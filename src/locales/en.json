@@ -1,0 +1,12 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "error": "An error occurred",
+    "noData": "No data available",
+    "search": "Search",
+    "clear": "Clear",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "close": "Close"
+  }
+}

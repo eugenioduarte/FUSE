@@ -1,0 +1,332 @@
+import {
+  createDrawerNavigator,
+  DrawerContentComponentProps,
+} from '@react-navigation/drawer'
+import { NavigationContainer } from '@react-navigation/native'
+import { createStackNavigator } from '@react-navigation/stack'
+import React, { useEffect, useState } from 'react'
+import { ActivityIndicator, Easing, View } from 'react-native'
+import { EasingFunction } from 'react-native-reanimated'
+
+import { Header } from '../components'
+import { RouteName, ROUTES } from '../constants/routes'
+import { useAuthStore } from '../store/useAuthStore'
+import { useThemeStore } from '../store/useThemeStore'
+import { navigationRef } from './navigationRef'
+
+// Menu (drawer content)
+import MenuScreen from '../screens/main/menu/MenuScreen'
+
+// Auth
+import LoginScreen from '../screens/auth/login/LoginScreen'
+import RecoveryPassScreen from '../screens/auth/recovery-password/RecoveryPasswordScreen'
+import RegisterScreen from '../screens/auth/register/RegisterScreen'
+
+// Main
+import DashboardScreen from '../screens/main/dashboard/DashboardScreen'
+import TopicScreen from '../screens/main/topic/TopicScreen'
+
+// Calendar
+import CalendarAddScreen from '../screens/main/calendar/CalendarAddScreen'
+import CalendarDetailsScreen from '../screens/main/calendar/CalendarDetailsScreen'
+import CalendarScreen from '../screens/main/calendar/CalendarScreen'
+
+// Challenge
+import ChallengeScreen from '../screens/main/challenge/ChallengeScreen'
+import ChallengeAddFlashCardScreen from '../screens/main/challenge/challenge-add/ChallengeAddFlashCardScreen'
+import ChallengeAddHangmanScreen from '../screens/main/challenge/challenge-add/ChallengeAddHangmanScreen'
+import ChallengeAddMatrixScreen from '../screens/main/challenge/challenge-add/ChallengeAddMatrixScreen'
+import ChallengeAddQuizScreen from '../screens/main/challenge/challenge-add/ChallengeAddQuizScreen'
+import ChallengeAddScreen from '../screens/main/challenge/challenge-add/ChallengeAddScreen'
+import ChallengeAddTextAnswerScreen from '../screens/main/challenge/challenge-add/ChallengeAddTextAnswerScreen'
+
+// Topic details & summary
+import SummaryAudioScreen from '../screens/main/topic/summary/SummaryAudioScreen'
+import SummaryScreen from '../screens/main/topic/summary/SummaryScreen'
+import TopicDetailsScreen from '../screens/main/topic/topic-details/TopicDetailsScreen'
+
+// Menu screens (as regular stack screens)
+import ConnectionsScreen from '../screens/main/menu/connections/ConnectionsScreen'
+import PaymentScreen from '../screens/main/menu/payment/PaymentScreen'
+import ProfileScreen from '../screens/main/menu/profile/ProfileScreen'
+import NotificationsScreen from '../screens/main/notifications/NotificationsScreen'
+
+// Whiteboard (keep legacy path casing for now)
+import WhiteboardScreen from '../screens/main/whiteBoard/WhiteBoardScreen'
+
+import ErrorOverlay from '../screens/main/utils/error-overlay/ErrorOverlay'
+import FastWayOverlay from '../screens/main/utils/fast-way-overlay/FastWayOverlay'
+import LoadingOverlay from '../screens/main/utils/loading-overlay/LoadingOverlay'
+import { useOverlay } from '../store/useOverlay'
+import { RootStackParamList } from './navigatorManager'
+
+const Stack = createStackNavigator<RootStackParamList>()
+const Drawer = createDrawerNavigator()
+const DRAWER_APP = 'App'
+
+const verticalTransition = {
+  gestureDirection: 'vertical' as const,
+  transitionSpec: {
+    open: {
+      animation: 'timing' as const,
+      config: {
+        duration: 550,
+        easing: Easing.bezier(0.25, 1, 0.5, 1) as unknown as EasingFunction,
+      },
+    },
+    close: {
+      animation: 'timing' as const,
+      config: {
+        duration: 500,
+        easing: Easing.bezier(0.25, 1, 0.5, 1) as unknown as EasingFunction,
+      },
+    },
+  },
+  cardStyleInterpolator: ({ current, layouts }: any) => ({
+    cardStyle: {
+      transform: [
+        {
+          translateY: current.progress.interpolate({
+            inputRange: [0, 1],
+            outputRange: [layouts.screen.height * 0.9, 0],
+          }),
+        },
+      ],
+      opacity: current.progress.interpolate({
+        inputRange: [0, 0.5, 1],
+        outputRange: [0, 0.6, 1],
+      }),
+    },
+  }),
+}
+
+const defaultScreenOptions = {
+  headerShown: false,
+  ...verticalTransition,
+}
+
+function MainStack() {
+  return (
+    <Stack.Navigator screenOptions={defaultScreenOptions}>
+      {/* Auth */}
+      <Stack.Screen
+        name={ROUTES.LoginScreen}
+        component={LoginScreen}
+        options={{ title: ROUTES.LoginScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.RegisterScreen}
+        component={RegisterScreen}
+        options={{ title: ROUTES.RegisterScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.RecoveryScreen}
+        component={RecoveryPassScreen}
+        options={{ title: ROUTES.RecoveryScreen }}
+      />
+
+      {/* Main */}
+      <Stack.Screen
+        name={ROUTES.DashboardScreen}
+        component={DashboardScreen}
+        options={{ title: ROUTES.DashboardScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.TopicScreen}
+        component={TopicScreen}
+        options={{ title: ROUTES.TopicScreen }}
+      />
+
+      {/* Calendar */}
+      <Stack.Screen
+        name={ROUTES.CalendarScreen}
+        component={CalendarScreen}
+        options={{ title: ROUTES.CalendarScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.CalendarAddScreen}
+        component={CalendarAddScreen}
+        options={{ title: ROUTES.CalendarAddScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.CalendarDetailsScreen}
+        component={CalendarDetailsScreen}
+        options={{ title: ROUTES.CalendarDetailsScreen }}
+      />
+
+      {/* Challenge */}
+      <Stack.Screen
+        name={ROUTES.ChallengeScreen}
+        component={ChallengeScreen}
+        options={{ title: ROUTES.ChallengeScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeAddScreen}
+        component={ChallengeAddScreen}
+        options={{ title: ROUTES.ChallengeAddScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeAddFlashCardScreen}
+        component={ChallengeAddFlashCardScreen}
+        options={{ title: ROUTES.ChallengeAddFlashCardScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeAddHangmanScreen}
+        component={ChallengeAddHangmanScreen}
+        options={{ title: ROUTES.ChallengeAddHangmanScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeAddMatrixScreen}
+        component={ChallengeAddMatrixScreen}
+        options={{ title: ROUTES.ChallengeAddMatrixScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeAddQuizScreen}
+        component={ChallengeAddQuizScreen}
+        options={{ title: ROUTES.ChallengeAddQuizScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeAddTextAnswerScreen}
+        component={ChallengeAddTextAnswerScreen}
+        options={{ title: ROUTES.ChallengeAddTextAnswerScreen }}
+      />
+
+      {/* Topic details & summary */}
+      <Stack.Screen
+        name={ROUTES.TopicDetailsScreen}
+        component={TopicDetailsScreen}
+        options={{ title: ROUTES.TopicDetailsScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.SummaryScreen}
+        component={SummaryScreen}
+        options={{ title: ROUTES.SummaryScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.SummaryAudioScreen}
+        component={SummaryAudioScreen}
+        options={{ title: ROUTES.SummaryAudioScreen }}
+      />
+
+      {/* Menu */}
+      <Stack.Screen
+        name={ROUTES.ProfileScreen}
+        component={ProfileScreen}
+        options={{ title: ROUTES.ProfileScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ConnectionsScreen}
+        component={ConnectionsScreen}
+        options={{ title: ROUTES.ConnectionsScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.PaymentScreen}
+        component={PaymentScreen}
+        options={{ title: ROUTES.PaymentScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.NotificationsScreen}
+        component={NotificationsScreen}
+        options={{ title: ROUTES.NotificationsScreen }}
+      />
+
+      {/* Whiteboard */}
+      <Stack.Screen
+        name={ROUTES.WhiteboardScreen}
+        component={WhiteboardScreen}
+        options={{ title: ROUTES.WhiteboardScreen }}
+      />
+    </Stack.Navigator>
+  )
+}
+
+// Lint-safe drawer content renderer (outside component to avoid re-creation on every render)
+const DrawerContent = (_props: DrawerContentComponentProps) => <MenuScreen />
+
+export default function Navigation() {
+  const [isNavReady, setIsNavReady] = useState(false)
+  const [initialRouteSet, setInitialRouteSet] = useState(false)
+
+  const setHeaderConfig = useThemeStore((s) => s.setHeaderConfig)
+  const { user, rehydrated } = useAuthStore()
+
+  useEffect(() => {
+    if (
+      rehydrated &&
+      isNavReady &&
+      !initialRouteSet &&
+      navigationRef.isReady()
+    ) {
+      const targetRoute = user ? ROUTES.DashboardScreen : ROUTES.LoginScreen
+
+      navigationRef.reset({
+        index: 0,
+        routes: [
+          {
+            name: DRAWER_APP as never,
+            state: {
+              index: 0,
+              routes: [{ name: targetRoute as never }],
+            },
+          } as never,
+        ],
+      })
+      setInitialRouteSet(true)
+    }
+  }, [rehydrated, isNavReady, user, initialRouteSet])
+
+  if (!rehydrated) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#000',
+        }}
+      >
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    )
+  }
+
+  return (
+    <>
+      <Header />
+      <NavigationContainer
+        ref={navigationRef}
+        onReady={() => setIsNavReady(true)}
+        onStateChange={() => {
+          const route = navigationRef.getCurrentRoute()
+          const name = (route?.name ?? '') as RouteName
+          setHeaderConfig(name)
+        }}
+      >
+        <Drawer.Navigator
+          screenOptions={{
+            headerShown: false,
+            swipeEnabled: false,
+            drawerType: 'front',
+          }}
+          drawerContent={DrawerContent}
+          initialRouteName={DRAWER_APP}
+        >
+          <Drawer.Screen name={DRAWER_APP} component={MainStack} />
+        </Drawer.Navigator>
+      </NavigationContainer>
+      <OverlayHost />
+    </>
+  )
+}
+
+// Renders overlays (modals) whenever the store flags are true
+const OverlayHost: React.FC = () => {
+  const { errorOverlay, loadingOverlay, fastWayOverlay } = useOverlay()
+  return (
+    <>
+      {loadingOverlay ? <LoadingOverlay /> : null}
+      {errorOverlay ? <ErrorOverlay /> : null}
+      {fastWayOverlay ? <FastWayOverlay /> : null}
+    </>
+  )
+}

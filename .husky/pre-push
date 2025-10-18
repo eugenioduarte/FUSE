@@ -1,0 +1,7 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "🛡️  Running pre-push hook... no tests, no push! 🚫"
+#TODO: # Uncomment the line below to run tests before pushing
+npm test -- --coverage --passWithNoTests
+
