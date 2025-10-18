@@ -9,8 +9,10 @@ export interface Topic {
 export interface Summary {
   id: string
   topicId: string
+  title?: string
   content: string
   generatedBy: 'user' | 'ai'
+  keywords?: string[]
   createdAt: number
   updatedAt: number
 }

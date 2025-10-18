@@ -19,7 +19,7 @@ export type RootStackParamList = {
   ChallengeAddQuizScreen: undefined
   ChallengeAddTextAnswerScreen: undefined
   TopicDetailsScreen: { topicId: string }
-  SummaryScreen: undefined
+  SummaryScreen: { topicId?: string; seedPrompt?: string } | undefined
   SummaryAudioScreen: undefined
   ProfileScreen: undefined
   ConnectionsScreen: undefined
@@ -119,8 +119,9 @@ export const navigatorManager = {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.TopicDetailsScreen, { topicId })
   },
-  goToSummary: () => {
-    if (navigationRef.isReady()) navigationRef.navigate(ROUTES.SummaryScreen)
+  goToSummary: (params?: { topicId?: string; seedPrompt?: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.SummaryScreen, params)
   },
   goToSummaryAudio: () => {
     if (navigationRef.isReady())
