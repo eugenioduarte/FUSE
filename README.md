@@ -1,8 +1,8 @@
 # AutoAuction
 
-![Project Preview](https://drive.google.com/uc?export=view&id=1QPJMTfk6NiYWgswb47cSkuK1WyKaKd5P)
+<!-- # ![Project Preview](https://drive.google.com/uc?export=view&id=1QPJMTfk6NiYWgswb47cSkuK1WyKaKd5P) -->
 
-Mobile challenge application built with React Native (Expo), designed for browsing and managing auction vehicles.
+<!-- Mobile challenge application built with React Native (Expo), designed for browsing and managing auction vehicles. -->
 
 ---
 
@@ -20,7 +20,7 @@ Mobile challenge application built with React Native (Expo), designed for browsi
 
 ---
 
-## 📦 Installation
+<!-- ## 📦 Installation
 
 ```bash
 # Clone the repository
@@ -68,4 +68,4 @@ npm run test:watch
 
 # Generate coverage report
 npm run test:coverage
-```
+``` -->

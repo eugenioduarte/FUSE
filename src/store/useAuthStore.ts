@@ -12,7 +12,7 @@ type AuthState = {
   rehydrated: boolean
   login: (user: NonNullable<User>) => void
   logout: () => void
-  markRehydrated: () => void // ✅ adiciona aqui
+  markRehydrated: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -22,13 +22,13 @@ export const useAuthStore = create<AuthState>()(
       rehydrated: false,
       login: (user) => set({ user }),
       logout: () => set({ user: null }),
-      markRehydrated: () => set({ rehydrated: true }), // ✅ implementação
+      markRehydrated: () => set({ rehydrated: true }),
     }),
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => asyncStorage),
       onRehydrateStorage: () => (state) => {
-        state?.markRehydrated?.() // ✅ agora o TS reconhece
+        state?.markRehydrated?.()
       },
     },
   ),

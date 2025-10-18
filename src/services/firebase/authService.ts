@@ -1,4 +1,3 @@
-// src/services/firebase/authService.ts
 import {
   createUserWithEmailAndPassword,
   getAuth,
@@ -69,7 +68,6 @@ export async function firebaseLogin(email: string, password: string) {
   )
   const user = res.user
 
-  // ✅ Guarda manualmente no Zustand
   const { login } = useAuthStore.getState()
   login({
     id: user.uid,

@@ -14,8 +14,6 @@ const HeaderDashboard = () => {
     // Lógica para abrir o calendário
   }
 
-  const a: any = 5
-  console.log(a)
   return (
     <View
       style={{

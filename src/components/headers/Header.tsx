@@ -5,7 +5,6 @@ import { navigationRef } from '../../navigation/navigationRef'
 import { useThemeStore } from '../../store/useThemeStore'
 import HeaderDashboard from './HeaderDashboard'
 
-// 🔸 Header genérico (com botão de voltar e título)
 const DefaultHeader = ({ title }: { title: string }) => {
   const canGoBack = navigationRef.isReady() && navigationRef.canGoBack()
 

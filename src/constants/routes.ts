@@ -1,4 +1,3 @@
-// Central route name constants (string literals) — use these across the app
 export const ROUTES = {
   LoginScreen: 'LoginScreen',
   DashboardScreen: 'DashboardScreen',

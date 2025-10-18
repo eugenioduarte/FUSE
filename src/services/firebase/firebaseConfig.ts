@@ -1,10 +1,3 @@
-// Placeholder Firebase configuration. Replace with your project's config from Firebase console.
-// Firebase configuration. Prefer environment variables when available.
-// For local development we load `.env` using dotenv (package installed).
-// Do NOT require('dotenv') here: importing dotenv at runtime causes the Metro
-// bundler to try and include Node-only modules (like `path`) which breaks iOS/Android
-// builds. Instead we read env vars injected at build-time via Expo's `extra`
-// config (see `app.config.js` in the project root).
 import Constants from 'expo-constants'
 
 const extras: any = (Constants?.expoConfig as any)?.extra?.firebase || {}

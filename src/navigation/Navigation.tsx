@@ -1,4 +1,3 @@
-// src/navigation/Navigation.tsx
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import React, { useEffect, useState } from 'react'
@@ -67,7 +66,6 @@ export default function Navigation() {
   const { user, rehydrated } = useAuthStore()
 
   useEffect(() => {
-    // Quando o Zustand terminar de reidratar e a navegação estiver pronta
     if (
       rehydrated &&
       isNavReady &&
