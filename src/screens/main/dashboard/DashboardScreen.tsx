@@ -1,36 +1,35 @@
-import React from 'react'
-import { Button, Text, View } from 'react-native'
-import { navigatorManager } from '../../../navigation/navigatorManager'
-import { useAuthStore } from '../../../store/useAuthStore'
+import Container from '@/src/components/containers/Container'
+import React, { useEffect, useState } from 'react'
+import { FlatList } from 'react-native'
+import { dashboardRepository } from '../../../services/repositories/dashboard.repository'
+import { TopicCardModel } from '../../../types/dashboard.type'
+import CalendarDisplay from './components/CalendarDisplay'
+import TopicCard from './components/TopicCard'
 
 export default function DashboardScreen() {
-  const logout = useAuthStore((s) => s.logout)
+  const [topicCards, setTopicCards] = useState<TopicCardModel[]>([])
+
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      await dashboardRepository.seedTopicCardsIfEmpty()
+      const list = await dashboardRepository.listTopicCards()
+      if (mounted) setTopicCards(list)
+    })()
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   return (
-    <View
-      testID="dashboard-root"
-      style={{
-        flex: 1,
-        alignItems: 'center',
-        justifyContent: 'center',
-        backgroundColor: 'blue',
-      }}
-    >
-      <Text style={{ fontSize: 20, marginBottom: 12 }}>Dashboard</Text>
-      <Button
-        title="Go to Topic"
-        onPress={() => {
-          navigatorManager.goToTopic()
-        }}
+    <Container>
+      <FlatList
+        data={topicCards}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <TopicCard {...item} />}
+        ListHeaderComponent={<CalendarDisplay />}
+        showsVerticalScrollIndicator={false}
       />
-      <View style={{ height: 12 }} />
-      <Button
-        title="Logout"
-        onPress={() => {
-          logout()
-          navigatorManager.goToLoginScreen()
-        }}
-      />
-    </View>
+    </Container>
   )
 }

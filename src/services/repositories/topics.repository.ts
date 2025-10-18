@@ -1,3 +1,4 @@
+import { topicsMock } from '../../mock/topics.mock'
 import { localCache } from '../../storage/localCache'
 import { offlineQueue } from '../../storage/offlineQueue'
 import { Topic } from '../../types/domain'
@@ -8,6 +9,25 @@ export const topicsRepository = {
   async list(): Promise<Topic[]> {
     const cached = await localCache.get<Topic[]>(CACHE_KEY)
     return cached?.data ?? []
+  },
+  async seedIfEmpty() {
+    const cached = await localCache.get<Topic[]>(CACHE_KEY)
+    const has = (cached?.data?.length ?? 0) > 0
+    if (has) return
+    // Map dashboard TopicCardModel mocks into Topic entities
+    const mapped: Topic[] = topicsMock.map((m) => ({
+      id: m.id,
+      title: m.topicName,
+      description: undefined,
+      createdAt: Date.parse(m.createdAt) || Date.now(),
+      updatedAt: Date.now(),
+    }))
+    await localCache.set(CACHE_KEY, mapped, Date.now())
+  },
+  async getById(id: string): Promise<Topic | null> {
+    const cached = await localCache.get<Topic[]>(CACHE_KEY)
+    const list = cached?.data ?? []
+    return list.find((t) => t.id === id) ?? null
   },
 
   async upsert(topic: Topic, syncUrl: string) {

@@ -2,20 +2,48 @@ import { localCache } from '../../storage/localCache'
 import { offlineQueue } from '../../storage/offlineQueue'
 import { Challenge } from '../../types/domain'
 
-const CACHE_KEY = 'challenges:list'
+const LIST_ALL_KEY = 'challenges:list'
+const listKeyBySummary = (summaryId: string) => `challenges:list:${summaryId}`
 
 export const challengesRepository = {
   async list(): Promise<Challenge[]> {
-    const cached = await localCache.get<Challenge[]>(CACHE_KEY)
+    const cached = await localCache.get<Challenge[]>(LIST_ALL_KEY)
     return cached?.data ?? []
   },
 
-  async upsert(challenge: Challenge, syncUrl: string) {
-    const current = (await localCache.get<Challenge[]>(CACHE_KEY))?.data ?? []
-    const idx = current.findIndex((c) => c.id === challenge.id)
-    if (idx >= 0) current[idx] = challenge
-    else current.unshift(challenge)
-    await localCache.set(CACHE_KEY, current, challenge.updatedAt)
+  async listBySummary(
+    summaryId: string,
+  ): Promise<{ id: string; title: string }[]> {
+    const cached = await localCache.get<{ id: string; title: string }[]>(
+      listKeyBySummary(summaryId),
+    )
+    return cached?.data ?? []
+  },
+
+  async upsert(
+    challenge: Challenge,
+    syncUrl: string,
+    opts?: { summaryId?: string },
+  ) {
+    // Update global list
+    const currentAll =
+      (await localCache.get<Challenge[]>(LIST_ALL_KEY))?.data ?? []
+    const idxAll = currentAll.findIndex((c) => c.id === challenge.id)
+    if (idxAll >= 0) currentAll[idxAll] = challenge
+    else currentAll.unshift(challenge)
+    await localCache.set(LIST_ALL_KEY, currentAll, challenge.updatedAt)
+
+    // Update per-summary list if provided
+    if (opts?.summaryId) {
+      const key = listKeyBySummary(opts.summaryId)
+      const current =
+        (await localCache.get<{ id: string; title: string }[]>(key))?.data ?? []
+      const idx = current.findIndex((c) => c.id === challenge.id)
+      const item = { id: challenge.id, title: challenge.title }
+      if (idx >= 0) current[idx] = item
+      else current.unshift(item)
+      await localCache.set(key, current, challenge.updatedAt)
+    }
 
     await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: challenge })
   },

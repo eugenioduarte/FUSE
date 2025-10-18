@@ -18,7 +18,7 @@ export type RootStackParamList = {
   ChallengeAddMatrixScreen: undefined
   ChallengeAddQuizScreen: undefined
   ChallengeAddTextAnswerScreen: undefined
-  TopicDetailsScreen: undefined
+  TopicDetailsScreen: { topicId: string }
   SummaryScreen: undefined
   SummaryAudioScreen: undefined
   ProfileScreen: undefined
@@ -115,9 +115,9 @@ export const navigatorManager = {
   },
 
   // Topic details and summary
-  goToTopicDetails: () => {
+  goToTopicDetails: (topicId: string) => {
     if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.TopicDetailsScreen)
+      navigationRef.navigate(ROUTES.TopicDetailsScreen, { topicId })
   },
   goToSummary: () => {
     if (navigationRef.isReady()) navigationRef.navigate(ROUTES.SummaryScreen)

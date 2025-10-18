@@ -1,8 +1,10 @@
+import { useAuthStore } from '@/src/store'
 import React from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { navigatorManager } from '../../../navigation/navigatorManager'
 
 const MenuScreen = () => {
+  const logout = useAuthStore((s) => s.logout)
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Menu</Text>
@@ -36,6 +38,13 @@ const MenuScreen = () => {
       >
         <Text style={styles.itemText}>Payment</Text>
       </TouchableOpacity>
+      <Button
+        title="Logout"
+        onPress={() => {
+          logout()
+          navigatorManager.goToLoginScreen()
+        }}
+      />
     </View>
   )
 }
