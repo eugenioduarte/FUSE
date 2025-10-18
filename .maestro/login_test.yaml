@@ -1,0 +1,21 @@
+app: 'host.exp.exponent'
+name: 'Login flow'
+
+flows:
+  - launchApp
+  - waitFor:
+      id: 'email-input'
+      timeout: 15000
+  - inputText:
+      id: 'email-input'
+      text: 'eugenioduartesilva@gmail.com'
+  - inputText:
+      id: 'password-input'
+      text: '123456'
+  - tapOn:
+      id: 'login-button'
+  - waitFor:
+      id: 'dashboard-root'
+      timeout: 20000
+  - assertVisible:
+      id: 'dashboard-root'

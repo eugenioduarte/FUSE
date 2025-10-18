@@ -57,6 +57,8 @@ const LoginScreen: React.FC = () => {
         keyboardType="email-address"
         autoCapitalize="none"
         style={styles.input}
+        testID="email-input"
+        accessibilityLabel="email-input"
         editable={!loading}
       />
       <TextInput
@@ -65,13 +67,15 @@ const LoginScreen: React.FC = () => {
         onChangeText={setPassword}
         secureTextEntry
         style={styles.input}
+        testID="password-input"
+        accessibilityLabel="password-input"
         editable={!loading}
       />
 
       {loading ? (
         <ActivityIndicator size="large" color="#0a84ff" />
       ) : (
-        <Button title="Login" onPress={onLogin} />
+        <Button title="Login" onPress={onLogin} testID="login-button" />
       )}
 
       <View style={{ height: 12 }} />
@@ -79,12 +83,14 @@ const LoginScreen: React.FC = () => {
         title="Register"
         onPress={() => navigatorManager.goToRegister()}
         disabled={loading}
+        testID="register-button"
       />
       <View style={{ height: 8 }} />
       <Button
         title="Forgot password?"
         onPress={() => navigatorManager.goToRecovery()}
         disabled={loading}
+        testID="forgot-button"
       />
     </View>
   )

@@ -1,6 +1,11 @@
 import { Ionicons } from '@expo/vector-icons'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import Animated, {
+  Layout,
+  SlideInDown,
+  SlideOutUp,
+} from 'react-native-reanimated'
 import { navigationRef } from '../../navigation/navigationRef'
 import { useThemeStore } from '../../store/useThemeStore'
 import HeaderDashboard from './HeaderDashboard'
@@ -33,11 +38,18 @@ const DefaultHeader = ({ title }: { title: string }) => {
 export const Header: React.FC = () => {
   const { headerConfig } = useThemeStore()
   const { title, visible, type } = headerConfig
+  const [currentType, setCurrentType] = useState(type)
+
+  useEffect(() => {
+    if (visible) {
+      setCurrentType(type)
+    }
+  }, [type, visible])
 
   if (!visible) return null
 
   const renderHeader = () => {
-    switch (type) {
+    switch (currentType) {
       case 'DashboardScreen':
         return <HeaderDashboard />
       default:
@@ -45,7 +57,19 @@ export const Header: React.FC = () => {
     }
   }
 
-  return <View style={styles.container}>{renderHeader()}</View>
+  return (
+    <Animated.View
+      key={currentType}
+      entering={SlideInDown.springify()
+        .damping(25)
+        .withInitialValues({ opacity: 0 })}
+      exiting={SlideOutUp.duration(700).withInitialValues({ opacity: 1 })}
+      layout={Layout.springify().damping(25).stiffness(150)}
+      style={styles.container}
+    >
+      {renderHeader()}
+    </Animated.View>
+  )
 }
 
 const styles = StyleSheet.create({
@@ -55,8 +79,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
     backgroundColor: 'black',
   },
   iconWrapper: { width: 40, alignItems: 'flex-start' },
@@ -66,19 +88,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 16,
     fontWeight: '600',
-    color: 'white',
-  },
-  dashboardHeaderContainer: {
-    height: 56,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'black',
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#eee',
-  },
-  dashboardTitle: {
-    fontSize: 18,
-    fontWeight: '700',
     color: 'white',
   },
 })

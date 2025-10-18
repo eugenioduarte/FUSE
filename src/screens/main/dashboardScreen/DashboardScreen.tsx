@@ -8,6 +8,7 @@ export default function DashboardScreen() {
 
   return (
     <View
+      testID="dashboard-root"
       style={{
         flex: 1,
         alignItems: 'center',

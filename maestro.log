@@ -1,0 +1,12 @@
+➤ YN0000: ┌ Resolution step
+➤ YN0061: │ querystring@npm:0.2.0 is deprecated: The querystring API is considered Legacy. new code should use the URLSearchParams API instead.
+➤ YN0000: └ Completed in 0s 980ms
+➤ YN0000: ┌ Fetch step
+➤ YN0000: └ Completed
+➤ YN0000: ┌ Link step
+➤ YN0007: │ aws-sdk@npm:2.1692.0 must be built because it never has been before or the last one failed
+➤ YN0007: │ maestro@npm:2.1.1 must be built because it never has been before or the last one failed
+➤ YN0000: └ Completed in 1s 696ms
+➤ YN0000: Done with warnings in 2s 766ms
+
+Run `[3m[34mmaestro help [1m[31mcommand[m` to get help specific to a subcommand.
