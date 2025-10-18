@@ -3,7 +3,7 @@ import { Alert, Button, Text, TextInput, View } from 'react-native'
 import { navigatorManager } from '../../../navigation/navigatorManager'
 import { firebaseSendPasswordReset } from '../../../services/firebase/authService'
 
-const RecoveryPassScreen: React.FC = () => {
+const RecoveryPasswordScreen: React.FC = () => {
   const [email, setEmail] = useState('')
 
   const onSend = async () => {
@@ -35,4 +35,4 @@ const RecoveryPassScreen: React.FC = () => {
   )
 }
 
-export default RecoveryPassScreen
+export default RecoveryPasswordScreen

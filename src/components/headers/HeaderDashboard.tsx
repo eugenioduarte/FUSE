@@ -1,19 +1,25 @@
 import React from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
+import { navigatorManager } from '../../navigation/navigatorManager'
+import { useOverlay } from '../../store/useOverlay'
 
 const HeaderDashboard = () => {
+  const setFastWayOverlay = useOverlay((s) => s.setFastWayOverlay)
   const handleMenuPress = () => {
-    // Lógica para abrir o menu lateral
+    navigatorManager.openMenu()
   }
 
   const handleNotificationsPress = () => {
-    // Lógica para abrir as notificações
+    navigatorManager.goToNotifications()
   }
 
   const handleCalendarPress = () => {
-    // Lógica para abrir o calendário
+    navigatorManager.goToCalendar()
   }
 
+  const handleFastWayPress = () => {
+    setFastWayOverlay(true)
+  }
   return (
     <View
       style={{
@@ -34,6 +40,9 @@ const HeaderDashboard = () => {
           <Text style={{ color: 'white', fontWeight: 'bold' }}>
             Notifications
           </Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleFastWayPress}>
+          <Text style={{ color: 'white', fontWeight: 'bold' }}>fastWay</Text>
         </TouchableOpacity>
       </View>
     </View>

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Animated, {
-  Layout,
+  LinearTransition,
   SlideInDown,
   SlideOutUp,
 } from 'react-native-reanimated'
@@ -49,12 +49,8 @@ export const Header: React.FC = () => {
   if (!visible) return null
 
   const renderHeader = () => {
-    switch (currentType) {
-      case 'DashboardScreen':
-        return <HeaderDashboard />
-      default:
-        return <DefaultHeader title={title} />
-    }
+    if (currentType === 'DashboardScreen') return <HeaderDashboard />
+    return <DefaultHeader title={title} />
   }
 
   return (
@@ -64,7 +60,7 @@ export const Header: React.FC = () => {
         .damping(25)
         .withInitialValues({ opacity: 0 })}
       exiting={SlideOutUp.duration(700).withInitialValues({ opacity: 1 })}
-      layout={Layout.springify().damping(25).stiffness(150)}
+      layout={LinearTransition.springify().damping(25).stiffness(150)}
       style={styles.container}
     >
       {renderHeader()}
