@@ -6,15 +6,33 @@ import { CalendarCommitment } from '../types/calendar.type'
 
 interface CalendarState {
   events: CalendarCommitment[]
+  // Selected date for UI screens
+  selectedDate: string | null
+  setSelectedDate: (date: string) => void
+  // Legacy/dashboard API
   seedIfEmpty: () => Promise<void>
   getEventsForDate: (date: string) => CalendarCommitment[]
   addOrUpdate: (e: CalendarCommitment) => void
+  // CalendarScreen helpers
+  addAppointment: (
+    a: Omit<
+      Pick<
+        CalendarCommitment,
+        'date' | 'title' | 'description' | 'topicId' | 'summaryId'
+      > & { time?: string },
+      'id'
+    >,
+  ) => void
+  editAppointment: (id: string, updates: Partial<CalendarCommitment>) => void
+  removeAppointment: (id: string) => void
 }
 
 export const useCalendarStore = create<CalendarState>()(
   persist(
     (set, get) => ({
       events: [],
+      selectedDate: null,
+      setSelectedDate: (date) => set({ selectedDate: date }),
       addOrUpdate: (e) =>
         set((s) => {
           const idx = s.events.findIndex((x) => x.id === e.id)
@@ -31,6 +49,31 @@ export const useCalendarStore = create<CalendarState>()(
         if (hasData) return
         set({ events: calendarMock })
       },
+      addAppointment: (a) =>
+        set((s) => {
+          const now = Date.now()
+          const newEvent: CalendarCommitment = {
+            id: `${now}`,
+            topicId: a.topicId,
+            summaryId: a.summaryId,
+            title: a.title,
+            description: a.description,
+            location: undefined,
+            date: a.date,
+            time: a.time || '00:00',
+            createdAt: now,
+            updatedAt: now,
+          }
+          return { events: [newEvent, ...s.events] }
+        }),
+      editAppointment: (id, updates) =>
+        set((s) => ({
+          events: s.events.map((ev) =>
+            ev.id === id ? { ...ev, ...updates, updatedAt: Date.now() } : ev,
+          ),
+        })),
+      removeAppointment: (id) =>
+        set((s) => ({ events: s.events.filter((ev) => ev.id !== id) })),
     }),
     {
       name: 'calendar-store',

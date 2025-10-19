@@ -4,11 +4,21 @@ import { Summary } from '../../types/domain'
 import { aiService } from '../ai/ai.service'
 
 const listKey = (topicId: string) => `summaries:list:${topicId}`
+const LIST_ALL_KEY = 'summaries:list'
 
 export const summariesRepository = {
+  async listAll(): Promise<Summary[]> {
+    const cached = await localCache.get<Summary[]>(LIST_ALL_KEY)
+    return cached?.data ?? []
+  },
   async list(topicId: string): Promise<Summary[]> {
     const cached = await localCache.get<Summary[]>(listKey(topicId))
     return cached?.data ?? []
+  },
+
+  async getById(id: string): Promise<Summary | null> {
+    const all = await this.listAll()
+    return all.find((s) => s.id === id) ?? null
   },
 
   async upsert(summary: Summary, syncUrl: string) {
@@ -18,6 +28,13 @@ export const summariesRepository = {
     if (idx >= 0) current[idx] = summary
     else current.unshift(summary)
     await localCache.set(key, current, summary.updatedAt)
+
+    // Maintain global list as well
+    const all = (await localCache.get<Summary[]>(LIST_ALL_KEY))?.data ?? []
+    const idxAll = all.findIndex((s) => s.id === summary.id)
+    if (idxAll >= 0) all[idxAll] = summary
+    else all.unshift(summary)
+    await localCache.set(LIST_ALL_KEY, all, summary.updatedAt)
 
     await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: summary })
   },

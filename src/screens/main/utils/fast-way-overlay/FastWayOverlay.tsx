@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   FlatList,
   Modal,
@@ -7,26 +7,26 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { ROUTES } from '../../../../constants/routes'
 import { navigationRef } from '../../../../navigation/navigationRef'
 import { navigatorManager } from '../../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../../services/repositories/challenges.repository'
 import { summariesRepository } from '../../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../../services/repositories/topics.repository'
+import { useFastwayStore } from '../../../../store/useFastwayStore'
 import { useOverlay } from '../../../../store/useOverlay'
-import { Summary, Topic } from '../../../../types/domain'
+import { Challenge, Summary, Topic } from '../../../../types/domain'
 
-type FWMode = 'topics' | 'topic' | 'challengesAll' | 'challenges'
+type FWMode = 'topics' | 'topic' | 'summaries' | 'challenges' | 'challenge'
 
-const HeaderTopics = ({ onAddTopic }: { onAddTopic: () => void }) => {
-  return (
-    <View style={styles.headerRow}>
-      <Text style={styles.headerTitle}>Topics</Text>
-      <TouchableOpacity onPress={onAddTopic}>
-        <Text style={styles.link}>Adicionar</Text>
-      </TouchableOpacity>
-    </View>
-  )
-}
+const HeaderTopics = ({ onAddTopic }: { onAddTopic: () => void }) => (
+  <View style={styles.headerRow}>
+    <Text style={styles.headerTitle}>Topics</Text>
+    <TouchableOpacity onPress={onAddTopic}>
+      <Text style={styles.link}>Adicionar</Text>
+    </TouchableOpacity>
+  </View>
+)
 
 const HeaderWithBack = ({
   title,
@@ -38,38 +38,32 @@ const HeaderWithBack = ({
   rightLabel?: string
   onBack: () => void
   onRightPress?: () => void
-}) => {
-  return (
-    <View style={styles.headerRow}>
-      <TouchableOpacity onPress={onBack}>
-        <Text style={styles.link}>← Voltar</Text>
+}) => (
+  <View style={styles.headerRow}>
+    <TouchableOpacity onPress={onBack}>
+      <Text style={styles.link}>← Voltar</Text>
+    </TouchableOpacity>
+    <Text style={styles.headerTitle}>{title}</Text>
+    {rightLabel ? (
+      <TouchableOpacity onPress={onRightPress}>
+        <Text style={styles.link}>{rightLabel}</Text>
       </TouchableOpacity>
-      <Text style={styles.headerTitle}>{title}</Text>
-      {rightLabel ? (
-        <TouchableOpacity onPress={onRightPress}>
-          <Text style={styles.link}>{rightLabel}</Text>
-        </TouchableOpacity>
-      ) : (
-        <View style={{ width: 64 }} />
-      )}
-    </View>
-  )
-}
+    ) : (
+      <View style={{ width: 64 }} />
+    )}
+  </View>
+)
 
 const TopicRow = ({
   topic,
-  expanded,
-  onToggle,
+  onSelect,
 }: {
   topic: Topic
-  expanded: boolean
-  onToggle: () => void
+  onSelect: (topicId: string) => void
 }) => (
-  <View style={styles.topicRow}>
-    <TouchableOpacity style={{ flex: 1 }} onPress={onToggle}>
-      <Text style={styles.topicName}>{topic.title}</Text>
-    </TouchableOpacity>
-  </View>
+  <TouchableOpacity style={styles.topicRow} onPress={() => onSelect(topic.id)}>
+    <Text style={styles.topicName}>{topic.title}</Text>
+  </TouchableOpacity>
 )
 
 const SummaryItem = ({
@@ -78,117 +72,148 @@ const SummaryItem = ({
 }: {
   summary: Summary
   onPress?: () => void
-}) => {
-  return (
-    <TouchableOpacity style={styles.summaryRow} onPress={onPress}>
-      <Text style={styles.summaryText} numberOfLines={1}>
-        • {summary.content}
-      </Text>
-    </TouchableOpacity>
-  )
-}
+}) => (
+  <TouchableOpacity style={styles.summaryRow} onPress={onPress}>
+    <Text style={styles.summaryText} numberOfLines={1}>
+      • {summary.content}
+    </Text>
+  </TouchableOpacity>
+)
 
 const FastWayOverlay: React.FC = () => {
   const { fastWayOverlay, setFastWayOverlay } = useOverlay()
+  const fast = useFastwayStore()
   const [topics, setTopics] = useState<Topic[]>([])
-  const [mode, setMode] = useState<FWMode>('topics')
-  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null)
-  const [selectedSummaryId, setSelectedSummaryId] = useState<string | null>(
-    null,
-  )
   const [summaries, setSummaries] = useState<Record<string, Summary[]>>({})
   const [challengesBySummary, setChallengesBySummary] = useState<
     Record<string, { id: string; title: string }[]>
   >({})
+  const [challengeDetailsById, setChallengeDetailsById] = useState<
+    Record<string, Challenge>
+  >({})
+  const [loading, setLoading] = useState(false)
 
+  // Derive UI mode
+  const mode: FWMode = useMemo(() => {
+    switch (fast.level) {
+      case 'dashboard':
+        return 'topics'
+      case 'topic':
+        return 'topic'
+      case 'summary':
+        return 'summaries'
+      case 'challenge':
+        return 'challenge'
+      default:
+        return 'topics'
+    }
+  }, [fast.level])
+
+  // Inicialização
   useEffect(() => {
     if (!fastWayOverlay) return
     let mounted = true
     ;(async () => {
+      setLoading(true)
       await topicsRepository.seedIfEmpty()
       const list = await topicsRepository.list()
       if (mounted) setTopics(list)
-
-      // Choose initial mode based on current route
-      const route = navigationRef.getCurrentRoute()
-      if (route?.name === 'TopicDetailsScreen') {
-        const topicId = (route.params as any)?.topicId as string | undefined
-        if (topicId) {
-          setSelectedTopicId(topicId)
-          setMode('topic')
-          const sList = await summariesRepository.list(topicId)
-          if (mounted) setSummaries((p) => ({ ...p, [topicId]: sList }))
-          return
-        }
-      }
-      if (route?.name === 'SummaryScreen') {
-        setMode('challengesAll')
-        return
-      }
-      setMode('topics')
+      setLoading(false)
+      useFastwayStore.getState().enterDashboard()
     })()
     return () => {
       mounted = false
     }
   }, [fastWayOverlay])
 
-  const [entering, setEntering] = useState(false)
-  const enterTopicMode = async (topicId: string) => {
-    if (entering) return
-    setEntering(true)
-    try {
-      setSelectedTopicId(topicId)
-      setMode('topic')
+  // Ao clicar em Topic
+  const enterTopicMode = useCallback(
+    async (topicId: string) => {
+      setLoading(true)
       const list = await summariesRepository.list(topicId)
       setSummaries((prev) => ({ ...prev, [topicId]: list }))
-    } finally {
-      setEntering(false)
-    }
-  }
+      fast.enterTopic(topicId)
+      setLoading(false)
+    },
+    [fast],
+  )
+
+  // Ao clicar em Summary
+  const enterChallengesForSummary = useCallback(
+    async (summaryId: string) => {
+      setLoading(true)
+      fast.enterSummary(summaryId)
+      if (!challengesBySummary[summaryId]) {
+        const list = await challengesRepository.listBySummary(summaryId)
+        setChallengesBySummary((prev) => ({ ...prev, [summaryId]: list }))
+      }
+      setLoading(false)
+    },
+    [challengesBySummary, fast],
+  )
 
   const onAddTopic = () => {
     setFastWayOverlay(false)
-    // Placeholder: navegar para a área de tópicos (tela de listagem/criação)
-    navigatorManager.goToTopic()
+    navigatorManager.goToTopicAdd()
   }
 
-  // '+ Summary' action removed: creation only from summary fastway
-
-  const enterChallengesForSummary = async (summaryId: string) => {
-    setSelectedSummaryId(summaryId)
-    setMode('challenges')
-    if (!challengesBySummary[summaryId]) {
-      const list = await challengesRepository.listBySummary(summaryId)
-      setChallengesBySummary((prev) => ({ ...prev, [summaryId]: list }))
-    }
+  const onAddSummary = () => {
+    // Navega para criar Summary associado ao Topic atual (se houver)
+    setFastWayOverlay(false)
+    if (selectedTopic?.id)
+      navigatorManager.goToSummary({ topicId: selectedTopic.id })
+    else navigatorManager.goToSummary()
   }
 
   const onAddChallenge = () => {
     setFastWayOverlay(false)
-    navigatorManager.goToChallengeAdd()
+    if (fast.selectedSummaryId)
+      navigatorManager.goToChallengeAdd({ summaryId: fast.selectedSummaryId })
+    else navigatorManager.goToChallengeAdd()
   }
 
-  const renderTopic = ({ item }: { item: Topic }) => {
-    return (
-      <View style={styles.topicBlock}>
-        <TopicRow
-          topic={item}
-          expanded={false}
-          onToggle={() => enterTopicMode(item.id)}
-        />
-      </View>
-    )
-  }
-
-  const selectedTopic = useMemo(
-    () => topics.find((t) => t.id === selectedTopicId) || null,
-    [topics, selectedTopicId],
+  const selectedTopic = topics.find((t) => t.id === fast.selectedTopicId)
+  const topicSummaries = fast.selectedTopicId
+    ? summaries[fast.selectedTopicId] || []
+    : []
+  const selectedSummary = topicSummaries.find(
+    (s) => s.id === fast.selectedSummaryId,
   )
+  const selectedChallenge: Challenge | null = fast.selectedChallengeId
+    ? (challengeDetailsById[fast.selectedChallengeId] ?? null)
+    : null
 
-  const topicSummaries = useMemo(() => {
-    if (!selectedTopicId) return [] as Summary[]
-    return summaries[selectedTopicId] || []
-  }, [summaries, selectedTopicId])
+  const enterChallengeDetails = async (challengeId: string) => {
+    if (!challengeDetailsById[challengeId]) {
+      const all = await challengesRepository.list()
+      const found = all.find((c) => c.id === challengeId)
+      if (found)
+        setChallengeDetailsById((p) => ({ ...p, [challengeId]: found }))
+    }
+    fast.enterChallenge(challengeId)
+  }
+
+  // Navegar para a tela de Topics (fora do overlay)
+  const goToTopicsScreen = () => {
+    setFastWayOverlay(false)
+    navigatorManager.goToTopic()
+  }
+
+  // Navegar para a tela de detalhes do Summary atual
+  const goToSummaryDetails = () => {
+    if (!fast.selectedSummaryId) return
+    setFastWayOverlay(false)
+    navigatorManager.goToSummaryDetails(fast.selectedSummaryId, selectedSummary)
+  }
+
+  // Detecta se está na Dashboard para exibir atalho apenas quando não estiver
+  const isOnDashboard =
+    navigationRef.isReady() &&
+    navigationRef.getCurrentRoute()?.name === ROUTES.DashboardScreen
+  const goToDashboard = () => {
+    setFastWayOverlay(false)
+    navigatorManager.goToDashboard()
+  }
 
   return (
     <Modal
@@ -199,88 +224,197 @@ const FastWayOverlay: React.FC = () => {
     >
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          {mode === 'topics' && (
+          {mode === 'topics' && <HeaderTopics onAddTopic={onAddTopic} />}
+          {mode === 'topic' && (
+            <HeaderWithBack
+              title={selectedTopic?.title || 'Topic'}
+              rightLabel="Fechar"
+              onBack={() => fast.backFromTopic()}
+              onRightPress={() => {
+                setFastWayOverlay(false)
+                fast.reset()
+              }}
+            />
+          )}
+          {mode === 'summaries' && (
+            <HeaderWithBack
+              title={selectedSummary?.title || 'Summary'}
+              rightLabel="+ Challenge"
+              onBack={() => fast.backFromSummary()}
+              onRightPress={onAddChallenge}
+            />
+          )}
+          {mode === 'challenge' && (
+            <HeaderWithBack
+              title={selectedChallenge?.title || 'Challenge'}
+              rightLabel="Fechar"
+              onBack={() => fast.backFromChallenge()}
+              onRightPress={() => {
+                setFastWayOverlay(false)
+                fast.reset()
+              }}
+            />
+          )}
+
+          {loading && (
+            <View style={{ padding: 20 }}>
+              <Text style={styles.emptyText}>Carregando...</Text>
+            </View>
+          )}
+
+          {!loading && mode === 'topics' && (
             <>
-              <HeaderTopics onAddTopic={onAddTopic} />
+              {!isOnDashboard && (
+                <View style={{ alignItems: 'flex-end', marginBottom: 6 }}>
+                  <TouchableOpacity onPress={goToDashboard}>
+                    <Text style={styles.link}>Ir para Dashboard →</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
               {topics.length === 0 ? (
-                <Text style={styles.emptyText}>Nenhum tópico encontrado.</Text>
+                <Text style={styles.emptyText}>Nenhum topic encontrado.</Text>
               ) : (
                 <FlatList
                   data={topics}
-                  keyExtractor={(t) => t.id}
-                  renderItem={renderTopic}
-                  contentContainerStyle={{ paddingBottom: 12 }}
+                  keyExtractor={(i) => i.id}
+                  renderItem={({ item }) => (
+                    <TopicRow topic={item} onSelect={enterTopicMode} />
+                  )}
                 />
               )}
+              <TouchableOpacity
+                style={styles.closeBtn}
+                onPress={() => {
+                  setFastWayOverlay(false)
+                  fast.reset()
+                }}
+              >
+                <Text style={styles.buttonText}>Fechar</Text>
+              </TouchableOpacity>
             </>
           )}
 
-          {mode === 'topic' && selectedTopic && (
-            <>
-              <HeaderWithBack
-                title={selectedTopic.title}
-                onBack={() => setMode('topics')}
-              />
-              <View style={styles.summaryList}>
-                {topicSummaries.length === 0 ? (
-                  <Text style={styles.emptyText}>Sem summaries ainda.</Text>
-                ) : (
-                  topicSummaries.map((s) => (
+          {!loading && mode === 'topic' && (
+            <View>
+              {/* Ação para ir para a tela de Topics */}
+              <View style={{ alignItems: 'flex-end', marginBottom: 6 }}>
+                <TouchableOpacity onPress={goToTopicsScreen}>
+                  <Text style={styles.link}>Ir para Topics →</Text>
+                </TouchableOpacity>
+              </View>
+              {topicSummaries.length === 0 ? (
+                <Text style={styles.emptyText}>
+                  Sem summaries para este topic.
+                </Text>
+              ) : (
+                <View style={styles.summaryList}>
+                  {topicSummaries.map((s) => (
                     <SummaryItem
                       key={s.id}
                       summary={s}
                       onPress={() => enterChallengesForSummary(s.id)}
                     />
-                  ))
-                )}
-              </View>
-            </>
+                  ))}
+                  {/* Adicionar summary no fim da lista */}
+                  <TouchableOpacity
+                    style={[styles.summaryRow, { marginTop: 8 }]}
+                    onPress={onAddSummary}
+                  >
+                    <Text style={styles.link}>＋ Adicionar summary</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+              {/* Mesmo sem summaries, ainda permitir adicionar */}
+              {topicSummaries.length === 0 && (
+                <TouchableOpacity
+                  style={[styles.summaryRow, { marginTop: 8 }]}
+                  onPress={onAddSummary}
+                >
+                  <Text style={styles.link}>＋ Adicionar summary</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
 
-          {mode === 'challenges' && selectedSummaryId && (
-            <>
-              <HeaderWithBack
-                title={'Challenges'}
-                rightLabel={'Adicionar'}
-                onBack={() => setMode('topic')}
-                onRightPress={onAddChallenge}
-              />
-              <View style={styles.summaryList}>
-                {(challengesBySummary[selectedSummaryId] || []).length === 0 ? (
-                  <Text style={styles.emptyText}>Sem challenges ainda.</Text>
-                ) : (
-                  (challengesBySummary[selectedSummaryId] || []).map((c) => (
-                    <View key={c.id} style={styles.summaryRow}>
-                      <Text style={styles.summaryText}>• {c.title}</Text>
+          {!loading && mode === 'summaries' && (
+            <View>
+              {/* Link para abrir a tela do Summary */}
+              <View style={{ alignItems: 'flex-end', marginBottom: 6 }}>
+                <TouchableOpacity onPress={goToSummaryDetails}>
+                  <Text style={styles.link}>Ir para summary →</Text>
+                </TouchableOpacity>
+              </View>
+              {fast.selectedSummaryId && (
+                <View>
+                  {(challengesBySummary[fast.selectedSummaryId] || [])
+                    .length === 0 ? (
+                    <Text style={styles.emptyText}>
+                      Sem challenges para este summary.
+                    </Text>
+                  ) : (
+                    <View style={{ paddingVertical: 6 }}>
+                      {(challengesBySummary[fast.selectedSummaryId] || []).map(
+                        (c) => (
+                          <TouchableOpacity
+                            key={c.id}
+                            style={styles.summaryRow}
+                            onPress={() => enterChallengeDetails(c.id)}
+                          >
+                            <Text style={styles.summaryText}>• {c.title}</Text>
+                          </TouchableOpacity>
+                        ),
+                      )}
+                      {/* Adicionar challenge no fim da lista */}
+                      <TouchableOpacity
+                        style={[styles.summaryRow, { marginTop: 8 }]}
+                        onPress={onAddChallenge}
+                      >
+                        <Text style={styles.link}>＋ Adicionar challenge</Text>
+                      </TouchableOpacity>
                     </View>
-                  ))
+                  )}
+                </View>
+              )}
+              {/* Mesmo sem challenges, ainda permitir adicionar */}
+              {fast.selectedSummaryId &&
+                (challengesBySummary[fast.selectedSummaryId] || []).length ===
+                  0 && (
+                  <TouchableOpacity
+                    style={[styles.summaryRow, { marginTop: 8 }]}
+                    onPress={onAddChallenge}
+                  >
+                    <Text style={styles.link}>＋ Adicionar challenge</Text>
+                  </TouchableOpacity>
                 )}
-              </View>
-            </>
+            </View>
           )}
 
-          {mode === 'challengesAll' && (
-            <>
-              <HeaderWithBack
-                title={'Challenges'}
-                rightLabel={'Adicionar'}
-                onBack={() => setMode('topics')}
-                onRightPress={onAddChallenge}
-              />
-              <View style={styles.summaryList}>
-                {/* For now, we don’t aggregate; prompt user to selecionar um summary no tópico */}
-                <Text style={styles.emptyText}>
-                  Abra um tópico e selecione um summary para ver os challenges.
-                </Text>
-              </View>
-            </>
+          {mode === 'challenge' && (
+            <View>
+              {selectedChallenge ? (
+                <View style={{ gap: 8 }}>
+                  <Text style={styles.detailLabel}>Título</Text>
+                  <Text style={styles.detailValue}>
+                    {selectedChallenge.title}
+                  </Text>
+                  <Text style={[styles.detailLabel, { marginTop: 8 }]}>
+                    Tipo
+                  </Text>
+                  <Text style={styles.detailValue}>
+                    {selectedChallenge.type}
+                  </Text>
+                  <Text style={[styles.detailLabel, { marginTop: 8 }]}>
+                    Payload
+                  </Text>
+                  <Text style={styles.detailValueMono}>
+                    {JSON.stringify(selectedChallenge.payload, null, 2)}
+                  </Text>
+                </View>
+              ) : (
+                <Text style={styles.emptyText}>Carregando challenge...</Text>
+              )}
+            </View>
           )}
-          <TouchableOpacity
-            style={styles.closeBtn}
-            onPress={() => setFastWayOverlay(false)}
-          >
-            <Text style={styles.buttonText}>Fechar</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -292,7 +426,7 @@ export default FastWayOverlay
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,1)',
+    backgroundColor: 'rgba(0,0,0,0.6)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
@@ -334,4 +468,20 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   buttonText: { color: 'white', fontWeight: '700' },
+  detailLabel: {
+    color: '#9ca3af',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  detailValue: {
+    color: '#e5e7eb',
+    fontSize: 14,
+  },
+  detailValueMono: {
+    color: '#e5e7eb',
+    fontFamily: 'Courier',
+    fontSize: 12,
+  },
 })

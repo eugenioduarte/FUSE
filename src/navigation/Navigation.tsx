@@ -27,9 +27,9 @@ import DashboardScreen from '../screens/main/dashboard/DashboardScreen'
 import TopicScreen from '../screens/main/topic/TopicScreen'
 
 // Calendar
+import CalendarScreen from '../screens/CalendarScreen/CalendarScreen'
 import CalendarAddScreen from '../screens/main/calendar/CalendarAddScreen'
 import CalendarDetailsScreen from '../screens/main/calendar/CalendarDetailsScreen'
-import CalendarScreen from '../screens/main/calendar/CalendarScreen'
 
 // Challenge
 import ChallengeScreen from '../screens/main/challenge/ChallengeScreen'
@@ -42,7 +42,9 @@ import ChallengeAddTextAnswerScreen from '../screens/main/challenge/challenge-ad
 
 // Topic details & summary
 import SummaryAudioScreen from '../screens/main/topic/summary/SummaryAudioScreen'
+import SummaryDetailsScreen from '../screens/main/topic/summary/SummaryDetailsScreen'
 import SummaryScreen from '../screens/main/topic/summary/SummaryScreen'
+import TopicAddScreen from '../screens/main/topic/topic-add/TopicAddScreen'
 import TopicDetailsScreen from '../screens/main/topic/topic-details/TopicDetailsScreen'
 
 // Menu screens (as regular stack screens)
@@ -54,6 +56,7 @@ import NotificationsScreen from '../screens/main/notifications/NotificationsScre
 // Whiteboard (keep legacy path casing for now)
 import WhiteboardScreen from '../screens/main/whiteBoard/WhiteBoardScreen'
 
+import EditOverlay from '../screens/main/utils/edit-overlay/EditOverlay'
 import ErrorOverlay from '../screens/main/utils/error-overlay/ErrorOverlay'
 import FastWayOverlay from '../screens/main/utils/fast-way-overlay/FastWayOverlay'
 import LoadingOverlay from '../screens/main/utils/loading-overlay/LoadingOverlay'
@@ -198,9 +201,19 @@ function MainStack() {
         options={{ title: ROUTES.TopicDetailsScreen }}
       />
       <Stack.Screen
+        name={ROUTES.TopicAddScreen}
+        component={TopicAddScreen}
+        options={{ title: ROUTES.TopicAddScreen }}
+      />
+      <Stack.Screen
         name={ROUTES.SummaryScreen}
         component={SummaryScreen}
         options={{ title: ROUTES.SummaryScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.SummaryDetailsScreen}
+        component={SummaryDetailsScreen}
+        options={{ title: ROUTES.SummaryDetailsScreen }}
       />
       <Stack.Screen
         name={ROUTES.SummaryAudioScreen}
@@ -321,12 +334,14 @@ export default function Navigation() {
 
 // Renders overlays (modals) whenever the store flags are true
 const OverlayHost: React.FC = () => {
-  const { errorOverlay, loadingOverlay, fastWayOverlay } = useOverlay()
+  const { errorOverlay, loadingOverlay, fastWayOverlay, editOverlay } =
+    useOverlay()
   return (
     <>
       {loadingOverlay ? <LoadingOverlay /> : null}
       {errorOverlay ? <ErrorOverlay /> : null}
       {fastWayOverlay ? <FastWayOverlay /> : null}
+      {editOverlay ? <EditOverlay /> : null}
     </>
   )
 }

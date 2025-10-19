@@ -18,6 +18,8 @@ export const ROUTES = {
   ChallengeAddTextAnswerScreen: 'ChallengeAddTextAnswerScreen',
   // Main - Topic
   TopicDetailsScreen: 'TopicDetailsScreen',
+  SummaryDetailsScreen: 'SummaryDetailsScreen',
+  TopicAddScreen: 'TopicAddScreen',
   SummaryScreen: 'SummaryScreen',
   SummaryAudioScreen: 'SummaryAudioScreen',
   // Main - Menu

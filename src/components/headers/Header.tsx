@@ -7,11 +7,13 @@ import Animated, {
   SlideOutUp,
 } from 'react-native-reanimated'
 import { navigationRef } from '../../navigation/navigationRef'
+import { useOverlay } from '../../store/useOverlay'
 import { useThemeStore } from '../../store/useThemeStore'
 import HeaderDashboard from './HeaderDashboard'
 
 const DefaultHeader = ({ title }: { title: string }) => {
   const canGoBack = navigationRef.isReady() && navigationRef.canGoBack()
+  const { setFastWayOverlay } = useOverlay()
 
   return (
     <>
@@ -30,7 +32,12 @@ const DefaultHeader = ({ title }: { title: string }) => {
         {title}
       </Text>
 
-      <View style={styles.iconPlaceholder} />
+      <TouchableOpacity
+        onPress={() => setFastWayOverlay(true)}
+        style={[styles.iconWrapper, { alignItems: 'flex-end' }]}
+      >
+        <Ionicons name="flash" size={20} color="#60a5fa" />
+      </TouchableOpacity>
     </>
   )
 }

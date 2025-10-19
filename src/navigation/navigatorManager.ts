@@ -9,16 +9,21 @@ export type RootStackParamList = {
   RecoveryScreen: undefined
   TopicScreen: undefined
   CalendarScreen: undefined
-  CalendarAddScreen: undefined
+  CalendarAddScreen: { date?: string } | undefined
   CalendarDetailsScreen: undefined
   ChallengeScreen: undefined
-  ChallengeAddScreen: undefined
+  ChallengeAddScreen: { summaryId?: string } | undefined
   ChallengeAddFlashCardScreen: undefined
-  ChallengeAddHangmanScreen: undefined
-  ChallengeAddMatrixScreen: undefined
-  ChallengeAddQuizScreen: undefined
-  ChallengeAddTextAnswerScreen: undefined
+  ChallengeAddHangmanScreen: { summaryId?: string } | undefined
+  ChallengeAddMatrixScreen: { summaryId?: string } | undefined
+  ChallengeAddQuizScreen: { summaryId?: string } | undefined
+  ChallengeAddTextAnswerScreen: { summaryId?: string } | undefined
   TopicDetailsScreen: { topicId: string }
+  SummaryDetailsScreen: {
+    summaryId: string
+    summary?: import('../types/domain').Summary
+  }
+  TopicAddScreen: undefined
   SummaryScreen: { topicId?: string; seedPrompt?: string } | undefined
   SummaryAudioScreen: undefined
   ProfileScreen: undefined
@@ -76,9 +81,9 @@ export const navigatorManager = {
   goToCalendar: () => {
     if (navigationRef.isReady()) navigationRef.navigate(ROUTES.CalendarScreen)
   },
-  goToCalendarAdd: () => {
+  goToCalendarAdd: (params?: { date?: string }) => {
     if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.CalendarAddScreen)
+      navigationRef.navigate(ROUTES.CalendarAddScreen, params)
   },
   goToCalendarDetails: () => {
     if (navigationRef.isReady())
@@ -89,35 +94,48 @@ export const navigatorManager = {
   goToChallenge: () => {
     if (navigationRef.isReady()) navigationRef.navigate(ROUTES.ChallengeScreen)
   },
-  goToChallengeAdd: () => {
+  goToChallengeAdd: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddScreen)
+      navigationRef.navigate(ROUTES.ChallengeAddScreen, params)
   },
-  goToChallengeAddFlashCard: () => {
+  goToChallengeAddFlashCard: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddFlashCardScreen)
+      navigationRef.navigate(ROUTES.ChallengeAddFlashCardScreen, params as any)
   },
-  goToChallengeAddHangman: () => {
+  goToChallengeAddHangman: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddHangmanScreen)
+      navigationRef.navigate(ROUTES.ChallengeAddHangmanScreen, params as any)
   },
-  goToChallengeAddMatrix: () => {
+  goToChallengeAddMatrix: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddMatrixScreen)
+      navigationRef.navigate(ROUTES.ChallengeAddMatrixScreen, params as any)
   },
-  goToChallengeAddQuiz: () => {
+  goToChallengeAddQuiz: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddQuizScreen)
+      navigationRef.navigate(ROUTES.ChallengeAddQuizScreen, params as any)
   },
-  goToChallengeAddTextAnswer: () => {
+  goToChallengeAddTextAnswer: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddTextAnswerScreen)
+      navigationRef.navigate(ROUTES.ChallengeAddTextAnswerScreen, params as any)
   },
 
   // Topic details and summary
   goToTopicDetails: (topicId: string) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.TopicDetailsScreen, { topicId })
+  },
+  goToSummaryDetails: (
+    summaryId: string,
+    summary?: import('../types/domain').Summary,
+  ) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.SummaryDetailsScreen, {
+        summaryId,
+        summary,
+      })
+  },
+  goToTopicAdd: () => {
+    if (navigationRef.isReady()) navigationRef.navigate(ROUTES.TopicAddScreen)
   },
   goToSummary: (params?: { topicId?: string; seedPrompt?: string }) => {
     if (navigationRef.isReady())

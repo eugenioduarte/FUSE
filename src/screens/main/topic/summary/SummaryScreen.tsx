@@ -11,9 +11,10 @@ import {
 import { RootStackParamList } from '../../../../navigation/navigatorManager'
 import { summariesRepository } from '../../../../services/repositories/summaries.repository'
 import { useOverlay } from '../../../../store/useOverlay'
+import { Summary } from '../../../../types/domain'
 
 const SummaryScreen = () => {
-  const { setErrorOverlay, setLoadingOverlay } = useOverlay()
+  const { setErrorOverlay, setLoadingOverlay, setEditOverlay } = useOverlay()
   const route = useRoute<RouteProp<RootStackParamList, 'SummaryScreen'>>()
   const initialTopicId = route.params?.topicId ?? 'topic-1'
   const initialPrompt =
@@ -24,6 +25,7 @@ const SummaryScreen = () => {
   const [content, setContent] = useState<string>('')
   const [keywords, setKeywords] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  const [lastSaved, setLastSaved] = useState<Summary | null>(null)
 
   const handleGenerate = async () => {
     try {
@@ -33,6 +35,7 @@ const SummaryScreen = () => {
       setTitle(summary.title || '')
       setContent(summary.content)
       setKeywords(summary.keywords || [])
+      setLastSaved(summary)
     } catch (e: any) {
       setErrorOverlay(true, e?.message || 'Falha ao gerar resumo')
     } finally {
@@ -45,9 +48,35 @@ const SummaryScreen = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#0b0b0c', padding: 16 }}>
-      <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }}>
-        Gerar resumo com ChatGPT
-      </Text>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
+        <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }}>
+          Gerar resumo com ChatGPT
+        </Text>
+        {!!lastSaved && (
+          <TouchableOpacity
+            onPress={() =>
+              setEditOverlay({
+                type: 'summary',
+                summary: lastSaved,
+                onSaved: (s) => {
+                  setLastSaved(s)
+                  setTitle(s.title || '')
+                  setContent(s.content)
+                  setKeywords(s.keywords || [])
+                },
+              })
+            }
+          >
+            <Text style={{ color: '#60a5fa', fontWeight: '700' }}>Editar</Text>
+          </TouchableOpacity>
+        )}
+      </View>
       <View style={{ height: 12 }} />
       <Text style={{ color: '#bbb', marginBottom: 6 }}>Tópico (id)</Text>
       <TextInput
@@ -108,12 +137,36 @@ const SummaryScreen = () => {
       {!!(title || content) && (
         <ScrollView style={{ flex: 1 }}>
           {!!title && (
-            <Text style={{ color: 'white', fontSize: 16, fontWeight: '700' }}>
-              {title}
-            </Text>
+            <View
+              style={{
+                alignSelf: 'flex-start',
+                backgroundColor: lastSaved?.backgroundColor || 'transparent',
+                borderRadius: 8,
+                paddingHorizontal: 8,
+                paddingVertical: 4,
+                marginBottom: 4,
+              }}
+            >
+              <Text
+                style={{
+                  color: lastSaved?.backgroundColor ? '#111' : 'white',
+                  fontSize: 16,
+                  fontWeight: '700',
+                }}
+              >
+                {title}
+              </Text>
+            </View>
           )}
           <View style={{ height: 8 }} />
-          <Text style={{ color: '#ddd', lineHeight: 20 }}>{content}</Text>
+          <Text
+            style={{
+              color: lastSaved?.backgroundColor ? '#222' : '#ddd',
+              lineHeight: 20,
+            }}
+          >
+            {content}
+          </Text>
           <View style={{ height: 12 }} />
           {!!keywords.length && (
             <View>

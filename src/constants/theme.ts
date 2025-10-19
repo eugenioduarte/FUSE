@@ -12,6 +12,19 @@ export const Colors = {
     warning_text: '#f25d4cff',
     disabled: '#dededeff',
   },
+
+  backgroundTextColors: {
+    sand: '#F3D8B4',
+    sage: '#D8E2DC',
+    blush: '#F0C1C1',
+    cream: '#EAD7C3',
+    mint: '#CDE3D3',
+    lilac: '#E9D6EB',
+    butter: '#F1E3B6',
+    sky: '#D7E4EA',
+    peach: '#F5D6C6',
+    olive: '#E0E4D9',
+  },
 }
 
 export const border = {
