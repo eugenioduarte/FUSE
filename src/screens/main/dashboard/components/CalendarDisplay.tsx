@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react'
-import { FlatList, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, TouchableOpacity, View } from 'react-native'
+import { Card, UiText } from '../../../../components'
 import { navigatorManager } from '../../../../navigation/navigatorManager'
 import { useCalendarStore } from '../../../../store/useCalendarStore'
 
@@ -11,31 +12,24 @@ const CalendarCard = ({
 }: {
   title: string
   time: string
-  topicId: string
+  topicId?: string
   location?: string
 }) => {
   return (
-    <View
-      style={{
-        backgroundColor: 'white',
-        height: 200,
-        padding: 10,
-        width: 300,
-        marginRight: 10,
-      }}
-    >
+    <Card style={{ height: 200, width: 300, marginRight: 10 }}>
       <View
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
-          padding: 20,
+          padding: 8,
         }}
       >
-        <Text>{title}</Text>
+        <UiText variant="title">{title}</UiText>
         <TouchableOpacity
-          onPress={() => navigatorManager.goToTopicDetails(topicId)}
+          disabled={!topicId}
+          onPress={() => topicId && navigatorManager.goToTopicDetails(topicId)}
         >
-          <Text style={{ color: 'blue' }}>Ver tópico</Text>
+          <UiText style={{ color: '#1d4ed8' }}>Ver tópico</UiText>
         </TouchableOpacity>
       </View>
 
@@ -43,15 +37,15 @@ const CalendarCard = ({
         style={{ flexDirection: 'row', justifyContent: 'flex-start', gap: 15 }}
       >
         <View>
-          <Text>{time}</Text>
-          {!!location && <Text>{location}</Text>}
+          <UiText>{time}</UiText>
+          {!!location && <UiText>{location}</UiText>}
         </View>
         <View>
-          <Text>ID do tópico: {topicId}</Text>
-          <Text>(navegação passará esse id)</Text>
+          <UiText>ID do tópico: {topicId ?? '—'}</UiText>
+          <UiText>(navegação passará esse id)</UiText>
         </View>
       </View>
-    </View>
+    </Card>
   )
 }
 
@@ -65,15 +59,7 @@ const CalendarDisplay = () => {
   }, [seedIfEmpty])
 
   return (
-    <View
-      style={{
-        backgroundColor: 'white',
-        height: 200,
-        padding: 10,
-        width: '100%',
-        marginBottom: 4,
-      }}
-    >
+    <Card style={{ height: 200, width: '100%', marginBottom: 8 }}>
       <FlatList
         data={dailyData}
         keyExtractor={(item) => item.id}
@@ -87,7 +73,7 @@ const CalendarDisplay = () => {
         )}
         horizontal
       />
-    </View>
+    </Card>
   )
 }
 

@@ -1,5 +1,6 @@
 import React from 'react'
-import { FlatList, Image, Text, TouchableOpacity, View } from 'react-native'
+import { FlatList, Image, TouchableOpacity, View } from 'react-native'
+import { Card, UiText } from '../../../../components'
 import { navigatorManager } from '../../../../navigation/navigatorManager'
 
 type users = {
@@ -22,33 +23,28 @@ const TopicCard = (payload: TopicCardPayload) => {
   const goToTopic = () => navigatorManager.goToTopicDetails(id)
 
   return (
-    <TouchableOpacity
-      onPress={goToTopic}
-      style={{
-        padding: 10,
-        borderWidth: 1,
-        borderColor: '#ccc',
-        width: '100%',
-        backgroundColor: 'white',
-        marginBottom: 4,
-      }}
-    >
-      <Text>{topicName}</Text>
-      <Text>{score}</Text>
-      <Text>{createdAt}</Text>
-      <Text>{spendTime}</Text>
-      <FlatList
-        data={usersShared}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View>
-            <Image
-              source={{ uri: item.avatarUrl }}
-              style={{ width: 50, height: 50 }}
-            />
-          </View>
-        )}
-      />
+    <TouchableOpacity onPress={goToTopic} style={{ width: '100%' }}>
+      <Card style={{ marginBottom: 8 }}>
+        <UiText variant="title">{topicName}</UiText>
+        <UiText>Score: {score}</UiText>
+        <UiText>Criado em: {createdAt}</UiText>
+        <UiText>Tempo: {spendTime}</UiText>
+        <FlatList
+          data={usersShared}
+          keyExtractor={(item) => item.id}
+          horizontal
+          contentContainerStyle={{ gap: 8, marginTop: 8 }}
+          renderItem={({ item }) => (
+            <View>
+              <Image
+                source={{ uri: item.avatarUrl }}
+                style={{ width: 36, height: 36, borderRadius: 18 }}
+              />
+            </View>
+          )}
+          showsHorizontalScrollIndicator={false}
+        />
+      </Card>
     </TouchableOpacity>
   )
 }
