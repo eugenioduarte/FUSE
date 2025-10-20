@@ -1,0 +1,73 @@
+name: Build and Submit (EAS)
+
+on:
+  workflow_dispatch:
+    inputs:
+      profile:
+        description: EAS build profile (development/preview/production)
+        required: true
+        default: production
+      platform:
+        description: Target platform (all/ios/android)
+        required: true
+        default: all
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'yarn'
+
+      - name: Enable Corepack (Yarn)
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install --immutable
+
+      - name: Install EAS CLI
+        run: yarn global add eas-cli@latest
+
+      - name: Login to Expo (Token)
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "$EXPO_TOKEN" ]; then echo "EXPO_TOKEN not set" && exit 1; fi
+          echo "Logged in with token"
+
+      - name: EAS Build
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ "${{ github.event.inputs.platform }}" = "all" ]; then
+            eas build --non-interactive --profile ${{ github.event.inputs.profile }} --platform all
+          else
+            eas build --non-interactive --profile ${{ github.event.inputs.profile }} --platform ${{ github.event.inputs.platform }}
+          fi
+
+      - name: EAS Submit (Production only)
+        if: ${{ github.event.inputs.profile == 'production' }}
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          GOOGLE_SERVICE_ACCOUNT_KEY: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.platform }}" = "all" ]; then
+            eas submit --non-interactive --platform ios --latest --profile production || true
+            eas submit --non-interactive --platform android --latest --profile production || true
+          elif [ "${{ github.event.inputs.platform }}" = "ios" ]; then
+            eas submit --non-interactive --platform ios --latest --profile production || true
+          else
+            eas submit --non-interactive --platform android --latest --profile production || true
+          fi

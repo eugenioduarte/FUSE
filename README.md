@@ -1,5 +1,3 @@
-
-
 ![Project Preview](https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExajRhbjJjaWRjdXBub3psbXl5bmthNjNwaXBuZnJqamxtMWhkeG90NSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/NEvPzZ8bd1V4Y/giphy.gif)
 
 <!-- 
@@ -37,3 +35,54 @@ yarn
 
 # Start the app with Expo (clean cache recommended)
 npx expo start -c
+```
+
+## CI/CD, SonarCloud e Publicação (EAS)
+
+Este projeto agora possui:
+
+- GitHub Actions CI (`.github/workflows/ci.yml`):
+  - Lint (ESLint)
+  - Testes (Jest) com cobertura
+  - SonarCloud (se `SONAR_TOKEN` configurado)
+
+- GitHub Actions Release (`.github/workflows/release.yml`):
+  - Build com EAS (profiles: development/preview/production)
+  - Submit para App Store Connect e Google Play (produção)
+
+- Configurações:
+  - `sonar-project.properties` (ajuste organização e projectKey)
+  - `eas.json` (perfis de build/submit)
+
+### Pré-requisitos
+
+- Secrets no GitHub (Settings > Secrets and variables > Actions):
+  - SonarCloud:
+    - SONAR_TOKEN
+  - Expo/EAS:
+    - EXPO_TOKEN
+  - Apple (para submit iOS):
+    - APPLE_ID
+    - APPLE_TEAM_ID
+    - APPLE_APP_SPECIFIC_PASSWORD
+  - Android (para submit Android):
+    - GOOGLE_SERVICE_ACCOUNT_KEY (JSON da Service Account)
+
+### Rodando os workflows
+
+- CI dispara em PR/push para `main` ou `setup`.
+- Release (manual): Actions > Build and Submit (EAS)
+  - profile: production (gera build para loja)
+  - platform: all/ios/android
+
+### Ajustes necessários
+
+- Edite `sonar-project.properties` com sua org e project key do SonarCloud.
+- Configure `app.json` com `bundleIdentifier` (iOS) e `package` (Android) definitivos.
+- Crie os certificados/credenciais na sua conta Expo (EAS) e conecte as lojas.
+- Caso use Yarn Berry, garanta o `.yarnrc.yml` com `enableGlobalCache: true` ou adapte o cache do workflow.
+
+### Dicas
+
+- Para builds internas, use o profile `preview` e instale builds do EAS no dispositivo/testers.
+- Se quiser publicar em TestFlight/Play Internal, use o workflow `release.yml` com profile `production` e os secrets configurados.
