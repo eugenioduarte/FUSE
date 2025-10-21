@@ -11,13 +11,15 @@ export const ROUTES = {
   // Main - Challenge
   ChallengeScreen: 'ChallengeScreen',
   ChallengeAddScreen: 'ChallengeAddScreen',
-  ChallengeAddFlashCardScreen: 'ChallengeAddFlashCardScreen',
   ChallengeAddHangmanScreen: 'ChallengeAddHangmanScreen',
   ChallengeAddMatrixScreen: 'ChallengeAddMatrixScreen',
   ChallengeAddQuizScreen: 'ChallengeAddQuizScreen',
   ChallengeAddTextAnswerScreen: 'ChallengeAddTextAnswerScreen',
   ChallengesListScreen: 'ChallengesListScreen',
   ChallengeRunQuizScreen: 'ChallengeRunQuizScreen',
+  ChallengeRunHangmanScreen: 'ChallengeRunHangmanScreen',
+  ChallengeReviewHangmanScreen: 'ChallengeReviewHangmanScreen',
+  ChallengeReviewQuizScreen: 'ChallengeReviewQuizScreen',
   // Main - Topic
   TopicDetailsScreen: 'TopicDetailsScreen',
   SummaryDetailsScreen: 'SummaryDetailsScreen',

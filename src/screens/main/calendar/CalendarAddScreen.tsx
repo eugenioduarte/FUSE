@@ -222,7 +222,7 @@ const styles = StyleSheet.create<{
   },
   header: {
     color: Colors.light.text,
-    ...(typography.titleLarge as unknown as TextStyle),
+    ...(typography.xLarge as unknown as TextStyle),
     marginBottom: spacings.small,
   },
   label: {

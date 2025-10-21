@@ -13,13 +13,15 @@ export type RootStackParamList = {
   CalendarDetailsScreen: undefined
   ChallengeScreen: undefined
   ChallengeAddScreen: { summaryId?: string } | undefined
-  ChallengeAddFlashCardScreen: undefined
   ChallengeAddHangmanScreen: { summaryId?: string } | undefined
   ChallengeAddMatrixScreen: { summaryId?: string } | undefined
   ChallengeAddQuizScreen: { summaryId?: string } | undefined
   ChallengeAddTextAnswerScreen: { summaryId?: string } | undefined
   ChallengesListScreen: { summaryId?: string } | undefined
   ChallengeRunQuizScreen: { challengeId: string } | undefined
+  ChallengeReviewQuizScreen: { challengeId: string } | undefined
+  ChallengeRunHangmanScreen: { challengeId: string } | undefined
+  ChallengeReviewHangmanScreen: { challengeId: string } | undefined
   TopicDetailsScreen: { topicId: string }
   SummaryDetailsScreen: {
     summaryId: string
@@ -100,10 +102,6 @@ export const navigatorManager = {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeAddScreen, params)
   },
-  goToChallengeAddFlashCard: (params?: { summaryId?: string }) => {
-    if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddFlashCardScreen, params as any)
-  },
   goToChallengeAddHangman: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeAddHangmanScreen, params as any)
@@ -127,6 +125,18 @@ export const navigatorManager = {
   goToChallengeRunQuiz: (params: { challengeId: string }) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeRunQuizScreen, params as any)
+  },
+  goToChallengeRunHangman: (params: { challengeId: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.ChallengeRunHangmanScreen, params as any)
+  },
+  goToChallengeReviewQuiz: (params: { challengeId: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.ChallengeReviewQuizScreen, params as any)
+  },
+  goToChallengeReviewHangman: (params: { challengeId: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.ChallengeReviewHangmanScreen, params as any)
   },
 
   // Topic details and summary

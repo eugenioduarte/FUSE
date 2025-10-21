@@ -30,7 +30,7 @@ export interface CalendarEvent {
 
 export interface Challenge {
   id: string
-  type: 'flashcard' | 'hangman' | 'matrix' | 'quiz' | 'text'
+  type: 'hangman' | 'matrix' | 'quiz' | 'text'
   title: string
   summaryId: string
   payload: any

@@ -32,12 +32,14 @@ import CalendarAddScreen from '../screens/main/calendar/CalendarAddScreen'
 import CalendarDetailsScreen from '../screens/main/calendar/CalendarDetailsScreen'
 
 // Challenge
-import ChallengeAddFlashCardScreen from '../screens/main/challenge/challenge-add/ChallengeAddFlashCardScreen'
 import ChallengeAddHangmanScreen from '../screens/main/challenge/challenge-add/ChallengeAddHangmanScreen'
 import ChallengeAddMatrixScreen from '../screens/main/challenge/challenge-add/ChallengeAddMatrixScreen'
 import ChallengeAddQuizScreen from '../screens/main/challenge/challenge-add/ChallengeAddQuizScreen'
 import ChallengeAddScreen from '../screens/main/challenge/challenge-add/ChallengeAddScreen'
 import ChallengeAddTextAnswerScreen from '../screens/main/challenge/challenge-add/ChallengeAddTextAnswerScreen'
+import ChallengeReviewHangmanScreen from '../screens/main/challenge/ChallengeReviewHangmanScreen'
+import ChallengeReviewQuizScreen from '../screens/main/challenge/ChallengeReviewQuizScreen'
+import ChallengeRunHangmanScreen from '../screens/main/challenge/ChallengeRunHangmanScreen'
 import ChallengeRunQuizScreen from '../screens/main/challenge/ChallengeRunQuizScreen'
 import ChallengeScreen from '../screens/main/challenge/ChallengeScreen'
 import ChallengesListScreen from '../screens/main/challenge/ChallengesListScreen'
@@ -171,11 +173,6 @@ function MainStack() {
         options={{ title: ROUTES.ChallengeAddScreen }}
       />
       <Stack.Screen
-        name={ROUTES.ChallengeAddFlashCardScreen}
-        component={ChallengeAddFlashCardScreen}
-        options={{ title: ROUTES.ChallengeAddFlashCardScreen }}
-      />
-      <Stack.Screen
         name={ROUTES.ChallengeAddHangmanScreen}
         component={ChallengeAddHangmanScreen}
         options={{ title: ROUTES.ChallengeAddHangmanScreen }}
@@ -204,6 +201,21 @@ function MainStack() {
         name={ROUTES.ChallengeRunQuizScreen}
         component={ChallengeRunQuizScreen}
         options={{ title: ROUTES.ChallengeRunQuizScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeRunHangmanScreen}
+        component={ChallengeRunHangmanScreen}
+        options={{ title: ROUTES.ChallengeRunHangmanScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeReviewQuizScreen}
+        component={ChallengeReviewQuizScreen}
+        options={{ title: ROUTES.ChallengeReviewQuizScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeReviewHangmanScreen}
+        component={ChallengeReviewHangmanScreen}
+        options={{ title: ROUTES.ChallengeReviewHangmanScreen }}
       />
 
       {/* Topic details & summary */}

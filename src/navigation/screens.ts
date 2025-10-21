@@ -9,7 +9,6 @@ export enum NavigationScreenName {
   CalendarDetailsScreen = 'CalendarDetailsScreen',
   ChallengeScreen = 'ChallengeScreen',
   ChallengeAddScreen = 'ChallengeAddScreen',
-  ChallengeAddFlashCardScreen = 'ChallengeAddFlashCardScreen',
   ChallengeAddHangmanScreen = 'ChallengeAddHangmanScreen',
   ChallengeAddMatrixScreen = 'ChallengeAddMatrixScreen',
   ChallengeAddQuizScreen = 'ChallengeAddQuizScreen',

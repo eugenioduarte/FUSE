@@ -42,38 +42,45 @@ export const spacings = {
 }
 
 export const font = {
-  light: 'FT Base Light',
-  regular: 'FT Base Regular',
-  medium: 'FT Base Medium',
+  light: 'Quicksand-Light',
+  regular: 'Quicksand-Regular',
+  medium: 'Quicksand-Medium',
+  semiBold: 'Quicksand-SemiBold',
+  bold: 'Quicksand-Bold',
 }
 
 export const typography = {
-  titleLarge: {
-    fontFamily: font.medium,
-    fontSize: 18,
-    fontWeight: '500',
-    letterSpacing: 0.15,
-    lineHeight: 24,
-  },
-  titleMedium: {
-    fontFamily: font.medium,
-    fontSize: 16,
-    fontWeight: '400',
-    letterSpacing: 0.15,
-    lineHeight: 20,
-  },
-  bodyLarge: {
-    fontFamily: font.regular,
-    fontSize: 14,
-    fontWeight: '500',
-    letterSpacing: 0.15,
-    lineHeight: 20,
-  },
-  bodySmall: {
+  small: {
     fontFamily: font.regular,
     fontSize: 12,
-    fontWeight: '400',
-    letterSpacing: 0.15,
     lineHeight: 16,
   },
+  medium: {
+    fontFamily: font.regular,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  large: {
+    fontFamily: font.medium,
+    fontSize: 16,
+    lineHeight: 22,
+  },
+  xLarge: {
+    fontFamily: font.medium,
+    fontSize: 18,
+    lineHeight: 24,
+  },
+  xxLarge: {
+    fontFamily: font.semiBold,
+    fontSize: 22,
+    lineHeight: 28,
+  },
 }
+
+export const textWeight = {
+  light: font.light,
+  regular: font.regular,
+  medium: font.medium,
+  semiBold: font.semiBold,
+  bold: font.bold,
+} as const

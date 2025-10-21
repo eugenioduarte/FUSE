@@ -29,6 +29,15 @@ type AIQuizResponse = {
   questions: AIQuizQuestion[]
 }
 
+// Persisted attempt types (stored inside challenge.payload)
+type AttemptQuestion = AIQuizQuestion & { choice: number | null }
+type Attempt = {
+  at: number
+  score: number
+  total: number
+  questions: AttemptQuestion[]
+}
+
 const StepDot = ({ active }: { active: boolean }) => (
   <View
     style={{
@@ -91,8 +100,11 @@ const ChallengeRunQuizScreen: React.FC = () => {
         if (!active) return
         if (!summary) throw new Error('Summary not found for this challenge')
 
-        // total questions from payload or fallback
-        const total = Number(ch.payload?.totalQuestions || 10)
+        // total questions from payload or fallback (random 5-10)
+        const total = Number(
+          ch.payload?.totalQuestions ||
+            Math.floor(Math.random() * (10 - 5 + 1)) + 5,
+        )
         const prompt = buildQuizPrompt(summary.content, total)
         const quiz = await generateQuiz(prompt)
         if (!active) return
@@ -140,11 +152,22 @@ const ChallengeRunQuizScreen: React.FC = () => {
     // finish
     const score = computeScore(questions, firstChoiceByIndex)
     const now = Date.now()
+    // Build attempt with immutable snapshot for review later
+    const attempt: Attempt = {
+      at: now,
+      score,
+      total: questions.length,
+      questions: questions.map((q, i) => ({
+        ...q,
+        choice: firstChoiceByIndex[i] ?? null,
+      })),
+    }
     const updated: Challenge = {
       ...challenge,
       updatedAt: now,
       payload: {
         ...challenge.payload,
+        attempts: [...(challenge.payload?.attempts ?? []), attempt],
         lastAttempt: { score, total: questions.length, at: now },
       },
     }

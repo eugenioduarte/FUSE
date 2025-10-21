@@ -1,18 +1,39 @@
 import React from 'react'
 import { Text as RNText, TextProps, TextStyle } from 'react-native'
+import { Colors, textWeight, typography } from '../../constants/theme'
+
+type Variant = keyof typeof typography
 
 type Props = TextProps & {
-  variant?: 'title' | 'body' | 'caption'
+  variant?: Variant | 'title' | 'body' | 'caption'
+  weight?: keyof typeof textWeight
+  color?: string
 }
 
-const stylesByVariant: Record<NonNullable<Props['variant']>, TextStyle> = {
-  title: { fontSize: 18, fontWeight: '700', color: '#000' },
-  body: { fontSize: 14, color: '#000' },
-  caption: { fontSize: 12, color: '#000' },
-}
+export const Text: React.FC<Props> = ({
+  variant = 'medium',
+  weight,
+  color,
+  style,
+  ...rest
+}) => {
+  const variantKey: Variant =
+    variant === 'title'
+      ? 'xLarge'
+      : variant === 'body'
+        ? 'medium'
+        : variant === 'caption'
+          ? 'small'
+          : variant
 
-export const Text: React.FC<Props> = ({ variant = 'body', style, ...rest }) => {
-  return <RNText {...rest} style={[stylesByVariant[variant], style]} />
+  const base = typography[variantKey]
+  const computedStyle: TextStyle = {
+    ...base,
+    color: color ?? Colors.light.text,
+    fontFamily: weight ? textWeight[weight] : base.fontFamily,
+  }
+
+  return <RNText {...rest} style={[computedStyle, style]} />
 }
 
 export default Text

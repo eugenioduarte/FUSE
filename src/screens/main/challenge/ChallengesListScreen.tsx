@@ -17,6 +17,7 @@ import { challengesRepository } from '../../../services/repositories/challenges.
 type Item = {
   id: string
   title: string
+  type?: 'hangman' | 'matrix' | 'quiz' | 'text'
   lastAttempt?: { score: number; total: number; at: number }
 }
 
@@ -31,10 +32,19 @@ const formatDateTime = (ts: number) => {
   return `${day}/${month}/${year} ${hours}:${minutes}`
 }
 
+const formatDateOnly = (ts: number) => {
+  const d = new Date(ts)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  const day = pad(d.getDate())
+  const month = pad(d.getMonth() + 1)
+  const year = d.getFullYear()
+  return `${day}/${month}/${year}`
+}
+
 const ChallengesListScreen: React.FC = () => {
   const route =
     useRoute<RouteProp<RootStackParamList, 'ChallengesListScreen'>>()
-  const summaryId = route.params?.summaryId as string | undefined
+  const summaryId = route.params?.summaryId
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -42,14 +52,18 @@ const ChallengesListScreen: React.FC = () => {
     base: { id: string; title: string }[],
     all: Awaited<ReturnType<typeof challengesRepository.list>>,
   ): Item[] => {
-    return base.map((l) => {
-      const found = all.find((a) => a.id === l.id)
-      return {
-        id: l.id,
-        title: l.title,
-        lastAttempt: found?.payload?.lastAttempt,
-      }
-    })
+    return base
+      .map((l) => {
+        const found = all.find((a) => a.id === l.id)
+        const type = found?.type as any as Item['type'] | undefined
+        return {
+          id: l.id,
+          title: l.title,
+          type,
+          lastAttempt: found?.payload?.lastAttempt,
+        }
+      })
+      .filter((i) => !!i.lastAttempt)
   }
 
   useEffect(() => {
@@ -59,11 +73,14 @@ const ChallengesListScreen: React.FC = () => {
         const all = await challengesRepository.list()
         if (!active) return
         setItems(
-          all.map((c) => ({
-            id: c.id,
-            title: c.title,
-            lastAttempt: c.payload?.lastAttempt,
-          })),
+          all
+            .map((c) => ({
+              id: c.id,
+              title: c.title,
+              type: c.type as Item['type'],
+              lastAttempt: c.payload?.lastAttempt,
+            }))
+            .filter((i) => !!i.lastAttempt),
         )
         setLoading(false)
         return
@@ -127,9 +144,16 @@ const ChallengesListScreen: React.FC = () => {
           keyExtractor={(it) => it.id}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() =>
-                navigatorManager.goToChallengeRunQuiz({ challengeId: item.id })
-              }
+              onPress={() => {
+                if (item.type === 'hangman')
+                  navigatorManager.goToChallengeReviewHangman({
+                    challengeId: item.id,
+                  })
+                else
+                  navigatorManager.goToChallengeReviewQuiz({
+                    challengeId: item.id,
+                  })
+              }}
               style={{
                 backgroundColor: '#111214',
                 borderColor: '#2B2C30',
@@ -140,19 +164,12 @@ const ChallengesListScreen: React.FC = () => {
               }}
             >
               <Text style={{ color: 'white', fontWeight: '600' }}>
-                {item.title}
+                {item.type === 'hangman'
+                  ? `Hangman – ${formatDateOnly(
+                      item.lastAttempt!.at,
+                    )} – ${item.lastAttempt!.score}`
+                  : `Quiz – ${formatDateTime(item.lastAttempt!.at)} – ${item.lastAttempt!.score}/${item.lastAttempt!.total}`}
               </Text>
-              {!!item.lastAttempt && (
-                <View style={{ marginTop: 4 }}>
-                  <Text style={{ color: '#9ca3af' }}>
-                    Última pontuação: {item.lastAttempt.score}/
-                    {item.lastAttempt.total}
-                  </Text>
-                  <Text style={{ color: '#9ca3af', marginTop: 2 }}>
-                    Última vez: {formatDateTime(item.lastAttempt.at)}
-                  </Text>
-                </View>
-              )}
             </TouchableOpacity>
           )}
         />

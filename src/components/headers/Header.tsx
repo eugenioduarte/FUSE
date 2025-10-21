@@ -6,20 +6,34 @@ import Animated, {
   SlideInDown,
   SlideOutUp,
 } from 'react-native-reanimated'
+import { ROUTES } from '../../constants/routes'
 import { navigationRef } from '../../navigation/navigationRef'
 import { useOverlay } from '../../store/useOverlay'
 import { useThemeStore } from '../../store/useThemeStore'
 import HeaderDashboard from './HeaderDashboard'
 
 const DefaultHeader = ({ title }: { title: string }) => {
-  const canGoBack = navigationRef.isReady() && navigationRef.canGoBack()
+  const isReady = navigationRef.isReady()
+  const canGoBack = isReady && navigationRef.canGoBack()
+  const currentRoute = isReady ? navigationRef.getCurrentRoute() : undefined
+  const isChallengesList = currentRoute?.name === ROUTES.ChallengesListScreen
+  const summaryId = (currentRoute?.params as any)?.summaryId as
+    | string
+    | undefined
+  const shouldForceBackToSummary = isChallengesList && !!summaryId
   const { setFastWayOverlay } = useOverlay()
 
   return (
     <>
-      {canGoBack ? (
+      {canGoBack || shouldForceBackToSummary ? (
         <TouchableOpacity
-          onPress={() => navigationRef.goBack()}
+          onPress={() => {
+            if (shouldForceBackToSummary) {
+              navigationRef.navigate(ROUTES.SummaryDetailsScreen, { summaryId })
+            } else if (canGoBack) {
+              navigationRef.goBack()
+            }
+          }}
           style={styles.iconWrapper}
         >
           <Ionicons name="chevron-back" size={24} color="white" />

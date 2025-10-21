@@ -323,7 +323,7 @@ const styles = StyleSheet.create<{
   },
   title: {
     color: '#000',
-    ...(typography.titleMedium as unknown as TextStyle),
+    ...(typography.large as unknown as TextStyle),
   },
   desc: { color: '#000', opacity: 0.8, marginTop: 4 },
   meta: { color: '#000', opacity: 0.7, marginTop: 6 },
