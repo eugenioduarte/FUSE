@@ -16,6 +16,8 @@ export const ROUTES = {
   ChallengeAddMatrixScreen: 'ChallengeAddMatrixScreen',
   ChallengeAddQuizScreen: 'ChallengeAddQuizScreen',
   ChallengeAddTextAnswerScreen: 'ChallengeAddTextAnswerScreen',
+  ChallengesListScreen: 'ChallengesListScreen',
+  ChallengeRunQuizScreen: 'ChallengeRunQuizScreen',
   // Main - Topic
   TopicDetailsScreen: 'TopicDetailsScreen',
   SummaryDetailsScreen: 'SummaryDetailsScreen',

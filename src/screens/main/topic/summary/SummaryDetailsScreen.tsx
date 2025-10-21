@@ -19,7 +19,7 @@ const SummaryDetailsScreen: React.FC = () => {
   const route =
     useRoute<RouteProp<RootStackParamList, 'SummaryDetailsScreen'>>()
   const { summaryId } = route.params
-  const { setEditOverlay } = useOverlay()
+  useOverlay() // keep overlay store initialized if needed
   const [summary, setSummary] = useState<Summary | null>(
     route.params.summary ?? null,
   )
@@ -93,15 +93,11 @@ const SummaryDetailsScreen: React.FC = () => {
           {summary.title || 'Resumo'}
         </Text>
         <TouchableOpacity
-          onPress={() =>
-            setEditOverlay({
-              type: 'summary',
-              summary,
-              onSaved: (s) => setSummary(s),
-            })
-          }
+          onPress={() => navigatorManager.goToChallengesList({ summaryId })}
         >
-          <Text style={{ color: '#60a5fa', fontWeight: '700' }}>Editar</Text>
+          <Text style={{ color: '#60a5fa', fontWeight: '700' }}>
+            Ver Challenges →
+          </Text>
         </TouchableOpacity>
       </View>
       <View style={{ height: 12 }} />
@@ -143,6 +139,22 @@ const SummaryDetailsScreen: React.FC = () => {
       </ScrollView>
       <View style={{ height: 12 }} />
       <View style={{ position: 'absolute', left: 16, right: 16, bottom: 16 }}>
+        <TouchableOpacity
+          onPress={() => navigatorManager.goToChallengesList({ summaryId })}
+          style={{
+            backgroundColor: '#111214',
+            borderColor: '#2B2C30',
+            borderWidth: 1,
+            borderRadius: 10,
+            padding: 14,
+            alignItems: 'center',
+            marginBottom: 8,
+          }}
+        >
+          <Text style={{ color: '#9ca3af', fontWeight: '700' }}>
+            Ver challenges deste resumo
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigatorManager.goToChallengeAdd({ summaryId })}
           style={{

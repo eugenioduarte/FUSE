@@ -206,6 +206,13 @@ const FastWayOverlay: React.FC = () => {
     navigatorManager.goToSummaryDetails(fast.selectedSummaryId, selectedSummary)
   }
 
+  // Navegar para a lista de Challenges do summary atual
+  const goToChallengesListForSummary = () => {
+    if (!fast.selectedSummaryId) return
+    setFastWayOverlay(false)
+    navigatorManager.goToChallengesList({ summaryId: fast.selectedSummaryId })
+  }
+
   // Detecta se está na Dashboard para exibir atalho apenas quando não estiver
   const isOnDashboard =
     navigationRef.isReady() &&
@@ -342,6 +349,12 @@ const FastWayOverlay: React.FC = () => {
               <View style={{ alignItems: 'flex-end', marginBottom: 6 }}>
                 <TouchableOpacity onPress={goToSummaryDetails}>
                   <Text style={styles.link}>Ir para summary →</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={goToChallengesListForSummary}
+                  style={{ marginTop: 4 }}
+                >
+                  <Text style={styles.link}>Ir para challenges →</Text>
                 </TouchableOpacity>
               </View>
               {fast.selectedSummaryId && (

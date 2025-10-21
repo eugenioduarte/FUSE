@@ -18,6 +18,8 @@ export type RootStackParamList = {
   ChallengeAddMatrixScreen: { summaryId?: string } | undefined
   ChallengeAddQuizScreen: { summaryId?: string } | undefined
   ChallengeAddTextAnswerScreen: { summaryId?: string } | undefined
+  ChallengesListScreen: { summaryId?: string } | undefined
+  ChallengeRunQuizScreen: { challengeId: string } | undefined
   TopicDetailsScreen: { topicId: string }
   SummaryDetailsScreen: {
     summaryId: string
@@ -117,6 +119,14 @@ export const navigatorManager = {
   goToChallengeAddTextAnswer: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeAddTextAnswerScreen, params as any)
+  },
+  goToChallengesList: (params?: { summaryId?: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.ChallengesListScreen, params as any)
+  },
+  goToChallengeRunQuiz: (params: { challengeId: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.ChallengeRunQuizScreen, params as any)
   },
 
   // Topic details and summary

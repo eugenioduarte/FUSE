@@ -32,13 +32,15 @@ import CalendarAddScreen from '../screens/main/calendar/CalendarAddScreen'
 import CalendarDetailsScreen from '../screens/main/calendar/CalendarDetailsScreen'
 
 // Challenge
-import ChallengeScreen from '../screens/main/challenge/ChallengeScreen'
 import ChallengeAddFlashCardScreen from '../screens/main/challenge/challenge-add/ChallengeAddFlashCardScreen'
 import ChallengeAddHangmanScreen from '../screens/main/challenge/challenge-add/ChallengeAddHangmanScreen'
 import ChallengeAddMatrixScreen from '../screens/main/challenge/challenge-add/ChallengeAddMatrixScreen'
 import ChallengeAddQuizScreen from '../screens/main/challenge/challenge-add/ChallengeAddQuizScreen'
 import ChallengeAddScreen from '../screens/main/challenge/challenge-add/ChallengeAddScreen'
 import ChallengeAddTextAnswerScreen from '../screens/main/challenge/challenge-add/ChallengeAddTextAnswerScreen'
+import ChallengeRunQuizScreen from '../screens/main/challenge/ChallengeRunQuizScreen'
+import ChallengeScreen from '../screens/main/challenge/ChallengeScreen'
+import ChallengesListScreen from '../screens/main/challenge/ChallengesListScreen'
 
 // Topic details & summary
 import SummaryAudioScreen from '../screens/main/topic/summary/SummaryAudioScreen'
@@ -192,6 +194,16 @@ function MainStack() {
         name={ROUTES.ChallengeAddTextAnswerScreen}
         component={ChallengeAddTextAnswerScreen}
         options={{ title: ROUTES.ChallengeAddTextAnswerScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengesListScreen}
+        component={ChallengesListScreen}
+        options={{ title: ROUTES.ChallengesListScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeRunQuizScreen}
+        component={ChallengeRunQuizScreen}
+        options={{ title: ROUTES.ChallengeRunQuizScreen }}
       />
 
       {/* Topic details & summary */}
