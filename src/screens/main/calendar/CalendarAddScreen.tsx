@@ -39,6 +39,7 @@ const CalendarAddScreen: React.FC = () => {
   const date = preselected || todayYmd
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [time, setTime] = useState('')
   const [topics, setTopics] = useState<Topic[]>([])
   const [topicId, setTopicId] = useState<string | undefined>(undefined)
   const [summaries, setSummaries] = useState<Summary[]>([])
@@ -69,15 +70,40 @@ const CalendarAddScreen: React.FC = () => {
 
   const onSave = () => {
     if (!title.trim()) return
+    const t = normalizeTime(time)
     addAppointment({
       date,
       title: title.trim(),
       description: description.trim(),
       topicId,
       summaryId,
+      time: t || undefined,
     })
     setSelectedDate(date)
     navigatorManager.goBack()
+  }
+
+  // Accepts formats like HH:mm, H:mm and validates 00-23/00-59; returns normalized HH:mm or null
+  const normalizeTime = (input: string): string | null => {
+    const raw = (input || '').trim()
+    if (!raw) return null
+    // If user typed 4 digits like 0830 coerce to 08:30
+    const onlyDigits = raw.replaceAll(/\D/g, '')
+    if (/^\d{4}$/.test(onlyDigits)) {
+      const hh = Number(onlyDigits.slice(0, 2))
+      const mm = Number(onlyDigits.slice(2))
+      if (hh >= 0 && hh <= 23 && mm >= 0 && mm <= 59)
+        return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
+    }
+    // Match H:mm or HH:mm
+    const regex = /^(\d{1,2}):(\d{2})$/
+    const m = regex.exec(raw)
+    if (!m) return null
+    const hh = Number(m[1])
+    const mm = Number(m[2])
+    if (Number.isNaN(hh) || Number.isNaN(mm)) return null
+    if (hh < 0 || hh > 23 || mm < 0 || mm > 59) return null
+    return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
   }
 
   return (
@@ -104,6 +130,16 @@ const CalendarAddScreen: React.FC = () => {
         onChangeText={setDescription}
         style={[styles.input, { height: 80 }]}
         multiline
+      />
+
+      <Text style={styles.label}>Hora (opcional)</Text>
+      <TextInput
+        placeholder="HH:mm (ex.: 08:30)"
+        value={time}
+        onChangeText={setTime}
+        keyboardType="numbers-and-punctuation"
+        style={styles.input}
+        maxLength={5}
       />
 
       <Text style={styles.label}>Tópico</Text>

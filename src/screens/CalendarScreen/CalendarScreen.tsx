@@ -205,7 +205,8 @@ const CalendarScreen: React.FC = () => {
                     <Text style={styles.desc}>{item.description}</Text>
                   )}
                   <Text style={styles.meta}>
-                    Topic: {topicName(item.topicId)} · Summary:{' '}
+                    {item.time ? `Hora: ${item.time} · ` : ''}Topic:{' '}
+                    {topicName(item.topicId)} · Summary:{' '}
                     {summaryName(item.topicId, item.summaryId)}
                   </Text>
                   <View
