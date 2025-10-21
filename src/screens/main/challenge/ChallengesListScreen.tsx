@@ -149,6 +149,10 @@ const ChallengesListScreen: React.FC = () => {
                   navigatorManager.goToChallengeReviewHangman({
                     challengeId: item.id,
                   })
+                else if (item.type === 'matrix')
+                  navigatorManager.goToChallengeReviewMatrix({
+                    challengeId: item.id,
+                  })
                 else
                   navigatorManager.goToChallengeReviewQuiz({
                     challengeId: item.id,
@@ -165,10 +169,10 @@ const ChallengesListScreen: React.FC = () => {
             >
               <Text style={{ color: 'white', fontWeight: '600' }}>
                 {item.type === 'hangman'
-                  ? `Hangman – ${formatDateOnly(
-                      item.lastAttempt!.at,
-                    )} – ${item.lastAttempt!.score}`
-                  : `Quiz – ${formatDateTime(item.lastAttempt!.at)} – ${item.lastAttempt!.score}/${item.lastAttempt!.total}`}
+                  ? `Hangman – ${formatDateOnly(item.lastAttempt!.at)} – ${item.lastAttempt!.score}`
+                  : item.type === 'matrix'
+                    ? `Matrix – ${formatDateOnly(item.lastAttempt!.at)} – ${item.lastAttempt!.score}`
+                    : `Quiz – ${formatDateTime(item.lastAttempt!.at)} – ${item.lastAttempt!.score}/${item.lastAttempt!.total}`}
               </Text>
             </TouchableOpacity>
           )}

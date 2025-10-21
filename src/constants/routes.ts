@@ -19,6 +19,8 @@ export const ROUTES = {
   ChallengeRunQuizScreen: 'ChallengeRunQuizScreen',
   ChallengeRunHangmanScreen: 'ChallengeRunHangmanScreen',
   ChallengeReviewHangmanScreen: 'ChallengeReviewHangmanScreen',
+  ChallengeRunMatrixScreen: 'ChallengeRunMatrixScreen',
+  ChallengeReviewMatrixScreen: 'ChallengeReviewMatrixScreen',
   ChallengeReviewQuizScreen: 'ChallengeReviewQuizScreen',
   // Main - Topic
   TopicDetailsScreen: 'TopicDetailsScreen',

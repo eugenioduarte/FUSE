@@ -87,6 +87,42 @@ const ChallengeAddScreen = () => {
     }
   }
 
+  const handleStartMatrix = async () => {
+    if (!summaryId) {
+      setErrorOverlay(
+        true,
+        'Abra a criação de challenge a partir de um Summary.',
+      )
+      return
+    }
+    try {
+      setLoadingOverlay(true)
+      const now = Date.now()
+      const id = `${now}`
+      const challenge: Challenge = {
+        id,
+        type: 'matrix',
+        title: 'Matrix',
+        summaryId,
+        payload: { totalWords: 5, durationSec: 60 },
+        createdAt: now,
+        updatedAt: now,
+      }
+      await challengesRepository.upsert(challenge, '/sync/challenge', {
+        summaryId,
+      })
+      navigatorManager.goToChallengeRunMatrix({ challengeId: id })
+    } catch (e) {
+      console.error(e)
+      setErrorOverlay(
+        true,
+        'Não foi possível iniciar o matrix. Tente novamente.',
+      )
+    } finally {
+      setLoadingOverlay(false)
+    }
+  }
+
   return (
     <View style={{ flex: 1, backgroundColor: '#0b0b0c', padding: 16 }}>
       <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }}>
@@ -96,10 +132,7 @@ const ChallengeAddScreen = () => {
 
       <Option label="Quiz" onPress={handleStartQuiz} />
       <Option label="Hangman" onPress={handleStartHangman} />
-      <Option
-        label="Matrix"
-        onPress={() => navigatorManager.goToChallengeAddMatrix({ summaryId })}
-      />
+      <Option label="Matrix" onPress={handleStartMatrix} />
       {/* Flashcard removido */}
       <Option
         label="Resposta em Texto"
