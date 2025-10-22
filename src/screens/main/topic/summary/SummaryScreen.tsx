@@ -1,4 +1,6 @@
 import { RouteProp, useRoute } from '@react-navigation/native'
+import * as DocumentPicker from 'expo-document-picker'
+import * as FileSystem from 'expo-file-system'
 import React, { useState } from 'react'
 import {
   ActivityIndicator,
@@ -8,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import PdfTextExtractor from '../../../../components/utils/PdfTextExtractor'
 import { RootStackParamList } from '../../../../navigation/navigatorManager'
 import { summariesRepository } from '../../../../services/repositories/summaries.repository'
 import { useOverlay } from '../../../../store/useOverlay'
@@ -26,6 +29,8 @@ const SummaryScreen = () => {
   const [keywords, setKeywords] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
   const [lastSaved, setLastSaved] = useState<Summary | null>(null)
+  const [pdfB64, setPdfB64] = useState<string | null>(null)
+  const [extracting, setExtracting] = useState(false)
 
   const handleGenerate = async () => {
     try {
@@ -41,6 +46,30 @@ const SummaryScreen = () => {
     } finally {
       setLoading(false)
       setLoadingOverlay(false)
+    }
+  }
+
+  const handleImportPdf = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: 'application/pdf',
+        multiple: false,
+        copyToCacheDirectory: true,
+      })
+      // @ts-ignore expo types
+      if (res.canceled) return
+      // @ts-ignore expo types
+      const file = res.assets?.[0]
+      if (!file?.uri) return
+      setExtracting(true)
+      const base64 = await FileSystem.readAsStringAsync(file.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      })
+      setPdfB64(base64)
+    } catch {
+      console.error('Erro ao importar PDF')
+      setErrorOverlay(true, 'Não foi possível importar o PDF.')
+      setExtracting(false)
     }
   }
 
@@ -114,6 +143,27 @@ const SummaryScreen = () => {
         }}
         returnKeyType="send"
       />
+
+      <View style={{ height: 12 }} />
+      <TouchableOpacity
+        onPress={handleImportPdf}
+        disabled={loading || extracting}
+        style={{
+          backgroundColor: extracting ? '#1f2937' : '#10b981',
+          borderRadius: 8,
+          paddingVertical: 12,
+          alignItems: 'center',
+          marginBottom: 8,
+        }}
+      >
+        {extracting ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={{ color: 'white', fontWeight: '700' }}>
+            Importar PDF
+          </Text>
+        )}
+      </TouchableOpacity>
 
       <View style={{ height: 12 }} />
       <TouchableOpacity
@@ -200,6 +250,39 @@ const SummaryScreen = () => {
             </View>
           )}
         </ScrollView>
+      )}
+
+      {pdfB64 && (
+        <PdfTextExtractor
+          base64={pdfB64}
+          onDone={async (res) => {
+            setPdfB64(null)
+            if (!res.ok) {
+              setErrorOverlay(true, 'Falha ao ler o PDF.')
+              setExtracting(false)
+              return
+            }
+            try {
+              setLoadingOverlay(true)
+              const normalized = res.text.replaceAll(/\s+/g, ' ').trim()
+              const truncated = normalized.slice(0, 8000)
+              const summary = await summariesRepository.createWithAI(
+                topicId,
+                truncated,
+              )
+              setTitle(summary.title || '')
+              setContent(summary.content)
+              setKeywords(summary.keywords || [])
+              setLastSaved(summary)
+            } catch {
+              console.error('Erro ao gerar resumo a partir do PDF')
+              setErrorOverlay(true, 'Falha ao gerar resumo a partir do PDF.')
+            } finally {
+              setLoadingOverlay(false)
+              setExtracting(false)
+            }
+          }}
+        />
       )}
     </View>
   )

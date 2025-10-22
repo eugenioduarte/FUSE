@@ -22,6 +22,8 @@ export const ROUTES = {
   ChallengeRunMatrixScreen: 'ChallengeRunMatrixScreen',
   ChallengeReviewMatrixScreen: 'ChallengeReviewMatrixScreen',
   ChallengeReviewQuizScreen: 'ChallengeReviewQuizScreen',
+  ChallengeRunTextAnswerScreen: 'ChallengeRunTextAnswerScreen',
+  ChallengeReviewTextAnswerScreen: 'ChallengeReviewTextAnswerScreen',
   // Main - Topic
   TopicDetailsScreen: 'TopicDetailsScreen',
   SummaryDetailsScreen: 'SummaryDetailsScreen',

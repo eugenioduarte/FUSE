@@ -24,6 +24,8 @@ export type RootStackParamList = {
   ChallengeReviewHangmanScreen: { challengeId: string } | undefined
   ChallengeRunMatrixScreen: { challengeId: string } | undefined
   ChallengeReviewMatrixScreen: { challengeId: string } | undefined
+  ChallengeRunTextAnswerScreen: { challengeId: string } | undefined
+  ChallengeReviewTextAnswerScreen: { challengeId: string } | undefined
   TopicDetailsScreen: { topicId: string }
   SummaryDetailsScreen: {
     summaryId: string
@@ -136,6 +138,10 @@ export const navigatorManager = {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeRunMatrixScreen, params as any)
   },
+  goToChallengeRunTextAnswer: (params: { challengeId: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.ChallengeRunTextAnswerScreen, params as any)
+  },
   goToChallengeReviewQuiz: (params: { challengeId: string }) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeReviewQuizScreen, params as any)
@@ -147,6 +153,13 @@ export const navigatorManager = {
   goToChallengeReviewMatrix: (params: { challengeId: string }) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeReviewMatrixScreen, params as any)
+  },
+  goToChallengeReviewTextAnswer: (params: { challengeId: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(
+        ROUTES.ChallengeReviewTextAnswerScreen,
+        params as any,
+      )
   },
 
   // Topic details and summary

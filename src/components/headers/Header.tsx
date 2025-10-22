@@ -8,6 +8,7 @@ import Animated, {
 } from 'react-native-reanimated'
 import { ROUTES } from '../../constants/routes'
 import { navigationRef } from '../../navigation/navigationRef'
+import { summariesRepository } from '../../services/repositories/summaries.repository'
 import { useOverlay } from '../../store/useOverlay'
 import { useThemeStore } from '../../store/useThemeStore'
 import HeaderDashboard from './HeaderDashboard'
@@ -17,6 +18,8 @@ const DefaultHeader = ({ title }: { title: string }) => {
   const canGoBack = isReady && navigationRef.canGoBack()
   const currentRoute = isReady ? navigationRef.getCurrentRoute() : undefined
   const isChallengesList = currentRoute?.name === ROUTES.ChallengesListScreen
+  const isSummaryDetails = currentRoute?.name === ROUTES.SummaryDetailsScreen
+  const isTopicDetails = currentRoute?.name === ROUTES.TopicDetailsScreen
   const summaryId = (currentRoute?.params as any)?.summaryId as
     | string
     | undefined
@@ -25,12 +28,40 @@ const DefaultHeader = ({ title }: { title: string }) => {
 
   return (
     <>
-      {canGoBack || shouldForceBackToSummary ? (
+      {canGoBack ||
+      shouldForceBackToSummary ||
+      isSummaryDetails ||
+      isTopicDetails ? (
         <TouchableOpacity
-          onPress={() => {
+          onPress={async () => {
             if (shouldForceBackToSummary) {
               navigationRef.navigate(ROUTES.SummaryDetailsScreen, { summaryId })
-            } else if (canGoBack) {
+              return
+            }
+            if (isSummaryDetails) {
+              const params = (currentRoute?.params as any) || {}
+              const s = params.summary || null
+              let topicId: string | undefined = s?.topicId
+              if (!topicId && params.summaryId) {
+                const fetched = await summariesRepository.getById(
+                  params.summaryId,
+                )
+                topicId = fetched?.topicId
+              }
+              if (topicId) {
+                navigationRef.navigate(ROUTES.TopicDetailsScreen, { topicId })
+                return
+              }
+              if (canGoBack) {
+                navigationRef.goBack()
+                return
+              }
+            }
+            if (isTopicDetails) {
+              navigationRef.navigate(ROUTES.DashboardScreen)
+              return
+            }
+            if (canGoBack) {
               navigationRef.goBack()
             }
           }}

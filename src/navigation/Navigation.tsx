@@ -40,9 +40,11 @@ import ChallengeAddTextAnswerScreen from '../screens/main/challenge/challenge-ad
 import ChallengeReviewHangmanScreen from '../screens/main/challenge/ChallengeReviewHangmanScreen'
 import ChallengeReviewMatrixScreen from '../screens/main/challenge/ChallengeReviewMatrixScreen'
 import ChallengeReviewQuizScreen from '../screens/main/challenge/ChallengeReviewQuizScreen'
+import ChallengeReviewTextAnswerScreen from '../screens/main/challenge/ChallengeReviewTextAnswerScreen'
 import ChallengeRunHangmanScreen from '../screens/main/challenge/ChallengeRunHangmanScreen'
 import ChallengeRunMatrixScreen from '../screens/main/challenge/ChallengeRunMatrixScreen'
 import ChallengeRunQuizScreen from '../screens/main/challenge/ChallengeRunQuizScreen'
+import ChallengeRunTextAnswerScreen from '../screens/main/challenge/ChallengeRunTextAnswerScreen'
 import ChallengeScreen from '../screens/main/challenge/ChallengeScreen'
 import ChallengesListScreen from '../screens/main/challenge/ChallengesListScreen'
 
@@ -185,9 +187,22 @@ function MainStack() {
         options={{ title: ROUTES.ChallengeAddMatrixScreen }}
       />
       <Stack.Screen
+        name={ROUTES.ChallengeRunTextAnswerScreen}
+        component={ChallengeRunTextAnswerScreen}
+        options={{
+          title: ROUTES.ChallengeRunTextAnswerScreen,
+          gestureEnabled: false,
+        }}
+      />
+      <Stack.Screen
         name={ROUTES.ChallengeAddQuizScreen}
         component={ChallengeAddQuizScreen}
         options={{ title: ROUTES.ChallengeAddQuizScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeReviewTextAnswerScreen}
+        component={ChallengeReviewTextAnswerScreen}
+        options={{ title: ROUTES.ChallengeReviewTextAnswerScreen }}
       />
       <Stack.Screen
         name={ROUTES.ChallengeAddTextAnswerScreen}

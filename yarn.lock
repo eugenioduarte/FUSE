@@ -4479,12 +4479,16 @@ __metadata:
     expo: ~53.0.20
     expo-blur: ~14.1.5
     expo-constants: ~17.1.7
+    expo-document-picker: ~12.0.1
+    expo-file-system: ~17.0.1
     expo-font: ~13.3.2
     expo-haptics: ~14.1.4
     expo-image: ~2.4.0
     expo-linking: ~7.1.7
     expo-localization: ^16.1.6
+    expo-print: ~14.0.0
     expo-secure-store: ~14.2.4
+    expo-sharing: ~12.0.1
     expo-splash-screen: ~0.30.10
     expo-status-bar: ~2.2.3
     expo-symbols: ~0.4.5
@@ -6769,6 +6773,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-document-picker@npm:~12.0.1":
+  version: 12.0.2
+  resolution: "expo-document-picker@npm:12.0.2"
+  peerDependencies:
+    expo: "*"
+  checksum: fe358e535e7b3a5466817b55178981fc8d6632c91bef07c9292538e83a6724879cd2a03f059f4d376445545e98296aaea7daffe6129ccd84a4f7dd98a8d18c6e
+  languageName: node
+  linkType: hard
+
+"expo-file-system@npm:~17.0.1":
+  version: 17.0.1
+  resolution: "expo-file-system@npm:17.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: e87f4b663dd01150ccc0c2eda52c221d0e6826ebaad4ff371498fb57c124ca73586868615d17031775671a58096a40a98e7dca189d46538aa3ade77ca2930e8b
+  languageName: node
+  linkType: hard
+
 "expo-file-system@npm:~18.1.11":
   version: 18.1.11
   resolution: "expo-file-system@npm:18.1.11"
@@ -6876,12 +6898,31 @@ __metadata:
   languageName: node
   linkType: hard
 
+"expo-print@npm:~14.0.0":
+  version: 14.0.3
+  resolution: "expo-print@npm:14.0.3"
+  peerDependencies:
+    expo: "*"
+    react-native: "*"
+  checksum: 0a7dfc7f15c60a78b84b73e78f697d8d823a89f2d2373901900a4c489442587125d8f1969779b627630644565713b3b3c5f29028e81e2af1550381e4ed8e0196
+  languageName: node
+  linkType: hard
+
 "expo-secure-store@npm:~14.2.4":
   version: 14.2.4
   resolution: "expo-secure-store@npm:14.2.4"
   peerDependencies:
     expo: "*"
   checksum: 3a70ff324facf596572aa3caf28e012dc0421090735e7f3bc4014fb6e784e5e13f90d5e0d8904f3cc7bb23e6f5228182a2efca28ce5e2d1c4a107f3ed4e9815d
+  languageName: node
+  linkType: hard
+
+"expo-sharing@npm:~12.0.1":
+  version: 12.0.1
+  resolution: "expo-sharing@npm:12.0.1"
+  peerDependencies:
+    expo: "*"
+  checksum: d091e5efe30699705c33c141aa64b9cfb0a14adecb737fd5f39d58a2fb1e6a44411d342ede897ebb4e15ca117f078aecac94d59734d465cc6919011d51a253b4
   languageName: node
   linkType: hard
 
