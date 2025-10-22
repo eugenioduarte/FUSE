@@ -11,7 +11,10 @@ import {
   View,
 } from 'react-native'
 import PdfTextExtractor from '../../../../components/utils/PdfTextExtractor'
-import { RootStackParamList } from '../../../../navigation/navigatorManager'
+import {
+  RootStackParamList,
+  navigatorManager,
+} from '../../../../navigation/navigatorManager'
 import { summariesRepository } from '../../../../services/repositories/summaries.repository'
 import { useOverlay } from '../../../../store/useOverlay'
 import { Summary } from '../../../../types/domain'
@@ -87,24 +90,33 @@ const SummaryScreen = () => {
         <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }}>
           Gerar resumo com ChatGPT
         </Text>
-        {!!lastSaved && (
-          <TouchableOpacity
-            onPress={() =>
-              setEditOverlay({
-                type: 'summary',
-                summary: lastSaved,
-                onSaved: (s) => {
-                  setLastSaved(s)
-                  setTitle(s.title || '')
-                  setContent(s.content)
-                  setKeywords(s.keywords || [])
-                },
-              })
-            }
-          >
-            <Text style={{ color: '#60a5fa', fontWeight: '700' }}>Editar</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+          {!!lastSaved && (
+            <TouchableOpacity
+              onPress={() =>
+                setEditOverlay({
+                  type: 'summary',
+                  summary: lastSaved,
+                  onSaved: (s) => {
+                    setLastSaved(s)
+                    setTitle(s.title || '')
+                    setContent(s.content)
+                    setKeywords(s.keywords || [])
+                  },
+                })
+              }
+            >
+              <Text style={{ color: '#60a5fa', fontWeight: '700' }}>
+                Editar
+              </Text>
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity onPress={() => navigatorManager.goToWhiteboard()}>
+            <Text style={{ color: '#34d399', fontWeight: '700' }}>
+              Whiteboard
+            </Text>
           </TouchableOpacity>
-        )}
+        </View>
       </View>
       <View style={{ height: 12 }} />
       <Text style={{ color: '#bbb', marginBottom: 6 }}>Tópico (id)</Text>

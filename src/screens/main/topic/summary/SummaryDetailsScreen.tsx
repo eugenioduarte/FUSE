@@ -261,6 +261,20 @@ const SummaryDetailsScreen: React.FC = () => {
       <View style={{ height: 12 }} />
       <View style={{ position: 'absolute', left: 16, right: 16, bottom: 16 }}>
         <TouchableOpacity
+          onPress={() => navigatorManager.goToWhiteboard()}
+          style={{
+            backgroundColor: '#0d9488',
+            borderRadius: 10,
+            padding: 14,
+            alignItems: 'center',
+            marginBottom: 8,
+          }}
+        >
+          <Text style={{ color: 'white', fontWeight: '700' }}>
+            Abrir Whiteboard
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           onPress={() => navigatorManager.goToChallengesList({ summaryId })}
           style={{
             backgroundColor: '#111214',
