@@ -13,12 +13,16 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import TermSnippetModal from '../../../../components/ui/TermSnippetModal'
+import ExpandableText from '../../../../components/utils/ExpandableText'
 import {
   navigatorManager,
   RootStackParamList,
 } from '../../../../navigation/navigatorManager'
+import { aiService } from '../../../../services/ai/ai.service'
 import { summariesRepository } from '../../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../../services/repositories/topics.repository'
+import { whiteboardRepository } from '../../../../services/repositories/whiteboard.repository'
 import { useOverlay } from '../../../../store/useOverlay'
 import { Summary } from '../../../../types/domain'
 
@@ -33,6 +37,10 @@ const SummaryDetailsScreen: React.FC = () => {
   const [loading, setLoading] = useState(!route.params.summary)
   const [downloading, setDownloading] = useState(false)
   const [topicName, setTopicName] = useState<string>('')
+  const [snippetOpen, setSnippetOpen] = useState(false)
+  const [snippetTerm, setSnippetTerm] = useState<
+    import('../../../../types/domain').ExpandableTerm | null
+  >(null)
 
   useEffect(() => {
     let active = true
@@ -148,6 +156,71 @@ const SummaryDetailsScreen: React.FC = () => {
     }
   }
 
+  const handleDeleteSummary = async () => {
+    if (!summary) return
+    Alert.alert(
+      'Apagar resumo?',
+      'Isto irá apagar o resumo, seus sub-resumos, challenges relacionados e limpar o quadro (whiteboard). Deseja continuar?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Apagar',
+          style: 'destructive',
+          onPress: () => {
+            ;(async () => {
+              try {
+                setLoading(true)
+                await summariesRepository.deleteById(summary.id)
+                await whiteboardRepository.clearAll()
+                navigatorManager.goBack()
+              } catch (e) {
+                console.error(e)
+                Alert.alert('Erro', 'Não foi possível apagar o resumo.')
+              } finally {
+                setLoading(false)
+              }
+            })()
+          },
+        },
+      ],
+    )
+  }
+
+  const openSnippet = async (
+    term: import('../../../../types/domain').ExpandableTerm,
+  ) => {
+    if (!summary) return
+    // Ensure mini is present; if not, ask AI for a tiny description using summary content as context
+    if (term.mini) {
+      setSnippetTerm(term)
+    } else {
+      try {
+        const mini = await aiService.miniExplain(term.term, summary.content)
+        setSnippetTerm({ ...term, mini })
+      } catch {
+        setSnippetTerm(term)
+      }
+    }
+    setSnippetOpen(true)
+  }
+
+  const createFromTerm = async (
+    term: import('../../../../types/domain').ExpandableTerm,
+  ) => {
+    if (!summary) return
+    try {
+      setSnippetOpen(false)
+      const child = await summariesRepository.createExpandableFromTerm(
+        summary,
+        term.term,
+      )
+      navigatorManager.goToSummaryDetails(child.id, child)
+    } catch (e) {
+      console.error(e)
+      Alert.alert('Erro', 'Não foi possível criar o sub-resumo.')
+    }
+  }
+
   if (loading) {
     return (
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -213,6 +286,12 @@ const SummaryDetailsScreen: React.FC = () => {
             </View>
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={handleDeleteSummary}
+            style={{ marginRight: 16 }}
+          >
+            <Text style={{ color: '#ef4444', fontWeight: '700' }}>Apagar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={() => navigatorManager.goToChallengesList({ summaryId })}
           >
             <Text style={{ color: '#60a5fa', fontWeight: '700' }}>
@@ -223,9 +302,15 @@ const SummaryDetailsScreen: React.FC = () => {
       </View>
       <View style={{ height: 12 }} />
       <ScrollView>
-        <Text style={{ color: bodyColor, lineHeight: 20 }}>
-          {summary.content}
-        </Text>
+        <ExpandableText
+          content={summary.content}
+          terms={
+            summary.expandableTerms ||
+            (summary.keywords || []).map((k) => ({ term: k }))
+          }
+          onPressTerm={openSnippet}
+          style={{ color: bodyColor, lineHeight: 20 }}
+        />
         {!!summary.keywords?.length && (
           <View style={{ marginTop: 12 }}>
             <Text style={{ color: titleColor, fontWeight: '700' }}>
@@ -253,6 +338,25 @@ const SummaryDetailsScreen: React.FC = () => {
                 >
                   <Text style={{ color: '#9ca3af' }}>{k}</Text>
                 </View>
+              ))}
+            </View>
+          </View>
+        )}
+
+        {!!summary.recommendations?.length && (
+          <View style={{ marginTop: 16 }}>
+            <Text style={{ color: titleColor, fontWeight: '700' }}>
+              Você também pode querer explorar…
+            </Text>
+            <View style={{ marginTop: 8 }}>
+              {summary.recommendations.map((rec) => (
+                <TouchableOpacity
+                  key={rec}
+                  onPress={() => openSnippet({ term: rec })}
+                  style={{ paddingVertical: 8 }}
+                >
+                  <Text style={{ color: '#60a5fa' }}>• {rec}</Text>
+                </TouchableOpacity>
               ))}
             </View>
           </View>
@@ -304,6 +408,31 @@ const SummaryDetailsScreen: React.FC = () => {
           </Text>
         </TouchableOpacity>
       </View>
+      {summary?.parentSummaryId ? (
+        <View style={{ position: 'absolute', top: 16, left: 16 }}>
+          <TouchableOpacity
+            onPress={async () => {
+              const parent = await summariesRepository.getById(
+                summary.parentSummaryId!,
+              )
+              if (parent) {
+                navigatorManager.goToSummaryDetails(parent.id, parent)
+              }
+            }}
+          >
+            <Text style={{ color: '#60a5fa' }}>
+              ← Voltar ao resumo anterior
+            </Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      <TermSnippetModal
+        visible={snippetOpen}
+        term={snippetTerm}
+        onClose={() => setSnippetOpen(false)}
+        onCreateSummary={createFromTerm}
+      />
     </View>
   )
 }

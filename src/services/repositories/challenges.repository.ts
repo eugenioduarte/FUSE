@@ -47,4 +47,54 @@ export const challengesRepository = {
 
     await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: challenge })
   },
+
+  async deleteById(
+    id: string,
+    opts?: { summaryId?: string; syncUrl?: string },
+  ) {
+    // Remove from global list
+    const currentAll =
+      (await localCache.get<Challenge[]>(LIST_ALL_KEY))?.data ?? []
+    const nextAll = currentAll.filter((c) => c.id !== id)
+    await localCache.set(LIST_ALL_KEY, nextAll)
+
+    // Remove from per-summary list if provided
+    if (opts?.summaryId) {
+      const key = listKeyBySummary(opts.summaryId)
+      const current =
+        (await localCache.get<{ id: string; title: string }[]>(key))?.data ?? []
+      const next = current.filter((c) => c.id !== id)
+      await localCache.set(key, next)
+    }
+
+    await offlineQueue.enqueue({
+      url: opts?.syncUrl || '/sync/challenge',
+      method: 'DELETE',
+      body: { id },
+    })
+  },
+
+  async deleteBySummaryId(summaryId: string, opts?: { syncUrl?: string }) {
+    // Remove mini list
+    const key = listKeyBySummary(summaryId)
+    const items = (await localCache.get<{ id: string; title: string }[]>(key))
+      ?.data
+    await localCache.remove(key)
+
+    // Remove from global list
+    const currentAll =
+      (await localCache.get<Challenge[]>(LIST_ALL_KEY))?.data ?? []
+    const toRemoveIds = new Set((items ?? []).map((i) => i.id))
+    const nextAll = currentAll.filter(
+      (c) => !(c.summaryId === summaryId || toRemoveIds.has(c.id)),
+    )
+    await localCache.set(LIST_ALL_KEY, nextAll)
+
+    // Enqueue a single batch delete for server
+    await offlineQueue.enqueue({
+      url: opts?.syncUrl || '/sync/challenge',
+      method: 'DELETE',
+      body: { summaryId },
+    })
+  },
 }

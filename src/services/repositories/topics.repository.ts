@@ -2,6 +2,7 @@ import { topicsMock } from '../../mock/topics.mock'
 import { localCache } from '../../storage/localCache'
 import { offlineQueue } from '../../storage/offlineQueue'
 import { Topic } from '../../types/domain'
+import { summariesRepository } from './summaries.repository'
 
 const CACHE_KEY = 'topics:list'
 
@@ -40,5 +41,22 @@ export const topicsRepository = {
 
     // Queue mutation for server
     await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: topic })
+  },
+
+  async deleteById(id: string, opts?: { syncUrl?: string }) {
+    // Cascade delete summaries (and their challenges)
+    await summariesRepository.deleteByTopicId(id)
+
+    // Update topics cache
+    const current = (await localCache.get<Topic[]>(CACHE_KEY))?.data ?? []
+    const next = current.filter((t) => t.id !== id)
+    await localCache.set(CACHE_KEY, next)
+
+    // Enqueue delete for server
+    await offlineQueue.enqueue({
+      url: opts?.syncUrl || '/sync/topic',
+      method: 'DELETE',
+      body: { id },
+    })
   },
 }

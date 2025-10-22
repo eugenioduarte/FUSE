@@ -6,6 +6,16 @@ type AISummary = {
   keywords: string[]
 }
 
+export type ExpandableTerm = {
+  term: string
+  mini?: string
+}
+
+export type AIKnowledgeSummary = AISummary & {
+  expandableTerms?: ExpandableTerm[]
+  recommendations?: string[]
+}
+
 const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY
 const OPENAI_BASE_URL =
   process.env.EXPO_PUBLIC_OPENAI_BASE_URL || 'https://api.openai.com/v1'
@@ -44,6 +54,39 @@ export const aiService = {
     const parsed = await parseAIResponse(res)
     return parsed
   },
+
+  async generateKnowledgeSummary(prompt: string): Promise<AIKnowledgeSummary> {
+    if (!OPENAI_API_KEY) return mockKnowledgeSummary(prompt)
+    const body = buildKnowledgeBody(prompt)
+    const res = await doRequestWithRetry(body)
+    if (!res?.ok) return handleKnowledgeErrorOrFallback(res, prompt)
+    const parsed = await parseKnowledgeResponse(res)
+    return parsed
+  },
+
+  async miniExplain(term: string, context?: string): Promise<string> {
+    if (!OPENAI_API_KEY) {
+      return `Breve descrição (mock) para "${term}".`
+    }
+    const system =
+      'Você escreve explicações curtas (1-2 frases) e objetivas em PT-BR.'
+    const user =
+      `Explique em 1-2 frases o termo: "${term}".` +
+      (context ? `\nContexto: ${context.slice(0, 800)}` : '')
+    const body = JSON.stringify({
+      model: MODEL,
+      messages: [
+        { role: 'system', content: system },
+        { role: 'user', content: user },
+      ],
+      temperature: 0.4,
+    })
+    const res = await doRequestWithRetry(body)
+    if (!res?.ok) return `Descrição breve de ${term}.`
+    const data = await res.json()
+    const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
+    return content
+  },
 }
 
 function mockSummary(prompt: string): AISummary {
@@ -56,10 +99,49 @@ function mockSummary(prompt: string): AISummary {
   }
 }
 
+function mockKnowledgeSummary(prompt: string): AIKnowledgeSummary {
+  return {
+    ...mockSummary(prompt),
+    expandableTerms: [
+      {
+        term: 'Independência do Brasil',
+        mini: 'Processo de separação de Portugal em 1822.',
+      },
+      {
+        term: 'Dom Pedro I',
+        mini: 'Primeiro imperador do Brasil após a independência.',
+      },
+    ],
+    recommendations: [
+      'Constituição de 1824',
+      'Período Regencial',
+      'Revolução Pernambucana',
+    ],
+  }
+}
+
 function buildBody(prompt: string) {
   const system =
     'Você é um assistente que cria resumos estruturados. Responda SOMENTE em JSON com as chaves: title, content, keywords (array de strings). Sem textos adicionais.'
   const user = `Gere um resumo completo e didático sobre: "${prompt}".\n- Tamanho: 6-10 parágrafos curtos.\n- Inclua keywords relevantes (5-12) que podem virar sub-resumos.`
+  return JSON.stringify({
+    model: MODEL,
+    messages: [
+      { role: 'system', content: system },
+      { role: 'user', content: user },
+    ],
+    temperature: 0.5,
+  })
+}
+
+function buildKnowledgeBody(prompt: string) {
+  const system =
+    'Você cria resumos estruturados em PT-BR para estudo. Responda SOMENTE em JSON com as chaves: title, content, keywords (string[]), expandableTerms (array de {term, mini}), recommendations (string[]). Nada além do JSON.'
+  const user =
+    `Tema: "${prompt}".\n` +
+    '- Produza um resumo didático (6-10 parágrafos curtos).\n' +
+    '- Escolha 6-14 termos/expressões que valham expansão e forneça uma mini (1-2 frases) para cada.\n' +
+    '- Sugira 3-8 recomendações de expansão em "recommendations".'
   return JSON.stringify({
     model: MODEL,
     messages: [
@@ -144,4 +226,52 @@ async function parseAIResponse(res: Response): Promise<AISummary> {
   }
 }
 
+async function parseKnowledgeResponse(
+  res: Response,
+): Promise<AIKnowledgeSummary> {
+  const data = await res.json()
+  const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
+  const parsed = toJSONSafe(content)
+  if (!parsed?.title || !parsed?.content) {
+    throw new Error('AI knowledge: formato inesperado')
+  }
+  const terms = Array.isArray(parsed.expandableTerms)
+    ? parsed.expandableTerms
+        .map((t: any) => ({
+          term: String(t.term),
+          mini: t.mini ? String(t.mini) : undefined,
+        }))
+        .filter((t: any) => t.term)
+        .slice(0, 30)
+    : []
+  const recs = Array.isArray(parsed.recommendations)
+    ? parsed.recommendations.map(String).slice(0, 20)
+    : []
+  return {
+    title: String(parsed.title),
+    content: String(parsed.content),
+    keywords: Array.isArray(parsed.keywords)
+      ? parsed.keywords.map(String).slice(0, 20)
+      : [],
+    expandableTerms: terms,
+    recommendations: recs,
+  }
+}
+
+function handleKnowledgeErrorOrFallback(
+  res: Response | null,
+  prompt: string,
+): AIKnowledgeSummary {
+  const base = handleErrorOrFallback(res, prompt)
+  return {
+    ...base,
+    expandableTerms: [
+      { term: 'Contexto histórico', mini: 'Panorama geral do período.' },
+      { term: 'Personagens-chave', mini: 'Principais figuras envolvidas.' },
+    ],
+    recommendations: ['Linhas do tempo', 'Conflitos regionais'],
+  }
+}
+
 export type { AISummary }
+// already exported above

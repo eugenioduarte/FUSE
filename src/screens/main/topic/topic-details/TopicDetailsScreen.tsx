@@ -2,6 +2,7 @@ import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
+  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -107,6 +108,38 @@ const TopicDetailsScreen: React.FC = () => {
             }
           >
             <Text style={{ color: '#2563eb', fontWeight: '700' }}>Editar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert(
+                'Apagar tópico?',
+                'Isto irá apagar o tópico e todos os seus resumos e challenges associados. Deseja continuar?',
+                [
+                  { text: 'Cancelar', style: 'cancel' },
+                  {
+                    text: 'Apagar',
+                    style: 'destructive',
+                    onPress: () => {
+                      ;(async () => {
+                        try {
+                          await topicsRepository.deleteById(topicId)
+                          navigatorManager.goBack()
+                        } catch (e) {
+                          console.error(e)
+                          Alert.alert(
+                            'Erro',
+                            'Não foi possível apagar o tópico.',
+                          )
+                        }
+                      })()
+                    },
+                  },
+                ],
+              )
+            }}
+            style={{ marginLeft: 12 }}
+          >
+            <Text style={{ color: '#ef4444', fontWeight: '700' }}>Apagar</Text>
           </TouchableOpacity>
         </View>
         {!!topic.description && (

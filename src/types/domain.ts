@@ -15,6 +15,12 @@ export interface Summary {
   generatedBy: 'user' | 'ai'
   keywords?: string[]
   backgroundColor?: string
+  /** Optional parent summary id when this summary was expanded from another */
+  parentSummaryId?: string
+  /** Terms inside the content that are clickable/expandable */
+  expandableTerms?: ExpandableTerm[]
+  /** AI suggestions for further exploration */
+  recommendations?: string[]
   createdAt: number
   updatedAt: number
 }
@@ -43,4 +49,10 @@ export interface PostDescriptor {
   resource: 'topic' | 'summary' | 'calendar' | 'challenge'
   payload: any
   createdAt: number
+}
+
+export interface ExpandableTerm {
+  term: string
+  /** Optional short, 1-2 sentence description for preview/snippet */
+  mini?: string
 }
