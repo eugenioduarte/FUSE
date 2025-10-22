@@ -9,41 +9,72 @@ type users = {
   avatarUrl: string
 }
 
-type TopicCardPayload = {
+export type TopicCardPayload = {
   id: string
   topicName: string
-  score: number
-  createdAt: string
-  spendTime: string
-  usersShared: users[]
+  score?: number
+  createdAt?: string
+  spendTime?: string
+  usersShared?: users[]
+  summaries?: { id: string; title?: string }[]
 }
 
 const TopicCard = (payload: TopicCardPayload) => {
-  const { id, topicName, score, createdAt, spendTime, usersShared } = payload
+  const { id, topicName, score, createdAt, spendTime, usersShared, summaries } =
+    payload
   const goToTopic = () => navigatorManager.goToTopicDetails(id)
 
   return (
     <TouchableOpacity onPress={goToTopic} style={{ width: '100%' }}>
       <Card style={{ marginBottom: 8 }}>
         <UiText variant="title">{topicName}</UiText>
-        <UiText>Score: {score}</UiText>
-        <UiText>Criado em: {createdAt}</UiText>
-        <UiText>Tempo: {spendTime}</UiText>
-        <FlatList
-          data={usersShared}
-          keyExtractor={(item) => item.id}
-          horizontal
-          contentContainerStyle={{ gap: 8, marginTop: 8 }}
-          renderItem={({ item }) => (
-            <View>
-              <Image
-                source={{ uri: item.avatarUrl }}
-                style={{ width: 36, height: 36, borderRadius: 18 }}
-              />
-            </View>
-          )}
-          showsHorizontalScrollIndicator={false}
-        />
+        {!!score && <UiText>Score: {score}</UiText>}
+        {!!createdAt && <UiText>Criado em: {createdAt}</UiText>}
+        {!!spendTime && <UiText>Tempo: {spendTime}</UiText>}
+        {!!usersShared?.length && (
+          <FlatList
+            data={usersShared}
+            keyExtractor={(item) => item.id}
+            horizontal
+            contentContainerStyle={{ gap: 8, marginTop: 8 }}
+            renderItem={({ item }) => (
+              <View>
+                <Image
+                  source={{ uri: item.avatarUrl }}
+                  style={{ width: 36, height: 36, borderRadius: 18 }}
+                />
+              </View>
+            )}
+            showsHorizontalScrollIndicator={false}
+          />
+        )}
+
+        {!!summaries?.length && (
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              gap: 8,
+              marginTop: 8,
+            }}
+          >
+            {summaries.map((s) => (
+              <View
+                key={s.id}
+                style={{
+                  backgroundColor: '#111827',
+                  borderColor: '#374151',
+                  borderWidth: 1,
+                  borderRadius: 999,
+                  paddingVertical: 6,
+                  paddingHorizontal: 10,
+                }}
+              >
+                <UiText color="#9ca3af">{s.title || 'Resumo'}</UiText>
+              </View>
+            ))}
+          </View>
+        )}
       </Card>
     </TouchableOpacity>
   )

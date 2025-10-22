@@ -91,30 +91,26 @@ const CalendarDisplay = () => {
     return copy
   }, [dailyData])
 
+  if (sortedDaily.length === 0) return null
+
   return (
     <Card style={{ height: 240, width: '100%', marginBottom: 8 }}>
       <View style={{ paddingHorizontal: 8, paddingTop: 8, paddingBottom: 4 }}>
         <UiText variant="title">Hoje ({sortedDaily.length})</UiText>
       </View>
-      {sortedDaily.length === 0 ? (
-        <View style={{ paddingHorizontal: 8 }}>
-          <UiText>Sem compromissos hoje</UiText>
-        </View>
-      ) : (
-        <FlatList
-          data={sortedDaily}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <CalendarCard
-              title={item.title}
-              time={item.time}
-              topicId={item.topicId}
-              location={item.location}
-            />
-          )}
-          horizontal
-        />
-      )}
+      <FlatList
+        data={sortedDaily}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => (
+          <CalendarCard
+            title={item.title}
+            time={item.time}
+            topicId={item.topicId}
+            location={item.location}
+          />
+        )}
+        horizontal
+      />
     </Card>
   )
 }

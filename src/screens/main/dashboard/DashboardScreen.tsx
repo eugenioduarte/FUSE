@@ -1,35 +1,113 @@
 import Container from '@/src/components/containers/Container'
-import React, { useEffect, useState } from 'react'
-import { FlatList } from 'react-native'
-import { dashboardRepository } from '../../../services/repositories/dashboard.repository'
-import { TopicCardModel } from '../../../types/dashboard.type'
+import { useFocusEffect } from '@react-navigation/native'
+import React, { useCallback, useEffect, useState } from 'react'
+import { FlatList, Text, View } from 'react-native'
+import { summariesRepository } from '../../../services/repositories/summaries.repository'
+import { topicsRepository } from '../../../services/repositories/topics.repository'
 import CalendarDisplay from './components/CalendarDisplay'
 import TopicCard from './components/TopicCard'
 
+type DashItem = {
+  id: string
+  topicName: string
+  createdAt: string
+  summaries: { id: string; title?: string }[]
+  score?: number
+  spendTime?: string
+  usersShared?: { id: string; name: string; avatarUrl: string }[]
+}
+
 export default function DashboardScreen() {
-  const [topicCards, setTopicCards] = useState<TopicCardModel[]>([])
+  const [items, setItems] = useState<DashItem[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let mounted = true
     ;(async () => {
-      await dashboardRepository.seedTopicCardsIfEmpty()
-      const list = await dashboardRepository.listTopicCards()
-      if (mounted) setTopicCards(list)
+      // Only show topics that actually exist in topicsRepository
+      const topics = await topicsRepository.list()
+      const enriched: DashItem[] = []
+      for (const t of topics) {
+        const summaries = await summariesRepository.list(t.id)
+        enriched.push({
+          id: t.id,
+          topicName: t.title,
+          createdAt: new Date(t.createdAt).toLocaleDateString(),
+          summaries: summaries.map((s) => ({ id: s.id, title: s.title })),
+        })
+      }
+      if (mounted) setItems(enriched)
+      if (mounted) setLoading(false)
     })()
     return () => {
       mounted = false
     }
   }, [])
 
+  useFocusEffect(
+    useCallback(() => {
+      let active = true
+      ;(async () => {
+        const topics = await topicsRepository.list()
+        const enriched: DashItem[] = []
+        for (const t of topics) {
+          const summaries = await summariesRepository.list(t.id)
+          enriched.push({
+            id: t.id,
+            topicName: t.title,
+            createdAt: new Date(t.createdAt).toLocaleDateString(),
+            summaries: summaries.map((s) => ({ id: s.id, title: s.title })),
+          })
+        }
+        if (active) setItems(enriched)
+      })()
+      return () => {
+        active = false
+      }
+    }, []),
+  )
+
   return (
     <Container>
       <FlatList
-        data={topicCards}
+        data={items}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <TopicCard {...item} />}
         ListHeaderComponent={<CalendarDisplay />}
+        ListEmptyComponent={
+          loading ? null : (
+            <View style={{ padding: 16 }}>
+              <Text style={{ color: 'white' }}>
+                Nenhum tópico encontrado. Crie um tópico para começar.
+              </Text>
+            </View>
+          )
+        }
+        contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       />
+
+      {/* Bottom CTA to create a new topic */}
+      <View style={{ position: 'absolute', left: 16, right: 16, bottom: 16 }}>
+        <View
+          style={{
+            backgroundColor: '#3b82f6',
+            borderRadius: 10,
+            paddingVertical: 14,
+            alignItems: 'center',
+          }}
+          // @ts-ignore RN Pressable types not imported here; keep simple
+          onTouchEnd={() =>
+            import('../../../navigation/navigatorManager').then((m) =>
+              m.navigatorManager.goToTopicAdd(),
+            )
+          }
+        >
+          <Text style={{ color: 'white', fontWeight: '700' }}>
+            Criar novo tópico
+          </Text>
+        </View>
+      </View>
     </Container>
   )
 }

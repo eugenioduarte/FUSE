@@ -23,8 +23,7 @@ const SummaryScreen = () => {
   const { setErrorOverlay, setLoadingOverlay, setEditOverlay } = useOverlay()
   const route = useRoute<RouteProp<RootStackParamList, 'SummaryScreen'>>()
   const initialTopicId = route.params?.topicId ?? 'topic-1'
-  const initialPrompt =
-    route.params?.seedPrompt ?? 'geografia historia do brasil'
+  const initialPrompt = route.params?.seedPrompt ?? ''
   const [topicId, setTopicId] = useState<string>(initialTopicId)
   const [prompt, setPrompt] = useState(initialPrompt)
   const [title, setTitle] = useState<string>('')
@@ -40,10 +39,9 @@ const SummaryScreen = () => {
       setLoading(true)
       setLoadingOverlay(true)
       const summary = await summariesRepository.createWithAI(topicId, prompt)
-      setTitle(summary.title || '')
-      setContent(summary.content)
-      setKeywords(summary.keywords || [])
+      // Navigate to details after creation
       setLastSaved(summary)
+      navigatorManager.goToSummaryDetails(summary.id, summary)
     } catch (e: any) {
       setErrorOverlay(true, e?.message || 'Falha ao gerar resumo')
     } finally {
@@ -142,7 +140,7 @@ const SummaryScreen = () => {
         value={prompt}
         onChangeText={setPrompt}
         onSubmitEditing={handleGenerate}
-        placeholder="ex: geografia historia do brasil"
+        placeholder=""
         placeholderTextColor="#666"
         multiline
         style={{
@@ -282,10 +280,8 @@ const SummaryScreen = () => {
                 topicId,
                 truncated,
               )
-              setTitle(summary.title || '')
-              setContent(summary.content)
-              setKeywords(summary.keywords || [])
               setLastSaved(summary)
+              navigatorManager.goToSummaryDetails(summary.id, summary)
             } catch {
               console.error('Erro ao gerar resumo a partir do PDF')
               setErrorOverlay(true, 'Falha ao gerar resumo a partir do PDF.')
