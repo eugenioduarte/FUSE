@@ -122,8 +122,14 @@ function mockKnowledgeSummary(prompt: string): AIKnowledgeSummary {
 
 function buildBody(prompt: string) {
   const system =
-    'Você é um assistente que cria resumos estruturados. Responda SOMENTE em JSON com as chaves: title, content, keywords (array de strings). Sem textos adicionais.'
-  const user = `Gere um resumo completo e didático sobre: "${prompt}".\n- Tamanho: 6-10 parágrafos curtos.\n- Inclua keywords relevantes (5-12) que podem virar sub-resumos.`
+    'Você é um assistente que cria resumos estruturados e aprofundados em PT-BR. Responda SOMENTE em JSON com as chaves: title, content, keywords (array de strings). Sem textos adicionais.'
+  const user =
+    `Gere um resumo completo, didático e mais extenso sobre: "${prompt}".\n` +
+    '- Estruture em 8–14 parágrafos (curtos a médios).\n' +
+    '- Aprofunde detalhes (definições, contexto histórico, causas e consequências, comparações, exemplos práticos e números/datas quando aplicável).\n' +
+    '- Se fizer sentido, descreva etapas, recomendações ou boas práticas.\n' +
+    '- Finalize com um parágrafo de síntese/conclusão.\n' +
+    '- Inclua keywords relevantes (8–16) que poderiam virar sub-resumos.'
   return JSON.stringify({
     model: MODEL,
     messages: [
@@ -131,17 +137,20 @@ function buildBody(prompt: string) {
       { role: 'user', content: user },
     ],
     temperature: 0.5,
+    max_tokens: 1400,
   })
 }
 
 function buildKnowledgeBody(prompt: string) {
   const system =
-    'Você cria resumos estruturados em PT-BR para estudo. Responda SOMENTE em JSON com as chaves: title, content, keywords (string[]), expandableTerms (array de {term, mini}), recommendations (string[]). Nada além do JSON.'
+    'Você cria resumos estruturados e aprofundados em PT-BR para estudo. Responda SOMENTE em JSON com as chaves: title, content, keywords (string[]), expandableTerms (array de {term, mini}), recommendations (string[]). Nada além do JSON.'
   const user =
     `Tema: "${prompt}".\n` +
-    '- Produza um resumo didático (6-10 parágrafos curtos).\n' +
-    '- Escolha 6-14 termos/expressões que valham expansão e forneça uma mini (1-2 frases) para cada.\n' +
-    '- Sugira 3-8 recomendações de expansão em "recommendations".'
+    '- Produza um resumo didático e mais detalhado (8–14 parágrafos curtos a médios).\n' +
+    '- Aprofunde definições, contexto, exemplos, relações de causa/efeito, prós e contras quando fizer sentido; use datas/valores apenas quando apropriado.\n' +
+    '- Inclua uma síntese final.\n' +
+    '- Escolha 10–18 termos/expressões que mereçam expansão e forneça uma mini (1–2 frases) para cada em expandableTerms.\n' +
+    '- Sugira 5–10 caminhos de expansão em "recommendations".'
   return JSON.stringify({
     model: MODEL,
     messages: [
@@ -149,6 +158,7 @@ function buildKnowledgeBody(prompt: string) {
       { role: 'user', content: user },
     ],
     temperature: 0.5,
+    max_tokens: 1600,
   })
 }
 

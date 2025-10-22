@@ -16,6 +16,7 @@ import {
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
+import { topicsRepository } from '../../../services/repositories/topics.repository'
 import { useOverlay } from '../../../store/useOverlay'
 import { Challenge } from '../../../types/domain'
 
@@ -61,6 +62,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
   const [challenge, setChallenge] = useState<Challenge | null>(null)
   const [rounds, setRounds] = useState<Round[]>([])
   const [loading, setLoading] = useState(true)
+  const [topicColor, setTopicColor] = useState<string | undefined>()
 
   // Per-round state
   const [step, setStep] = useState(0)
@@ -124,6 +126,12 @@ const ChallengeRunHangmanScreen: React.FC = () => {
         const summary = await summariesRepository.getById(ch.summaryId)
         if (!active) return
         if (!summary) throw new Error('Summary not found for this challenge')
+
+        // Resolve topic color for theming
+        try {
+          const topic = await topicsRepository.getById(summary.topicId)
+          if (active) setTopicColor(topic?.backgroundColor || undefined)
+        } catch {}
 
         // Build rounds (question + answer) from summary content
         const totalRounds = Number(
@@ -266,7 +274,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
           flex: 1,
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#0b0b0c',
+          backgroundColor: topicColor || '#0b0b0c',
         }}
       >
         <ActivityIndicator />
@@ -276,14 +284,22 @@ const ChallengeRunHangmanScreen: React.FC = () => {
 
   if (!challenge || rounds.length === 0) {
     return (
-      <View style={{ flex: 1, backgroundColor: '#0b0b0c', padding: 16 }}>
-        <Text style={{ color: 'white' }}>Hangman indisponível.</Text>
+      <View
+        style={{
+          flex: 1,
+          backgroundColor: topicColor || '#0b0b0c',
+          padding: 16,
+        }}
+      >
+        <Text style={{ color: topicColor ? '#111' : 'white' }}>
+          Hangman indisponível.
+        </Text>
       </View>
     )
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0b0b0c' }}>
+    <View style={{ flex: 1, backgroundColor: topicColor || '#0b0b0c' }}>
       {/* Header with progress */}
       <View
         style={{
@@ -295,7 +311,13 @@ const ChallengeRunHangmanScreen: React.FC = () => {
           alignItems: 'center',
         }}
       >
-        <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }}>
+        <Text
+          style={{
+            color: topicColor ? '#111' : 'white',
+            fontSize: 18,
+            fontWeight: '700',
+          }}
+        >
           {challenge.title}
         </Text>
         <View style={{ flexDirection: 'row' }}>

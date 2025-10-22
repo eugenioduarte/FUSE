@@ -37,6 +37,7 @@ const SummaryDetailsScreen: React.FC = () => {
   const [loading, setLoading] = useState(!route.params.summary)
   const [downloading, setDownloading] = useState(false)
   const [topicName, setTopicName] = useState<string>('')
+  const [topicColor, setTopicColor] = useState<string | undefined>()
   const [snippetOpen, setSnippetOpen] = useState(false)
   const [snippetTerm, setSnippetTerm] = useState<
     import('../../../../types/domain').ExpandableTerm | null
@@ -49,7 +50,10 @@ const SummaryDetailsScreen: React.FC = () => {
       if (summary) {
         setLoading(false)
         const topic = await topicsRepository.getById(summary.topicId)
-        if (active) setTopicName(topic?.title ?? '')
+        if (active) {
+          setTopicName(topic?.title ?? '')
+          setTopicColor(topic?.backgroundColor || undefined)
+        }
         return
       }
       const found = await summariesRepository.getById(summaryId)
@@ -57,7 +61,10 @@ const SummaryDetailsScreen: React.FC = () => {
       setSummary(found)
       if (found) {
         const topic = await topicsRepository.getById(found.topicId)
-        if (active) setTopicName(topic?.title ?? '')
+        if (active) {
+          setTopicName(topic?.title ?? '')
+          setTopicColor(topic?.backgroundColor || undefined)
+        }
       }
       setLoading(false)
     })()
@@ -253,8 +260,8 @@ const SummaryDetailsScreen: React.FC = () => {
     )
   }
 
-  const colored = !!summary.backgroundColor
-  const bg = summary.backgroundColor || '#0b0b0c'
+  const colored = !!topicColor
+  const bg = topicColor || '#0b0b0c'
   const titleColor = colored ? '#111' : 'white'
   const bodyColor = colored ? '#222' : '#ddd'
 

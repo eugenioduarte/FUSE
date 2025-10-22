@@ -35,12 +35,24 @@ export const topicsRepository = {
     // Update local cache first
     const current = (await localCache.get<Topic[]>(CACHE_KEY))?.data ?? []
     const idx = current.findIndex((t) => t.id === topic.id)
+
+    const prev = idx >= 0 ? current[idx] : undefined
+    const backgroundChanged = prev?.backgroundColor !== topic.backgroundColor
+
     if (idx >= 0) current[idx] = topic
     else current.unshift(topic)
     await localCache.set(CACHE_KEY, current, topic.updatedAt)
 
     // Queue mutation for server
     await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: topic })
+
+    // If color changed, propagate to summaries for this topic
+    if (backgroundChanged) {
+      await summariesRepository.setBackgroundColorByTopic(
+        topic.id,
+        topic.backgroundColor,
+      )
+    }
   },
 
   async deleteById(id: string, opts?: { syncUrl?: string }) {

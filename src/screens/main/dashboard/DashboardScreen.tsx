@@ -15,6 +15,7 @@ type DashItem = {
   score?: number
   spendTime?: string
   usersShared?: { id: string; name: string; avatarUrl: string }[]
+  backgroundColor?: string
 }
 
 export default function DashboardScreen() {
@@ -34,6 +35,7 @@ export default function DashboardScreen() {
           topicName: t.title,
           createdAt: new Date(t.createdAt).toLocaleDateString(),
           summaries: summaries.map((s) => ({ id: s.id, title: s.title })),
+          backgroundColor: t.backgroundColor,
         })
       }
       if (mounted) setItems(enriched)
@@ -57,6 +59,7 @@ export default function DashboardScreen() {
             topicName: t.title,
             createdAt: new Date(t.createdAt).toLocaleDateString(),
             summaries: summaries.map((s) => ({ id: s.id, title: s.title })),
+            backgroundColor: t.backgroundColor,
           })
         }
         if (active) setItems(enriched)

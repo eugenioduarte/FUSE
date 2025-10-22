@@ -17,17 +17,32 @@ export type TopicCardPayload = {
   spendTime?: string
   usersShared?: users[]
   summaries?: { id: string; title?: string }[]
+  backgroundColor?: string
 }
 
 const TopicCard = (payload: TopicCardPayload) => {
-  const { id, topicName, score, createdAt, spendTime, usersShared, summaries } =
-    payload
+  const {
+    id,
+    topicName,
+    score,
+    createdAt,
+    spendTime,
+    usersShared,
+    summaries,
+    backgroundColor,
+  } = payload
   const goToTopic = () => navigatorManager.goToTopicDetails(id)
+  const colored = !!backgroundColor
+  const titleColor = colored ? '#111' : undefined
 
   return (
     <TouchableOpacity onPress={goToTopic} style={{ width: '100%' }}>
-      <Card style={{ marginBottom: 8 }}>
-        <UiText variant="title">{topicName}</UiText>
+      <Card
+        style={{ marginBottom: 8, backgroundColor: backgroundColor || '#fff' }}
+      >
+        <UiText variant="title" color={titleColor}>
+          {topicName}
+        </UiText>
         {!!score && <UiText>Score: {score}</UiText>}
         {!!createdAt && <UiText>Criado em: {createdAt}</UiText>}
         {!!spendTime && <UiText>Tempo: {spendTime}</UiText>}

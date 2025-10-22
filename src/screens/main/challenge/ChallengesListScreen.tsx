@@ -12,6 +12,8 @@ import {
   navigatorManager,
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
+import { summariesRepository } from '../../../services/repositories/summaries.repository'
+import { topicsRepository } from '../../../services/repositories/topics.repository'
 //
 
 type Item = {
@@ -47,6 +49,7 @@ const ChallengesListScreen: React.FC = () => {
   const summaryId = route.params?.summaryId
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
+  const [topicColor, setTopicColor] = useState<string | undefined>()
 
   const attachLastAttempt = (
     base: { id: string; title: string }[],
@@ -93,6 +96,15 @@ const ChallengesListScreen: React.FC = () => {
       const withMeta: Item[] = attachLastAttempt(list, all)
       setItems(withMeta)
       setLoading(false)
+
+      // Resolve topic color for this summary
+      try {
+        const summary = await summariesRepository.getById(summaryId)
+        if (!summary) return
+        const topic = await topicsRepository.getById(summary.topicId)
+        if (!active) return
+        setTopicColor(topic?.backgroundColor || undefined)
+      } catch {}
     }
     load()
     return () => {
@@ -115,8 +127,15 @@ const ChallengesListScreen: React.FC = () => {
     )
   }
 
+  const colored = !!topicColor
+  const bg = topicColor || '#0b0b0c'
+  const titleColor = colored ? '#111' : 'white'
+  const cardBg = colored ? '#ffffffaa' : '#111214'
+  const cardBorder = colored ? '#e5e7eb' : '#2B2C30'
+  const cardText = colored ? '#111' : 'white'
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#0b0b0c', padding: 16 }}>
+    <View style={{ flex: 1, backgroundColor: bg, padding: 16 }}>
       <View
         style={{
           flexDirection: 'row',
@@ -125,19 +144,21 @@ const ChallengesListScreen: React.FC = () => {
           marginBottom: 12,
         }}
       >
-        <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }}>
+        <Text style={{ color: titleColor, fontSize: 18, fontWeight: '700' }}>
           Challenges
         </Text>
         {!!summaryId && (
           <TouchableOpacity
             onPress={() => navigatorManager.goToChallengeAdd({ summaryId })}
           >
-            <Text style={{ color: '#60a5fa', fontWeight: '700' }}>+ Criar</Text>
+            <Text style={{ color: '#2563eb', fontWeight: '700' }}>+ Criar</Text>
           </TouchableOpacity>
         )}
       </View>
       {items.length === 0 ? (
-        <Text style={{ color: '#9ca3af' }}>Nenhum challenge.</Text>
+        <Text style={{ color: colored ? '#333' : '#9ca3af' }}>
+          Nenhum challenge.
+        </Text>
       ) : (
         <FlatList
           data={items}
@@ -163,15 +184,15 @@ const ChallengesListScreen: React.FC = () => {
                   })
               }}
               style={{
-                backgroundColor: '#111214',
-                borderColor: '#2B2C30',
+                backgroundColor: cardBg,
+                borderColor: cardBorder,
                 borderWidth: 1,
                 borderRadius: 10,
                 padding: 12,
                 marginBottom: 10,
               }}
             >
-              <Text style={{ color: 'white', fontWeight: '600' }}>
+              <Text style={{ color: cardText, fontWeight: '600' }}>
                 {item.type === 'hangman'
                   ? `Hangman – ${formatDateOnly(item.lastAttempt!.at)} – ${item.lastAttempt!.score}`
                   : item.type === 'matrix'

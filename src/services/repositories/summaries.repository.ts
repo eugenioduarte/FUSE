@@ -3,6 +3,7 @@ import { offlineQueue } from '../../storage/offlineQueue'
 import { ExpandableTerm, Summary } from '../../types/domain'
 import { aiService } from '../ai/ai.service'
 import { challengesRepository } from './challenges.repository'
+import { topicsRepository } from './topics.repository'
 
 const listKey = (topicId: string) => `summaries:list:${topicId}`
 const LIST_ALL_KEY = 'summaries:list'
@@ -49,6 +50,7 @@ export const summariesRepository = {
     const id = opts?.idFactory ? opts.idFactory() : `${now}`
     // Prefer enriched knowledge summary
     const gen = await aiService.generateKnowledgeSummary(prompt)
+    const topic = await topicsRepository.getById(topicId)
     const summary: Summary = {
       id,
       topicId,
@@ -58,6 +60,7 @@ export const summariesRepository = {
       expandableTerms: gen.expandableTerms as ExpandableTerm[] | undefined,
       recommendations: gen.recommendations,
       generatedBy: 'ai',
+      backgroundColor: topic?.backgroundColor || undefined,
       createdAt: now,
       updatedAt: now,
     }
@@ -84,6 +87,7 @@ export const summariesRepository = {
       recommendations: gen.recommendations,
       parentSummaryId: parent.id,
       generatedBy: 'ai',
+      backgroundColor: parent.backgroundColor || undefined,
       createdAt: now,
       updatedAt: now,
     }
@@ -139,5 +143,40 @@ export const summariesRepository = {
     }
     // Clear the topic cache key
     await localCache.remove(listKey(topicId))
+  },
+
+  async setBackgroundColorByTopic(
+    topicId: string,
+    color?: string,
+    opts?: { syncUrl?: string },
+  ) {
+    const key = listKey(topicId)
+    const list = (await localCache.get<Summary[]>(key))?.data ?? []
+    if (!list.length) return
+    const updatedAt = Date.now()
+    const nextList = list.map((s) => ({
+      ...s,
+      backgroundColor: color || undefined,
+      updatedAt,
+    }))
+    await localCache.set(key, nextList, updatedAt)
+
+    // Update global list entries
+    const all = (await localCache.get<Summary[]>(LIST_ALL_KEY))?.data ?? []
+    const nextAll = all.map((s) =>
+      s.topicId === topicId
+        ? { ...s, backgroundColor: color || undefined, updatedAt }
+        : s,
+    )
+    await localCache.set(LIST_ALL_KEY, nextAll, updatedAt)
+
+    // Enqueue individual updates for sync (keeps server consistent)
+    for (const s of nextList) {
+      await offlineQueue.enqueue({
+        url: opts?.syncUrl || '/sync/summary',
+        method: 'PUT',
+        body: s,
+      })
+    }
   },
 }

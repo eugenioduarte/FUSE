@@ -1,5 +1,13 @@
-import React, { useState } from 'react'
-import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import React, { useMemo, useState } from 'react'
+import {
+  Alert,
+  ScrollView,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from 'react-native'
+import { Colors } from '../../../../constants/theme'
 import { navigatorManager } from '../../../../navigation/navigatorManager'
 import { topicsRepository } from '../../../../services/repositories/topics.repository'
 
@@ -7,6 +15,12 @@ const TopicAddScreen: React.FC = () => {
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
+  const [backgroundColor, setBackgroundColor] = useState<string | undefined>()
+
+  const colorEntries = useMemo(
+    () => Object.entries(Colors.backgroundTextColors),
+    [],
+  )
 
   const onSave = async () => {
     if (!title.trim()) {
@@ -16,12 +30,20 @@ const TopicAddScreen: React.FC = () => {
       )
       return
     }
+    if (!backgroundColor) {
+      Alert.alert(
+        'Cor obrigatória',
+        'Selecione uma cor de fundo para o tópico.',
+      )
+      return
+    }
     setSaving(true)
     const now = Date.now()
     const topic = {
       id: `${now}`,
       title: title.trim(),
       description: description.trim() || undefined,
+      backgroundColor: backgroundColor || undefined,
       createdAt: now,
       updatedAt: now,
     }
@@ -88,20 +110,55 @@ const TopicAddScreen: React.FC = () => {
         }}
       />
 
-      <TouchableOpacity
-        onPress={onSave}
-        disabled={saving}
-        style={{
-          backgroundColor: saving ? '#3b82f699' : '#3b82f6',
-          borderRadius: 10,
-          padding: 14,
-          alignItems: 'center',
-        }}
+      {/* Color selector */}
+      <Text style={{ color: '#bbb', marginBottom: 6 }}>Cor de fundo</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, paddingBottom: 8 }}
+        style={{ marginBottom: 12 }}
       >
-        <Text style={{ color: 'white', fontWeight: '700' }}>
-          {saving ? 'A guardar…' : 'Guardar tópico'}
-        </Text>
-      </TouchableOpacity>
+        {colorEntries.map(([name, color]) => {
+          const selected = backgroundColor === color
+          return (
+            <TouchableOpacity
+              key={name}
+              onPress={() => setBackgroundColor(color)}
+              style={{
+                paddingVertical: 8,
+                paddingHorizontal: 12,
+                borderRadius: 999,
+                backgroundColor: color,
+                borderWidth: selected ? 2 : 1,
+                borderColor: selected ? '#3b82f6' : '#2f2f31',
+              }}
+            >
+              <Text style={{ color: '#111', fontWeight: '700' }}>{name}</Text>
+            </TouchableOpacity>
+          )
+        })}
+      </ScrollView>
+
+      {(() => {
+        const canSave = !!title.trim() && !!backgroundColor
+        const bg = canSave ? (saving ? '#3b82f699' : '#3b82f6') : '#1f2937'
+        return (
+          <TouchableOpacity
+            onPress={onSave}
+            disabled={saving || !canSave}
+            style={{
+              backgroundColor: bg,
+              borderRadius: 10,
+              padding: 14,
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ color: 'white', fontWeight: '700' }}>
+              {saving ? 'A guardar…' : 'Guardar tópico'}
+            </Text>
+          </TouchableOpacity>
+        )
+      })()}
     </View>
   )
 }
