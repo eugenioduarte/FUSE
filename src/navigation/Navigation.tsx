@@ -68,6 +68,11 @@ import EditOverlay from '../screens/main/utils/edit-overlay/EditOverlay'
 import ErrorOverlay from '../screens/main/utils/error-overlay/ErrorOverlay'
 import FastWayOverlay from '../screens/main/utils/fast-way-overlay/FastWayOverlay'
 import LoadingOverlay from '../screens/main/utils/loading-overlay/LoadingOverlay'
+import SuccessOverlay from '../screens/main/utils/success-overlay/SuccessOverlay'
+import {
+  initFirebaseAuthListener,
+  waitForAuthReady,
+} from '../services/firebase/authService'
 import { useOverlay } from '../store/useOverlay'
 import { RootStackParamList } from './navigatorManager'
 
@@ -313,13 +318,21 @@ const DrawerContent = (_props: DrawerContentComponentProps) => <MenuScreen />
 export default function Navigation() {
   const [isNavReady, setIsNavReady] = useState(false)
   const [initialRouteSet, setInitialRouteSet] = useState(false)
+  const [authReady, setAuthReady] = useState(false)
 
   const setHeaderConfig = useThemeStore((s) => s.setHeaderConfig)
   const { user, rehydrated } = useAuthStore()
 
+  // Attach Firebase auth listener once on mount
+  useEffect(() => {
+    initFirebaseAuthListener()
+    waitForAuthReady().then(() => setAuthReady(true))
+  }, [])
+
   useEffect(() => {
     if (
       rehydrated &&
+      authReady &&
       isNavReady &&
       !initialRouteSet &&
       navigationRef.isReady()
@@ -340,9 +353,9 @@ export default function Navigation() {
       })
       setInitialRouteSet(true)
     }
-  }, [rehydrated, isNavReady, user, initialRouteSet])
+  }, [rehydrated, isNavReady, authReady, user, initialRouteSet])
 
-  if (!rehydrated) {
+  if (!rehydrated || !authReady) {
     return (
       <View
         style={{
@@ -396,6 +409,7 @@ const OverlayHost: React.FC = () => {
       {errorOverlay ? <ErrorOverlay /> : null}
       {fastWayOverlay ? <FastWayOverlay /> : null}
       {editOverlay ? <EditOverlay /> : null}
+      <SuccessOverlay />
     </>
   )
 }

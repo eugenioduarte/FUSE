@@ -86,3 +86,20 @@ Este projeto agora possui:
 
 - Para builds internas, use o profile `preview` e instale builds do EAS no dispositivo/testers.
 - Se quiser publicar em TestFlight/Play Internal, use o workflow `release.yml` com profile `production` e os secrets configurados.
+
+---
+
+## 👤 Perfil do Utilizador (Profile)
+
+A app inclui uma tela de Perfil acessível pelo menu lateral (Menu → Profile), onde podes:
+
+- Definir o Nome de exibição (autosave ao sair do campo). Se não definires, é usado um nome padrão como Explorador(a) ou Utilizador(a) #1234.
+- Gerar um Avatar ilustrativo aleatório (DiceBear) e escolher entre estilos (ex.: adventurer, bottts, identicon, pixel-art, fun-emoji). A alteração é guardada automaticamente.
+- Alterar o Email com validação básica e envio de email de confirmação. Por segurança, é necessário informar a senha atual.
+- Alterar a Palavra‑passe, com indicador de força (fraca/média/forte/muito forte) e confirmação de senha.
+
+Notas técnicas:
+
+- Autenticação e perfil via Firebase Auth (updateProfile, updateEmail, updatePassword, reauthenticate).
+- Estado do utilizador persistido com Zustand + AsyncStorage (`src/store/useAuthStore.ts`).
+- Serviço de avatares em `src/services/profile/avatar.service.ts` (DiceBear, PNG).

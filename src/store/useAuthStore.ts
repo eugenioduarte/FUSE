@@ -2,9 +2,13 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { asyncStorage } from '../storage/asyncStorage'
 
-type User = {
+export type User = {
   id: string
-  name: string
+  name?: string | null
+  email?: string | null
+  avatarUrl?: string | null
+  avatarStyle?: string | null
+  avatarSeed?: string | null
 } | null
 
 type AuthState = {
@@ -12,16 +16,22 @@ type AuthState = {
   rehydrated: boolean
   login: (user: NonNullable<User>) => void
   logout: () => void
+  updateUser: (patch: Partial<NonNullable<User>>) => void
   markRehydrated: () => void
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       rehydrated: false,
       login: (user) => set({ user }),
       logout: () => set({ user: null }),
+      updateUser: (patch) => {
+        const current = get().user
+        if (!current) return
+        set({ user: { ...current, ...patch } })
+      },
       markRehydrated: () => set({ rehydrated: true }),
     }),
     {

@@ -8,7 +8,7 @@ updates:
       time: '04:00'
       timezone: 'Europe/Lisbon'
     open-pull-requests-limit: 5
-    # Keep Expo-managed packages pinned to the SDK via `expo install`
+
     ignore:
       - dependency-name: 'expo'
       - dependency-name: 'jest-expo'
