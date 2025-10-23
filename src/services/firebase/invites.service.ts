@@ -50,6 +50,21 @@ export async function sendTopicInvite(toEmail: string, topicId: string) {
   })
 }
 
+export async function sendTopicInviteToUid(toUid: string, topicId: string) {
+  const from = getCurrentUser()
+  if (!from) throw new Error('Not authenticated')
+  const ref = collection(db(), 'notifications')
+  await addDoc(ref, {
+    type: 'invite',
+    toUser: toUid,
+    fromUser: from.uid,
+    topicId,
+    status: 'pending',
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  })
+}
+
 export function listenPendingInvites(
   uid: string,
   cb: (invites: NotificationInvite[]) => void,

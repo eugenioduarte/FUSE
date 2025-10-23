@@ -218,3 +218,20 @@ export function listenPendingConnectionRequests(
     cb(list)
   })
 }
+
+export async function listAcceptedConnections(
+  uid: string,
+): Promise<PublicUser[]> {
+  const qy = query(
+    collection(db(), 'users', uid, 'connections'),
+    where('status', '==', 'accepted'),
+  )
+  const snap = await getDocs(qy)
+  const results: PublicUser[] = []
+  for (const d of snap.docs) {
+    const otherUid = d.id
+    const profile = await getUserProfile(otherUid)
+    if (profile) results.push(profile)
+  }
+  return results
+}

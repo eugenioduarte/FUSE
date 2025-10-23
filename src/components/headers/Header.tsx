@@ -3,7 +3,6 @@ import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Animated, {
   Easing,
-  LinearTransition,
   SlideInUp,
   SlideOutDown,
 } from 'react-native-reanimated'
@@ -109,13 +108,14 @@ export const Header: React.FC = () => {
   return (
     <Animated.View
       key={currentType}
-      entering={SlideInUp.duration(700)
+      entering={SlideInUp.duration(600)
         .easing(Easing.out(Easing.cubic))
+        .damping(100)
         .withInitialValues({ opacity: 0 })}
-      exiting={SlideOutDown.duration(500)
+      exiting={SlideOutDown.duration(450)
         .easing(Easing.in(Easing.cubic))
+        .damping(100)
         .withInitialValues({ opacity: 1 })}
-      layout={LinearTransition.duration(220).easing(Easing.inOut(Easing.cubic))}
       style={styles.container}
     >
       {renderHeader()}

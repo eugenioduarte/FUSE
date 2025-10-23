@@ -12,8 +12,11 @@ import {
   navigatorManager,
   RootStackParamList,
 } from '../../../../navigation/navigatorManager'
+import { listAcceptedConnections } from '../../../../services/firebase/connections.service'
+import { sendTopicInviteToUid } from '../../../../services/firebase/invites.service'
 import { summariesRepository } from '../../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../../services/repositories/topics.repository'
+import { useAuthStore } from '../../../../store/useAuthStore'
 import { useOverlay } from '../../../../store/useOverlay'
 import { Summary, Topic } from '../../../../types/domain'
 
@@ -26,6 +29,17 @@ const TopicDetailsScreen: React.FC = () => {
   const [summaries, setSummaries] = useState<Summary[]>([])
   const [loadingSummaries, setLoadingSummaries] = useState(false)
   // Removed inline modal; we navigate to SummaryDetailsScreen instead
+  const [showShare, setShowShare] = useState(false)
+  const [shareLoading, setShareLoading] = useState(false)
+  const [connections, setConnections] = useState<
+    {
+      uid: string
+      name: string | null
+      email: string | null
+      avatarUrl: string | null
+    }[]
+  >([])
+  const myUid = useAuthStore((s) => s.user?.id)
 
   useEffect(() => {
     let mounted = true
@@ -110,6 +124,35 @@ const TopicDetailsScreen: React.FC = () => {
             <Text style={{ color: '#2563eb', fontWeight: '700' }}>Editar</Text>
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={async () => {
+              if (!myUid) return
+              const next = !showShare
+              setShowShare(next)
+              if (next && connections.length === 0) {
+                try {
+                  setShareLoading(true)
+                  const list = await listAcceptedConnections(myUid)
+                  setConnections(
+                    list.map((u) => ({
+                      uid: u.uid,
+                      name: u.name,
+                      email: u.email,
+                      avatarUrl: u.avatarUrl,
+                    })),
+                  )
+                } catch {
+                } finally {
+                  setShareLoading(false)
+                }
+              }
+            }}
+            style={{ marginLeft: 12 }}
+          >
+            <Text style={{ color: '#10b981', fontWeight: '700' }}>
+              Partilhar
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             onPress={() => {
               Alert.alert(
                 'Apagar tópico?',
@@ -150,6 +193,97 @@ const TopicDetailsScreen: React.FC = () => {
         <Text style={{ color: colored ? '#333' : '#aaa', marginTop: 12 }}>
           Atualizado em: {new Date(topic.updatedAt).toLocaleString()}
         </Text>
+
+        {/* Share with connections panel */}
+        {showShare ? (
+          <View
+            style={{
+              marginTop: 12,
+              padding: 12,
+              borderRadius: 10,
+              backgroundColor: colored ? '#f4f4f5' : '#141416',
+              borderWidth: 1,
+              borderColor: colored ? '#e5e7eb' : '#27272a',
+            }}
+          >
+            <Text
+              style={{
+                color: colored ? '#111' : 'white',
+                fontWeight: '800',
+                marginBottom: 10,
+              }}
+            >
+              Partilhar com conexão
+            </Text>
+            {shareLoading ? (
+              <ActivityIndicator />
+            ) : connections.length === 0 ? (
+              <Text style={{ color: colored ? '#333' : '#aaa' }}>
+                Não há conexões aceites.
+              </Text>
+            ) : (
+              <View style={{ gap: 10 }}>
+                {connections.map((u) => (
+                  <View
+                    key={u.uid}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                    }}
+                  >
+                    <View style={{ flex: 1, marginRight: 12 }}>
+                      <Text
+                        style={{
+                          color: colored ? '#111' : 'white',
+                          fontWeight: '700',
+                        }}
+                        numberOfLines={1}
+                      >
+                        {u.name || u.email || u.uid}
+                      </Text>
+                      {!!u.email && (
+                        <Text
+                          style={{ color: colored ? '#222' : '#bbb' }}
+                          numberOfLines={1}
+                        >
+                          {u.email}
+                        </Text>
+                      )}
+                    </View>
+                    <TouchableOpacity
+                      onPress={async () => {
+                        try {
+                          await sendTopicInviteToUid(u.uid, topicId)
+                          Alert.alert(
+                            'Convite enviado',
+                            'O utilizador irá receber uma notificação para aceitar o acesso ao tópico.',
+                          )
+                        } catch (e) {
+                          console.error('Failed to send topic invite', e)
+                          Alert.alert(
+                            'Erro',
+                            'Não foi possível enviar o convite.',
+                          )
+                        }
+                      }}
+                      style={{
+                        backgroundColor: '#2563eb',
+                        paddingHorizontal: 12,
+                        paddingVertical: 8,
+                        borderRadius: 8,
+                      }}
+                    >
+                      <Text style={{ color: 'white', fontWeight: '700' }}>
+                        Convidar
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            )}
+          </View>
+        ) : null}
 
         <View style={{ height: 20 }} />
         <Text style={{ color: titleColor, fontSize: 16, fontWeight: '700' }}>
