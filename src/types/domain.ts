@@ -61,7 +61,7 @@ export interface ExpandableTerm {
   mini?: string
 }
 
-export type NotificationType = 'invite'
+export type NotificationType = 'invite' | 'connection'
 
 export interface NotificationInvite {
   id: string
@@ -69,7 +69,31 @@ export interface NotificationInvite {
   toUser: string
   fromUser: string
   topicId: string
-  status: 'pending' | 'accepted' | 'declined'
+  status: RequestStatus
+  createdAt: number
+  updatedAt: number
+}
+
+export type RequestStatus = 'pending' | 'accepted' | 'declined'
+
+export interface ConnectionRequest {
+  id: string
+  fromUser: string
+  toUser: string
+  /** sorted join of participants to ease lookup */
+  participantsKey: string
+  status: RequestStatus
+  createdAt: number
+  updatedAt: number
+}
+
+export interface NotificationConnection {
+  id: string
+  type: 'connection'
+  toUser: string
+  fromUser: string
+  requestId: string
+  status: RequestStatus
   createdAt: number
   updatedAt: number
 }

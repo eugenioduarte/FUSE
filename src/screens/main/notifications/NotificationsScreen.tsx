@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from 'react'
 import {
   FlatList,
-  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import {
+  getUserProfile,
+  listenPendingConnectionRequests,
+  respondToConnectionRequest,
+} from '../../../services/firebase/connections.service'
 import {
   acceptInvite,
   declineInvite,
@@ -16,12 +21,14 @@ import { useAuthStore } from '../../../store/useAuthStore'
 import { NotificationInvite } from '../../../types/domain'
 
 type InviteVM = { id: string; fromUser: string; topicId: string }
+type ConnVM = { id: string; fromUser: string; fromName?: string | null }
 
 const Separator = () => <View style={{ height: 12 }} />
 
 const NotificationsScreen: React.FC = () => {
   const uid = useAuthStore((s) => s.user?.id)
   const [invites, setInvites] = useState<InviteVM[]>([])
+  const [connections, setConnections] = useState<ConnVM[]>([])
 
   useEffect(() => {
     if (!uid) return
@@ -34,7 +41,22 @@ const NotificationsScreen: React.FC = () => {
         })),
       )
     })
-    return () => unsub()
+    const unsubConn = listenPendingConnectionRequests(uid, async (list) => {
+      const enriched: ConnVM[] = []
+      for (const r of list) {
+        const profile = await getUserProfile(r.fromUser)
+        enriched.push({
+          id: r.id,
+          fromUser: r.fromUser,
+          fromName: profile?.name,
+        })
+      }
+      setConnections(enriched)
+    })
+    return () => {
+      unsub()
+      unsubConn()
+    }
   }, [uid])
 
   const renderItem = ({ item }: { item: InviteVM }) => (
@@ -59,20 +81,62 @@ const NotificationsScreen: React.FC = () => {
     </View>
   )
 
+  // Connection cards are rendered in a footer component below
+
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
         data={invites}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => `invite-${item.id}`}
         renderItem={renderItem}
         contentContainerStyle={{ padding: 16 }}
         ItemSeparatorComponent={Separator}
+        ListHeaderComponent={
+          invites.length ? (
+            <Text style={[styles.title, { marginBottom: 8 }]}>Convites</Text>
+          ) : null
+        }
+        ListFooterComponent={<ConnectionsFooter connections={connections} />}
       />
     </SafeAreaView>
   )
 }
 
 export default NotificationsScreen
+
+const ConnectionsFooter: React.FC<{ connections: ConnVM[] }> = ({
+  connections,
+}) => (
+  <>
+    <Separator />
+    <FlatList
+      data={connections}
+      keyExtractor={(item) => `conn-${item.id}`}
+      renderItem={({ item }) => <ConnectionCard item={item} />}
+      ItemSeparatorComponent={Separator}
+    />
+  </>
+)
+const ConnectionCard: React.FC<{ item: ConnVM }> = ({ item }) => (
+  <View style={styles.card}>
+    <Text style={styles.title}>Pedido de conexão</Text>
+    <Text style={styles.body}>De: {item.fromName || item.fromUser}</Text>
+    <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => respondToConnectionRequest(item.id, 'accepted')}
+      >
+        <Text style={styles.buttonText}>Aceitar</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.button, styles.secondary]}
+        onPress={() => respondToConnectionRequest(item.id, 'declined')}
+      >
+        <Text style={styles.buttonText}>Recusar</Text>
+      </TouchableOpacity>
+    </View>
+  </View>
+)
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'black' },
