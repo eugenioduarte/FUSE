@@ -13,6 +13,7 @@ import {
   navigatorManager,
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
+import { useAuthStore } from '../../../store/useAuthStore'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { useOverlay } from '../../../store/useOverlay'
 import { Challenge } from '../../../types/domain'
@@ -228,6 +229,7 @@ const ChallengeRunMatrixScreen: React.FC = () => {
     score: number
     total: number
   }>(null)
+  const meId = useAuthStore((s) => s.user?.id)
 
   // Layout/dimensions
   const cellSize = Math.floor((Dimensions.get('window').width - 32) / GRID_COLS)
@@ -334,10 +336,11 @@ const ChallengeRunMatrixScreen: React.FC = () => {
     if (timer <= 0 || found.length >= total) {
       const now = Date.now()
       const score = found.length
-      const attempt: MatrixAttempt = {
+      const attempt: MatrixAttempt & { userId?: string } = {
         at: now,
         score,
         total,
+        userId: meId || undefined,
         question,
         words,
         found,
@@ -361,7 +364,7 @@ const ChallengeRunMatrixScreen: React.FC = () => {
         setFinished({ score, total })
       })()
     }
-  }, [timer, found, total, challenge, grid, placements, question, words])
+  }, [timer, found, total, challenge, grid, placements, question, words, meId])
 
   // Measure absolute grid coords for hit testing
   const gridLayoutRef = useRef<{ x: number; y: number } | null>(null)

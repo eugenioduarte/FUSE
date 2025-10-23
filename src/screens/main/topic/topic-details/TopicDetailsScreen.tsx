@@ -152,6 +152,16 @@ const TopicDetailsScreen: React.FC = () => {
               Partilhar
             </Text>
           </TouchableOpacity>
+          {(topic.members?.length ?? 0) > 1 && (
+            <TouchableOpacity
+              onPress={() => navigatorManager.goToTopicRanking(topicId)}
+              style={{ marginLeft: 12 }}
+            >
+              <Text style={{ color: '#f59e0b', fontWeight: '700' }}>
+                Ranking
+              </Text>
+            </TouchableOpacity>
+          )}
           <TouchableOpacity
             onPress={() => {
               Alert.alert(

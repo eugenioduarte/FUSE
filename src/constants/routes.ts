@@ -30,6 +30,8 @@ export const ROUTES = {
   TopicAddScreen: 'TopicAddScreen',
   SummaryScreen: 'SummaryScreen',
   SummaryAudioScreen: 'SummaryAudioScreen',
+  // Topic - Ranking
+  TopicRankingScreen: 'TopicRankingScreen',
   // Main - Menu
   ProfileScreen: 'ProfileScreen',
   ConnectionsScreen: 'ConnectionsScreen',

@@ -12,6 +12,7 @@ import {
   navigatorManager,
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
+import { useAuthStore } from '../../../store/useAuthStore'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { useOverlay } from '../../../store/useOverlay'
 import { Challenge } from '../../../types/domain'
@@ -52,6 +53,7 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
   const [attemptItems, setAttemptItems] = useState<TAAttemptItem[]>([])
   const [loading, setLoading] = useState(true)
   const [finished, setFinished] = useState<null | { score: number }>(null)
+  const meId = useAuthStore((s) => s.user?.id)
 
   const canSubmit = answer.trim().length >= 30 && evaluated == null
   // continue habilita apenas após avaliação
@@ -156,10 +158,11 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
     const avg = attemptItems.length ? sum / attemptItems.length : 0
     const final = Math.round(avg * 10) / 10 // 1 decimal between 0 and 10
     const now = Date.now()
-    const attempt: TAAttempt = {
+    const attempt: TAAttempt & { userId?: string } = {
       at: now,
       score: final,
       total: 10,
+      userId: meId || undefined,
       exercises: attemptItems,
     }
     const updated: Challenge = {

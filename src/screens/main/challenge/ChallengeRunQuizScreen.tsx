@@ -15,6 +15,7 @@ import {
   navigatorManager,
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
+import { useAuthStore } from '../../../store/useAuthStore'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
 import { useOverlay } from '../../../store/useOverlay'
@@ -66,6 +67,7 @@ const ChallengeRunQuizScreen: React.FC = () => {
     score: number
     total: number
   }>(null)
+  const meId = useAuthStore((s) => s.user?.id)
 
   // Attempt state
   const [firstChoiceByIndex, setFirstChoiceByIndex] = useState<
@@ -160,10 +162,11 @@ const ChallengeRunQuizScreen: React.FC = () => {
     const score = computeScore(questions, firstChoiceByIndex)
     const now = Date.now()
     // Build attempt with immutable snapshot for review later
-    const attempt: Attempt = {
+    const attempt: Attempt & { userId?: string } = {
       at: now,
       score,
       total: questions.length,
+      userId: meId || undefined,
       questions: questions.map((q, i) => ({
         ...q,
         choice: firstChoiceByIndex[i] ?? null,

@@ -15,6 +15,7 @@ import {
   RootStackParamList,
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
+import { useAuthStore } from '../../../store/useAuthStore'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
 import { useOverlay } from '../../../store/useOverlay'
@@ -76,6 +77,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
     score: number
     total: number
   }>(null)
+  const meId = useAuthStore((s) => s.user?.id)
 
   // Slide animation
   const screenWidth = Dimensions.get('window').width
@@ -237,10 +239,11 @@ const ChallengeRunHangmanScreen: React.FC = () => {
     // finish
     const now = Date.now()
     const finalRounds = [...persistedRoundsRef.current, attemptRound]
-    const attempt: Attempt = {
+    const attempt: Attempt & { userId?: string } = {
       at: now,
       score: nextScore,
       total: rounds.length,
+      userId: meId || undefined,
       rounds: finalRounds,
     }
     const updated: Challenge = {

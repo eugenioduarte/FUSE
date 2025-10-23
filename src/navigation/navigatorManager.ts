@@ -39,6 +39,7 @@ export type RootStackParamList = {
   PaymentScreen: undefined
   NotificationsScreen: undefined
   WhiteboardScreen: undefined
+  TopicRankingScreen: { topicId: string }
 }
 
 export const navigatorManager = {
@@ -208,6 +209,11 @@ export const navigatorManager = {
   // Whiteboard
   goToWhiteboard: () => {
     if (navigationRef.isReady()) navigationRef.navigate(ROUTES.WhiteboardScreen)
+  },
+
+  goToTopicRanking: (topicId: string) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.TopicRankingScreen, { topicId } as any)
   },
 
   goBack: () => {

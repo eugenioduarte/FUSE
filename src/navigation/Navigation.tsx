@@ -53,7 +53,9 @@ import SummaryAudioScreen from '../screens/main/topic/summary/SummaryAudioScreen
 import SummaryDetailsScreen from '../screens/main/topic/summary/SummaryDetailsScreen'
 import SummaryScreen from '../screens/main/topic/summary/SummaryScreen'
 import TopicAddScreen from '../screens/main/topic/topic-add/TopicAddScreen'
-import TopicDetailsScreen from '../screens/main/topic/topic-details/TopicDetailsScreen'
+import TopicDetailsScreen, {
+  TopicRankingScreen,
+} from '../screens/main/topic/topic-details'
 
 // Menu screens (as regular stack screens)
 import ConnectionsScreen from '../screens/main/menu/connections/ConnectionsScreen'
@@ -282,6 +284,11 @@ function MainStack() {
         name={ROUTES.SummaryAudioScreen}
         component={SummaryAudioScreen}
         options={{ title: ROUTES.SummaryAudioScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.TopicRankingScreen}
+        component={TopicRankingScreen}
+        options={{ title: ROUTES.TopicRankingScreen }}
       />
 
       {/* Menu */}
