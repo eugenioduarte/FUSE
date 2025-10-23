@@ -46,6 +46,16 @@ export const topicsRepository = {
     // Queue mutation for server
     await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: topic })
 
+    // If this is a group topic, mirror to Firestore for collaboration
+    if ((topic.members && topic.members.length > 0) || topic.createdBy) {
+      try {
+        const { upsertGroupTopic } = await import(
+          '../firebase/collabData.service'
+        )
+        await upsertGroupTopic(topic)
+      } catch {}
+    }
+
     // If color changed, propagate to summaries for this topic
     if (backgroundChanged) {
       await summariesRepository.setBackgroundColorByTopic(
@@ -70,5 +80,13 @@ export const topicsRepository = {
       method: 'DELETE',
       body: { id },
     })
+
+    // Also remove from Firestore if it was a group topic
+    try {
+      const { deleteGroupTopic } = await import(
+        '../firebase/collabData.service'
+      )
+      await deleteGroupTopic(id)
+    } catch {}
   },
 }

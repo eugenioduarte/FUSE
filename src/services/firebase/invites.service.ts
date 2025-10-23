@@ -1,13 +1,14 @@
 import {
   addDoc,
+  arrayUnion,
   collection,
   doc,
+  getDoc,
   getDocs,
   getFirestore,
   onSnapshot,
   query,
   serverTimestamp,
-  setDoc,
   updateDoc,
   where,
 } from 'firebase/firestore'
@@ -81,25 +82,26 @@ export async function acceptInvite(inviteId: string) {
   const me = getCurrentUser()
   if (!me) throw new Error('Not authenticated')
   const notifRef = doc(db(), 'notifications', inviteId)
+  const notifDoc = await getDoc(notifRef)
+  const data = notifDoc.data() as any
+  const topicId = data?.topicId as string
+  if (topicId) {
+    const topicRef = doc(db(), 'topics', topicId)
+    // Append to members array safely
+    await updateDoc(topicRef, {
+      members: arrayUnion(me.uid),
+      updatedAt: serverTimestamp(),
+    })
+  }
   await updateDoc(notifRef, {
     status: 'accepted',
     updatedAt: serverTimestamp(),
   })
-  // Add user to topic.members
-  const notifSnap = await getDocs(
-    query(collection(db(), 'notifications'), where('__name__', '==', inviteId)),
-  )
-  const data = notifSnap.docs[0]?.data() as any
-  const topicId = data?.topicId as string
-  if (topicId) {
-    const topicRef = doc(db(), 'topics', topicId)
-    // merge into members array by using setDoc merge
-    await setDoc(
-      topicRef,
-      { members: [me.uid] as string[], updatedAt: serverTimestamp() },
-      { merge: true },
-    )
-  }
+  // Optionally refresh local membership cache
+  try {
+    const { syncUserTopicsMembership } = await import('./invites.service')
+    await syncUserTopicsMembership()
+  } catch {}
 }
 
 export async function declineInvite(inviteId: string) {

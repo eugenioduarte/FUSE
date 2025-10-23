@@ -19,9 +19,17 @@ const firebase = {
 }
 
 function expoConfig({ config }) {
+  const existingExtra = config && config.extra ? config.extra : undefined
   return {
     ...config,
-    extra: { ...(config?.extra ?? {}), firebase },
+    plugins: [
+      ...(config.plugins || []),
+      'expo-font',
+      'expo-localization',
+      'expo-secure-store',
+      'expo-web-browser',
+    ],
+    extra: existingExtra ? { ...existingExtra, firebase } : { firebase },
   }
 }
 

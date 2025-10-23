@@ -2,9 +2,10 @@ import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import Animated, {
+  Easing,
   LinearTransition,
-  SlideInDown,
-  SlideOutUp,
+  SlideInUp,
+  SlideOutDown,
 } from 'react-native-reanimated'
 import { ROUTES } from '../../constants/routes'
 import { navigationRef } from '../../navigation/navigationRef'
@@ -108,11 +109,13 @@ export const Header: React.FC = () => {
   return (
     <Animated.View
       key={currentType}
-      entering={SlideInDown.springify()
-        .damping(25)
+      entering={SlideInUp.duration(350)
+        .easing(Easing.out(Easing.cubic))
         .withInitialValues({ opacity: 0 })}
-      exiting={SlideOutUp.duration(700).withInitialValues({ opacity: 1 })}
-      layout={LinearTransition.springify().damping(25).stiffness(150)}
+      exiting={SlideOutDown.duration(350)
+        .easing(Easing.in(Easing.cubic))
+        .withInitialValues({ opacity: 1 })}
+      layout={LinearTransition.duration(220).easing(Easing.inOut(Easing.cubic))}
       style={styles.container}
     >
       {renderHeader()}

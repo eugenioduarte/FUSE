@@ -39,6 +39,18 @@ export const summariesRepository = {
     await localCache.set(LIST_ALL_KEY, all, summary.updatedAt)
 
     await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: summary })
+
+    // Mirror to Firestore if parent topic is a group
+    try {
+      const { topicsRepository } = await import('./topics.repository')
+      const parent = await topicsRepository.getById(summary.topicId)
+      if ((parent?.members && parent.members.length > 0) || parent?.createdBy) {
+        const { upsertGroupSummary } = await import(
+          '../firebase/collabData.service'
+        )
+        await upsertGroupSummary(summary)
+      }
+    } catch {}
   },
 
   async createWithAI(
@@ -134,6 +146,14 @@ export const summariesRepository = {
       method: 'DELETE',
       body: { id },
     })
+
+    // Remove from Firestore as well
+    try {
+      const { deleteGroupSummary } = await import(
+        '../firebase/collabData.service'
+      )
+      await deleteGroupSummary(id)
+    } catch {}
   },
 
   async deleteByTopicId(topicId: string, opts?: { syncUrl?: string }) {
@@ -177,6 +197,20 @@ export const summariesRepository = {
         method: 'PUT',
         body: s,
       })
+      // Mirror color change in Firestore for group topics
+      try {
+        const { topicsRepository } = await import('./topics.repository')
+        const parent = await topicsRepository.getById(topicId)
+        if (
+          (parent?.members && parent.members.length > 0) ||
+          parent?.createdBy
+        ) {
+          const { upsertGroupSummary } = await import(
+            '../firebase/collabData.service'
+          )
+          await upsertGroupSummary(s)
+        }
+      } catch {}
     }
   },
 }

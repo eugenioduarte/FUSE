@@ -5,7 +5,7 @@ import {
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
 import React, { useEffect, useState } from 'react'
-import { ActivityIndicator, Easing, View } from 'react-native'
+import { ActivityIndicator, AppState, Easing, View } from 'react-native'
 import { EasingFunction } from 'react-native-reanimated'
 
 import { Header } from '../components'
@@ -73,6 +73,10 @@ import {
   initFirebaseAuthListener,
   waitForAuthReady,
 } from '../services/firebase/authService'
+import {
+  startCollabSyncForUser,
+  triggerInitialCollaborativeSync,
+} from '../services/firebase/collabSync.service'
 import { useOverlay } from '../store/useOverlay'
 import { RootStackParamList } from './navigatorManager'
 
@@ -354,6 +358,29 @@ export default function Navigation() {
       setInitialRouteSet(true)
     }
   }, [rehydrated, isNavReady, authReady, user, initialRouteSet])
+
+  useEffect(() => {
+    // When authenticated and nav ready, start collaborative listeners and do an initial refresh
+    if (rehydrated && authReady && user?.id) {
+      const stop = startCollabSyncForUser(user.id)
+      triggerInitialCollaborativeSync().catch(() => {})
+
+      // Refresh when app comes to foreground
+      const sub = AppState.addEventListener('change', (state) => {
+        if (state === 'active')
+          triggerInitialCollaborativeSync().catch(() => {})
+      })
+
+      return () => {
+        try {
+          stop()
+        } catch {}
+        try {
+          sub.remove()
+        } catch {}
+      }
+    }
+  }, [rehydrated, authReady, user?.id])
 
   if (!rehydrated || !authReady) {
     return (

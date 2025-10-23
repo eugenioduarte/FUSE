@@ -46,6 +46,22 @@ export const challengesRepository = {
     }
 
     await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: challenge })
+
+    // Mirror to Firestore if parent topic is a group
+    try {
+      const { summariesRepository } = await import('./summaries.repository')
+      const { topicsRepository } = await import('./topics.repository')
+      const summary = await summariesRepository.getById(challenge.summaryId)
+      const parent = summary
+        ? await topicsRepository.getById(summary.topicId)
+        : null
+      if ((parent?.members && parent.members.length > 0) || parent?.createdBy) {
+        const { upsertGroupChallenge } = await import(
+          '../firebase/collabData.service'
+        )
+        await upsertGroupChallenge(challenge, { topicId: summary?.topicId })
+      }
+    } catch {}
   },
 
   async deleteById(
@@ -72,6 +88,14 @@ export const challengesRepository = {
       method: 'DELETE',
       body: { id },
     })
+
+    // Delete in Firestore as well
+    try {
+      const { deleteGroupChallenge } = await import(
+        '../firebase/collabData.service'
+      )
+      await deleteGroupChallenge(id)
+    } catch {}
   },
 
   async deleteBySummaryId(summaryId: string, opts?: { syncUrl?: string }) {
@@ -96,5 +120,7 @@ export const challengesRepository = {
       method: 'DELETE',
       body: { summaryId },
     })
+
+    // Firestore deletions are handled in cascade by summariesRepository.deleteById
   },
 }

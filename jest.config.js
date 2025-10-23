@@ -1,5 +1,5 @@
 module.exports = {
-  preset: 'react-native',
+  preset: 'jest-expo',
   testMatch: ['**/?(*.)+(test).[jt]s?(x)'],
 
   setupFiles: ['<rootDir>/jest.setupEarly.js'],
@@ -28,7 +28,6 @@ module.exports = {
 
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
-    '^expo($|/.*)': '<rootDir>/__mocks__/expoMock.js',
   },
 
   collectCoverage: true,
