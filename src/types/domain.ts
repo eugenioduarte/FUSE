@@ -3,6 +3,8 @@ export interface Topic {
   title: string
   description?: string
   backgroundColor?: string
+  createdBy?: string
+  members?: string[]
   createdAt: number
   updatedAt: number
 }
@@ -10,6 +12,7 @@ export interface Topic {
 export interface Summary {
   id: string
   topicId: string
+  authorId?: string
   title?: string
   content: string
   generatedBy: 'user' | 'ai'
@@ -39,6 +42,7 @@ export interface Challenge {
   type: 'hangman' | 'matrix' | 'quiz' | 'text'
   title: string
   summaryId: string
+  authorId?: string
   payload: any
   createdAt: number
   updatedAt: number
@@ -55,4 +59,17 @@ export interface ExpandableTerm {
   term: string
   /** Optional short, 1-2 sentence description for preview/snippet */
   mini?: string
+}
+
+export type NotificationType = 'invite'
+
+export interface NotificationInvite {
+  id: string
+  type: NotificationType
+  toUser: string
+  fromUser: string
+  topicId: string
+  status: 'pending' | 'accepted' | 'declined'
+  createdAt: number
+  updatedAt: number
 }

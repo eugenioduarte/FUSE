@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   FlatList,
   SafeAreaView,
@@ -7,38 +7,62 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import {
+  acceptInvite,
+  declineInvite,
+  listenPendingInvites,
+} from '../../../services/firebase/invites.service'
+import { useAuthStore } from '../../../store/useAuthStore'
+import { NotificationInvite } from '../../../types/domain'
 
-interface NotificationItem {
-  id: string
-  title: string
-  body: string
-  read?: boolean
-}
-
-const sampleData: NotificationItem[] = [
-  { id: '1', title: 'Welcome', body: 'Thanks for joining!', read: false },
-  {
-    id: '2',
-    title: 'Calendar',
-    body: 'Your event starts in 1 hour',
-    read: true,
-  },
-]
+type InviteVM = { id: string; fromUser: string; topicId: string }
 
 const Separator = () => <View style={{ height: 12 }} />
 
 const NotificationsScreen: React.FC = () => {
-  const renderItem = ({ item }: { item: NotificationItem }) => (
-    <TouchableOpacity style={[styles.card, item.read && styles.cardRead]}>
-      <Text style={styles.title}>{item.title}</Text>
-      <Text style={styles.body}>{item.body}</Text>
-    </TouchableOpacity>
+  const uid = useAuthStore((s) => s.user?.id)
+  const [invites, setInvites] = useState<InviteVM[]>([])
+
+  useEffect(() => {
+    if (!uid) return
+    const unsub = listenPendingInvites(uid, (list: NotificationInvite[]) => {
+      setInvites(
+        list.map((n: NotificationInvite) => ({
+          id: n.id,
+          fromUser: n.fromUser,
+          topicId: n.topicId,
+        })),
+      )
+    })
+    return () => unsub()
+  }, [uid])
+
+  const renderItem = ({ item }: { item: InviteVM }) => (
+    <View style={styles.card}>
+      <Text style={styles.title}>Convite para tópico</Text>
+      <Text style={styles.body}>De: {item.fromUser}</Text>
+      <Text style={styles.body}>Tópico: {item.topicId}</Text>
+      <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() => acceptInvite(item.id)}
+        >
+          <Text style={styles.buttonText}>Aceitar</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, styles.secondary]}
+          onPress={() => declineInvite(item.id)}
+        >
+          <Text style={styles.buttonText}>Recusar</Text>
+        </TouchableOpacity>
+      </View>
+    </View>
   )
 
   return (
     <SafeAreaView style={styles.container}>
       <FlatList
-        data={sampleData}
+        data={invites}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
         contentContainerStyle={{ padding: 16 }}
@@ -60,4 +84,14 @@ const styles = StyleSheet.create({
   cardRead: { opacity: 0.6 },
   title: { color: 'white', fontSize: 16, fontWeight: '700', marginBottom: 6 },
   body: { color: '#ddd' },
+  button: {
+    backgroundColor: '#2563eb',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  secondary: {
+    backgroundColor: '#374151',
+  },
+  buttonText: { color: 'white', fontWeight: '700' },
 })
