@@ -1,0 +1,63 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Europe/Lisbon"
+    open-pull-requests-limit: 5
+    # Keep Expo-managed packages pinned to the SDK via `expo install`
+    ignore:
+      - dependency-name: "expo"
+      - dependency-name: "jest-expo"
+      - dependency-name: "react"
+      - dependency-name: "react-dom"
+      - dependency-name: "react-native"
+      - dependency-name: "react-native-gesture-handler"
+      - dependency-name: "react-native-reanimated"
+      - dependency-name: "react-native-safe-area-context"
+      - dependency-name: "react-native-screens"
+      - dependency-name: "react-native-svg"
+      - dependency-name: "react-native-web"
+      - dependency-name: "@react-native-async-storage/async-storage"
+      - dependency-name: "@expo/metro-runtime"
+      - dependency-name: "expo-blur"
+      - dependency-name: "expo-constants"
+      - dependency-name: "expo-document-picker"
+      - dependency-name: "expo-file-system"
+      - dependency-name: "expo-font"
+      - dependency-name: "expo-haptics"
+      - dependency-name: "expo-image"
+      - dependency-name: "expo-linking"
+      - dependency-name: "expo-localization"
+      - dependency-name: "expo-print"
+      - dependency-name: "expo-secure-store"
+      - dependency-name: "expo-sharing"
+      - dependency-name: "expo-splash-screen"
+      - dependency-name: "expo-status-bar"
+      - dependency-name: "expo-symbols"
+      - dependency-name: "expo-system-ui"
+      - dependency-name: "expo-web-browser"
+      - dependency-name: "typescript"
+    groups:
+      react-navigation:
+        applies-to: version-updates
+        patterns:
+          - "@react-navigation/*"
+      react-query:
+        applies-to: version-updates
+        patterns:
+          - "@tanstack/*"
+      testing-libraries:
+        applies-to: version-updates
+        patterns:
+          - "jest"
+          - "@testing-library/*"
+      linting-formatting:
+        applies-to: version-updates
+        patterns:
+          - "eslint*"
+          - "@typescript-eslint/*"
+          - "prettier*"
