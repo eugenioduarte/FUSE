@@ -12,6 +12,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   findUserByEmailFull,
   isAlreadyConnected,
+  listenAcceptedConnections,
   listenConnectionRequest,
   sendConnectionRequest,
   type PublicUser,
@@ -27,6 +28,8 @@ const ConnectionsScreen: React.FC = () => {
   const [status, setStatus] = useState<
     'none' | 'pending' | 'accepted' | 'declined' | 'connected'
   >('none')
+  const [myConnections, setMyConnections] = useState<PublicUser[]>([])
+  const [loadingConnections, setLoadingConnections] = useState(true)
 
   const unsubRef = useRef<null | (() => void)>(null)
 
@@ -37,6 +40,21 @@ const ConnectionsScreen: React.FC = () => {
       } catch {}
     }
   }, [])
+
+  // Realtime connections list
+  useEffect(() => {
+    if (!myUid) return
+    setLoadingConnections(true)
+    const unsub = listenAcceptedConnections(myUid, (profiles) => {
+      setMyConnections(profiles)
+      setLoadingConnections(false)
+    })
+    return () => {
+      try {
+        unsub()
+      } catch {}
+    }
+  }, [myUid])
 
   const canSend = useMemo(() => {
     return !!user && status === 'none'
@@ -150,6 +168,45 @@ const ConnectionsScreen: React.FC = () => {
         </View>
 
         <View style={{ marginTop: 16 }}>{renderResult()}</View>
+
+        <View style={{ height: 24 }} />
+        <Text style={styles.title}>As minhas conexões</Text>
+        {loadingConnections ? (
+          <ActivityIndicator color="#fff" style={{ marginTop: 8 }} />
+        ) : myConnections.length === 0 ? (
+          <Text style={styles.muted}>Sem conexões.</Text>
+        ) : (
+          <View style={{ marginTop: 8, gap: 8 }}>
+            {myConnections.map((c) => (
+              <View key={c.uid} style={styles.card}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  {c.avatarUrl ? (
+                    <Image
+                      source={{ uri: c.avatarUrl }}
+                      style={styles.avatar}
+                    />
+                  ) : (
+                    <View style={[styles.avatar, styles.avatarFallback]}>
+                      <Text style={{ color: '#111', fontWeight: '800' }}>
+                        {c.name?.[0]?.toUpperCase() || '?'}
+                      </Text>
+                    </View>
+                  )}
+                  <View style={{ marginLeft: 12, flex: 1 }}>
+                    <Text style={styles.name} numberOfLines={1}>
+                      {c.name || 'Utilizador'}
+                    </Text>
+                    {!!c.email && (
+                      <Text style={styles.email} numberOfLines={1}>
+                        {c.email}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
       </View>
     </SafeAreaView>
   )

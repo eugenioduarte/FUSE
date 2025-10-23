@@ -235,3 +235,28 @@ export async function listAcceptedConnections(
   }
   return results
 }
+
+/** Realtime listener for accepted connections list (profiles) */
+export function listenAcceptedConnections(
+  uid: string,
+  cb: (profiles: PublicUser[]) => void,
+) {
+  const qy = query(
+    collection(db(), 'users', uid, 'connections'),
+    where('status', '==', 'accepted'),
+  )
+  return onSnapshot(qy, async (snap) => {
+    try {
+      const profiles = await Promise.all(
+        snap.docs.map(async (d) => {
+          const p = await getUserProfile(d.id)
+          return p
+        }),
+      )
+      cb(profiles.filter(Boolean) as PublicUser[])
+    } catch (e) {
+      console.error('listenAcceptedConnections error', e)
+      cb([])
+    }
+  })
+}
