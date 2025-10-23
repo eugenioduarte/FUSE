@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
 import {
   FlatList,
   StyleSheet,
@@ -118,6 +119,18 @@ const CalendarScreen: React.FC = () => {
       setSelectedDate(`${y}-${m}-${d}`)
     }
   }, [selectedDate, setSelectedDate])
+
+  // Always open on today's date when the screen gains focus
+  useFocusEffect(
+    React.useCallback(() => {
+      const now = new Date()
+      const y = now.getFullYear()
+      const m = pad(now.getMonth() + 1)
+      const d = pad(now.getDate())
+      setSelectedDate(`${y}-${m}-${d}`)
+      setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1))
+    }, [setSelectedDate]),
+  )
 
   // Load summaries when topic selected in form
   // (No inline form anymore)
