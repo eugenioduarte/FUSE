@@ -87,6 +87,87 @@ export const aiService = {
     const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
     return content
   },
+
+  async generateSummaryImage(prompt: string): Promise<string> {
+    try {
+      if (!OPENAI_API_KEY) {
+        // Fallback: placeholder image
+        return 'https://picsum.photos/1024/768'
+      }
+      const imageModel =
+        process.env.EXPO_PUBLIC_OPENAI_IMAGE_MODEL || 'gpt-image-1'
+      const body = JSON.stringify({
+        model: imageModel,
+        prompt: [
+          'Fotografia ou ilustração com estilo coerente ao tema do resumo, nítida e atraente.',
+          'Evite texto, foco em elementos visuais representativos do assunto.',
+          `Tema: ${prompt}`,
+        ].join('\n'),
+        size: '1024x768',
+        n: 1,
+      })
+      const res = await fetch(`${OPENAI_BASE_URL}/images/generations`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body,
+      })
+      if (!res.ok) return 'https://picsum.photos/1024/768'
+      const data = await res.json()
+      const url: string = data?.data?.[0]?.url
+      return url || 'https://picsum.photos/1024/768'
+    } catch {
+      return 'https://picsum.photos/1024/768'
+    }
+  },
+
+  async ttsToBase64(
+    text: string,
+    format: 'mp3' | 'wav' = 'mp3',
+  ): Promise<string | null> {
+    try {
+      if (!OPENAI_API_KEY) return null
+      const ttsModel =
+        process.env.EXPO_PUBLIC_OPENAI_TTS_MODEL || 'gpt-4o-mini-tts'
+      const body = JSON.stringify({
+        model: ttsModel,
+        input: text,
+        voice: 'alloy',
+        format,
+      })
+      const res = await fetch(`${OPENAI_BASE_URL}/audio/speech`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${OPENAI_API_KEY}`,
+        },
+        body,
+      })
+      if (!res.ok) return null
+      // OpenAI returns binary; some gateways return JSON with base64. Try both.
+      const contentType = res.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        const data = await res.json()
+        const b64 = data?.audio || data?.data || null
+        return typeof b64 === 'string' ? b64 : null
+      }
+      const arrayBuffer = await res.arrayBuffer()
+      // Convert to base64
+      let binary = ''
+      const bytes = new Uint8Array(arrayBuffer)
+      const len = bytes.byteLength
+      for (let i = 0; i < len; i++) binary += String.fromCodePoint(bytes[i])
+      // Prefer runtime-safe branch ordering to satisfy lints
+      if (typeof btoa === 'undefined') {
+        return Buffer.from(binary, 'binary').toString('base64')
+      }
+      return btoa(binary)
+    } catch {
+      return null
+    }
+  },
 }
 
 function mockSummary(prompt: string): AISummary {

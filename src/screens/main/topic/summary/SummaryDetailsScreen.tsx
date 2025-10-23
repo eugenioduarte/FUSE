@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import TermSnippetModal from '../../../../components/ui/TermSnippetModal'
 import ExpandableText from '../../../../components/utils/ExpandableText'
 import {
@@ -42,6 +43,7 @@ const SummaryDetailsScreen: React.FC = () => {
   const [snippetTerm, setSnippetTerm] = useState<
     import('../../../../types/domain').ExpandableTerm | null
   >(null)
+  const insets = useSafeAreaInsets()
 
   useEffect(() => {
     let active = true
@@ -370,7 +372,29 @@ const SummaryDetailsScreen: React.FC = () => {
         )}
       </ScrollView>
       <View style={{ height: 12 }} />
-      <View style={{ position: 'absolute', left: 16, right: 16, bottom: 16 }}>
+      <View
+        style={{
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: Math.max(16, insets.bottom + 8),
+          zIndex: 10,
+        }}
+      >
+        <TouchableOpacity
+          onPress={() => navigatorManager.goToSummaryAudio({ summaryId })}
+          style={{
+            backgroundColor: '#8b5cf6',
+            borderRadius: 10,
+            padding: 14,
+            alignItems: 'center',
+            marginBottom: 8,
+          }}
+        >
+          <Text style={{ color: 'white', fontWeight: '700' }}>
+            🎧 Ouvir resumo
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity
           onPress={() => navigatorManager.goToWhiteboard()}
           style={{

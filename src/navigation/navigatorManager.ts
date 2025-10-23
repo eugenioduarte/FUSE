@@ -33,7 +33,7 @@ export type RootStackParamList = {
   }
   TopicAddScreen: undefined
   SummaryScreen: { topicId?: string; seedPrompt?: string } | undefined
-  SummaryAudioScreen: undefined
+  SummaryAudioScreen: { summaryId: string } | undefined
   ProfileScreen: undefined
   ConnectionsScreen: undefined
   PaymentScreen: undefined
@@ -184,9 +184,9 @@ export const navigatorManager = {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.SummaryScreen, params)
   },
-  goToSummaryAudio: () => {
+  goToSummaryAudio: (params: { summaryId: string }) => {
     if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.SummaryAudioScreen)
+      navigationRef.navigate(ROUTES.SummaryAudioScreen, params as any)
   },
 
   // Menu

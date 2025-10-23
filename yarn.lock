@@ -4496,6 +4496,7 @@ __metadata:
     eslint-config-universe: ^15.0.3
     eslint-plugin-prettier: ^5.5.4
     expo: ~53.0.20
+    expo-av: ~14.0.5
     expo-blur: ~14.1.5
     expo-constants: ~17.1.7
     expo-document-picker: ~12.0.1
@@ -6765,6 +6766,15 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: fcbd7b1c1ab665757b3fb8f11592f35f252ada7f093eb70c17461c611347161a4bdd74a4e9717970f62ef191a400e9080426ed199c89042d020abe85007a8c79
+  languageName: node
+  linkType: hard
+
+"expo-av@npm:~14.0.5":
+  version: 14.0.7
+  resolution: "expo-av@npm:14.0.7"
+  peerDependencies:
+    expo: "*"
+  checksum: 7518a8972b0d1b3b362d4dc9c4d21a39c7cf98b46abbdbb2349451115f4edf6e97fb6c723674fd3c62fa037fc77e00172955082d21b1c3fdf5273f33781ce78d
   languageName: node
   linkType: hard
 
