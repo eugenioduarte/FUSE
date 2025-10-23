@@ -109,10 +109,10 @@ export const Header: React.FC = () => {
   return (
     <Animated.View
       key={currentType}
-      entering={SlideInUp.duration(350)
+      entering={SlideInUp.duration(700)
         .easing(Easing.out(Easing.cubic))
         .withInitialValues({ opacity: 0 })}
-      exiting={SlideOutDown.duration(350)
+      exiting={SlideOutDown.duration(500)
         .easing(Easing.in(Easing.cubic))
         .withInitialValues({ opacity: 1 })}
       layout={LinearTransition.duration(220).easing(Easing.inOut(Easing.cubic))}
