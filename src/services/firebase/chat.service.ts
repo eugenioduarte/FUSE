@@ -9,6 +9,7 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 import { useAuthStore } from '../../store/useAuthStore'
+import { getFirebaseAuth } from './authService'
 import { getFirebaseApp } from './firebaseInit'
 
 export type TopicChatMessage = {
@@ -59,10 +60,13 @@ export function listenTopicChat(
  * Send a chat message to a topic. Requires authenticated user.
  */
 export async function sendTopicChatMessage(topicId: string, text: string) {
-  const me = useAuthStore.getState().user
-  if (!me?.id) throw new Error('Not authenticated')
+  // Prefer the authenticated Firebase uid to avoid stale store issues
+  const authUid = getFirebaseAuth().currentUser?.uid || null
+  const storeUid = useAuthStore.getState().user?.id || null
+  const uid = authUid || storeUid
+  if (!uid) throw new Error('Not authenticated')
   const payload = {
-    authorId: me.id,
+    authorId: uid,
     text,
     createdAt: serverTimestamp() as unknown as Timestamp,
   }

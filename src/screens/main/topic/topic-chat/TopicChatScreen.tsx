@@ -13,6 +13,7 @@ import {
 } from 'react-native'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { RootStackParamList } from '../../../../navigation/navigatorManager'
+import { getFirebaseAuth } from '../../../../services/firebase/authService'
 import {
   listenTopicChat,
   sendTopicChatMessage,
@@ -33,14 +34,20 @@ const TopicChatScreen: React.FC = () => {
   useEffect(() => {
     // placeholder side-effect referencing topicId
   }, [topicId])
-  const myUid = useAuthStore((s) => s.user?.id || 'me')
+  const storeUid = useAuthStore((s) => s.user?.id || '')
   const myName = useAuthStore((s) => s.user?.name || 'Você')
+  const authUid = getFirebaseAuth().currentUser?.uid || ''
+  const myUid = storeUid || authUid || ''
 
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [nameByUid, setNameByUid] = useState<Record<string, string>>({
-    [myUid]: myName,
-  })
+  const [nameByUid, setNameByUid] = useState<Record<string, string>>({})
+
+  // Ensure our own name is mapped whenever uid/name changes
+  useEffect(() => {
+    if (!myUid) return
+    setNameByUid((prev) => ({ ...prev, [myUid]: myName }))
+  }, [myUid, myName])
 
   const listRef = useRef<FlatList<ChatMessage>>(null)
 
@@ -105,6 +112,8 @@ const TopicChatScreen: React.FC = () => {
   }
 
   const renderItem: ListRenderItem<ChatMessage> = ({ item }) => {
+    console.log('Rendering message', item)
+    console.log('Rendering message', myUid)
     const isMine = item.authorId === myUid
     const senderName = nameByUid[item.authorId] || item.authorId
     return (
@@ -136,7 +145,7 @@ const TopicChatScreen: React.FC = () => {
         <View
           style={{
             maxWidth: '85%',
-            backgroundColor: isMine ? '#3b82f6' : '#1f2937',
+            backgroundColor: isMine ? '#3b82f6' : 'red',
             borderRadius: 14,
             paddingHorizontal: 12,
             paddingVertical: 8,
