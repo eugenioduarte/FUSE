@@ -115,7 +115,8 @@ const TopicChatScreen: React.FC = () => {
           width: '100%',
           paddingVertical: 6,
           paddingHorizontal: 12,
-          alignItems: isMine ? 'flex-end' : 'flex-start',
+          // Keep row full-width and let the bubble decide alignment
+          alignItems: 'stretch',
         }}
       >
         {isMine ? null : (
@@ -125,6 +126,7 @@ const TopicChatScreen: React.FC = () => {
               fontSize: 11,
               marginBottom: 4,
               marginLeft: 6,
+              alignSelf: 'flex-start',
             }}
             numberOfLines={1}
           >
