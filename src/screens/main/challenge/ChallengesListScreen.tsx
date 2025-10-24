@@ -149,6 +149,50 @@ const ChallengesListScreen: React.FC = () => {
           )
           await flushLocalCollaborativeChanges()
         } catch {}
+        // Backfill: fetch challenges by summaryId directly from Firestore in case
+        // some legacy docs are missing topicId (listener filter)
+        try {
+          if (summaryId) {
+            const { getFirestore, collection, getDocs, query, where } =
+              await import('firebase/firestore')
+            const { getFirebaseApp } = await import(
+              '../../../services/firebase/firebaseInit'
+            )
+            const db = getFirestore(getFirebaseApp())
+            const q = query(
+              collection(db, 'challenges'),
+              where('summaryId', '==', summaryId),
+            )
+            const snap = await getDocs(q)
+            const promises: Promise<any>[] = []
+            for (const d of snap.docs) {
+              const data: any = d.data()
+              const c = {
+                id: d.id,
+                type: data.type,
+                title: data.title,
+                summaryId: data.summaryId,
+                authorId: data.authorId,
+                payload: data.payload,
+                createdAt:
+                  typeof data.createdAt === 'number'
+                    ? data.createdAt
+                    : (data.createdAt?.toMillis?.() ?? Date.now()),
+                updatedAt:
+                  typeof data.updatedAt === 'number'
+                    ? data.updatedAt
+                    : (data.updatedAt?.toMillis?.() ?? Date.now()),
+              } as const
+              promises.push(
+                challengesRepository.upsert(c as any, '/sync/challenge', {
+                  summaryId: c.summaryId,
+                  fromSync: true,
+                }),
+              )
+            }
+            await Promise.all(promises)
+          }
+        } catch {}
         // quick reload similar to useEffect
         try {
           if (!mounted) return

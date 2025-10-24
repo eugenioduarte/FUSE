@@ -189,23 +189,19 @@ const ChallengeRunQuizScreen: React.FC = () => {
     await challengesRepository.upsert(updated, '/sync/challenge', {
       summaryId: challenge.summaryId,
     })
-    // Flush immediately so collaborators see it without needing to refocus
+    // Update UI immediately, then run a capped-time flush to avoid hanging overlay
+    setChallenge(updated)
+    setFinished({ score, total: questions.length })
     try {
       setLoadingOverlay(true, 'Sincronizando…')
-      const { processOfflineQueue } = await import(
-        '../../../services/sync/sync.service'
+      const { immediateCollaborativeFlush } = await import(
+        '../../../services/firebase/immediateFlush'
       )
-      await processOfflineQueue()
-      const { flushLocalCollaborativeChanges } = await import(
-        '../../../services/firebase/collabFlush.service'
-      )
-      await flushLocalCollaborativeChanges()
+      await immediateCollaborativeFlush(1500)
     } catch {
     } finally {
       setLoadingOverlay(false)
     }
-    setChallenge(updated)
-    setFinished({ score, total: questions.length })
   }
 
   if (loading) {
