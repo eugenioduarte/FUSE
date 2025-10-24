@@ -8,8 +8,8 @@ import {
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore'
-import { getFirebaseApp } from './firebaseInit'
 import { useAuthStore } from '../../store/useAuthStore'
+import { getFirebaseApp } from './firebaseInit'
 
 export type TopicChatMessage = {
   id: string

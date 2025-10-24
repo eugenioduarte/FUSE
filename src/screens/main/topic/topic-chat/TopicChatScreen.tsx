@@ -1,4 +1,5 @@
 import { RouteProp, useRoute } from '@react-navigation/native'
+import { doc, getDoc, getFirestore } from 'firebase/firestore'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   FlatList,
@@ -12,12 +13,13 @@ import {
 } from 'react-native'
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { RootStackParamList } from '../../../../navigation/navigatorManager'
-import { useAuthStore } from '../../../../store/useAuthStore'
 import {
   listenTopicChat,
   sendTopicChatMessage,
   TopicChatMessage,
 } from '../../../../services/firebase/chat.service'
+import { getFirebaseApp } from '../../../../services/firebase/firebaseInit'
+import { useAuthStore } from '../../../../store/useAuthStore'
 
 // Simple local message shape for mock/chat simulation
 type ChatMessage = TopicChatMessage
@@ -32,9 +34,13 @@ const TopicChatScreen: React.FC = () => {
     // placeholder side-effect referencing topicId
   }, [topicId])
   const myUid = useAuthStore((s) => s.user?.id || 'me')
+  const myName = useAuthStore((s) => s.user?.name || 'Você')
 
   const [input, setInput] = useState('')
   const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [nameByUid, setNameByUid] = useState<Record<string, string>>({
+    [myUid]: myName,
+  })
 
   const listRef = useRef<FlatList<ChatMessage>>(null)
 
@@ -57,6 +63,35 @@ const TopicChatScreen: React.FC = () => {
     }
   }, [topicId])
 
+  // Resolve display names for other participants (from users/{uid})
+  useEffect(() => {
+    const others = messages
+      .map((m) => m.authorId)
+      .filter((uid) => uid && uid !== myUid)
+    const unique = Array.from(new Set(others))
+    const missing = unique.filter((uid) => !(uid in nameByUid))
+    if (missing.length === 0) return
+    const loadNames = async () => {
+      const db = getFirestore(getFirebaseApp())
+      const updates: Record<string, string> = {}
+      for (const uid of missing) {
+        try {
+          const snap = await getDoc(doc(db, 'users', uid))
+          if (snap.exists()) {
+            const data: any = snap.data()
+            updates[uid] = data?.name || data?.email || uid
+          } else {
+            updates[uid] = uid
+          }
+        } catch {
+          updates[uid] = uid
+        }
+      }
+      setNameByUid((prev) => ({ ...prev, ...updates }))
+    }
+    loadNames()
+  }, [messages, myUid, nameByUid])
+
   const onSend = async () => {
     const text = input.trim()
     if (!text) return
@@ -71,16 +106,31 @@ const TopicChatScreen: React.FC = () => {
 
   const renderItem: ListRenderItem<ChatMessage> = ({ item }) => {
     const isMine = item.authorId === myUid
+    const senderName = nameByUid[item.authorId] || item.authorId
     return (
       <AnimatedView
         entering={FadeIn.duration(150)}
         exiting={FadeOut.duration(120)}
         style={{
+          width: '100%',
           paddingVertical: 6,
           paddingHorizontal: 12,
           alignItems: isMine ? 'flex-end' : 'flex-start',
         }}
       >
+        {isMine ? null : (
+          <Text
+            style={{
+              color: 'rgba(255,255,255,0.8)',
+              fontSize: 11,
+              marginBottom: 4,
+              marginLeft: 6,
+            }}
+            numberOfLines={1}
+          >
+            {senderName}
+          </Text>
+        )}
         <View
           style={{
             maxWidth: '85%',
@@ -88,17 +138,30 @@ const TopicChatScreen: React.FC = () => {
             borderRadius: 14,
             paddingHorizontal: 12,
             paddingVertical: 8,
+            borderTopLeftRadius: isMine ? 14 : 4,
+            borderTopRightRadius: isMine ? 4 : 14,
+            alignSelf: isMine ? 'flex-end' : 'flex-start',
+            marginLeft: isMine ? 48 : 0,
+            marginRight: isMine ? 0 : 48,
           }}
         >
           <Text style={{ color: 'white' }}>{item.text}</Text>
           <Text
             style={{
+              width: '100%',
               color: 'rgba(255,255,255,0.6)',
               fontSize: 10,
               marginTop: 4,
+              textAlign: isMine ? 'right' : 'left',
             }}
           >
-            {new Date(item.createdAt).toLocaleTimeString()}
+            {(item.createdAt
+              ? // Firestore Timestamp or number/date string handling
+                typeof (item as any).createdAt?.toDate === 'function'
+                ? (item as any).createdAt.toDate()
+                : new Date(item.createdAt as any)
+              : new Date()
+            ).toLocaleTimeString()}
           </Text>
         </View>
       </AnimatedView>
@@ -157,6 +220,7 @@ const TopicChatScreen: React.FC = () => {
               borderRadius: 10,
               paddingHorizontal: 12,
               paddingVertical: 8,
+              marginBottom: 50,
             }}
           />
           <TouchableOpacity
