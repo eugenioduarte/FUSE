@@ -22,6 +22,7 @@ export type TopicChatMessage = {
 function db() {
   return getFirestore(getFirebaseApp())
 }
+const DEBUG_CHAT = false
 
 function mapChatDoc(d: any): TopicChatMessage {
   const data = d.data()
@@ -64,6 +65,12 @@ export async function sendTopicChatMessage(topicId: string, text: string) {
   const authUid = getFirebaseAuth().currentUser?.uid || null
   const storeUid = useAuthStore.getState().user?.id || null
   const uid = authUid || storeUid
+  // Debug: trace which uid we are sending as
+  if (__DEV__ && DEBUG_CHAT) {
+    try {
+      console.log('[chat] sendTopicChatMessage uid', { authUid, storeUid, uid })
+    } catch {}
+  }
   if (!uid) throw new Error('Not authenticated')
   const payload = {
     authorId: uid,

@@ -26,6 +26,7 @@ import { useAuthStore } from '../../../../store/useAuthStore'
 type ChatMessage = TopicChatMessage
 
 const AnimatedView = Animated.View
+const DEBUG_CHAT = false
 
 const TopicChatScreen: React.FC = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'TopicChatScreen'>>()
@@ -112,9 +113,21 @@ const TopicChatScreen: React.FC = () => {
   }
 
   const renderItem: ListRenderItem<ChatMessage> = ({ item }) => {
-    console.log('Rendering message', item)
-    console.log('Rendering message', myUid)
+    if (__DEV__ && DEBUG_CHAT) {
+      console.log('Rendering message', item)
+      console.log('Rendering message', myUid)
+    }
     const isMine = item.authorId === myUid
+    if (__DEV__ && DEBUG_CHAT) {
+      try {
+        console.log('[chat] render item', {
+          id: item.id,
+          authorId: item.authorId,
+          myUid,
+          isMine,
+        })
+      } catch {}
+    }
     const senderName = nameByUid[item.authorId] || item.authorId
     return (
       <AnimatedView
@@ -145,7 +158,7 @@ const TopicChatScreen: React.FC = () => {
         <View
           style={{
             maxWidth: '85%',
-            backgroundColor: isMine ? '#3b82f6' : 'red',
+            backgroundColor: isMine ? '#3b82f6' : '#1f2937',
             borderRadius: 14,
             paddingHorizontal: 12,
             paddingVertical: 8,

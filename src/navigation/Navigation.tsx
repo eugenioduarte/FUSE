@@ -53,7 +53,7 @@ import SummaryAudioScreen from '../screens/main/topic/summary/SummaryAudioScreen
 import SummaryDetailsScreen from '../screens/main/topic/summary/SummaryDetailsScreen'
 import SummaryScreen from '../screens/main/topic/summary/SummaryScreen'
 import TopicAddScreen from '../screens/main/topic/topic-add/TopicAddScreen'
-import TopicChatScreen from '../screens/main/topic/topic-chat'
+import TopicChatScreen from '../screens/main/topic/topic-chat/TopicChatScreen'
 import TopicDetailsScreen, {
   TopicRankingScreen,
 } from '../screens/main/topic/topic-details'
