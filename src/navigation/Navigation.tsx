@@ -30,6 +30,7 @@ import TopicScreen from '../screens/main/topic/TopicScreen'
 import CalendarScreen from '../screens/CalendarScreen/CalendarScreen'
 import CalendarAddScreen from '../screens/main/calendar/CalendarAddScreen'
 import CalendarDetailsScreen from '../screens/main/calendar/CalendarDetailsScreen'
+import CalendarEditScreen from '../screens/main/calendar/CalendarEditScreen'
 
 // Challenge
 import ChallengeAddHangmanScreen from '../screens/main/challenge/challenge-add/ChallengeAddHangmanScreen'
@@ -71,15 +72,28 @@ import EditOverlay from '../screens/main/utils/edit-overlay/EditOverlay'
 import ErrorOverlay from '../screens/main/utils/error-overlay/ErrorOverlay'
 import FastWayOverlay from '../screens/main/utils/fast-way-overlay/FastWayOverlay'
 import LoadingOverlay from '../screens/main/utils/loading-overlay/LoadingOverlay'
+import NotificationOverlay from '../screens/main/utils/notification-overlay/NotificationOverlay'
 import SuccessOverlay from '../screens/main/utils/success-overlay/SuccessOverlay'
 import {
   initFirebaseAuthListener,
   waitForAuthReady,
 } from '../services/firebase/authService'
 import {
+  acceptCalendarEvent,
+  listenCalendarForUser,
+} from '../services/firebase/calendar.service'
+import {
   startCollabSyncForUser,
   triggerInitialCollaborativeSync,
 } from '../services/firebase/collabSync.service'
+import {
+  decideNotification,
+  decideNotificationTopLevel,
+  listenUserNotifications,
+  listenUserNotificationsTopLevel,
+} from '../services/firebase/notifications.service'
+import { registerForPushNotificationsAsync } from '../services/push/expoPush.service'
+import { useCalendarStore } from '../store/useCalendarStore'
 import { useOverlay } from '../store/useOverlay'
 import { RootStackParamList } from './navigatorManager'
 
@@ -185,6 +199,11 @@ function MainStack() {
         component={CalendarDetailsScreen}
         options={{ title: ROUTES.CalendarDetailsScreen }}
       />
+      <Stack.Screen
+        name={ROUTES.CalendarEditScreen}
+        component={CalendarEditScreen}
+        options={{ title: ROUTES.CalendarEditScreen }}
+      />
 
       {/* Challenge */}
       <Stack.Screen
@@ -226,6 +245,11 @@ function MainStack() {
         options={{ title: ROUTES.ChallengeReviewTextAnswerScreen }}
       />
       <Stack.Screen
+        name={ROUTES.ChallengeReviewHangmanScreen}
+        component={ChallengeReviewHangmanScreen}
+        options={{ title: ROUTES.ChallengeReviewHangmanScreen }}
+      />
+      <Stack.Screen
         name={ROUTES.ChallengeAddTextAnswerScreen}
         component={ChallengeAddTextAnswerScreen}
         options={{ title: ROUTES.ChallengeAddTextAnswerScreen }}
@@ -249,11 +273,6 @@ function MainStack() {
         name={ROUTES.ChallengeReviewQuizScreen}
         component={ChallengeReviewQuizScreen}
         options={{ title: ROUTES.ChallengeReviewQuizScreen }}
-      />
-      <Stack.Screen
-        name={ROUTES.ChallengeReviewHangmanScreen}
-        component={ChallengeReviewHangmanScreen}
-        options={{ title: ROUTES.ChallengeReviewHangmanScreen }}
       />
       <Stack.Screen
         name={ROUTES.ChallengeRunMatrixScreen}
@@ -346,6 +365,131 @@ export default function Navigation() {
 
   const setHeaderConfig = useThemeStore((s) => s.setHeaderConfig)
   const { user, rehydrated } = useAuthStore()
+  const setNotificationOverlay = useOverlay((s) => s.setNotificationOverlay)
+
+  // Build a stable notification handler with minimal nesting
+  const buildNotificationHandler = React.useCallback(
+    (uid: string) => {
+      const shown = new Set<string>()
+      return (
+        list: import('../services/firebase/notifications.service').AppNotification[],
+      ) => {
+        const pending = list.find(
+          (n) => n.status === 'pending' && !shown.has(n.id),
+        )
+        if (!pending) return
+        shown.add(pending.id)
+        // If it's a calendar invite, prefer server accept (eventId) and never show to inviter
+        if (pending.type === 'calendar_invite' && pending.event) {
+          if (pending.event.invitedBy === uid) return
+          const ev = pending.event
+          setNotificationOverlay({
+            id: pending.id,
+            title: pending.title,
+            body: pending.body,
+            requireDecision: !!pending.requireDecision,
+            acceptLabel: pending.acceptLabel,
+            denyLabel: pending.denyLabel,
+            onAccept: () => {
+              if (ev.eventId) {
+                void acceptCalendarEvent(ev.eventId, uid)
+              } else {
+                // Fallback to local add if no eventId present
+                const add = useCalendarStore.getState().addAppointment
+                add({
+                  date: ev.date,
+                  title: ev.title,
+                  description: ev.description || '',
+                  topicId: ev.topicId,
+                  summaryId: ev.summaryId,
+                  time: ev.time,
+                })
+              }
+              void decideNotification(uid, pending.id, 'accepted')
+            },
+            onDeny: () => {
+              void decideNotification(uid, pending.id, 'denied')
+            },
+            onClose: () => {
+              // For invite, treat close as deny unless accepted
+              void decideNotification(uid, pending.id, 'denied')
+            },
+          })
+          return
+        }
+        // Default notification overlay
+        setNotificationOverlay({
+          id: pending.id,
+          title: pending.title,
+          body: pending.body,
+          requireDecision: !!pending.requireDecision,
+          acceptLabel: pending.acceptLabel,
+          denyLabel: pending.denyLabel,
+        })
+      }
+    },
+    [setNotificationOverlay],
+  )
+
+  // Back-compat handler for top-level notifications (root collection)
+  const buildTopLevelNotificationHandler = React.useCallback(
+    (uid: string) => {
+      const shown = new Set<string>()
+      return (
+        list: import('../services/firebase/notifications.service').AppNotification[],
+      ) => {
+        const pending = list.find(
+          (n) => n.status === 'pending' && !shown.has(n.id),
+        )
+        if (!pending) return
+        shown.add(pending.id)
+        if (pending.type === 'calendar_invite' && pending.event) {
+          if (pending.event.invitedBy === uid) return
+          const ev = pending.event
+          setNotificationOverlay({
+            id: pending.id,
+            title: pending.title,
+            body: pending.body,
+            requireDecision: !!pending.requireDecision,
+            acceptLabel: pending.acceptLabel,
+            denyLabel: pending.denyLabel,
+            onAccept: () => {
+              if (ev.eventId) {
+                void acceptCalendarEvent(ev.eventId, uid)
+              } else {
+                const add = useCalendarStore.getState().addAppointment
+                add({
+                  date: ev.date,
+                  title: ev.title,
+                  description: ev.description || '',
+                  topicId: ev.topicId,
+                  summaryId: ev.summaryId,
+                  time: ev.time,
+                })
+              }
+              void decideNotificationTopLevel(pending.id, 'accepted')
+            },
+            onDeny: () => {
+              void decideNotificationTopLevel(pending.id, 'denied')
+            },
+            onClose: () => {
+              void decideNotificationTopLevel(pending.id, 'denied')
+            },
+          })
+          return
+        }
+        setNotificationOverlay({
+          id: pending.id,
+          title: pending.title,
+          body: pending.body,
+          requireDecision: !!pending.requireDecision,
+          acceptLabel: pending.acceptLabel,
+          denyLabel: pending.denyLabel,
+        })
+      }
+    },
+    [setNotificationOverlay],
+  )
 
   // Attach Firebase auth listener once on mount
   useEffect(() => {
@@ -360,8 +504,24 @@ export default function Navigation() {
   useEffect(() => {
     // When authenticated and nav ready, start collaborative listeners and do an initial refresh
     if (rehydrated && authReady && user?.id) {
-      const stop = startCollabSyncForUser(user.id)
+      const uid = user.id
+      const stop = startCollabSyncForUser(uid)
       triggerInitialCollaborativeSync().catch(() => {})
+      // Register device for push notifications (fire and forget)
+      registerForPushNotificationsAsync(uid).catch(() => {})
+      // Listen to user notifications in real-time and show overlay when pending
+      const handler = buildNotificationHandler(uid)
+      const handlerTop = buildTopLevelNotificationHandler(uid)
+      const unSubNotif = listenUserNotifications(uid, handler)
+      const unSubTop = listenUserNotificationsTopLevel(uid, handlerTop)
+      // Calendar realtime sync: events owned by me or accepted by me
+      const unSubCal = listenCalendarForUser(uid, (chg) => {
+        if (chg.type === 'removed') {
+          useCalendarStore.getState().removeAppointment(chg.event.id)
+        } else {
+          useCalendarStore.getState().addOrUpdate(chg.event)
+        }
+      })
 
       // Refresh when app comes to foreground
       const sub = AppState.addEventListener('change', (state) => {
@@ -376,9 +536,25 @@ export default function Navigation() {
         try {
           sub.remove()
         } catch {}
+        try {
+          unSubNotif()
+        } catch {}
+        try {
+          unSubTop()
+        } catch {}
+        try {
+          unSubCal()
+        } catch {}
       }
     }
-  }, [rehydrated, authReady, user?.id])
+  }, [
+    rehydrated,
+    authReady,
+    user?.id,
+    setNotificationOverlay,
+    buildNotificationHandler,
+    buildTopLevelNotificationHandler,
+  ])
 
   if (!rehydrated || !authReady) {
     return (
@@ -400,6 +576,11 @@ export default function Navigation() {
       <Header />
       <NavigationContainer
         ref={navigationRef}
+        onReady={() => {
+          const route = navigationRef.getCurrentRoute()
+          const name = (route?.name ?? '') as RouteName
+          setHeaderConfig(name)
+        }}
         onStateChange={() => {
           const route = navigationRef.getCurrentRoute()
           const name = (route?.name ?? '') as RouteName
@@ -418,6 +599,7 @@ export default function Navigation() {
           <Drawer.Screen name={DRAWER_APP} component={MainStack} />
         </Drawer.Navigator>
       </NavigationContainer>
+      <NotificationOverlay />
       <OverlayHost />
     </>
   )

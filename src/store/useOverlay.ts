@@ -21,11 +21,23 @@ interface OverlayState {
   successOverlay: boolean
   successMessage?: string
   editOverlay: EditOverlayPayload | null
+  notificationOverlay: {
+    id: string
+    title?: string
+    body?: string
+    requireDecision?: boolean
+    acceptLabel?: string
+    denyLabel?: string
+    onAccept?: () => void
+    onDeny?: () => void
+    onClose?: () => void
+  } | null
   setErrorOverlay: (visible: boolean, message?: string) => void
   setFastWayOverlay: (visible: boolean) => void
   setLoadingOverlay: (visible: boolean, message?: string) => void
   setSuccessOverlay: (visible: boolean, message?: string) => void
   setEditOverlay: (payload: EditOverlayPayload | null) => void
+  setNotificationOverlay: (payload: OverlayState['notificationOverlay']) => void
 }
 
 export const useOverlay = create<OverlayState>((set) => ({
@@ -37,6 +49,7 @@ export const useOverlay = create<OverlayState>((set) => ({
   successOverlay: false,
   successMessage: undefined,
   editOverlay: null,
+  notificationOverlay: null,
 
   setErrorOverlay: (visible, message) =>
     set({ errorOverlay: visible, errorMessage: message }),
@@ -46,4 +59,5 @@ export const useOverlay = create<OverlayState>((set) => ({
   setSuccessOverlay: (visible, message) =>
     set({ successOverlay: visible, successMessage: message }),
   setEditOverlay: (payload) => set({ editOverlay: payload }),
+  setNotificationOverlay: (payload) => set({ notificationOverlay: payload }),
 }))

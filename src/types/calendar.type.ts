@@ -1,5 +1,8 @@
 export type CalendarCommitment = {
   id: string
+  ownerUid?: string
+  participants?: string[]
+  accepted?: string[]
   topicId?: string
   summaryId?: string
   title: string

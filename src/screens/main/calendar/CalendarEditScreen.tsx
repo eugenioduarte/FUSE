@@ -27,32 +27,33 @@ import { topicsRepository } from '../../../services/repositories/topics.reposito
 import { useAuthStore } from '../../../store/useAuthStore'
 import { useCalendarStore } from '../../../store/useCalendarStore'
 import type { Summary, Topic } from '../../../types/domain'
-import ReactMemo = React.memo
 
-type CalendarAddRoute = RouteProp<RootStackParamList, 'CalendarAddScreen'>
+type CalendarEditRoute = RouteProp<RootStackParamList, 'CalendarEditScreen'>
 
-const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`)
+const CalendarEditScreen: React.FC = () => {
+  const route = useRoute<CalendarEditRoute>()
+  const eventId = route.params?.id
 
-const EmptyListText: React.FC<{ text: string }> = ({ text }) => (
-  <Text style={styles.helperText}>{text}</Text>
-)
+  const events = useCalendarStore((s) => s.events)
+  const editAppointment = useCalendarStore((s) => s.editAppointment)
+  const setSelectedDate = useCalendarStore((s) => s.setSelectedDate)
+  const me = useAuthStore((s) => s.user)
 
-const CalendarAddScreen: React.FC = () => {
-  const route = useRoute<CalendarAddRoute>()
-  const preselected = route.params?.date
-  const todayYmd = useMemo(() => {
-    const now = new Date()
-    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`
-  }, [])
+  const current = useMemo(
+    () => events.find((e) => e.id === eventId),
+    [events, eventId],
+  )
 
-  const date = preselected || todayYmd
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [time, setTime] = useState('')
+  const date = current?.date || ''
+  const [title, setTitle] = useState(current?.title || '')
+  const [description, setDescription] = useState(current?.description || '')
+  const [time, setTime] = useState(current?.time || '')
   const [topics, setTopics] = useState<Topic[]>([])
-  const [topicId, setTopicId] = useState<string | undefined>(undefined)
+  const [topicId, setTopicId] = useState<string | undefined>(current?.topicId)
   const [summaries, setSummaries] = useState<Summary[]>([])
-  const [summaryId, setSummaryId] = useState<string | undefined>(undefined)
+  const [summaryId, setSummaryId] = useState<string | undefined>(
+    current?.summaryId,
+  )
   const [connections, setConnections] = useState<PublicUser[]>([])
   const [selectedInviteUids, setSelectedInviteUids] = useState<string[]>([])
   const [inviteBusy, setInviteBusy] = useState(false)
@@ -63,10 +64,6 @@ const CalendarAddScreen: React.FC = () => {
       prev.includes(uid) ? prev.filter((id) => id !== uid) : [...prev, uid],
     )
   }, [])
-
-  // const addAppointment = useCalendarStore((s) => s.addAppointment) // no longer used; unified to Firestore
-  const setSelectedDate = useCalendarStore((s) => s.setSelectedDate)
-  const me = useAuthStore((s) => s.user)
 
   useEffect(() => {
     ;(async () => {
@@ -95,29 +92,41 @@ const CalendarAddScreen: React.FC = () => {
   }, [topicId])
 
   const onSave = async () => {
+    if (!current) return
     if (!title.trim()) return
     const t = normalizeTime(time)
-    const ownerUid = me?.id || getCurrentUser()?.uid
-    if (!ownerUid) {
-      setInviteError('Não autenticado. Tente entrar novamente.')
-      return
-    }
-    setInviteBusy(true)
-    setInviteError(null)
-    try {
-      const eventId = await createSharedEvent(
-        ownerUid,
-        {
-          title: title.trim(),
-          description: description.trim(),
-          date,
-          time: t || undefined,
-          topicId,
-          summaryId,
-        },
-        selectedInviteUids,
-      )
-      if (selectedInviteUids.length > 0) {
+    editAppointment(current.id, {
+      date,
+      title: title.trim(),
+      description: description.trim(),
+      topicId,
+      summaryId,
+      time: t || undefined,
+    })
+    setSelectedDate(date)
+
+    // Optional invite flow - only connections (create shared event and notify)
+    if (selectedInviteUids.length > 0) {
+      const ownerUid = me?.id || getCurrentUser()?.uid
+      if (!ownerUid) {
+        setInviteError('Não autenticado. Tente entrar novamente.')
+        return
+      }
+      setInviteBusy(true)
+      setInviteError(null)
+      try {
+        const eventId = await createSharedEvent(
+          ownerUid,
+          {
+            title: title.trim(),
+            description: description.trim(),
+            date,
+            time: t || undefined,
+            topicId,
+            summaryId,
+          },
+          selectedInviteUids,
+        )
         await Promise.all(
           selectedInviteUids.map((toUid) =>
             pushCalendarInviteToUid(toUid, {
@@ -132,14 +141,14 @@ const CalendarAddScreen: React.FC = () => {
             }),
           ),
         )
+      } catch (e: any) {
+        setInviteError(e?.message || 'Falha ao enviar convite')
+      } finally {
+        setInviteBusy(false)
       }
-      setSelectedDate(date)
-      navigatorManager.goBack()
-    } catch (e: any) {
-      setInviteError(e?.message || 'Falha ao criar compromisso')
-    } finally {
-      setInviteBusy(false)
     }
+
+    navigatorManager.goBack()
   }
 
   // Accepts formats like HH:mm, H:mm and validates 00-23/00-59; returns normalized HH:mm or null
@@ -165,9 +174,17 @@ const CalendarAddScreen: React.FC = () => {
     return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`
   }
 
+  if (!current) {
+    return (
+      <View style={styles.screen}>
+        <Text style={styles.header}>Compromisso não encontrado</Text>
+      </View>
+    )
+  }
+
   return (
     <View style={styles.screen}>
-      <Text style={styles.header}>Novo compromisso</Text>
+      <Text style={styles.header}>Editar compromisso</Text>
 
       <Text style={styles.label}>Data</Text>
       <View style={styles.readonlyBox}>
@@ -241,13 +258,6 @@ const CalendarAddScreen: React.FC = () => {
             </TouchableOpacity>
           )
         }}
-        ListEmptyComponent={
-          <EmptyListText
-            text={
-              topicId ? 'Sem resumos para este tópico.' : 'Selecione um tópico.'
-            }
-          />
-        }
       />
 
       <Text style={styles.label}>Convidar (apenas conexões)</Text>
@@ -262,12 +272,23 @@ const CalendarAddScreen: React.FC = () => {
           keyExtractor={(u) => u.uid}
           contentContainerStyle={{ paddingVertical: 6 }}
           renderItem={({ item }) => (
-            <InviteChip
-              key={item.uid}
-              user={item}
-              selected={selectedInviteUids.includes(item.uid)}
-              onToggle={handleToggleInvite}
-            />
+            <TouchableOpacity
+              style={[
+                styles.pill,
+                selectedInviteUids.includes(item.uid) && styles.pillActive,
+              ]}
+              onPress={() => handleToggleInvite(item.uid)}
+            >
+              <Text
+                style={[
+                  styles.pillText,
+                  selectedInviteUids.includes(item.uid) &&
+                    styles.pillTextActive,
+                ]}
+              >
+                {item.name || item.email || item.uid}
+              </Text>
+            </TouchableOpacity>
           )}
         />
       )}
@@ -276,38 +297,17 @@ const CalendarAddScreen: React.FC = () => {
       )}
 
       <TouchableOpacity
-        style={styles.saveBtn}
+        style={[styles.saveBtn, inviteBusy && { opacity: 0.7 }]}
         onPress={onSave}
         disabled={inviteBusy}
       >
-        <Text style={styles.saveBtnText}>Salvar</Text>
+        <Text style={styles.saveBtnText}>Salvar alterações</Text>
       </TouchableOpacity>
     </View>
   )
 }
 
-export default CalendarAddScreen
-
-type InviteChipProps = {
-  user: PublicUser
-  selected: boolean
-  onToggle: (uid: string) => void
-}
-
-const InviteChip: React.FC<InviteChipProps> = ReactMemo(
-  ({ user, selected, onToggle }) => {
-    return (
-      <TouchableOpacity
-        style={[styles.pill, selected && styles.pillActive]}
-        onPress={() => onToggle(user.uid)}
-      >
-        <Text style={[styles.pillText, selected && styles.pillTextActive]}>
-          {user.name || user.email || user.uid}
-        </Text>
-      </TouchableOpacity>
-    )
-  },
-)
+export default CalendarEditScreen
 
 const styles = StyleSheet.create<{
   screen: ViewStyle

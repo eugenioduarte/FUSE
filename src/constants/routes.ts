@@ -8,6 +8,7 @@ export const ROUTES = {
   CalendarScreen: 'CalendarScreen',
   CalendarAddScreen: 'CalendarAddScreen',
   CalendarDetailsScreen: 'CalendarDetailsScreen',
+  CalendarEditScreen: 'CalendarEditScreen',
   // Main - Challenge
   ChallengeScreen: 'ChallengeScreen',
   ChallengeAddScreen: 'ChallengeAddScreen',

@@ -13,6 +13,7 @@ import { Colors, spacings, typography } from '../../constants/theme'
 import { navigatorManager } from '../../navigation/navigatorManager'
 import { summariesRepository } from '../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../services/repositories/topics.repository'
+import { useAuthStore } from '../../store/useAuthStore'
 import { useCalendarStore } from '../../store/useCalendarStore'
 import type { Summary, Topic } from '../../types/domain'
 
@@ -87,6 +88,7 @@ const CalendarScreen: React.FC = () => {
   const removeAppointment = useCalendarStore((s) => s.removeAppointment)
   // Subscribe to events so the screen re-renders immediately after adding
   const events = useCalendarStore((s) => s.events)
+  const me = useAuthStore((s) => s.user)
 
   // Month navigation state
   const [currentMonth, setCurrentMonth] = useState<Date>(() => {
@@ -144,6 +146,17 @@ const CalendarScreen: React.FC = () => {
     topics.find((t) => t.id === id)?.title || '—'
   const summaryName = (_topicId?: string, summaryId?: string) =>
     summaryId ? summariesAll.find((s) => s.id === summaryId)?.title || '—' : '—'
+
+  const isPendingForMe = (
+    ev: import('../../types/calendar.type').CalendarCommitment,
+  ) => {
+    const myId = me?.id
+    if (!myId) return false
+    if (ev.ownerUid === myId) return false
+    const accepted = ev.accepted || []
+    const participants = ev.participants || []
+    return participants.includes(myId) && !accepted.includes(myId)
+  }
 
   // Month header helpers
   const monthNames = [
@@ -213,7 +226,14 @@ const CalendarScreen: React.FC = () => {
               keyExtractor={(i) => i.id}
               renderItem={({ item }) => (
                 <View style={styles.card}>
-                  <Text style={styles.title}>{item.title}</Text>
+                  <View style={styles.titleRow}>
+                    <Text style={styles.title}>{item.title}</Text>
+                    {isPendingForMe(item) ? (
+                      <View style={styles.badge}>
+                        <Text style={styles.badgeText}>Pendente</Text>
+                      </View>
+                    ) : null}
+                  </View>
                   {!!item.description && (
                     <Text style={styles.desc}>{item.description}</Text>
                   )}
@@ -229,6 +249,13 @@ const CalendarScreen: React.FC = () => {
                       marginTop: spacings.small,
                     }}
                   >
+                    <TouchableOpacity
+                      onPress={() =>
+                        navigatorManager.goToCalendarEdit({ id: item.id })
+                      }
+                    >
+                      <Text style={styles.link}>Editar</Text>
+                    </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => removeAppointment(item.id)}
                     >
@@ -267,9 +294,12 @@ const styles = StyleSheet.create<{
   emptyText: TextStyle
   card: ViewStyle
   title: TextStyle
+  titleRow: ViewStyle
   desc: TextStyle
   meta: TextStyle
   link: TextStyle
+  badge: ViewStyle
+  badgeText: TextStyle
   // removed inline form styles
 }>({
   screen: {
@@ -338,6 +368,21 @@ const styles = StyleSheet.create<{
     color: '#000',
     ...(typography.large as unknown as TextStyle),
   },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 8,
+  },
+  badge: {
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: '#F59E0B',
+  },
+  badgeText: { color: '#92400E', fontWeight: '700' },
   desc: { color: '#000', opacity: 0.8, marginTop: 4 },
   meta: { color: '#000', opacity: 0.7, marginTop: 6 },
   link: { color: '#1d4ed8', fontWeight: '700' },

@@ -11,6 +11,7 @@ export type RootStackParamList = {
   CalendarScreen: undefined
   CalendarAddScreen: { date?: string } | undefined
   CalendarDetailsScreen: undefined
+  CalendarEditScreen: { id: string }
   ChallengeScreen: undefined
   ChallengeAddScreen: { summaryId?: string } | undefined
   ChallengeAddHangmanScreen: { summaryId?: string } | undefined
@@ -98,6 +99,10 @@ export const navigatorManager = {
   goToCalendarDetails: () => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.CalendarDetailsScreen)
+  },
+  goToCalendarEdit: (params: { id: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.CalendarEditScreen, params)
   },
 
   // Challenge
