@@ -11,13 +11,13 @@ import {
 } from 'react-native'
 import { Colors, spacings, typography } from '../../constants/theme'
 import { navigatorManager } from '../../navigation/navigatorManager'
-import { summariesRepository } from '../../services/repositories/summaries.repository'
-import { topicsRepository } from '../../services/repositories/topics.repository'
-import { useAuthStore } from '../../store/useAuthStore'
 import {
   deleteOwnedCalendarEvent,
   leaveCalendarEvent,
 } from '../../services/firebase/calendar.service'
+import { summariesRepository } from '../../services/repositories/summaries.repository'
+import { topicsRepository } from '../../services/repositories/topics.repository'
+import { useAuthStore } from '../../store/useAuthStore'
 import { useCalendarStore } from '../../store/useCalendarStore'
 import type { Summary, Topic } from '../../types/domain'
 
