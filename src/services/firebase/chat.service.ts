@@ -1,0 +1,70 @@
+import {
+  addDoc,
+  collection,
+  getFirestore,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+  Timestamp,
+} from 'firebase/firestore'
+import { getFirebaseApp } from './firebaseInit'
+import { useAuthStore } from '../../store/useAuthStore'
+
+export type TopicChatMessage = {
+  id: string
+  authorId: string
+  text: string
+  createdAt: number
+}
+
+function db() {
+  return getFirestore(getFirebaseApp())
+}
+
+function mapChatDoc(d: any): TopicChatMessage {
+  const data = d.data()
+  const createdAt: number =
+    typeof data.createdAt === 'number'
+      ? data.createdAt
+      : (data.createdAt?.toMillis?.() ?? Date.now())
+  return {
+    id: d.id,
+    authorId: String(data.authorId || ''),
+    text: String(data.text || ''),
+    createdAt,
+  }
+}
+
+export type Unsubscribe = () => void
+
+/**
+ * Listen to a topic chat in real-time. Emits sorted messages (oldest first).
+ */
+export function listenTopicChat(
+  topicId: string,
+  onMessages: (msgs: TopicChatMessage[]) => void,
+): Unsubscribe {
+  const q = query(
+    collection(db(), 'topics', topicId, 'chat'),
+    orderBy('createdAt', 'asc'),
+  )
+  return onSnapshot(q, (snap) => {
+    const list: TopicChatMessage[] = snap.docs.map(mapChatDoc)
+    onMessages(list)
+  })
+}
+
+/**
+ * Send a chat message to a topic. Requires authenticated user.
+ */
+export async function sendTopicChatMessage(topicId: string, text: string) {
+  const me = useAuthStore.getState().user
+  if (!me?.id) throw new Error('Not authenticated')
+  const payload = {
+    authorId: me.id,
+    text,
+    createdAt: serverTimestamp() as unknown as Timestamp,
+  }
+  await addDoc(collection(db(), 'topics', topicId, 'chat'), payload as any)
+}

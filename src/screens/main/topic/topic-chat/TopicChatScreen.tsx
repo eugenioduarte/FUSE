@@ -13,14 +13,14 @@ import {
 import Animated, { FadeIn, FadeOut } from 'react-native-reanimated'
 import { RootStackParamList } from '../../../../navigation/navigatorManager'
 import { useAuthStore } from '../../../../store/useAuthStore'
+import {
+  listenTopicChat,
+  sendTopicChatMessage,
+  TopicChatMessage,
+} from '../../../../services/firebase/chat.service'
 
 // Simple local message shape for mock/chat simulation
-interface ChatMessage {
-  id: string
-  authorId: string
-  text: string
-  createdAt: number
-}
+type ChatMessage = TopicChatMessage
 
 const AnimatedView = Animated.View
 
@@ -34,20 +34,7 @@ const TopicChatScreen: React.FC = () => {
   const myUid = useAuthStore((s) => s.user?.id || 'me')
 
   const [input, setInput] = useState('')
-  const [messages, setMessages] = useState<ChatMessage[]>(() => [
-    {
-      id: '1',
-      authorId: 'friend',
-      text: 'Bem-vindo ao chat do tópico! 👋',
-      createdAt: Date.now() - 10000,
-    },
-    {
-      id: '2',
-      authorId: myUid,
-      text: 'Valeu! Vamos discutir as ideias por aqui.',
-      createdAt: Date.now() - 5000,
-    },
-  ])
+  const [messages, setMessages] = useState<ChatMessage[]>([])
 
   const listRef = useRef<FlatList<ChatMessage>>(null)
 
@@ -58,19 +45,28 @@ const TopicChatScreen: React.FC = () => {
         listRef.current?.scrollToEnd({ animated: true })
       } catch {}
     })
-  }, [messages])
+  }, [messages.length])
 
-  const onSend = () => {
+  // Subscribe to Firestore chat in real-time
+  useEffect(() => {
+    const unsub = listenTopicChat(topicId, (msgs) => setMessages(msgs))
+    return () => {
+      try {
+        unsub()
+      } catch {}
+    }
+  }, [topicId])
+
+  const onSend = async () => {
     const text = input.trim()
     if (!text) return
-    const msg: ChatMessage = {
-      id: Math.random().toString(36).slice(2),
-      authorId: myUid,
-      text,
-      createdAt: Date.now(),
+    try {
+      await sendTopicChatMessage(topicId, text)
+      setInput('')
+    } catch (e) {
+      // Optional: surface a toast later
+      console.error('Failed to send message', e)
     }
-    setMessages((prev) => [...prev, msg])
-    setInput('')
   }
 
   const renderItem: ListRenderItem<ChatMessage> = ({ item }) => {
