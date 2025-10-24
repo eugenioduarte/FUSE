@@ -50,6 +50,26 @@ export default function DashboardScreen() {
     useCallback(() => {
       let active = true
       ;(async () => {
+        // Ensure we sync any topics where the user was added as a member
+        try {
+          const { syncUserTopicsMembership } = await import(
+            '../../../services/firebase/invites.service'
+          )
+          await syncUserTopicsMembership()
+        } catch {}
+        // Flush local changes to backend and Firestore collaborators only when entering Dashboard
+        try {
+          const { processOfflineQueue } = await import(
+            '../../../services/sync/sync.service'
+          )
+          await processOfflineQueue()
+        } catch {}
+        try {
+          const { flushLocalCollaborativeChanges } = await import(
+            '../../../services/firebase/collabFlush.service'
+          )
+          await flushLocalCollaborativeChanges()
+        } catch {}
         const topics = await topicsRepository.list()
         const enriched: DashItem[] = []
         for (const t of topics) {

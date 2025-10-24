@@ -3,7 +3,7 @@ import { ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native'
 import { useOverlay } from '../../../../store/useOverlay'
 
 const LoadingOverlay: React.FC = () => {
-  const { loadingOverlay } = useOverlay()
+  const { loadingOverlay, loadingMessage } = useOverlay()
   return (
     <Modal
       visible={loadingOverlay}
@@ -14,7 +14,7 @@ const LoadingOverlay: React.FC = () => {
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.label}>Carregando…</Text>
+          <Text style={styles.label}>{loadingMessage || 'Carregando…'}</Text>
         </View>
       </View>
     </Modal>

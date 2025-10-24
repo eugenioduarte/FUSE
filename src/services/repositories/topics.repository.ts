@@ -31,7 +31,7 @@ export const topicsRepository = {
     return list.find((t) => t.id === id) ?? null
   },
 
-  async upsert(topic: Topic, syncUrl: string) {
+  async upsert(topic: Topic, syncUrl: string, opts?: { fromSync?: boolean }) {
     // Update local cache first
     const current = (await localCache.get<Topic[]>(CACHE_KEY))?.data ?? []
     const idx = current.findIndex((t) => t.id === topic.id)
@@ -44,23 +44,18 @@ export const topicsRepository = {
     await localCache.set(CACHE_KEY, current, topic.updatedAt)
 
     // Queue mutation for server
-    await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: topic })
-
-    // If this is a group topic, mirror to Firestore for collaboration
-    if ((topic.members && topic.members.length > 0) || topic.createdBy) {
-      try {
-        const { upsertGroupTopic } = await import(
-          '../firebase/collabData.service'
-        )
-        await upsertGroupTopic(topic)
-      } catch {}
+    if (!opts?.fromSync) {
+      await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: topic })
     }
+
+    // No immediate Firestore mirror for topics; collaborative mirror is flushed on Dashboard focus.
 
     // If color changed, propagate to summaries for this topic
     if (backgroundChanged) {
       await summariesRepository.setBackgroundColorByTopic(
         topic.id,
         topic.backgroundColor,
+        { fromSync: opts?.fromSync },
       )
     }
   },

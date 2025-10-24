@@ -1,5 +1,5 @@
-import { RouteProp, useRoute } from '@react-navigation/native'
-import React, { useEffect, useState } from 'react'
+import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
+import React, { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   FlatList,
@@ -11,9 +11,11 @@ import {
   RootStackParamList,
   navigatorManager,
 } from '../../../navigation/navigatorManager'
+import { getUserProfile } from '../../../services/firebase/connections.service'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
+import { useAuthStore } from '../../../store/useAuthStore'
 //
 
 type Item = {
@@ -21,6 +23,7 @@ type Item = {
   title: string
   type?: 'hangman' | 'matrix' | 'quiz' | 'text'
   lastAttempt?: { score: number; total: number; at: number }
+  lastUserId?: string
 }
 
 const formatDateTime = (ts: number) => {
@@ -51,23 +54,40 @@ const ChallengesListScreen: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [topicColor, setTopicColor] = useState<string | undefined>()
 
-  const attachLastAttempt = (
-    base: { id: string; title: string }[],
-    all: Awaited<ReturnType<typeof challengesRepository.list>>,
-  ): Item[] => {
-    return base
-      .map((l) => {
-        const found = all.find((a) => a.id === l.id)
-        const type = found?.type as any as Item['type'] | undefined
-        return {
-          id: l.id,
-          title: l.title,
-          type,
-          lastAttempt: found?.payload?.lastAttempt,
-        }
-      })
-      .filter((i) => !!i.lastAttempt)
+  const getLastUserIdFromPayload = (payload: any): string | undefined => {
+    const lastAt = payload?.lastAttempt?.at
+    if (!lastAt) return undefined
+    const attempts = Array.isArray(payload?.attempts)
+      ? (payload.attempts as any[])
+      : []
+    const match = attempts.find((a) => a?.at === lastAt)
+    return match?.userId
   }
+
+  const attachLastAttempt = useCallback(
+    (
+      base: { id: string; title: string }[],
+      all: Awaited<ReturnType<typeof challengesRepository.list>>,
+    ): Item[] => {
+      return base
+        .map((l) => {
+          const found = all.find((a) => a.id === l.id)
+          const type = found?.type as any as Item['type'] | undefined
+          return {
+            id: l.id,
+            title: l.title,
+            type,
+            lastAttempt: found?.payload?.lastAttempt,
+            lastUserId: getLastUserIdFromPayload(found?.payload),
+          }
+        })
+        .filter((i) => !!i.lastAttempt)
+    },
+    [],
+  )
+
+  const meId = useAuthStore((s) => s.user?.id)
+  const [userNames, setUserNames] = useState<Record<string, string>>({})
 
   useEffect(() => {
     let active = true
@@ -75,16 +95,16 @@ const ChallengesListScreen: React.FC = () => {
       if (!summaryId) {
         const all = await challengesRepository.list()
         if (!active) return
-        setItems(
-          all
-            .map((c) => ({
-              id: c.id,
-              title: c.title,
-              type: c.type as Item['type'],
-              lastAttempt: c.payload?.lastAttempt,
-            }))
-            .filter((i) => !!i.lastAttempt),
-        )
+        const next: Item[] = all
+          .map((c) => ({
+            id: c.id,
+            title: c.title,
+            type: c.type as Item['type'],
+            lastAttempt: c.payload?.lastAttempt,
+            lastUserId: getLastUserIdFromPayload(c.payload),
+          }))
+          .filter((i) => !!i.lastAttempt)
+        setItems(next)
         setLoading(false)
         return
       }
@@ -110,7 +130,84 @@ const ChallengesListScreen: React.FC = () => {
     return () => {
       active = false
     }
-  }, [summaryId])
+  }, [summaryId, attachLastAttempt])
+
+  // On focus: flush pending local changes to backend and Firestore, then reload list
+  useFocusEffect(
+    React.useCallback(() => {
+      let mounted = true
+      ;(async () => {
+        try {
+          const { processOfflineQueue } = await import(
+            '../../../services/sync/sync.service'
+          )
+          await processOfflineQueue()
+        } catch {}
+        try {
+          const { flushLocalCollaborativeChanges } = await import(
+            '../../../services/firebase/collabFlush.service'
+          )
+          await flushLocalCollaborativeChanges()
+        } catch {}
+        // quick reload similar to useEffect
+        try {
+          if (!mounted) return
+          if (summaryId == null) {
+            const all = await challengesRepository.list()
+            if (!mounted) return
+            const next: Item[] = all
+              .map((c) => ({
+                id: c.id,
+                title: c.title,
+                type: c.type as Item['type'],
+                lastAttempt: c.payload?.lastAttempt,
+                lastUserId: getLastUserIdFromPayload(c.payload),
+              }))
+              .filter((i) => !!i.lastAttempt)
+            setItems(next)
+          } else {
+            const [list, all] = await Promise.all([
+              challengesRepository.listBySummary(summaryId),
+              challengesRepository.list(),
+            ])
+            if (!mounted) return
+            const withMeta: Item[] = attachLastAttempt(list, all)
+            setItems(withMeta)
+          }
+        } catch {}
+      })()
+      return () => {
+        mounted = false
+      }
+    }, [summaryId, attachLastAttempt]),
+  )
+
+  // Fetch display names for users that completed last attempts
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      const ids = Array.from(
+        new Set(items.map((i) => i.lastUserId).filter(Boolean) as string[]),
+      )
+      const missing = ids.filter((id) => !(id in userNames))
+      if (missing.length === 0) return
+      const entries = await Promise.all(
+        missing.map(async (uid) => {
+          const p = await getUserProfile(uid)
+          return [uid, p?.name || p?.email || uid] as const
+        }),
+      )
+      if (!mounted) return
+      setUserNames((prev) => {
+        const next = { ...prev }
+        for (const [uid, name] of entries) next[uid] = name
+        return next
+      })
+    })()
+    return () => {
+      mounted = false
+    }
+  }, [items, userNames])
 
   if (loading) {
     return (
@@ -201,6 +298,11 @@ const ChallengesListScreen: React.FC = () => {
                       ? `Resposta em Texto – ${formatDateOnly(item.lastAttempt!.at)} – ${Number(item.lastAttempt!.score).toFixed(1)}`
                       : `Quiz – ${formatDateTime(item.lastAttempt!.at)} – ${item.lastAttempt!.score}/${item.lastAttempt!.total}`}
               </Text>
+              {!!item.lastUserId && (
+                <Text style={{ color: cardText, opacity: 0.8, marginTop: 4 }}>
+                  {`por ${item.lastUserId === meId ? 'você' : userNames[item.lastUserId] || '…'}`}
+                </Text>
+              )}
             </TouchableOpacity>
           )}
         />

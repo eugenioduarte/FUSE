@@ -23,7 +23,7 @@ export const challengesRepository = {
   async upsert(
     challenge: Challenge,
     syncUrl: string,
-    opts?: { summaryId?: string },
+    opts?: { summaryId?: string; fromSync?: boolean },
   ) {
     // Update global list
     const currentAll =
@@ -45,23 +45,17 @@ export const challengesRepository = {
       await localCache.set(key, current, challenge.updatedAt)
     }
 
-    await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: challenge })
+    // Only enqueue to server when this is a local change (not coming from Firestore)
+    if (!opts?.fromSync) {
+      await offlineQueue.enqueue({
+        url: syncUrl,
+        method: 'PUT',
+        body: challenge,
+      })
+    }
 
-    // Mirror to Firestore if parent topic is a group
-    try {
-      const { summariesRepository } = await import('./summaries.repository')
-      const { topicsRepository } = await import('./topics.repository')
-      const summary = await summariesRepository.getById(challenge.summaryId)
-      const parent = summary
-        ? await topicsRepository.getById(summary.topicId)
-        : null
-      if ((parent?.members && parent.members.length > 0) || parent?.createdBy) {
-        const { upsertGroupChallenge } = await import(
-          '../firebase/collabData.service'
-        )
-        await upsertGroupChallenge(challenge, { topicId: summary?.topicId })
-      }
-    } catch {}
+    // Do NOT mirror to Firestore here. Collaborative mirror will be handled
+    // centrally when Dashboard gains focus (flushLocalCollaborativeChanges).
   },
 
   async deleteById(

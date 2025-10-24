@@ -21,6 +21,19 @@ function db() {
   return getFirestore(getFirebaseApp())
 }
 
+async function ensureTopicOnFirestore(topicId: string) {
+  // If topic doc doesn't exist in Firestore yet, promote local topic to group
+  const ref = doc(db(), 'topics', topicId)
+  const snap = await getDoc(ref)
+  if (snap.exists()) return
+  try {
+    const { promoteTopicToGroup } = await import('./collabData.service')
+    await promoteTopicToGroup(topicId)
+  } catch (e) {
+    console.error('Failed to promote topic before inviting', e)
+  }
+}
+
 export async function findUserByEmail(email: string): Promise<string | null> {
   const q = query(
     collection(db(), 'users'),
@@ -37,6 +50,7 @@ export async function sendTopicInvite(toEmail: string, topicId: string) {
   if (!from) throw new Error('Not authenticated')
   const toUid = await findUserByEmail(toEmail)
   if (!toUid) throw new Error('Utilizador não encontrado')
+  await ensureTopicOnFirestore(topicId)
 
   const ref = collection(db(), 'notifications')
   await addDoc(ref, {
@@ -53,6 +67,7 @@ export async function sendTopicInvite(toEmail: string, topicId: string) {
 export async function sendTopicInviteToUid(toUid: string, topicId: string) {
   const from = getCurrentUser()
   if (!from) throw new Error('Not authenticated')
+  await ensureTopicOnFirestore(topicId)
   const ref = collection(db(), 'notifications')
   await addDoc(ref, {
     type: 'invite',
@@ -107,6 +122,27 @@ export async function acceptInvite(inviteId: string) {
       members: arrayUnion(me.uid),
       updatedAt: serverTimestamp(),
     })
+    // Immediately fetch and upsert locally so Dashboard updates without waiting
+    const tSnap = await getDoc(topicRef)
+    if (tSnap.exists()) {
+      const t = tSnap.data() as any
+      const topic: Topic = {
+        id: tSnap.id,
+        title: t.title || 'Tópico',
+        description: t.description,
+        backgroundColor: t.backgroundColor,
+        createdBy: t.createdBy,
+        members: Array.from(new Set([...(t.members || []), me.uid])),
+        createdAt: t.createdAt?.toMillis?.() ?? Date.now(),
+        updatedAt: Date.now(),
+      }
+      try {
+        const { topicsRepository } = await import(
+          '../repositories/topics.repository'
+        )
+        await topicsRepository.upsert(topic, '/sync/acceptInvite')
+      } catch {}
+    }
   }
   await updateDoc(notifRef, {
     status: 'accepted',

@@ -12,8 +12,8 @@ import {
   navigatorManager,
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
-import { useAuthStore } from '../../../store/useAuthStore'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
+import { useAuthStore } from '../../../store/useAuthStore'
 import { useOverlay } from '../../../store/useOverlay'
 import { Challenge } from '../../../types/domain'
 
@@ -177,6 +177,21 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
     await challengesRepository.upsert(updated, '/sync/challenge', {
       summaryId: challenge.summaryId,
     })
+    // Flush immediately so collaborators see it
+    try {
+      setLoadingOverlay(true, 'Sincronizando…')
+      const { processOfflineQueue } = await import(
+        '../../../services/sync/sync.service'
+      )
+      await processOfflineQueue()
+      const { flushLocalCollaborativeChanges } = await import(
+        '../../../services/firebase/collabFlush.service'
+      )
+      await flushLocalCollaborativeChanges()
+    } catch {
+    } finally {
+      setLoadingOverlay(false)
+    }
     setChallenge(updated)
     setFinished({ score: final })
   }

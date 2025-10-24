@@ -23,7 +23,11 @@ export const summariesRepository = {
     return all.find((s) => s.id === id) ?? null
   },
 
-  async upsert(summary: Summary, syncUrl: string) {
+  async upsert(
+    summary: Summary,
+    syncUrl: string,
+    opts?: { fromSync?: boolean },
+  ) {
     const key = listKey(summary.topicId)
     const current = (await localCache.get<Summary[]>(key))?.data ?? []
     const idx = current.findIndex((s) => s.id === summary.id)
@@ -38,19 +42,11 @@ export const summariesRepository = {
     else all.unshift(summary)
     await localCache.set(LIST_ALL_KEY, all, summary.updatedAt)
 
-    await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: summary })
+    if (!opts?.fromSync) {
+      await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: summary })
+    }
 
-    // Mirror to Firestore if parent topic is a group
-    try {
-      const { topicsRepository } = await import('./topics.repository')
-      const parent = await topicsRepository.getById(summary.topicId)
-      if ((parent?.members && parent.members.length > 0) || parent?.createdBy) {
-        const { upsertGroupSummary } = await import(
-          '../firebase/collabData.service'
-        )
-        await upsertGroupSummary(summary)
-      }
-    } catch {}
+    // No immediate Firestore mirror; collaborative mirror will be flushed on Dashboard focus.
   },
 
   async createWithAI(
@@ -77,6 +73,17 @@ export const summariesRepository = {
       updatedAt: now,
     }
     await this.upsert(summary, opts?.syncUrl || '/sync/summary')
+    // Immediately flush so collaborators on shared topics see the new summary
+    try {
+      const { processOfflineQueue } = await import('../sync/sync.service')
+      await processOfflineQueue()
+    } catch {}
+    try {
+      const { flushLocalCollaborativeChanges } = await import(
+        '../firebase/collabFlush.service'
+      )
+      await flushLocalCollaborativeChanges()
+    } catch {}
     return summary
   },
 
@@ -104,6 +111,17 @@ export const summariesRepository = {
       updatedAt: now,
     }
     await this.upsert(summary, opts?.syncUrl || '/sync/summary')
+    // Immediately flush so collaborators on shared topics see the new summary
+    try {
+      const { processOfflineQueue } = await import('../sync/sync.service')
+      await processOfflineQueue()
+    } catch {}
+    try {
+      const { flushLocalCollaborativeChanges } = await import(
+        '../firebase/collabFlush.service'
+      )
+      await flushLocalCollaborativeChanges()
+    } catch {}
     return summary
   },
 
@@ -168,7 +186,7 @@ export const summariesRepository = {
   async setBackgroundColorByTopic(
     topicId: string,
     color?: string,
-    opts?: { syncUrl?: string },
+    opts?: { syncUrl?: string; fromSync?: boolean },
   ) {
     const key = listKey(topicId)
     const list = (await localCache.get<Summary[]>(key))?.data ?? []
@@ -191,26 +209,15 @@ export const summariesRepository = {
     await localCache.set(LIST_ALL_KEY, nextAll, updatedAt)
 
     // Enqueue individual updates for sync (keeps server consistent)
-    for (const s of nextList) {
-      await offlineQueue.enqueue({
-        url: opts?.syncUrl || '/sync/summary',
-        method: 'PUT',
-        body: s,
-      })
-      // Mirror color change in Firestore for group topics
-      try {
-        const { topicsRepository } = await import('./topics.repository')
-        const parent = await topicsRepository.getById(topicId)
-        if (
-          (parent?.members && parent.members.length > 0) ||
-          parent?.createdBy
-        ) {
-          const { upsertGroupSummary } = await import(
-            '../firebase/collabData.service'
-          )
-          await upsertGroupSummary(s)
-        }
-      } catch {}
+    if (!opts?.fromSync) {
+      for (const s of nextList) {
+        await offlineQueue.enqueue({
+          url: opts?.syncUrl || '/sync/summary',
+          method: 'PUT',
+          body: s,
+        })
+        // No immediate Firestore mirror here; flushed on Dashboard focus.
+      }
     }
   },
 }

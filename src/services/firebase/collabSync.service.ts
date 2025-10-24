@@ -12,7 +12,7 @@ import { getFirebaseApp } from './firebaseInit'
 // Lazily loaded to avoid circular deps
 async function upsertTopic(t: Topic) {
   const { topicsRepository } = await import('../repositories/topics.repository')
-  await topicsRepository.upsert(t, '/sync/topic')
+  await topicsRepository.upsert(t, '/sync/topic', { fromSync: true })
 }
 
 async function deleteTopic(id: string) {
@@ -118,7 +118,9 @@ export function startCollabSyncForUser(userId: string): UnsubscribeGroup {
           await summariesRepository.deleteById(id)
         } else {
           const s = mapSummaryDoc(ch.doc)
-          await summariesRepository.upsert(s, '/sync/summary')
+          await summariesRepository.upsert(s, '/sync/summary', {
+            fromSync: true,
+          })
         }
       }
     })
@@ -141,6 +143,7 @@ export function startCollabSyncForUser(userId: string): UnsubscribeGroup {
           const c = mapChallengeDoc(ch.doc)
           await challengesRepository.upsert(c, '/sync/challenge', {
             summaryId: c.summaryId,
+            fromSync: true,
           })
         }
       }

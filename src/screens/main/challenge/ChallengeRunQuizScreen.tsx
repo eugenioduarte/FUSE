@@ -15,9 +15,9 @@ import {
   navigatorManager,
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
-import { useAuthStore } from '../../../store/useAuthStore'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
+import { useAuthStore } from '../../../store/useAuthStore'
 import { useOverlay } from '../../../store/useOverlay'
 import { Challenge } from '../../../types/domain'
 
@@ -117,7 +117,12 @@ const ChallengeRunQuizScreen: React.FC = () => {
         const prompt = buildQuizPrompt(summary.content, total)
         const quiz = await generateQuiz(prompt)
         if (!active) return
-        setQuestions(quiz.questions)
+        // Shuffle options inside each question so the correct answer isn't always first
+        const shuffled = quiz.questions.map((q) => ({
+          ...q,
+          options: shuffleArray(q.options),
+        }))
+        setQuestions(shuffled)
 
         // init first choice mapping
         const init: Record<number, number | null> = {}
@@ -184,6 +189,21 @@ const ChallengeRunQuizScreen: React.FC = () => {
     await challengesRepository.upsert(updated, '/sync/challenge', {
       summaryId: challenge.summaryId,
     })
+    // Flush immediately so collaborators see it without needing to refocus
+    try {
+      setLoadingOverlay(true, 'Sincronizando…')
+      const { processOfflineQueue } = await import(
+        '../../../services/sync/sync.service'
+      )
+      await processOfflineQueue()
+      const { flushLocalCollaborativeChanges } = await import(
+        '../../../services/firebase/collabFlush.service'
+      )
+      await flushLocalCollaborativeChanges()
+    } catch {
+    } finally {
+      setLoadingOverlay(false)
+    }
     setChallenge(updated)
     setFinished({ score, total: questions.length })
   }
@@ -459,6 +479,16 @@ async function generateQuiz(prompt: string): Promise<AIQuizResponse> {
     console.error(e)
     return mockQuiz()
   }
+}
+
+// Fisher–Yates shuffle
+function shuffleArray<T>(arr: T[]): T[] {
+  const a = arr.slice()
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[a[i], a[j]] = [a[j], a[i]]
+  }
+  return a
 }
 
 function toJSONSafe(text: string): any {
