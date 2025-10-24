@@ -128,8 +128,17 @@ const defaultScreenOptions = {
 }
 
 function MainStack() {
+  // Decide the very first screen based on auth state to avoid any login flicker
+  const { user } = useAuthStore()
+  const initialRouteName: keyof RootStackParamList = user
+    ? 'DashboardScreen'
+    : 'LoginScreen'
+
   return (
-    <Stack.Navigator screenOptions={defaultScreenOptions}>
+    <Stack.Navigator
+      screenOptions={defaultScreenOptions}
+      initialRouteName={initialRouteName}
+    >
       {/* Auth */}
       <Stack.Screen
         name={ROUTES.LoginScreen}
@@ -327,8 +336,6 @@ function MainStack() {
 const DrawerContent = (_props: DrawerContentComponentProps) => <MenuScreen />
 
 export default function Navigation() {
-  const [isNavReady, setIsNavReady] = useState(false)
-  const [initialRouteSet, setInitialRouteSet] = useState(false)
   const [authReady, setAuthReady] = useState(false)
 
   const setHeaderConfig = useThemeStore((s) => s.setHeaderConfig)
@@ -340,31 +347,9 @@ export default function Navigation() {
     waitForAuthReady().then(() => setAuthReady(true))
   }, [])
 
-  useEffect(() => {
-    if (
-      rehydrated &&
-      authReady &&
-      isNavReady &&
-      !initialRouteSet &&
-      navigationRef.isReady()
-    ) {
-      const targetRoute = user ? ROUTES.DashboardScreen : ROUTES.LoginScreen
-
-      navigationRef.reset({
-        index: 0,
-        routes: [
-          {
-            name: DRAWER_APP as never,
-            state: {
-              index: 0,
-              routes: [{ name: targetRoute as never }],
-            },
-          } as never,
-        ],
-      })
-      setInitialRouteSet(true)
-    }
-  }, [rehydrated, isNavReady, authReady, user, initialRouteSet])
+  // We avoid resetting navigation on mount. Instead, MainStack sets the
+  // correct initialRouteName based on the persisted auth state, preventing
+  // the login screen from flashing when the user is already authenticated.
 
   useEffect(() => {
     // When authenticated and nav ready, start collaborative listeners and do an initial refresh
@@ -409,7 +394,6 @@ export default function Navigation() {
       <Header />
       <NavigationContainer
         ref={navigationRef}
-        onReady={() => setIsNavReady(true)}
         onStateChange={() => {
           const route = navigationRef.getCurrentRoute()
           const name = (route?.name ?? '') as RouteName
