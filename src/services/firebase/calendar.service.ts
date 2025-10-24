@@ -1,7 +1,9 @@
 import {
   addDoc,
+  arrayRemove,
   arrayUnion,
   collection,
+  deleteDoc,
   doc,
   getFirestore,
   onSnapshot,
@@ -155,4 +157,24 @@ export async function acceptCalendarEvent(eventId: string, uid: string) {
     accepted: arrayUnion(uid),
     updatedAt: serverTimestamp(),
   } as any)
+}
+
+/**
+ * Leave a shared event: removes the user from participants and accepted arrays.
+ * After this, the event will stop appearing for this user via realtime listeners.
+ */
+export async function leaveCalendarEvent(eventId: string, uid: string) {
+  await updateDoc(doc(db(), 'calendarEvents', eventId), {
+    participants: arrayRemove(uid),
+    accepted: arrayRemove(uid),
+    updatedAt: serverTimestamp(),
+  } as any)
+}
+
+/**
+ * Delete an event owned by the current user. Use only if the user is the owner.
+ * Security rules should enforce ownership on delete. Caller must ensure ownership.
+ */
+export async function deleteOwnedCalendarEvent(eventId: string) {
+  await deleteDoc(doc(db(), 'calendarEvents', eventId))
 }

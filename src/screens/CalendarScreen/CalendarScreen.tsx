@@ -14,6 +14,10 @@ import { navigatorManager } from '../../navigation/navigatorManager'
 import { summariesRepository } from '../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../services/repositories/topics.repository'
 import { useAuthStore } from '../../store/useAuthStore'
+import {
+  deleteOwnedCalendarEvent,
+  leaveCalendarEvent,
+} from '../../services/firebase/calendar.service'
 import { useCalendarStore } from '../../store/useCalendarStore'
 import type { Summary, Topic } from '../../types/domain'
 
@@ -257,7 +261,21 @@ const CalendarScreen: React.FC = () => {
                       <Text style={styles.link}>Editar</Text>
                     </TouchableOpacity>
                     <TouchableOpacity
-                      onPress={() => removeAppointment(item.id)}
+                      onPress={async () => {
+                        const myId = me?.id
+                        if (!myId) return
+                        try {
+                          if (item.ownerUid && item.ownerUid === myId) {
+                            await deleteOwnedCalendarEvent(item.id)
+                          } else {
+                            await leaveCalendarEvent(item.id, myId)
+                          }
+                          // Optimistic local removal; realtime will reconcile
+                          removeAppointment(item.id)
+                        } catch (e) {
+                          console.error('Failed to remove calendar event', e)
+                        }
+                      }}
                     >
                       <Text style={[styles.link, { color: '#EF4444' }]}>
                         Remover
