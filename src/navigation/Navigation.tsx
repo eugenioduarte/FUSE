@@ -53,6 +53,7 @@ import SummaryAudioScreen from '../screens/main/topic/summary/SummaryAudioScreen
 import SummaryDetailsScreen from '../screens/main/topic/summary/SummaryDetailsScreen'
 import SummaryScreen from '../screens/main/topic/summary/SummaryScreen'
 import TopicAddScreen from '../screens/main/topic/topic-add/TopicAddScreen'
+import TopicChatScreen from '../screens/main/topic/topic-chat'
 import TopicDetailsScreen, {
   TopicRankingScreen,
 } from '../screens/main/topic/topic-details'
@@ -298,6 +299,11 @@ function MainStack() {
         name={ROUTES.TopicRankingScreen}
         component={TopicRankingScreen}
         options={{ title: ROUTES.TopicRankingScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.TopicChatScreen}
+        component={TopicChatScreen}
+        options={{ title: ROUTES.TopicChatScreen }}
       />
 
       {/* Menu */}

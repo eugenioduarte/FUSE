@@ -162,6 +162,27 @@ const TopicDetailsScreen: React.FC = () => {
               </Text>
             </TouchableOpacity>
           )}
+          {/* Topic chat: visible only when shared (2+ members) and I am a member/owner */}
+          {(() => {
+            const membersCount = topic.members?.length ?? 0
+            const isMember =
+              !!myUid &&
+              ((topic.members || []).includes(myUid) ||
+                topic.createdBy === myUid)
+            if (membersCount >= 2 && isMember) {
+              return (
+                <TouchableOpacity
+                  onPress={() => navigatorManager.goToTopicChat(topicId)}
+                  style={{ marginLeft: 12 }}
+                >
+                  <Text style={{ color: '#22c55e', fontWeight: '700' }}>
+                    Chat
+                  </Text>
+                </TouchableOpacity>
+              )
+            }
+            return null
+          })()}
           <TouchableOpacity
             onPress={() => {
               Alert.alert(

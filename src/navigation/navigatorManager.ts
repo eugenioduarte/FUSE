@@ -40,6 +40,7 @@ export type RootStackParamList = {
   NotificationsScreen: undefined
   WhiteboardScreen: undefined
   TopicRankingScreen: { topicId: string }
+  TopicChatScreen: { topicId: string }
 }
 
 export const navigatorManager = {
@@ -214,6 +215,11 @@ export const navigatorManager = {
   goToTopicRanking: (topicId: string) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.TopicRankingScreen, { topicId } as any)
+  },
+
+  goToTopicChat: (topicId: string) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.TopicChatScreen, { topicId } as any)
   },
 
   goBack: () => {

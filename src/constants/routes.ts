@@ -32,6 +32,8 @@ export const ROUTES = {
   SummaryAudioScreen: 'SummaryAudioScreen',
   // Topic - Ranking
   TopicRankingScreen: 'TopicRankingScreen',
+  // Topic - Chat
+  TopicChatScreen: 'TopicChatScreen',
   // Main - Menu
   ProfileScreen: 'ProfileScreen',
   ConnectionsScreen: 'ConnectionsScreen',
