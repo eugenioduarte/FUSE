@@ -42,6 +42,8 @@ export const ROUTES = {
   NotificationsScreen: 'NotificationsScreen',
   // Main - Whiteboard
   WhiteboardScreen: 'WhiteboardScreen',
+  // Main - Dev / Components
+  ComponentsScreen: 'ComponentsScreen',
   // Tabs/Other
   SummaryListTab: 'SummaryListTab',
 } as const

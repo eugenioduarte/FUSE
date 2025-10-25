@@ -42,6 +42,7 @@ export type RootStackParamList = {
   WhiteboardScreen: undefined
   TopicRankingScreen: { topicId: string }
   TopicChatScreen: { topicId: string }
+  ComponentsScreen: undefined
 }
 
 export const navigatorManager = {
@@ -225,6 +226,11 @@ export const navigatorManager = {
   goToTopicChat: (topicId: string) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.TopicChatScreen, { topicId } as any)
+  },
+
+  // Dev / Components
+  goToComponents: () => {
+    if (navigationRef.isReady()) navigationRef.navigate(ROUTES.ComponentsScreen)
   },
 
   goBack: () => {

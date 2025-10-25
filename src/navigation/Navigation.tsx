@@ -60,6 +60,7 @@ import TopicDetailsScreen, {
 } from '../screens/main/topic/topic-details'
 
 // Menu screens (as regular stack screens)
+import ComponentsScreen from '../screens/main/components/ComponentsScreen'
 import ConnectionsScreen from '../screens/main/menu/connections/ConnectionsScreen'
 import PaymentScreen from '../screens/main/menu/payment/PaymentScreen'
 import ProfileScreen from '../screens/main/menu/profile/ProfileScreen'
@@ -345,6 +346,13 @@ function MainStack() {
         name={ROUTES.NotificationsScreen}
         component={NotificationsScreen}
         options={{ title: ROUTES.NotificationsScreen }}
+      />
+
+      {/* Dev / Components */}
+      <Stack.Screen
+        name={ROUTES.ComponentsScreen}
+        component={ComponentsScreen}
+        options={{ title: ROUTES.ComponentsScreen }}
       />
 
       {/* Whiteboard */}
