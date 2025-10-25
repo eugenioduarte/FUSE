@@ -1,16 +1,29 @@
 export const Colors = {
   light: {
-    text: '#33323C',
-    light_text: '#ECEDF2',
-    background: '#ECEDF2',
-    primary: '#2996F3',
-    secondary: '#FEEAEA',
-    tertiary: '#2996F3',
-    surface: '#FFFFFF',
-    background_color_modal: 'rgba(0,0,0,0.1)',
-    grey: '#B0B0B0',
-    warning_text: '#f25d4cff',
-    disabled: '#dededeff',
+    // ---- Backgrounds ----
+    backgroundPrimary: '#FFFAF0', // fundo principal (mais claro)
+    backgroundSecondary: '#F7F0E0', // fundo de seções / cartões
+    backgroundTertiary: '#F7EFDF', // leve variação do fundo
+
+    // ---- Texto e bordas ----
+    textPrimary: '#3A001D', // cor principal do texto
+    textSecondary: '#5A2E3D', // opcional – tom mais suave derivado
+    borderColor: '#3A001D', // cor padrão de borda
+
+    // ---- Cores de estado / ênfase ----
+    accentRed: '#EA3D5C', // destaque / erro / delete
+    accentRedDark: '#A01538', // tom escuro para hover/press
+    accentYellow: '#FCCB66', // aviso / destaque leve
+    accentBlue: '#AEE3F3', // info / foco
+    accentGreen: '#BCEBCB', // sucesso / confirmação
+    accentOrange: '#FBC19D', // ação / energia
+    accentPurple: '#CFBDDE', // elementos criativos / secundários
+    accentPink: '#F296B8', // feminino / lúdico / apoio visual
+
+    // ---- Neutros ----
+    white: '#FFFFFF',
+    black: '#3A001D', // reutilizado do texto primário (consistente)
+    disabled: '#DEDEDEFF',
   },
 
   backgroundTextColors: {
@@ -42,11 +55,11 @@ export const spacings = {
 }
 
 export const font = {
-  light: 'Quicksand-Light',
-  regular: 'Quicksand-Regular',
-  medium: 'Quicksand-Medium',
-  semiBold: 'Quicksand-SemiBold',
-  bold: 'Quicksand-Bold',
+  light: 'Fredoka-Light',
+  regular: 'Fredoka-Regular',
+  medium: 'Fredoka-Medium',
+  semiBold: 'Fredoka-SemiBold',
+  bold: 'Fredoka-Bold',
 }
 
 export const typography = {

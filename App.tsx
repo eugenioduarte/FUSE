@@ -20,11 +20,11 @@ const queryClient = new QueryClient({
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'Quicksand-Light': require('./assets/fonts/Quicksand-Light.ttf'),
-    'Quicksand-Regular': require('./assets/fonts/Quicksand-Regular.ttf'),
-    'Quicksand-Medium': require('./assets/fonts/Quicksand-Medium.ttf'),
-    'Quicksand-SemiBold': require('./assets/fonts/Quicksand-SemiBold.ttf'),
-    'Quicksand-Bold': require('./assets/fonts/Quicksand-Bold.ttf'),
+    'Fredoka-Light': require('./assets/fonts/Fredoka-Light.ttf'),
+    'Fredoka-Regular': require('./assets/fonts/Fredoka-Regular.ttf'),
+    'Fredoka-Medium': require('./assets/fonts/Fredoka-Medium.ttf'),
+    'Fredoka-SemiBold': require('./assets/fonts/Fredoka-SemiBold.ttf'),
+    'Fredoka-Bold': require('./assets/fonts/Fredoka-Bold.ttf'),
   })
 
   if (!fontsLoaded) return null

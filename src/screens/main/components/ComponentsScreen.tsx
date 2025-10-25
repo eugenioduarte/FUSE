@@ -1,5 +1,5 @@
 import React from 'react'
-import { ScrollView, StyleSheet, Text, View } from 'react-native'
+import { ScrollView, StyleSheet, Text } from 'react-native'
 
 const ComponentsScreen: React.FC = () => {
   return (
@@ -9,11 +9,6 @@ const ComponentsScreen: React.FC = () => {
         Este é um espaço para demonstrar e testar componentes UI. Adiciona aqui
         os teus exemplos e variações.
       </Text>
-      {/* Placeholder showcase area; add real examples as they are created */}
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Exemplo de componente</Text>
-        <Text style={styles.cardText}>Coloca um componente aqui…</Text>
-      </View>
     </ScrollView>
   )
 }
