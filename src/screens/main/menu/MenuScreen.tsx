@@ -5,24 +5,25 @@ import { navigatorManager } from '../../../navigation/navigatorManager'
 import { isDevUser } from '../../../services/firebase/dev.service'
 
 const MenuScreen = () => {
-  const { user, logout } = useAuthStore((s) => ({
-    user: s.user,
-    logout: s.logout,
-  }))
+  const userId = useAuthStore((s) => s.user?.id)
+  const logout = useAuthStore((s) => s.logout)
   const [isDev, setIsDev] = React.useState(false)
 
   React.useEffect(() => {
     let mounted = true
     const run = async () => {
-      if (!user?.id) return setIsDev(false)
-      const ok = await isDevUser(user.id)
+      if (!userId) {
+        if (mounted) setIsDev(false)
+        return
+      }
+      const ok = await isDevUser(userId)
       if (mounted) setIsDev(ok)
     }
     run()
     return () => {
       mounted = false
     }
-  }, [user?.id])
+  }, [userId])
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Menu</Text>

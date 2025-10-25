@@ -371,133 +371,125 @@ const DrawerContent = (_props: DrawerContentComponentProps) => <MenuScreen />
 export default function Navigation() {
   const [authReady, setAuthReady] = useState(false)
 
-  const setHeaderConfig = useThemeStore((s) => s.setHeaderConfig)
   const { user, rehydrated } = useAuthStore()
-  const setNotificationOverlay = useOverlay((s) => s.setNotificationOverlay)
 
   // Build a stable notification handler with minimal nesting
-  const buildNotificationHandler = React.useCallback(
-    (uid: string) => {
-      const shown = new Set<string>()
-      return (
-        list: import('../services/firebase/notifications.service').AppNotification[],
-      ) => {
-        const pending = list.find(
-          (n) => n.status === 'pending' && !shown.has(n.id),
-        )
-        if (!pending) return
-        shown.add(pending.id)
-        // If it's a calendar invite, prefer server accept (eventId) and never show to inviter
-        if (pending.type === 'calendar_invite' && pending.event) {
-          if (pending.event.invitedBy === uid) return
-          const ev = pending.event
-          setNotificationOverlay({
-            id: pending.id,
-            title: pending.title,
-            body: pending.body,
-            requireDecision: !!pending.requireDecision,
-            acceptLabel: pending.acceptLabel,
-            denyLabel: pending.denyLabel,
-            onAccept: () => {
-              if (ev.eventId) {
-                void acceptCalendarEvent(ev.eventId, uid)
-              } else {
-                // Fallback to local add if no eventId present
-                const add = useCalendarStore.getState().addAppointment
-                add({
-                  date: ev.date,
-                  title: ev.title,
-                  description: ev.description || '',
-                  topicId: ev.topicId,
-                  summaryId: ev.summaryId,
-                  time: ev.time,
-                })
-              }
-              void decideNotification(uid, pending.id, 'accepted')
-            },
-            onDeny: () => {
-              void decideNotification(uid, pending.id, 'denied')
-            },
-            onClose: () => {
-              // For invite, treat close as deny unless accepted
-              void decideNotification(uid, pending.id, 'denied')
-            },
-          })
-          return
-        }
-        // Default notification overlay
-        setNotificationOverlay({
+  const buildNotificationHandler = React.useCallback((uid: string) => {
+    const shown = new Set<string>()
+    return (
+      list: import('../services/firebase/notifications.service').AppNotification[],
+    ) => {
+      const pending = list.find(
+        (n) => n.status === 'pending' && !shown.has(n.id),
+      )
+      if (!pending) return
+      shown.add(pending.id)
+      // If it's a calendar invite, prefer server accept (eventId) and never show to inviter
+      if (pending.type === 'calendar_invite' && pending.event) {
+        if (pending.event.invitedBy === uid) return
+        const ev = pending.event
+        useOverlay.getState().setNotificationOverlay({
           id: pending.id,
           title: pending.title,
           body: pending.body,
           requireDecision: !!pending.requireDecision,
           acceptLabel: pending.acceptLabel,
           denyLabel: pending.denyLabel,
+          onAccept: () => {
+            if (ev.eventId) {
+              void acceptCalendarEvent(ev.eventId, uid)
+            } else {
+              // Fallback to local add if no eventId present
+              const add = useCalendarStore.getState().addAppointment
+              add({
+                date: ev.date,
+                title: ev.title,
+                description: ev.description || '',
+                topicId: ev.topicId,
+                summaryId: ev.summaryId,
+                time: ev.time,
+              })
+            }
+            void decideNotification(uid, pending.id, 'accepted')
+          },
+          onDeny: () => {
+            void decideNotification(uid, pending.id, 'denied')
+          },
+          onClose: () => {
+            // For invite, treat close as deny unless accepted
+            void decideNotification(uid, pending.id, 'denied')
+          },
         })
+        return
       }
-    },
-    [setNotificationOverlay],
-  )
+      // Default notification overlay
+      useOverlay.getState().setNotificationOverlay({
+        id: pending.id,
+        title: pending.title,
+        body: pending.body,
+        requireDecision: !!pending.requireDecision,
+        acceptLabel: pending.acceptLabel,
+        denyLabel: pending.denyLabel,
+      })
+    }
+  }, [])
 
   // Back-compat handler for top-level notifications (root collection)
-  const buildTopLevelNotificationHandler = React.useCallback(
-    (uid: string) => {
-      const shown = new Set<string>()
-      return (
-        list: import('../services/firebase/notifications.service').AppNotification[],
-      ) => {
-        const pending = list.find(
-          (n) => n.status === 'pending' && !shown.has(n.id),
-        )
-        if (!pending) return
-        shown.add(pending.id)
-        if (pending.type === 'calendar_invite' && pending.event) {
-          if (pending.event.invitedBy === uid) return
-          const ev = pending.event
-          setNotificationOverlay({
-            id: pending.id,
-            title: pending.title,
-            body: pending.body,
-            requireDecision: !!pending.requireDecision,
-            acceptLabel: pending.acceptLabel,
-            denyLabel: pending.denyLabel,
-            onAccept: () => {
-              if (ev.eventId) {
-                void acceptCalendarEvent(ev.eventId, uid)
-              } else {
-                const add = useCalendarStore.getState().addAppointment
-                add({
-                  date: ev.date,
-                  title: ev.title,
-                  description: ev.description || '',
-                  topicId: ev.topicId,
-                  summaryId: ev.summaryId,
-                  time: ev.time,
-                })
-              }
-              void decideNotificationTopLevel(pending.id, 'accepted')
-            },
-            onDeny: () => {
-              void decideNotificationTopLevel(pending.id, 'denied')
-            },
-            onClose: () => {
-              void decideNotificationTopLevel(pending.id, 'denied')
-            },
-          })
-          return
-        }
-        setNotificationOverlay({
+  const buildTopLevelNotificationHandler = React.useCallback((uid: string) => {
+    const shown = new Set<string>()
+    return (
+      list: import('../services/firebase/notifications.service').AppNotification[],
+    ) => {
+      const pending = list.find(
+        (n) => n.status === 'pending' && !shown.has(n.id),
+      )
+      if (!pending) return
+      shown.add(pending.id)
+      if (pending.type === 'calendar_invite' && pending.event) {
+        if (pending.event.invitedBy === uid) return
+        const ev = pending.event
+        useOverlay.getState().setNotificationOverlay({
           id: pending.id,
           title: pending.title,
           body: pending.body,
           requireDecision: !!pending.requireDecision,
           acceptLabel: pending.acceptLabel,
           denyLabel: pending.denyLabel,
+          onAccept: () => {
+            if (ev.eventId) {
+              void acceptCalendarEvent(ev.eventId, uid)
+            } else {
+              const add = useCalendarStore.getState().addAppointment
+              add({
+                date: ev.date,
+                title: ev.title,
+                description: ev.description || '',
+                topicId: ev.topicId,
+                summaryId: ev.summaryId,
+                time: ev.time,
+              })
+            }
+            void decideNotificationTopLevel(pending.id, 'accepted')
+          },
+          onDeny: () => {
+            void decideNotificationTopLevel(pending.id, 'denied')
+          },
+          onClose: () => {
+            void decideNotificationTopLevel(pending.id, 'denied')
+          },
         })
+        return
       }
-    },
-    [setNotificationOverlay],
-  )
+      useOverlay.getState().setNotificationOverlay({
+        id: pending.id,
+        title: pending.title,
+        body: pending.body,
+        requireDecision: !!pending.requireDecision,
+        acceptLabel: pending.acceptLabel,
+        denyLabel: pending.denyLabel,
+      })
+    }
+  }, [])
 
   // Attach Firebase auth listener once on mount
   useEffect(() => {
@@ -508,6 +500,9 @@ export default function Navigation() {
   // We avoid resetting navigation on mount. Instead, MainStack sets the
   // correct initialRouteName based on the persisted auth state, preventing
   // the login screen from flashing when the user is already authenticated.
+
+  // Track previous route name to avoid redundant header updates that could cascade renders
+  const prevRouteNameRef = React.useRef<RouteName | ''>('')
 
   useEffect(() => {
     // When authenticated and nav ready, start collaborative listeners and do an initial refresh
@@ -559,7 +554,6 @@ export default function Navigation() {
     rehydrated,
     authReady,
     user?.id,
-    setNotificationOverlay,
     buildNotificationHandler,
     buildTopLevelNotificationHandler,
   ])
@@ -587,12 +581,18 @@ export default function Navigation() {
         onReady={() => {
           const route = navigationRef.getCurrentRoute()
           const name = (route?.name ?? '') as RouteName
-          setHeaderConfig(name)
+          if (prevRouteNameRef.current !== name) {
+            useThemeStore.getState().setHeaderConfig(name)
+            prevRouteNameRef.current = name
+          }
         }}
         onStateChange={() => {
           const route = navigationRef.getCurrentRoute()
           const name = (route?.name ?? '') as RouteName
-          setHeaderConfig(name)
+          if (prevRouteNameRef.current !== name) {
+            useThemeStore.getState().setHeaderConfig(name)
+            prevRouteNameRef.current = name
+          }
         }}
       >
         <Drawer.Navigator
