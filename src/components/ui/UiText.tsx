@@ -29,7 +29,7 @@ export const Text: React.FC<Props> = ({
   const base = typography[variantKey]
   const computedStyle: TextStyle = {
     ...base,
-    color: color ?? Colors.light.text,
+    color: color ?? Colors.light.textPrimary,
     fontFamily: weight ? textWeight[weight] : base.fontFamily,
   }
 
