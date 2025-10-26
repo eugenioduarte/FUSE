@@ -45,6 +45,7 @@ type DynamicOptions = {
   hasRightIcon: boolean
   scale: Animated.Value
   disabled: boolean
+  loading?: boolean
 }
 
 const Button: React.FC<ButtonProps> = ({

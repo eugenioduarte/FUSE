@@ -166,6 +166,7 @@ const LoginScreen: React.FC = () => {
                   style={styles.button}
                   background={theme.colors.accentRed}
                   textColor={theme.colors.backgroundPrimary}
+                  disabled={loading}
                 />
                 <Button
                   title="Register"

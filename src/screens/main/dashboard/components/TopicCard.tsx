@@ -1,6 +1,6 @@
 import React from 'react'
 import { FlatList, Image, TouchableOpacity, View } from 'react-native'
-import { Card, UiText } from '../../../../components'
+import { Card, Text as UiText } from '../../../../components'
 import { navigatorManager } from '../../../../navigation/navigatorManager'
 
 type users = {
@@ -40,7 +40,7 @@ const TopicCard = (payload: TopicCardPayload) => {
       <Card
         style={{ marginBottom: 8, backgroundColor: backgroundColor || '#fff' }}
       >
-        <UiText variant="title" color={titleColor}>
+        <UiText variant="medium" color={titleColor}>
           {topicName}
         </UiText>
         {!!score && <UiText>Score: {score}</UiText>}
