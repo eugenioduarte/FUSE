@@ -1,9 +1,20 @@
 import React from 'react'
-import { View } from 'react-native'
+import { View, ViewProps } from 'react-native'
 
-const Container = ({ children }: { children: React.ReactNode }) => {
+const Container = ({
+  children,
+  style,
+  ...props
+}: {
+  children: React.ReactNode
+  style?: ViewProps['style']
+  props?: ViewProps
+}) => {
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff', padding: 16 }}>
+    <View
+      style={[{ flex: 1, backgroundColor: 'blue', paddingTop: 50 }, style]}
+      {...props}
+    >
       {children}
     </View>
   )

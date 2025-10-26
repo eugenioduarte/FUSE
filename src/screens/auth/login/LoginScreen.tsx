@@ -1,32 +1,96 @@
+import { Button, LinkButton, Text, TextInput } from '@/src/components'
+import Container from '@/src/components/containers/Container'
+import { useTheme } from '@/src/hooks/useTheme'
+import { loginSchema } from '@/src/schemas/authSchemas'
 import { firebaseLogin } from '@/src/services/firebase/authService'
-import React, { useState } from 'react'
+import { ThemeType } from '@/src/types/theme.type'
+import React, { useEffect, useRef, useState } from 'react'
 import {
-  ActivityIndicator,
   Alert,
-  Button,
+  Animated,
+  EmitterSubscription,
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
-  Text,
-  TextInput,
+  TouchableWithoutFeedback,
   View,
 } from 'react-native'
 import { navigatorManager } from '../../../navigation/navigatorManager'
 import { useAuthStore } from '../../../store/useAuthStore'
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+import LoginScreenAnimatedTitle from './LoginScreenAnimatedTitle'
 
 const LoginScreen: React.FC = () => {
+  const theme = useTheme()
+  const styles = createStyles(theme)
+  const animatedTitleSize = useRef(new Animated.Value(100)).current
+  const animatedTitleMargin = useRef(
+    new Animated.Value(theme.spacings.large),
+  ).current
   const loginStore = useAuthStore((s) => s.login)
   const [email, setEmail] = useState('eugenioduartesilva@gmail.com')
   const [password, setPassword] = useState('123456')
   const [loading, setLoading] = useState(false)
 
-  const validate = () => {
-    if (!email || !password) {
-      Alert.alert('Validation', 'Preencha email e senha')
-      return false
+  const translateY = useRef(new Animated.Value(0)).current
+  const [keyboardOpen, setKeyboardOpen] = useState(false)
+
+  useEffect(() => {
+    let showSub: EmitterSubscription | undefined
+    let hideSub: EmitterSubscription | undefined
+
+    showSub = Keyboard.addListener('keyboardWillShow', () => {
+      setKeyboardOpen(true)
+      Animated.timing(translateY, {
+        toValue: -80,
+        duration: 300,
+        useNativeDriver: true,
+      }).start()
+      Animated.timing(animatedTitleSize, {
+        toValue: 40,
+        duration: 300,
+        useNativeDriver: false,
+      }).start()
+      Animated.timing(animatedTitleMargin, {
+        toValue: theme.spacings.small,
+        duration: 300,
+        useNativeDriver: false,
+      }).start()
+    })
+
+    hideSub = Keyboard.addListener('keyboardWillHide', () => {
+      setKeyboardOpen(false)
+      Animated.timing(translateY, {
+        toValue: 0,
+        duration: 300,
+        useNativeDriver: true,
+      }).start()
+      Animated.timing(animatedTitleSize, {
+        toValue: 100,
+        duration: 300,
+        useNativeDriver: false,
+      }).start()
+      Animated.timing(animatedTitleMargin, {
+        toValue: theme.spacings.large,
+        duration: 300,
+        useNativeDriver: false,
+      }).start()
+    })
+
+    return () => {
+      showSub?.remove()
+      hideSub?.remove()
     }
-    if (!EMAIL_REGEX.test(email)) {
-      Alert.alert('Validation', 'Digite um email válido')
+  }, [translateY, animatedTitleSize, animatedTitleMargin, theme])
+
+  const validate = () => {
+    const result = loginSchema.safeParse({ email, password })
+    if (!result.success) {
+      const msg = result.error.issues
+        .map((e: { message: string }) => e.message)
+        .join('\n')
+      Alert.alert('Validation', msg)
       return false
     }
     return true
@@ -48,58 +112,137 @@ const LoginScreen: React.FC = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
-      <TextInput
-        placeholder="Email"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        style={styles.input}
-        testID="email-input"
-        accessibilityLabel="email-input"
-        editable={!loading}
-      />
-      <TextInput
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        style={styles.input}
-        testID="password-input"
-        accessibilityLabel="password-input"
-        editable={!loading}
-      />
+    <Container style={styles.container}>
+      <LoginScreenAnimatedTitle />
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#0a84ff" />
-      ) : (
-        <Button title="Login" onPress={onLogin} testID="login-button" />
-      )}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.keyboardAvoiding}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <Animated.View
+              style={[
+                styles.animatedBlock,
+                {
+                  transform: [{ translateY }],
+                  justifyContent: keyboardOpen ? 'center' : 'flex-end',
+                },
+              ]}
+            >
+              <Text variant="xxLarge">Login</Text>
+              <Text variant="xLarge" style={styles.subtitle}>
+                Please Sign in to continue.
+              </Text>
 
-      <View style={{ height: 12 }} />
-      <Button
-        title="Register"
-        onPress={() => navigatorManager.goToRegister()}
-        disabled={loading}
-        testID="register-button"
-      />
-      <View style={{ height: 8 }} />
-      <Button
-        title="Forgot password?"
-        onPress={() => navigatorManager.goToRecovery()}
-        disabled={loading}
-        testID="forgot-button"
-      />
-    </View>
+              <TextInput
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+                testID="email-input"
+                accessibilityLabel="email-input"
+                editable={!loading}
+              />
+
+              <TextInput
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                testID="password-input"
+                accessibilityLabel="password-input"
+                editable={!loading}
+              />
+
+              <View style={styles.buttonRow}>
+                <Button
+                  title="Login"
+                  onPress={onLogin}
+                  style={styles.button}
+                  background={theme.colors.accentRed}
+                  textColor={theme.colors.backgroundPrimary}
+                />
+                <Button
+                  title="Register"
+                  onPress={() => navigatorManager.goToRegister()}
+                  disabled={loading}
+                  style={styles.button}
+                  background={theme.colors.accentRed}
+                  textColor={theme.colors.backgroundPrimary}
+                />
+              </View>
+
+              <LinkButton
+                text="Forgot password?"
+                textColor={theme.colors.textPrimary}
+                variant="large"
+                onPress={() => navigatorManager.goToRecovery()}
+              />
+            </Animated.View>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </Container>
   )
 }
 
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, justifyContent: 'center' },
-  title: { fontSize: 24, marginBottom: 12 },
-  input: { borderWidth: 1, padding: 8, marginBottom: 8, borderRadius: 6 },
-})
-
 export default LoginScreen
+
+const createStyles = (theme: ThemeType) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      justifyContent: 'space-between',
+      backgroundColor: theme.colors.backgroundTertiary,
+    },
+    title: {
+      fontSize: 100,
+      lineHeight: 100,
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      textAlign: 'center',
+      marginTop: theme.spacings.large,
+    },
+    titleSmall: {
+      fontSize: 40,
+      lineHeight: 44,
+      fontWeight: 'bold',
+      color: theme.colors.textPrimary,
+      textAlign: 'center',
+      marginTop: theme.spacings.small,
+    },
+    keyboardAvoiding: {
+      flex: 1,
+      zIndex: 2,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      justifyContent: 'flex-end',
+    },
+    animatedBlock: {
+      backgroundColor: theme.colors.backgroundPrimary,
+      padding: theme.spacings.medium,
+      borderRadius: theme.border.radius16,
+      paddingVertical: theme.spacings.xLarge,
+      borderWidth: theme.border.size,
+      borderColor: theme.colors.borderColor,
+    },
+    subtitle: {
+      marginBottom: theme.spacings.large,
+      color: theme.colors.textSecondary,
+    },
+    buttonRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      marginVertical: theme.spacings.medium,
+      gap: theme.spacings.medium,
+    },
+    button: {
+      flex: 1,
+    },
+  })

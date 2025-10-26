@@ -1,0 +1,4 @@
+{
+  "auth.email_invalid": "Digite um email válido",
+  "auth.password_min": "A senha deve ter pelo menos 6 caracteres"
+}

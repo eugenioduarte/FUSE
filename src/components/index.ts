@@ -1,3 +1,7 @@
+export { default as Button } from './buttons/Button'
+export { default as LinkButton } from './buttons/LinkButton'
+export { default as Container } from './containers/Container'
 export { Header } from './headers/Header'
 export { default as Card } from './ui/Card'
-export { Text as UiText } from './ui/UiText'
+export { default as TextInput } from './ui/TextInput'
+export { Text } from './ui/UiText'

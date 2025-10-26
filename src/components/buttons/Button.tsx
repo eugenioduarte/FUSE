@@ -28,6 +28,23 @@ type ButtonProps = {
   style?: StyleProp<ViewStyle>
   size?: ButtonSize
   background?: string
+  textColor?: string
+}
+
+type SizeStyle = {
+  paddingVertical?: number
+  paddingHorizontal?: number
+}
+
+type DynamicOptions = {
+  bgColor: string
+  textColor: string
+  borderColor: string
+  sizeStyle: SizeStyle
+  hasLeftIcon: boolean
+  hasRightIcon: boolean
+  scale: Animated.Value
+  disabled: boolean
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -39,6 +56,8 @@ const Button: React.FC<ButtonProps> = ({
   style,
   size = 'default',
   background,
+  textColor,
+  ...rest
 }) => {
   const theme = useTheme()
 
@@ -73,7 +92,7 @@ const Button: React.FC<ButtonProps> = ({
     () =>
       createStyles(theme, {
         bgColor: background ?? theme.colors.backgroundPrimary,
-        textColor: theme.colors.textPrimary,
+        textColor: textColor ?? theme.colors.textPrimary,
         borderColor: theme.colors.borderColor,
         sizeStyle,
         hasLeftIcon: !!leftIcon,
@@ -81,7 +100,16 @@ const Button: React.FC<ButtonProps> = ({
         scale,
         disabled,
       }),
-    [theme, background, sizeStyle, leftIcon, rightIcon, scale, disabled],
+    [
+      theme,
+      background,
+      sizeStyle,
+      leftIcon,
+      rightIcon,
+      scale,
+      disabled,
+      textColor,
+    ],
   )
 
   return (
@@ -110,6 +138,7 @@ const Button: React.FC<ButtonProps> = ({
         pressed && styles.pressed,
         style,
       ]}
+      {...rest}
     >
       <Animated.View style={styles.container}>
         {leftIcon ? <View style={styles.iconLeft}>{leftIcon}</View> : null}
@@ -130,22 +159,6 @@ const Button: React.FC<ButtonProps> = ({
 }
 
 export default Button
-
-type SizeStyle = {
-  paddingVertical?: number
-  paddingHorizontal?: number
-}
-
-type DynamicOptions = {
-  bgColor: string
-  textColor: string
-  borderColor: string
-  sizeStyle: SizeStyle
-  hasLeftIcon: boolean
-  hasRightIcon: boolean
-  scale: Animated.Value
-  disabled: boolean
-}
 
 const createStyles = (
   theme: ReturnType<typeof useTheme>,

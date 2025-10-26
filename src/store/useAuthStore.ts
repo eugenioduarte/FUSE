@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 import { asyncStorage } from '../storage/asyncStorage'
@@ -26,7 +27,10 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       rehydrated: false,
       login: (user) => set({ user }),
-      logout: () => set({ user: null }),
+      logout: async () => {
+        await AsyncStorage.clear()
+        set({ user: null })
+      },
       updateUser: (patch) => {
         const current = get().user
         if (!current) return

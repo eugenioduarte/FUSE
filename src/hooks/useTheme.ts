@@ -1,7 +1,7 @@
 import { border, Colors, spacings, typography } from '../constants/theme'
-import type { Theme } from '../types/theme.type'
+import { ThemeType } from '../types/theme.type'
 
-export function useTheme(): Theme {
+export function useTheme(): ThemeType {
   const colorScheme = 'light'
 
   return {

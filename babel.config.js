@@ -7,6 +7,15 @@ module.exports = function (api) {
   return {
     presets: ['babel-preset-expo'],
     plugins: [
+      [
+        'module-resolver',
+        {
+          root: ['./'],
+          alias: {
+            '@': './src',
+          },
+        },
+      ],
       // Keep Reanimated LAST per its docs; omit Worklets here to avoid duplicate injection
       // Reanimated v4 includes Worklets transform internally.
       !isTest && 'react-native-reanimated/plugin',

@@ -1,7 +1,9 @@
 import Container from '@/src/components/containers/Container'
+import { useAuthStore } from '@/src/store'
 import { useFocusEffect } from '@react-navigation/native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FlatList, Text, View } from 'react-native'
+import { navigatorManager } from '../../../navigation/navigatorManager'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
 import CalendarDisplay from './components/CalendarDisplay'
@@ -21,6 +23,13 @@ type DashItem = {
 export default function DashboardScreen() {
   const [items, setItems] = useState<DashItem[]>([])
   const [loading, setLoading] = useState(true)
+  const user = useAuthStore((s) => s.user)
+
+  useEffect(() => {
+    if (!user) {
+      navigatorManager.goToLoginScreen()
+    }
+  }, [user])
 
   useEffect(() => {
     let mounted = true
