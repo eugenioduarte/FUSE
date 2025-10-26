@@ -1,4 +1,14 @@
 {
   "auth.email_invalid": "Digite um email válido",
-  "auth.password_min": "A senha deve ter pelo menos 6 caracteres"
+  "auth.password_min": "A senha deve ter pelo menos 6 caracteres",
+  "login.button": "Entrar",
+  "login.email": "Email",
+  "login.failed": "Falha no login",
+  "login.forgot_password": "Esqueceu a senha?",
+  "login.password": "Senha",
+  "login.subtitle": "Faça login para continuar.",
+  "login.title": "Entrar",
+  "register.button": "Registrar",
+  "user.default": "Usuário",
+  "validation.title": "Validação"
 }
