@@ -1,3 +1,4 @@
+import { useTheme } from '@/hooks/useTheme'
 import React from 'react'
 import { View, ViewProps, ViewStyle } from 'react-native'
 
@@ -6,16 +7,17 @@ type Props = ViewProps & {
 }
 
 const Card: React.FC<Props> = ({ style, children, ...rest }) => {
+  const theme = useTheme()
   return (
     <View
       {...rest}
       style={[
         {
           backgroundColor: '#fff',
-          borderWidth: 1,
-          borderColor: '#3a3a3a',
-          borderRadius: 10,
-          padding: 12,
+          borderWidth: theme.border.size,
+          borderColor: theme.colors.borderColor,
+          borderRadius: theme.border.radius12,
+          overflow: 'hidden',
         },
         style as any,
       ]}

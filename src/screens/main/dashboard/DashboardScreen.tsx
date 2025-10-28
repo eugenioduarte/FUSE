@@ -10,7 +10,8 @@ import { navigatorManager } from '../../../navigation/navigatorManager'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
 import CalendarDisplay from './components/CalendarDisplay'
-import TopicCard from './components/TopicCard'
+import FrequencyDisplay from './components/FrequencyDisplay'
+import TopicCard, { TopicCardPayload } from './components/TopicCard'
 
 type DashItem = {
   id: string
@@ -103,14 +104,50 @@ export default function DashboardScreen() {
     }, []),
   )
 
+  const mockTopicCard: TopicCardPayload = {
+    id: 'topic-001',
+    topicName: 'Machine Learning Fundamentals',
+    score: 85,
+    createdAt: '2025-10-21T10:30:00Z',
+    spendTime: '2h 15min',
+    backgroundColor: '#F5F7FF',
+    usersShared: [
+      {
+        id: 'user-001',
+        name: 'Alice Johnson',
+        avatarUrl: 'https://randomuser.me/api/portraits/women/45.jpg',
+      },
+      {
+        id: 'user-002',
+        name: 'Bruno Costa',
+        avatarUrl: 'https://randomuser.me/api/portraits/men/46.jpg',
+      },
+      {
+        id: 'user-003',
+        name: 'Chen Wei',
+        avatarUrl: 'https://randomuser.me/api/portraits/men/24.jpg',
+      },
+    ],
+    summaries: [
+      { id: 'summary-001', title: 'What is Machine Learning?' },
+      { id: 'summary-002', title: 'Supervised vs Unsupervised Learning' },
+      { id: 'summary-003', title: 'Key Algorithms Overview' },
+    ],
+  }
+
   return (
     <Container style={{ backgroundColor: 'green', paddingTop: 0 }}>
       <SubContainer>
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <TopicCard {...item} />}
-          ListHeaderComponent={<CalendarDisplay />}
+          renderItem={({ item }) => <TopicCard {...mockTopicCard} />}
+          ListHeaderComponent={
+            <>
+              <FrequencyDisplay />
+              <CalendarDisplay />
+            </>
+          }
           ListEmptyComponent={
             loading ? null : (
               <View style={{ padding: 16 }}>
@@ -120,8 +157,11 @@ export default function DashboardScreen() {
               </View>
             )
           }
-          contentContainerStyle={{ paddingBottom: 100 }}
+          contentContainerStyle={{
+            paddingBottom: 100,
+          }}
           showsVerticalScrollIndicator={false}
+          style={{ width: '100%' }}
         />
 
         {/* Bottom CTA to create a new topic */}

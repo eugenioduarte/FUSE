@@ -1,7 +1,7 @@
 import { format } from 'date-fns'
 import React, { useEffect, useMemo, useRef } from 'react'
 import { FlatList, TouchableOpacity, View } from 'react-native'
-import { Card, UiText } from '../../../../components'
+import { Card, Text } from '../../../../components'
 import { navigatorManager } from '../../../../navigation/navigatorManager'
 import { useCalendarStore } from '../../../../store/useCalendarStore'
 
@@ -25,12 +25,12 @@ const CalendarCard = ({
           padding: 8,
         }}
       >
-        <UiText variant="title">{title}</UiText>
+        <Text variant="medium">{title}</Text>
         <TouchableOpacity
           disabled={!topicId}
           onPress={() => topicId && navigatorManager.goToTopicDetails(topicId)}
         >
-          <UiText style={{ color: '#1d4ed8' }}>Ver tópico</UiText>
+          <Text style={{ color: '#1d4ed8' }}>Ver tópico</Text>
         </TouchableOpacity>
       </View>
 
@@ -38,12 +38,12 @@ const CalendarCard = ({
         style={{ flexDirection: 'row', justifyContent: 'flex-start', gap: 15 }}
       >
         <View>
-          <UiText>{time}</UiText>
-          {!!location && <UiText>{location}</UiText>}
+          <Text>{time}</Text>
+          {!!location && <Text>{location}</Text>}
         </View>
         <View>
-          <UiText>ID do tópico: {topicId ?? '—'}</UiText>
-          <UiText>(navegação passará esse id)</UiText>
+          <Text>ID do tópico: {topicId ?? '—'}</Text>
+          <Text>(navegação passará esse id)</Text>
         </View>
       </View>
     </Card>
@@ -96,7 +96,7 @@ const CalendarDisplay = () => {
   return (
     <Card style={{ height: 240, width: '100%', marginBottom: 8 }}>
       <View style={{ paddingHorizontal: 8, paddingTop: 8, paddingBottom: 4 }}>
-        <UiText variant="title">Hoje ({sortedDaily.length})</UiText>
+        <Text variant="medium">Hoje ({sortedDaily.length})</Text>
       </View>
       <FlatList
         data={sortedDaily}

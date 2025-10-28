@@ -1,8 +1,10 @@
+import DisplayNumber from '@/components/ui/DisplayNumber'
+import { useTheme } from '@/hooks/useTheme'
 import React from 'react'
 import { FlatList, Image, TouchableOpacity, View } from 'react-native'
-import { Card, Text as UiText } from '../../../../components'
+import { Card, Text } from '../../../../components'
 import { navigatorManager } from '../../../../navigation/navigatorManager'
-
+import { TopicCardChart } from './TopicCardChart'
 type users = {
   id: string
   name: string
@@ -21,16 +23,9 @@ export type TopicCardPayload = {
 }
 
 const TopicCard = (payload: TopicCardPayload) => {
-  const {
-    id,
-    topicName,
-    score,
-    createdAt,
-    spendTime,
-    usersShared,
-    summaries,
-    backgroundColor,
-  } = payload
+  const { id, topicName, score, usersShared, summaries, backgroundColor } =
+    payload
+  const theme = useTheme()
   const goToTopic = () => navigatorManager.goToTopicDetails(id)
   const colored = !!backgroundColor
   const titleColor = colored ? '#111' : undefined
@@ -38,58 +33,82 @@ const TopicCard = (payload: TopicCardPayload) => {
   return (
     <TouchableOpacity onPress={goToTopic} style={{ width: '100%' }}>
       <Card
-        style={{ marginBottom: 8, backgroundColor: backgroundColor || '#fff' }}
+        style={{
+          marginBottom: 8,
+          backgroundColor: theme.colors.backgroundPrimary,
+          paddingBottom: 16,
+        }}
       >
-        <UiText variant="medium" color={titleColor}>
-          {topicName}
-        </UiText>
-        {!!score && <UiText>Score: {score}</UiText>}
-        {!!createdAt && <UiText>Criado em: {createdAt}</UiText>}
-        {!!spendTime && <UiText>Tempo: {spendTime}</UiText>}
-        {!!usersShared?.length && (
-          <FlatList
-            data={usersShared}
-            keyExtractor={(item) => item.id}
-            horizontal
-            contentContainerStyle={{ gap: 8, marginTop: 8 }}
-            renderItem={({ item }) => (
-              <View>
-                <Image
-                  source={{ uri: item.avatarUrl }}
-                  style={{ width: 36, height: 36, borderRadius: 18 }}
-                />
-              </View>
-            )}
-            showsHorizontalScrollIndicator={false}
-          />
-        )}
+        <View
+          style={{
+            marginBottom: 8,
+            backgroundColor: backgroundColor || theme.colors.accentYellow,
+            padding: 16,
+            borderBottomColor: theme.colors.borderColor,
+            borderBottomWidth: 1,
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
+          <Text variant="large" color={titleColor}>
+            {topicName}
+          </Text>
+          {!!summaries && <Text>{summaries?.length}</Text>}
+        </View>
 
-        {!!summaries?.length && (
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              gap: 8,
-              marginTop: 8,
-            }}
-          >
-            {summaries.map((s) => (
-              <View
-                key={s.id}
-                style={{
-                  backgroundColor: '#111827',
-                  borderColor: '#374151',
-                  borderWidth: 1,
-                  borderRadius: 999,
-                  paddingVertical: 6,
-                  paddingHorizontal: 10,
-                }}
-              >
-                <UiText color="#9ca3af">{s.title || 'Resumo'}</UiText>
-              </View>
-            ))}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            paddingHorizontal: 16,
+            marginBottom: 16,
+          }}
+        >
+          <DisplayNumber value={score} label="Score" />
+          <View>
+            {!!usersShared?.length && (
+              <FlatList
+                data={usersShared}
+                keyExtractor={(item) => item.id}
+                horizontal
+                contentContainerStyle={{ gap: 8, marginTop: 8 }}
+                renderItem={({ item, index }) => (
+                  <View
+                    style={{
+                      borderWidth: 2,
+                      borderColor: theme.colors.black,
+                      marginLeft: index > 0 ? -20 : 0,
+                      borderRadius: 999,
+                      borderBottomWidth: 5,
+                    }}
+                  >
+                    <View
+                      style={{
+                        borderWidth: 2,
+                        borderColor: backgroundColor,
+                        borderRadius: 999,
+                      }}
+                    >
+                      <Image
+                        source={{ uri: item.avatarUrl }}
+                        style={{
+                          width: 36,
+                          height: 36,
+                          borderRadius: 18,
+                        }}
+                      />
+                    </View>
+                  </View>
+                )}
+                showsHorizontalScrollIndicator={false}
+              />
+            )}
           </View>
-        )}
+        </View>
+
+        <TopicCardChart />
       </Card>
     </TouchableOpacity>
   )
