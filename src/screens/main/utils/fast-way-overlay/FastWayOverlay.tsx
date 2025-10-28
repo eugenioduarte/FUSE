@@ -1,3 +1,4 @@
+import { useBottomTabStore } from '@/store/useBottomTabStore'
 import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   FlatList,
@@ -81,6 +82,7 @@ const SummaryItem = ({
 )
 
 const FastWayOverlay: React.FC = () => {
+  const { setActiveTab } = useBottomTabStore()
   const { fastWayOverlay, setFastWayOverlay } = useOverlay()
   const fast = useFastwayStore()
   const [topics, setTopics] = useState<Topic[]>([])
@@ -196,9 +198,9 @@ const FastWayOverlay: React.FC = () => {
   // Navegar para a tela de Topics (fora do overlay)
   const goToTopicsScreen = () => {
     setFastWayOverlay(false)
+    setActiveTab('topics')
     navigatorManager.goToTopic()
   }
-
   // Navegar para a tela de detalhes do Summary atual
   const goToSummaryDetails = () => {
     if (!fast.selectedSummaryId) return
@@ -217,11 +219,12 @@ const FastWayOverlay: React.FC = () => {
   const isOnDashboard =
     navigationRef.isReady() &&
     navigationRef.getCurrentRoute()?.name === ROUTES.DashboardScreen
+
   const goToDashboard = () => {
     setFastWayOverlay(false)
+    setActiveTab('dashboard')
     navigatorManager.goToDashboard()
   }
-
   return (
     <Modal
       visible={fastWayOverlay}

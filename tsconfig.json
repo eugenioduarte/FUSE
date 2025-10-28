@@ -4,10 +4,9 @@
     "types": ["jest"],
     "jsx": "react",
     "strict": true,
+    "baseUrl": ".",
     "paths": {
-      "@/*": ["./*"],
-      "@": ["./src"],
-      "@firebase/auth": ["./node_modules/@firebase/auth/dist/index.rn.d.ts"]
+      "@/*": ["src/*"]
     },
     "moduleResolution": "bundler"
   },
@@ -16,7 +15,6 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
-    "declarations.d.ts",
-    "src/screens/main/topic/topicDetailsScreen/summaryListTab"
+    "declarations.d.ts"
   ]
 }

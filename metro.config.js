@@ -1,4 +1,6 @@
+// metro.config.js
 const { getDefaultConfig } = require('expo/metro-config')
+const path = require('path')
 
 const config = getDefaultConfig(__dirname)
 
@@ -6,14 +8,18 @@ config.transformer.babelTransformerPath = require.resolve(
   'react-native-svg-transformer',
 )
 
-// Ensure the transformer knows where to register assets.
-// Prevents "missing-asset-registry-path" errors for images required from node_modules.
+// Corrige problema de assets dentro de node_modules
 config.transformer.assetRegistryPath =
   'react-native/Libraries/Image/AssetRegistry'
 
+// Suporte a SVG
 config.resolver.assetExts = config.resolver.assetExts.filter(
   (ext) => ext !== 'svg',
 )
 config.resolver.sourceExts.push('svg')
+
+config.resolver.alias = {
+  '@': path.resolve(__dirname, 'src'),
+}
 
 module.exports = config

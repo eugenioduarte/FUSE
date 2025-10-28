@@ -1,8 +1,8 @@
-import { Text } from '@/src/components'
+import { Text } from '@/components'
 import React from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
-import { useTheme } from '@/src/hooks/useTheme'
+import { useTheme } from '@/hooks/useTheme'
 
 type Props = {
   text: string

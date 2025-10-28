@@ -1,4 +1,4 @@
-import { width } from '@/src/utils/dimensions'
+import { width } from '@/utils/dimensions'
 import React, { useEffect, useRef } from 'react'
 import { Animated, Easing } from 'react-native'
 
@@ -48,7 +48,7 @@ const LoginScreenAnimatedTitle = ({ keyboardOpen }: Props) => {
       }}
     >
       <Animated.Image
-        source={require('@/src/assets/images/logo.png')}
+        source={require('@/assets/images/logo.png')}
         style={{
           width: animatedSize,
           height: animatedSize,

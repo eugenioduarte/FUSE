@@ -1,11 +1,13 @@
-import { Button, LinkButton, Text, TextInput } from '@/src/components'
-import Container from '@/src/components/containers/Container'
-
-import { useTheme } from '@/src/hooks/useTheme'
-import { loginSchema } from '@/src/schemas/authSchemas'
-import { firebaseLogin } from '@/src/services/firebase/authService'
-import { ThemeType } from '@/src/types/theme.type'
-import React, { useState } from 'react'
+import { Button, LinkButton, Text, TextInput } from '@/components'
+import Container from '@/components/containers/Container'
+import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
+import { loginSchema } from '@/schemas/authSchemas'
+import { firebaseLogin } from '@/services/firebase/authService'
+import { ThemeType } from '@/types/theme.type'
+import { zodResolver } from '@hookform/resolvers/zod'
+import React from 'react'
+import { Controller, useForm } from 'react-hook-form'
 import {
   Alert,
   Animated,
@@ -22,38 +24,35 @@ import { useAuthStore } from '../../../store/useAuthStore'
 import LoginScreenAnimatedTitle from './LoginScreenAnimatedTitle'
 import { useLoginAnimation } from './useLoginAnimation'
 
+type LoginFormValues = {
+  email: string
+  password: string
+}
+
 const LoginScreen: React.FC = () => {
   const theme = useTheme()
   const styles = createStyles(theme)
   const loginStore = useAuthStore((s) => s.login)
-  const [email, setEmail] = useState('eugenioduartesilva@gmail.com')
-  const [password, setPassword] = useState('123456')
-  const [loading, setLoading] = useState(false)
 
+  const { control, handleSubmit, formState } = useForm<LoginFormValues>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: 'eugenioduartesilva@gmail.com',
+      password: '123456',
+    },
+  })
+
+  const { isSubmitting, errors } = formState
   const { translateY, keyboardOpen } = useLoginAnimation(theme)
 
-  const validate = () => {
-    const result = loginSchema.safeParse({ email, password })
-    if (!result.success) {
-      const msg = result.error.issues.map((e) => e.message).join('\n')
-      Alert.alert('Validation', msg)
-      return false
-    }
-    return true
-  }
-
-  const onLogin = async () => {
-    if (!validate()) return
-    setLoading(true)
+  const onSubmit = async (values: LoginFormValues) => {
     try {
-      const res: any = await firebaseLogin(email, password)
+      const res: any = await firebaseLogin(values.email, values.password)
       const u = res.user
-      loginStore({ id: u.uid, name: u.email ?? 'User' })
+      loginStore({ id: u.uid, name: u.email ?? t('user.default') })
       navigatorManager.goToDashboard()
     } catch (err: any) {
-      Alert.alert('Login failed', err?.message ?? String(err))
-    } finally {
-      setLoading(false)
+      Alert.alert(t('login.failed'), err?.message ?? String(err))
     }
   }
 
@@ -80,49 +79,63 @@ const LoginScreen: React.FC = () => {
                 },
               ]}
             >
-              <Text variant="xxLarge">Login</Text>
+              <Text variant="xxLarge">{t('login.title')}</Text>
               <Text variant="xLarge" style={styles.subtitle}>
-                Please Sign in to continue.
+                {t('login.subtitle')}
               </Text>
 
-              <TextInput
-                placeholder="Email"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                editable={!loading}
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    placeholder={t('login.email')}
+                    value={value}
+                    onChangeText={onChange}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                    editable={!isSubmitting}
+                    error={errors.email?.message}
+                  />
+                )}
               />
 
-              <TextInput
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                editable={!loading}
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, value } }) => (
+                  <TextInput
+                    placeholder={t('login.password')}
+                    value={value}
+                    onChangeText={onChange}
+                    secureTextEntry
+                    editable={!isSubmitting}
+                    error={errors.password?.message}
+                  />
+                )}
               />
 
               <View style={styles.buttonRow}>
                 <Button
-                  title="Login"
-                  onPress={onLogin}
+                  title={t('register.button')}
+                  onPress={() => navigatorManager.goToRegister()}
+                  disabled={isSubmitting}
                   style={styles.button}
                   background={theme.colors.accentRed}
                   textColor={theme.colors.backgroundPrimary}
-                  disabled={loading}
                 />
                 <Button
-                  title="Register"
-                  onPress={() => navigatorManager.goToRegister()}
-                  disabled={loading}
+                  title={t('login.button')}
+                  onPress={handleSubmit(onSubmit)}
                   style={styles.button}
                   background={theme.colors.accentRed}
                   textColor={theme.colors.backgroundPrimary}
+                  disabled={isSubmitting}
                 />
               </View>
 
               <LinkButton
-                text="Forgot password?"
+                text={t('login.forgot_password')}
                 textColor={theme.colors.textPrimary}
                 variant="large"
                 onPress={() => navigatorManager.goToRecovery()}

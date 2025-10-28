@@ -1,3 +1,4 @@
+import { SnackbarProvider } from '@/components/ui/SnackbarProvider'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { registerRootComponent } from 'expo'
 import { useFonts } from 'expo-font'
@@ -6,19 +7,21 @@ import { StatusBar } from 'react-native'
 import 'react-native-reanimated'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import Navigation from './src/navigation/Navigation'
+import { useThemeStore } from './src/store/useThemeStore'
 
-// Configure a shared QueryClient; default cache policy aligns with AI hooks
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 30 * 60 * 1000, // 30 minutes
+      staleTime: 5 * 60 * 1000,
+      gcTime: 30 * 60 * 1000,
       refetchOnWindowFocus: false,
     },
   },
 })
 
 export default function App() {
+  // printHello()
+  const { backgroundColor } = useThemeStore()
   const [fontsLoaded] = useFonts({
     'Fredoka-Light': require('./assets/fonts/Fredoka-Light.ttf'),
     'Fredoka-Regular': require('./assets/fonts/Fredoka-Regular.ttf'),
@@ -31,13 +34,15 @@ export default function App() {
 
   return (
     <SafeAreaProvider>
-      <StatusBar backgroundColor="#000" barStyle="light-content" />
+      <StatusBar backgroundColor="#000" barStyle="dark-content" />
       <SafeAreaView
         edges={['top']}
-        style={{ flex: 1, backgroundColor: '#000' }}
+        style={{ flex: 1, backgroundColor: backgroundColor }}
       >
         <QueryClientProvider client={queryClient}>
-          <Navigation />
+          <SnackbarProvider>
+            <Navigation />
+          </SnackbarProvider>
         </QueryClientProvider>
       </SafeAreaView>
     </SafeAreaProvider>

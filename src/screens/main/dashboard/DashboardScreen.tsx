@@ -1,5 +1,8 @@
-import Container from '@/src/components/containers/Container'
-import { useAuthStore } from '@/src/store'
+import { Button } from '@/components'
+import Container from '@/components/containers/Container'
+import SubContainer from '@/components/containers/SubContainer'
+import { useTheme } from '@/hooks/useTheme'
+import { useAuthStore } from '@/store'
 import { useFocusEffect } from '@react-navigation/native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { FlatList, Text, View } from 'react-native'
@@ -21,6 +24,7 @@ type DashItem = {
 }
 
 export default function DashboardScreen() {
+  const theme = useTheme()
   const [items, setItems] = useState<DashItem[]>([])
   const [loading, setLoading] = useState(true)
   const user = useAuthStore((s) => s.user)
@@ -100,46 +104,36 @@ export default function DashboardScreen() {
   )
 
   return (
-    <Container>
-      <FlatList
-        data={items}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <TopicCard {...item} />}
-        ListHeaderComponent={<CalendarDisplay />}
-        ListEmptyComponent={
-          loading ? null : (
-            <View style={{ padding: 16 }}>
-              <Text style={{ color: 'white' }}>
-                Nenhum tópico encontrado. Crie um tópico para começar.
-              </Text>
-            </View>
-          )
-        }
-        contentContainerStyle={{ paddingBottom: 100 }}
-        showsVerticalScrollIndicator={false}
-      />
-
-      {/* Bottom CTA to create a new topic */}
-      <View style={{ position: 'absolute', left: 16, right: 16, bottom: 16 }}>
-        <View
-          style={{
-            backgroundColor: '#3b82f6',
-            borderRadius: 10,
-            paddingVertical: 14,
-            alignItems: 'center',
-          }}
-          // @ts-ignore RN Pressable types not imported here; keep simple
-          onTouchEnd={() =>
-            import('../../../navigation/navigatorManager').then((m) =>
-              m.navigatorManager.goToTopicAdd(),
+    <Container style={{ backgroundColor: 'green', paddingTop: 0 }}>
+      <SubContainer>
+        <FlatList
+          data={items}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => <TopicCard {...item} />}
+          ListHeaderComponent={<CalendarDisplay />}
+          ListEmptyComponent={
+            loading ? null : (
+              <View style={{ padding: 16 }}>
+                <Text style={{ color: 'white' }}>
+                  Nenhum tópico encontrado. Crie um tópico para começar.
+                </Text>
+              </View>
             )
           }
-        >
-          <Text style={{ color: 'white', fontWeight: '700' }}>
-            Criar novo tópico
-          </Text>
-        </View>
-      </View>
+          contentContainerStyle={{ paddingBottom: 100 }}
+          showsVerticalScrollIndicator={false}
+        />
+
+        {/* Bottom CTA to create a new topic */}
+
+        <Button
+          title={' Criar novo tópico'}
+          onPress={() => navigatorManager.goToTopicAdd()}
+          style={{ marginTop: 16, alignSelf: 'center' }}
+          background={theme.colors.accentRed}
+          textColor={theme.colors.backgroundPrimary}
+        />
+      </SubContainer>
     </Container>
   )
 }

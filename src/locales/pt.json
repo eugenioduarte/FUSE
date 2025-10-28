@@ -1,6 +1,7 @@
 {
   "auth.email_invalid": "Digite um email válido",
   "auth.password_min": "A senha deve ter pelo menos 6 caracteres",
+
   "login.button": "Entrar",
   "login.email": "Email",
   "login.failed": "Falha no login",
@@ -8,7 +9,33 @@
   "login.password": "Senha",
   "login.subtitle": "Faça login para continuar.",
   "login.title": "Entrar",
-  "register.button": "Registrar",
+
   "user.default": "Usuário",
-  "validation.title": "Validação"
+  "validation.title": "Validação",
+
+  "common.goBack": "Voltar",
+  "common.loading": "Carregando...",
+  "common.error": "Ocorreu um erro",
+  "common.noData": "Nenhum dado disponível",
+  "common.search": "Buscar",
+  "common.clear": "Limpar",
+  "common.apply": "Aplicar",
+  "common.cancel": "Cancelar",
+  "common.close": "Fechar",
+
+  "register.button": "Registrar",
+  "register.name": "Nome",
+  "register.email": "Email",
+  "register.password": "Senha",
+  "register.title": "Criar uma conta",
+  "register.subtitle": "Registre-se para começar a usar o aplicativo.",
+  "register.failed_title": "Registro falhou",
+  "register.failed_message": "Não foi possível criar a conta. Por favor, tente novamente mais tarde.",
+
+  "recovery.title": "Recuperar Senha",
+  "recovery.subtitle": "Insira seu email para receber instruções de recuperação de senha.",
+  "recovery.send_button": "Enviar Instruções",
+  "recovery.success_title": "Email Enviado",
+  "recovery.success_message": "Instruções de recuperação de senha foram enviadas para seu email.",
+  "recovery.error_title": "Erro ao Enviar Email"
 }

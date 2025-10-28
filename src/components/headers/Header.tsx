@@ -91,7 +91,7 @@ export const Header: React.FC = () => {
   const { headerConfig } = useThemeStore()
   const { title, visible, type } = headerConfig
   const [currentType, setCurrentType] = useState(type)
-
+  const backgroundColor = useThemeStore((state) => state.backgroundColor)
   useEffect(() => {
     if (visible) {
       setCurrentType(type)
@@ -116,7 +116,7 @@ export const Header: React.FC = () => {
         .easing(Easing.in(Easing.cubic))
         .damping(100)
         .withInitialValues({ opacity: 1 })}
-      style={styles.container}
+      style={[styles.container, { backgroundColor: backgroundColor }]}
     >
       {renderHeader()}
     </Animated.View>
@@ -130,7 +130,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 12,
-    backgroundColor: 'black',
   },
   iconWrapper: { width: 40, alignItems: 'flex-start' },
   iconPlaceholder: { width: 40 },

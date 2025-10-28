@@ -1,4 +1,4 @@
-import { ThemeType } from '@/src/types/theme.type'
+import { ThemeType } from '@/types/theme.type'
 import { useEffect, useRef, useState } from 'react'
 import { Animated, EmitterSubscription, Keyboard, Platform } from 'react-native'
 

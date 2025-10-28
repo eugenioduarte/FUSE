@@ -12,5 +12,13 @@ module.exports = defineConfig([
       'react/no-unknown-property': ['error', { ignore: ['testID'] }],
       '@typescript-eslint/no-require-imports': 'off',
     },
+    settings: {
+      'import/resolver': {
+        alias: {
+          map: [['@', './src']],
+          extensions: ['.ts', '.tsx', '.js', '.jsx'],
+        },
+      },
+    },
   },
 ])

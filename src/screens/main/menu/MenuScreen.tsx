@@ -1,4 +1,4 @@
-import { useAuthStore } from '@/src/store'
+import { useAuthStore } from '@/store'
 import React from 'react'
 import { Button, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { navigatorManager } from '../../../navigation/navigatorManager'

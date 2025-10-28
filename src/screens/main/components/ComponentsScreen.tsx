@@ -1,6 +1,7 @@
-import Button from '@/src/components/buttons/Button'
-import { useTheme } from '@/src/hooks/useTheme'
-import type { Theme } from '@/src/types/theme.type'
+import Button from '@/components/buttons/Button'
+import { useTheme } from '@/hooks/useTheme'
+import { ThemeType } from '@/types/theme.type'
+
 import React from 'react'
 import { ScrollView, StyleSheet, Text } from 'react-native'
 
@@ -21,7 +22,7 @@ const ComponentsScreen: React.FC = () => {
 
 export default ComponentsScreen
 
-export const createStyles = (theme: Theme) =>
+export const createStyles = (theme: ThemeType) =>
   StyleSheet.create({
     screen: { flex: 1, backgroundColor: theme.colors.backgroundPrimary },
     content: { padding: 16 },

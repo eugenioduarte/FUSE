@@ -2681,6 +2681,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@hookform/resolvers@npm:^5.2.2":
+  version: 5.2.2
+  resolution: "@hookform/resolvers@npm:5.2.2"
+  dependencies:
+    "@standard-schema/utils": ^0.3.0
+  peerDependencies:
+    react-hook-form: ^7.55.0
+  checksum: 131b1c4c763949164825634058fbe126041f1375622fddcb4f833af57e89665a2672474c778e604583d7447cff8252ab7df460240269e91eb5683646a3c9bebb
+  languageName: node
+  linkType: hard
+
 "@humanfs/core@npm:^0.19.1":
   version: 0.19.1
   resolution: "@humanfs/core@npm:0.19.1"
@@ -3634,6 +3645,13 @@ __metadata:
   dependencies:
     "@sinonjs/commons": ^3.0.0
   checksum: 614d30cb4d5201550c940945d44c9e0b6d64a888ff2cd5b357f95ad6721070d6b8839cd10e15b76bf5e14af0bcc1d8f9ec00d49a46318f1f669a4bec1d7f3148
+  languageName: node
+  linkType: hard
+
+"@standard-schema/utils@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "@standard-schema/utils@npm:0.3.0"
+  checksum: 7084f875d322792f2e0a5904009434c8374b9345b09ba89828b68fd56fa3c2b366d35bf340d9e8c72736ef01793c2f70d350c372ed79845dc3566c58d34b4b51
   languageName: node
   linkType: hard
 
@@ -4801,6 +4819,7 @@ __metadata:
     "@commitlint/cli": ^19.8.1
     "@commitlint/config-conventional": ^19.8.1
     "@expo/vector-icons": ^15.0.3
+    "@hookform/resolvers": ^5.2.2
     "@react-native-async-storage/async-storage": 2.2.0
     "@react-navigation/bottom-tabs": ^7.3.10
     "@react-navigation/drawer": ^7.5.7
@@ -4821,6 +4840,7 @@ __metadata:
     eslint-config-expo: ~9.2.0
     eslint-config-prettier: ^10.1.8
     eslint-config-universe: ^15.0.3
+    eslint-import-resolver-alias: ^1.1.2
     eslint-plugin-prettier: ^5.5.4
     expo: ~54.0.0
     expo-av: ~16.0.7
@@ -4855,6 +4875,7 @@ __metadata:
     prettier: ^3.6.2
     react: 19.1.0
     react-dom: 19.1.0
+    react-hook-form: ^7.65.0
     react-native: 0.81.5
     react-native-gesture-handler: ~2.28.0
     react-native-keyboard-aware-scroll-view: ^0.9.5
@@ -6689,6 +6710,15 @@ __metadata:
     prettier:
       optional: true
   checksum: 5987b575b02b6d83feb5c6b0901bf8072a878304b40dd5f80d9be652944387d7786748e15519428939aecc38a95193b27c1128826dbe52661a14075022c9f783
+  languageName: node
+  linkType: hard
+
+"eslint-import-resolver-alias@npm:^1.1.2":
+  version: 1.1.2
+  resolution: "eslint-import-resolver-alias@npm:1.1.2"
+  peerDependencies:
+    eslint-plugin-import: ">=1.4.0"
+  checksum: 3fbb9aeda98335060bb438ed8446a060d282f80a365838a82edb1f8743b1d54c89303009c7717e3c915d5d722e57148082c5ada4455e811acdc8ed3a65059fa1
   languageName: node
   linkType: hard
 
@@ -11982,6 +12012,15 @@ __metadata:
   peerDependencies:
     react: ">=17.0.0"
   checksum: 6b4d93209dff04a1f25d9f8e0c56a9a8a80e7889e8e8267299f34449c7e41a9ab90cad24569d03dd7173b56b7496576dba68f71f1d4e5c8be72f0633023668bc
+  languageName: node
+  linkType: hard
+
+"react-hook-form@npm:^7.65.0":
+  version: 7.65.0
+  resolution: "react-hook-form@npm:7.65.0"
+  peerDependencies:
+    react: ^16.8.0 || ^17 || ^18 || ^19
+  checksum: ad7b6c6919e0f987587a94fe9bed0bd7d4c6817d7f9c4651f8d9d747261ad99b20d85f2ff2f329b86aadecc1ab48d4b0ef2eb13123e1a5d48022dbca259c4aef
   languageName: node
   linkType: hard
 
