@@ -15,6 +15,10 @@ import { getUserProfile } from '../../../services/firebase/connections.service'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
+import {
+  startSession,
+  stopSessionByKey,
+} from '../../../services/usage/usageTracker'
 import { useAuthStore } from '../../../store/useAuthStore'
 //
 
@@ -224,6 +228,28 @@ const ChallengesListScreen: React.FC = () => {
         mounted = false
       }
     }, [summaryId, attachLastAttempt]),
+  )
+
+  // Track study session for this summary's challenges list
+  useFocusEffect(
+    React.useCallback(() => {
+      let sessionKey: string | null = null
+      ;(async () => {
+        try {
+          if (!summaryId) return
+          const summary = await summariesRepository.getById(summaryId)
+          if (!summary) return
+          sessionKey = await startSession(
+            summary.topicId,
+            'challenge_list',
+            summaryId,
+          )
+        } catch {}
+      })()
+      return () => {
+        if (sessionKey) stopSessionByKey(sessionKey)
+      }
+    }, [summaryId]),
   )
 
   // Fetch display names for users that completed last attempts

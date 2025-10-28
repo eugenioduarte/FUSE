@@ -78,28 +78,19 @@ const TopicCard = (payload: TopicCardPayload) => {
                   <View
                     style={{
                       borderWidth: 2,
-                      borderColor: theme.colors.black,
-                      marginLeft: index > 0 ? -20 : 0,
+                      borderColor: backgroundColor,
                       borderRadius: 999,
-                      borderBottomWidth: 5,
+                      marginLeft: index > 0 ? -20 : 0,
                     }}
                   >
-                    <View
+                    <Image
+                      source={{ uri: item.avatarUrl }}
                       style={{
-                        borderWidth: 2,
-                        borderColor: backgroundColor,
-                        borderRadius: 999,
+                        width: 36,
+                        height: 36,
+                        borderRadius: 18,
                       }}
-                    >
-                      <Image
-                        source={{ uri: item.avatarUrl }}
-                        style={{
-                          width: 36,
-                          height: 36,
-                          borderRadius: 18,
-                        }}
-                      />
-                    </View>
+                    />
                   </View>
                 )}
                 showsHorizontalScrollIndicator={false}

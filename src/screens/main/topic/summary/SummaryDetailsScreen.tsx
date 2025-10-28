@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
-import { RouteProp, useRoute } from '@react-navigation/native'
+import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
 import * as FileSystem from 'expo-file-system'
 import * as Print from 'expo-print'
 import * as Sharing from 'expo-sharing'
@@ -24,6 +24,10 @@ import { aiService } from '../../../../services/ai/ai.service'
 import { summariesRepository } from '../../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../../services/repositories/topics.repository'
 import { whiteboardRepository } from '../../../../services/repositories/whiteboard.repository'
+import {
+  startSession,
+  stopSessionByKey,
+} from '../../../../services/usage/usageTracker'
 import { useOverlay } from '../../../../store/useOverlay'
 import { Summary } from '../../../../types/domain'
 
@@ -74,6 +78,26 @@ const SummaryDetailsScreen: React.FC = () => {
       active = false
     }
   }, [summaryId, summary])
+
+  // Track study session for this summary: start on focus, stop on blur
+  useFocusEffect(
+    React.useCallback(() => {
+      let sessionKey: string | null = null
+      ;(async () => {
+        try {
+          if (!summary) return
+          sessionKey = await startSession(
+            summary.topicId,
+            'summary',
+            summary.id,
+          )
+        } catch {}
+      })()
+      return () => {
+        if (sessionKey) stopSessionByKey(sessionKey)
+      }
+    }, [summary]),
+  )
 
   const fileDate = useMemo(() => {
     const d = new Date()
@@ -138,7 +162,9 @@ const SummaryDetailsScreen: React.FC = () => {
       const titlePart = sanitize(summary.title || 'resumo')
       const filename = `${topicPart}_${titlePart}_${fileDate}.pdf`
       const targetDir =
-        FileSystem.documentDirectory || FileSystem.cacheDirectory || ''
+        (FileSystem as any).documentDirectory ||
+        (FileSystem as any).cacheDirectory ||
+        ''
       const targetUri = `${targetDir}${filename}`
       try {
         // Remove if exists

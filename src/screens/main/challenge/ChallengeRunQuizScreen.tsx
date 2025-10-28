@@ -1,4 +1,4 @@
-import { RouteProp, useRoute } from '@react-navigation/native'
+import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
 import React, { useEffect, useRef, useState } from 'react'
 import {
   ActivityIndicator,
@@ -17,6 +17,10 @@ import {
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
+import {
+  startSession,
+  stopSessionByKey,
+} from '../../../services/usage/usageTracker'
 import { useAuthStore } from '../../../store/useAuthStore'
 import { useOverlay } from '../../../store/useOverlay'
 import { Challenge } from '../../../types/domain'
@@ -142,6 +146,28 @@ const ChallengeRunQuizScreen: React.FC = () => {
       active = false
     }
   }, [challengeId, setErrorOverlay, setLoadingOverlay])
+
+  // Track study session while running this challenge (start on focus, stop on blur)
+  useFocusEffect(
+    React.useCallback(() => {
+      let sessionKey: string | null = null
+      ;(async () => {
+        try {
+          if (!challenge) return
+          const summary = await summariesRepository.getById(challenge.summaryId)
+          if (!summary) return
+          sessionKey = await startSession(
+            summary.topicId,
+            'challenge',
+            challenge.id,
+          )
+        } catch {}
+      })()
+      return () => {
+        if (sessionKey) stopSessionByKey(sessionKey)
+      }
+    }, [challenge]),
+  )
 
   const isLast = step >= Math.max(0, questions.length - 1)
   const canContinue = currentChoice !== null
