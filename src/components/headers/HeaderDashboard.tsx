@@ -13,7 +13,7 @@ const HeaderDashboard = () => {
   const setFastWayOverlay = useOverlay((s) => s.setFastWayOverlay)
 
   const handleMenuPress = () => {
-    navigatorManager.openMenu()
+    navigatorManager.toggleMenu()
   }
 
   const handleFastWayPress = () => {

@@ -600,6 +600,15 @@ export default function Navigation() {
             headerShown: false,
             swipeEnabled: false,
             drawerType: 'front',
+            // make drawer cover full screen
+            drawerStyle: {
+              width: '100%',
+              backgroundColor: 'transparent',
+              zIndex: 9999,
+              elevation: 9999,
+            },
+            // overlay color between drawer and app (optional)
+            overlayColor: 'rgba(0,0,0,0.6)',
           }}
           drawerContent={DrawerContent}
           initialRouteName={DRAWER_APP}
