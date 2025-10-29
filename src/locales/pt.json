@@ -37,5 +37,14 @@
   "recovery.send_button": "Enviar Instruções",
   "recovery.success_title": "Email Enviado",
   "recovery.success_message": "Instruções de recuperação de senha foram enviadas para seu email.",
-  "recovery.error_title": "Erro ao Enviar Email"
+  "recovery.error_title": "Erro ao Enviar Email",
+
+  "topicCard.label.scores": "Pontuações",
+
+  "dashboard.calendar.day": "Dia",
+  "dashboard.calendar.hour": "Hora",
+  "dashboard.calendar.noEvents": "Nenhum compromisso hoje",
+  "dashboard.calendar.topic": "Tópico",
+  "dashboard.notifications.title": "Notificações",
+  "dashboard.notifications.empty": "Sem notificações"
 }

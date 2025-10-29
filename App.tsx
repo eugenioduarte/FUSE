@@ -9,6 +9,10 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import Navigation from './src/navigation/Navigation'
 import { useThemeStore } from './src/store/useThemeStore'
 
+import { firebaseConfig } from '@/services'
+import { initializeApp } from 'firebase/app'
+import { addDoc, collection, getFirestore } from 'firebase/firestore'
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -31,6 +35,12 @@ export default function App() {
   })
 
   if (!fontsLoaded) return null
+
+  const app = initializeApp(firebaseConfig)
+  const db = getFirestore(app)
+
+  addDoc(collection(db, 'test'), { foo: 'bar' })
+  console.log('ok!')
 
   return (
     <SafeAreaProvider>

@@ -41,7 +41,8 @@ export const Colors = {
 }
 
 export const border = {
-  size: 2,
+  size: 1,
+  sizeThick: 2,
   radius8: 8,
   radius10: 10,
   radius12: 12,

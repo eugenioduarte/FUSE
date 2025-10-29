@@ -9,9 +9,9 @@ import { FlatList, Text, View } from 'react-native'
 import { navigatorManager } from '../../../navigation/navigatorManager'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
-import CalendarDisplay from './components/CalendarDisplay'
-import FrequencyDisplay from './components/FrequencyDisplay'
-import TopicCard, { TopicCardPayload } from './components/TopicCard'
+import DashboardCalendarDisplay from './components/DashboardCalendarDisplay'
+import DashboardNotificationDisplay from './components/DashboardNotificationDisplay'
+import TopicCard from './components/TopicCard'
 
 type DashItem = {
   id: string
@@ -104,49 +104,18 @@ export default function DashboardScreen() {
     }, []),
   )
 
-  const mockTopicCard: TopicCardPayload = {
-    id: 'topic-001',
-    topicName: 'Machine Learning Fundamentals',
-    score: 85,
-    createdAt: '2025-10-21T10:30:00Z',
-    spendTime: '2h 15min',
-    backgroundColor: '#F5F7FF',
-    usersShared: [
-      {
-        id: 'user-001',
-        name: 'Alice Johnson',
-        avatarUrl: 'https://randomuser.me/api/portraits/women/45.jpg',
-      },
-      {
-        id: 'user-002',
-        name: 'Bruno Costa',
-        avatarUrl: 'https://randomuser.me/api/portraits/men/46.jpg',
-      },
-      {
-        id: 'user-003',
-        name: 'Chen Wei',
-        avatarUrl: 'https://randomuser.me/api/portraits/men/24.jpg',
-      },
-    ],
-    summaries: [
-      { id: 'summary-001', title: 'What is Machine Learning?' },
-      { id: 'summary-002', title: 'Supervised vs Unsupervised Learning' },
-      { id: 'summary-003', title: 'Key Algorithms Overview' },
-    ],
-  }
-
   return (
     <Container style={{ backgroundColor: 'green', paddingTop: 0 }}>
       <SubContainer>
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <TopicCard {...mockTopicCard} />}
+          renderItem={({ item }) => <TopicCard {...item} />}
           ListHeaderComponent={
-            <>
-              <FrequencyDisplay />
-              <CalendarDisplay />
-            </>
+            <View style={{ marginBottom: 24, flexDirection: 'row', gap: 8 }}>
+              <DashboardCalendarDisplay />
+              <DashboardNotificationDisplay />
+            </View>
           }
           ListEmptyComponent={
             loading ? null : (

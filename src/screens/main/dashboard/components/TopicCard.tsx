@@ -114,7 +114,7 @@ const createStyles = (theme: ThemeType, backgroundColor?: string) =>
       height: theme.spacings.xLarge,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: theme.colors.backgroundPrimary,
+      backgroundColor: theme.colors.backgroundSecondary,
       borderRadius: theme.border.radius16,
       borderWidth: theme.border.size,
       borderColor: theme.colors.borderColor,

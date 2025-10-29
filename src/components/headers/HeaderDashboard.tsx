@@ -1,3 +1,4 @@
+import { PathIcon } from '@/assets/icons'
 import React from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
 import { navigatorManager } from '../../navigation/navigatorManager'
@@ -44,6 +45,18 @@ const HeaderDashboard = () => {
         <TouchableOpacity onPress={handleFastWayPress}>
           <Text style={{ color: 'white', fontWeight: 'bold' }}>fastWay</Text>
         </TouchableOpacity>
+        <View
+          style={{
+            backgroundColor: 'red',
+            width: 30,
+            height: 30,
+            borderRadius: 15,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <PathIcon />
+        </View>
       </View>
     </View>
   )

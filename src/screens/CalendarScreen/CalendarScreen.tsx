@@ -322,7 +322,7 @@ const styles = StyleSheet.create<{
 }>({
   screen: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.backgroundPrimary,
     padding: spacings.medium,
   },
   grid: { flexDirection: 'row', flexWrap: 'wrap' },
@@ -334,7 +334,7 @@ const styles = StyleSheet.create<{
     marginBottom: spacings.small,
   },
   yearText: {
-    color: Colors.light.text,
+    color: Colors.light.textPrimary,
     fontWeight: '700',
   },
   monthNav: {
@@ -343,11 +343,11 @@ const styles = StyleSheet.create<{
     gap: 12,
   },
   monthText: {
-    color: Colors.light.text,
+    color: Colors.light.textPrimary,
     fontWeight: '700',
   },
   monthNavText: {
-    color: Colors.light.primary,
+    color: Colors.light.backgroundPrimary,
     fontWeight: '700',
   },
   dayCell: {
@@ -363,14 +363,14 @@ const styles = StyleSheet.create<{
   dayLabel: { color: '#000' },
   dayLabelSelected: { color: '#000', fontWeight: '700' },
   addBtn: {
-    backgroundColor: Colors.light.primary,
+    backgroundColor: Colors.light.backgroundPrimary,
     borderRadius: 8,
     paddingVertical: 10,
     alignItems: 'center',
   },
   addBtnText: { color: '#fff', fontWeight: '700' },
   emptyText: {
-    color: Colors.light.text,
+    color: Colors.light.textPrimary,
     opacity: 0.6,
     marginTop: spacings.small,
   },
