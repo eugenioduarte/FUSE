@@ -22,7 +22,7 @@ const createStyles = (theme: ThemeType) =>
       borderTopRightRadius: 25,
       borderWidth: theme.border.size,
       borderColor: theme.colors.borderColor,
-      paddingTop: theme.spacings.medium,
+      paddingTop: theme.spacings.xSmall,
       paddingHorizontal: theme.spacings.medium,
       paddingBottom: theme.spacings.xLarge,
     },

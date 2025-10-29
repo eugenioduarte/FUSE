@@ -1,65 +1,62 @@
-import { PathIcon } from '@/assets/icons'
+import { PathIcon, Settings } from '@/assets/icons'
+import { useTheme } from '@/hooks/useTheme'
+import { ThemeType } from '@/types/theme.type'
 import React from 'react'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { navigatorManager } from '../../navigation/navigatorManager'
 import { useOverlay } from '../../store/useOverlay'
 
 const HeaderDashboard = () => {
+  const theme = useTheme()
+  const styles = createStyles(theme)
+
   const setFastWayOverlay = useOverlay((s) => s.setFastWayOverlay)
+
   const handleMenuPress = () => {
     navigatorManager.openMenu()
-  }
-
-  const handleNotificationsPress = () => {
-    navigatorManager.goToNotifications()
-  }
-
-  const handleCalendarPress = () => {
-    navigatorManager.goToCalendar()
   }
 
   const handleFastWayPress = () => {
     setFastWayOverlay(true)
   }
+
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-      }}
-    >
-      <TouchableOpacity onPress={handleMenuPress}>
-        <Text style={{ color: 'white', fontWeight: 'bold' }}>Menu</Text>
+    <View style={styles.container}>
+      <TouchableOpacity onPress={handleMenuPress} style={styles.touchable}>
+        <Settings />
       </TouchableOpacity>
-      <View style={{ flexDirection: 'row', gap: 20 }}>
-        <TouchableOpacity onPress={handleCalendarPress}>
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>Calendar</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleNotificationsPress}>
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>
-            Notifications
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={handleFastWayPress}>
-          <Text style={{ color: 'white', fontWeight: 'bold' }}>fastWay</Text>
-        </TouchableOpacity>
-        <View
-          style={{
-            backgroundColor: 'red',
-            width: 30,
-            height: 30,
-            borderRadius: 15,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          <PathIcon />
-        </View>
-      </View>
+
+      <Image
+        source={require('../../../assets/images/logo.png')}
+        style={styles.image}
+      />
+      <TouchableOpacity onPress={handleFastWayPress} style={styles.touchable}>
+        <PathIcon />
+      </TouchableOpacity>
     </View>
   )
 }
 
 export default HeaderDashboard
+
+const createStyles = (theme: ThemeType) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+    touchable: {
+      backgroundColor: theme.colors.backgroundSecondary,
+      width: 35,
+      height: 35,
+      borderRadius: 99,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: theme.spacings.xSmall,
+      borderWidth: theme.border.size,
+      borderColor: theme.colors.borderColor,
+    },
+    image: { width: 80, height: 80 },
+  })

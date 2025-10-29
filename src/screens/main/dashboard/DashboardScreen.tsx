@@ -105,7 +105,9 @@ export default function DashboardScreen() {
   )
 
   return (
-    <Container style={{ backgroundColor: 'green', paddingTop: 0 }}>
+    <Container
+      style={{ backgroundColor: theme.colors.accentRed, paddingTop: 0 }}
+    >
       <SubContainer>
         <FlatList
           data={items}
@@ -128,6 +130,7 @@ export default function DashboardScreen() {
           }
           contentContainerStyle={{
             paddingBottom: 100,
+            paddingTop: 16,
           }}
           showsVerticalScrollIndicator={false}
           style={{ width: '100%' }}
