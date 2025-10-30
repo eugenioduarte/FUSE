@@ -15,3 +15,5 @@ export const sizes = {
   ICON_LOGO_SIZE,
   IMAGE_CAR_SIZE,
 }
+
+export const NAVIGATION_ICON_SIZE = 16
