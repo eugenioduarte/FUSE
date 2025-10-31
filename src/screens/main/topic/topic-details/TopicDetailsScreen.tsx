@@ -18,6 +18,7 @@ import { summariesRepository } from '../../../../services/repositories/summaries
 import { topicsRepository } from '../../../../services/repositories/topics.repository'
 import { useAuthStore } from '../../../../store/useAuthStore'
 import { useOverlay } from '../../../../store/useOverlay'
+import { useThemeStore } from '../../../../store/useThemeStore'
 import { Summary, Topic } from '../../../../types/domain'
 
 const TopicDetailsScreen: React.FC = () => {
@@ -67,6 +68,18 @@ const TopicDetailsScreen: React.FC = () => {
         active = false
       }
     }, [topicId]),
+  )
+
+  // Sync header background with this screen's background (even before data resolves)
+  const bgForHeader = topic?.backgroundColor || '#0b0b0c'
+  const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
+  useEffect(() => {
+    setBackgroundColor(bgForHeader)
+  }, [bgForHeader, setBackgroundColor])
+  useFocusEffect(
+    useCallback(() => {
+      setBackgroundColor(bgForHeader)
+    }, [bgForHeader, setBackgroundColor]),
   )
 
   if (loading) {

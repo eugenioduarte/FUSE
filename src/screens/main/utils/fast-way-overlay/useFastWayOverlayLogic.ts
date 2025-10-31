@@ -70,10 +70,24 @@ export const useFastWayOverlayLogic = () => {
     async (summaryId: string) => {
       setLoading(true)
       fast.enterSummary(summaryId)
-      if (!challengesBySummary[summaryId]) {
-        const list = await challengesRepository.listBySummary(summaryId)
-        setChallengesBySummary((prev) => ({ ...prev, [summaryId]: list }))
+      let miniList = challengesBySummary[summaryId]
+      if (!miniList) {
+        const fetched = await challengesRepository.listBySummary(summaryId)
+        setChallengesBySummary((prev) => ({ ...prev, [summaryId]: fetched }))
+        miniList = fetched
       }
+      // Ensure we have details (including lastAttempt/score) for these challenges
+      try {
+        const all = await challengesRepository.list()
+        const toAdd: Record<string, Challenge> = {}
+        for (const mini of miniList || []) {
+          const found = all.find((a) => a.id === mini.id)
+          if (found) toAdd[found.id] = found
+        }
+        if (Object.keys(toAdd).length > 0) {
+          setChallengeDetailsById((prev) => ({ ...prev, ...toAdd }))
+        }
+      } catch {}
       setLoading(false)
     },
     [challengesBySummary, fast],

@@ -20,6 +20,7 @@ import {
   stopSessionByKey,
 } from '../../../services/usage/usageTracker'
 import { useAuthStore } from '../../../store/useAuthStore'
+import { useThemeStore } from '../../../store/useThemeStore'
 //
 
 type Item = {
@@ -57,6 +58,17 @@ const ChallengesListScreen: React.FC = () => {
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
   const [topicColor, setTopicColor] = useState<string | undefined>()
+  // Sync header background with this screen's background early
+  const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
+  const bgEarly = topicColor || '#0b0b0c'
+  useEffect(() => {
+    setBackgroundColor(bgEarly)
+  }, [bgEarly, setBackgroundColor])
+  useFocusEffect(
+    React.useCallback(() => {
+      setBackgroundColor(bgEarly)
+    }, [bgEarly, setBackgroundColor]),
+  )
 
   const getLastUserIdFromPayload = (payload: any): string | undefined => {
     const lastAt = payload?.lastAttempt?.at

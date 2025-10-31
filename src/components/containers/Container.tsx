@@ -29,6 +29,7 @@ const Container = ({ children, style, ...props }: ContainerProps) => {
     }
   }
 
+  console.log('Container background color:', bgColor)
   const dark = isColorDark(bgColor)
 
   useFocusEffect(

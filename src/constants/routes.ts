@@ -29,6 +29,7 @@ export const ROUTES = {
   TopicDetailsScreen: 'TopicDetailsScreen',
   SummaryDetailsScreen: 'SummaryDetailsScreen',
   TopicAddScreen: 'TopicAddScreen',
+
   SummaryScreen: 'SummaryScreen',
   SummaryAudioScreen: 'SummaryAudioScreen',
   // Topic - Ranking

@@ -1,3 +1,17 @@
+import TermSnippetModal from '@/components/ui/TermSnippetModal'
+import ExpandableText from '@/components/utils/ExpandableText'
+import {
+  navigatorManager,
+  RootStackParamList,
+} from '@/navigation/navigatorManager'
+import { aiService } from '@/services/ai/ai.service'
+import { summariesRepository } from '@/services/repositories/summaries.repository'
+import { topicsRepository } from '@/services/repositories/topics.repository'
+import { whiteboardRepository } from '@/services/repositories/whiteboard.repository'
+import { startSession, stopSessionByKey } from '@/services/usage/usageTracker'
+import { useOverlay } from '@/store/useOverlay'
+import { useThemeStore } from '@/store/useThemeStore'
+import { Summary } from '@/types/domain'
 import { Ionicons } from '@expo/vector-icons'
 import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
 import * as FileSystem from 'expo-file-system'
@@ -14,22 +28,6 @@ import {
   View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import TermSnippetModal from '../../../../components/ui/TermSnippetModal'
-import ExpandableText from '../../../../components/utils/ExpandableText'
-import {
-  navigatorManager,
-  RootStackParamList,
-} from '../../../../navigation/navigatorManager'
-import { aiService } from '../../../../services/ai/ai.service'
-import { summariesRepository } from '../../../../services/repositories/summaries.repository'
-import { topicsRepository } from '../../../../services/repositories/topics.repository'
-import { whiteboardRepository } from '../../../../services/repositories/whiteboard.repository'
-import {
-  startSession,
-  stopSessionByKey,
-} from '../../../../services/usage/usageTracker'
-import { useOverlay } from '../../../../store/useOverlay'
-import { Summary } from '../../../../types/domain'
 
 const SummaryDetailsScreen: React.FC = () => {
   const route =
@@ -45,7 +43,7 @@ const SummaryDetailsScreen: React.FC = () => {
   const [topicColor, setTopicColor] = useState<string | undefined>()
   const [snippetOpen, setSnippetOpen] = useState(false)
   const [snippetTerm, setSnippetTerm] = useState<
-    import('../../../../types/domain').ExpandableTerm | null
+    import('@/types/domain').ExpandableTerm | null
   >(null)
   const insets = useSafeAreaInsets()
 
@@ -78,6 +76,21 @@ const SummaryDetailsScreen: React.FC = () => {
       active = false
     }
   }, [summaryId, summary])
+
+  // Colors and header background sync (before any early returns)
+  const colored = !!topicColor
+  const bg = topicColor || '#0b0b0c'
+  const titleColor = colored ? '#111' : 'white'
+  const bodyColor = colored ? '#222' : '#ddd'
+  const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
+  useEffect(() => {
+    setBackgroundColor(bg)
+  }, [bg, setBackgroundColor])
+  useFocusEffect(
+    React.useCallback(() => {
+      setBackgroundColor(bg)
+    }, [bg, setBackgroundColor]),
+  )
 
   // Track study session for this summary: start on focus, stop on blur
   useFocusEffect(
@@ -221,9 +234,7 @@ const SummaryDetailsScreen: React.FC = () => {
     )
   }
 
-  const openSnippet = async (
-    term: import('../../../../types/domain').ExpandableTerm,
-  ) => {
+  const openSnippet = async (term: import('@/types/domain').ExpandableTerm) => {
     if (!summary) return
     // Ensure mini is present; if not, ask AI for a tiny description using summary content as context
     if (term.mini) {
@@ -240,7 +251,7 @@ const SummaryDetailsScreen: React.FC = () => {
   }
 
   const createFromTerm = async (
-    term: import('../../../../types/domain').ExpandableTerm,
+    term: import('@/types/domain').ExpandableTerm,
   ) => {
     if (!summary) return
     try {
@@ -288,10 +299,7 @@ const SummaryDetailsScreen: React.FC = () => {
     )
   }
 
-  const colored = !!topicColor
-  const bg = topicColor || '#0b0b0c'
-  const titleColor = colored ? '#111' : 'white'
-  const bodyColor = colored ? '#222' : '#ddd'
+  // (colors and header background sync defined earlier)
 
   return (
     <View style={{ flex: 1, backgroundColor: bg, padding: 16 }}>

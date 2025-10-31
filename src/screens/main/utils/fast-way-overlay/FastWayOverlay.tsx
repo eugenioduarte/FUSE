@@ -121,6 +121,14 @@ const FastWayOverlay: React.FC = () => {
               </TouchableOpacity>
 
               <HeaderTopics onAddTopic={onAddTopic} />
+
+              {/* Link para todos os tópicos */}
+              <TouchableOpacity
+                style={styles.linkRow}
+                onPress={goToTopicsScreen}
+              >
+                <Text style={styles.link}>Ver todos os tópicos</Text>
+              </TouchableOpacity>
             </>
           )}
           {mode === 'summaries' && (
@@ -179,9 +187,21 @@ const FastWayOverlay: React.FC = () => {
             <View>
               <View style={styles.alignEndMb6}>
                 <TouchableOpacity onPress={goToTopicsScreen}>
-                  <Text style={styles.link}>Ir para Topics →</Text>
+                  <Text style={styles.link}>Ir para Topics</Text>
                 </TouchableOpacity>
               </View>
+              {/* Link para lista de summaries do tópico */}
+              {!!fast.selectedTopicId && (
+                <TouchableOpacity
+                  style={[styles.linkRow, styles.mt4]}
+                  onPress={() => {
+                    setFastWayOverlay(false)
+                    navigatorManager.goToTopicDetails(fast.selectedTopicId!)
+                  }}
+                >
+                  <Text style={styles.link}>Ver summaries do tópico</Text>
+                </TouchableOpacity>
+              )}
               {topicSummaries.length === 0 ? (
                 <Text style={styles.emptyText}>
                   Sem summaries para este topic.
@@ -218,15 +238,18 @@ const FastWayOverlay: React.FC = () => {
 
           {!loading && mode === 'summaries' && (
             <View>
-              <View style={{ alignItems: 'flex-end', marginBottom: 6 }}>
-                <TouchableOpacity onPress={goToSummaryDetails}>
-                  <Text style={styles.link}>Ir para summary →</Text>
+              <View style={{ marginBottom: 6 }}>
+                <TouchableOpacity
+                  style={styles.linkRow}
+                  onPress={goToSummaryDetails}
+                >
+                  <Text style={styles.link}>Ir para summary</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
+                  style={[styles.linkRow, styles.mt4]}
                   onPress={goToChallengesListForSummary}
-                  style={{ marginTop: 4 }}
                 >
-                  <Text style={styles.link}>Ir para challenges →</Text>
+                  <Text style={styles.link}>Ver challenges efetuados</Text>
                 </TouchableOpacity>
               </View>
               {fast.selectedSummaryId && (
@@ -245,7 +268,23 @@ const FastWayOverlay: React.FC = () => {
                             style={styles.summaryRow}
                             onPress={() => enterChallengeDetails(c.id)}
                           >
-                            <Text style={styles.summaryText}>• {c.title}</Text>
+                            <Text style={styles.summaryText}>
+                              {(() => {
+                                const details = challengeDetailsById[c.id]
+                                const last = details?.payload?.lastAttempt
+                                if (!details || !last) return `• ${c.title}`
+                                if (details.type === 'quiz') {
+                                  const total = last.total ?? undefined
+                                  const totalSuffix = total ? '/' + total : ''
+                                  return `• ${c.title} – ${last.score}${totalSuffix}`
+                                }
+                                if (details.type === 'text') {
+                                  return `• ${c.title} – ${Number(last.score).toFixed(1)}`
+                                }
+                                // hangman/matrix or others
+                                return `• ${c.title} – ${last.score}`
+                              })()}
+                            </Text>
                           </TouchableOpacity>
                         ),
                       )}
@@ -326,7 +365,7 @@ const createStyles = (theme: ThemeType) =>
       marginBottom: 12,
     },
     headerTitle: { color: 'white', fontSize: 18, fontWeight: '700' },
-    link: { color: '#60a5fa', fontWeight: '700' },
+    link: { color: theme.colors.accentBlue, fontWeight: '700' },
     topicBlock: { marginBottom: 10 },
     topicRow: {
       flexDirection: 'row',
@@ -402,5 +441,11 @@ const createStyles = (theme: ThemeType) =>
     },
     detailGap8: {
       gap: 8,
+    },
+    linkRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 6,
     },
   })

@@ -47,6 +47,16 @@ const TopicBlock = ({
       />
       {expandedTopicId === topic.id && (
         <View style={styles.summaryList}>
+          {/* Link para lista completa de resumos do tópico */}
+          <TouchableOpacity
+            style={styles.linkRow}
+            onPress={() => {
+              setFastWayOverlay(false)
+              navigatorManager.goToTopicDetails(topic.id)
+            }}
+          >
+            <Text style={styles.link}>Ver todos os resumos</Text>
+          </TouchableOpacity>
           {summariesForTopic.length === 0 ? (
             <Text style={styles.emptyText}>Sem summaries para este topic.</Text>
           ) : (
@@ -63,6 +73,20 @@ const TopicBlock = ({
                   />
                   {expandedSummaryId === s.id && (
                     <View style={{ paddingLeft: 12, paddingVertical: 12 }}>
+                      {/* Link para a lista de challenges do resumo */}
+                      <TouchableOpacity
+                        style={[styles.linkRow, { marginBottom: 6 }]}
+                        onPress={() => {
+                          setFastWayOverlay(false)
+                          navigatorManager.goToChallengesList({
+                            summaryId: s.id,
+                          })
+                        }}
+                      >
+                        <Text style={styles.link}>
+                          Ver challenges deste resumo
+                        </Text>
+                      </TouchableOpacity>
                       {(challengesBySummary[s.id] || []).length === 0 ? (
                         <Text style={styles.emptyText}>
                           Sem challenges para este summary.
@@ -71,12 +95,30 @@ const TopicBlock = ({
                         (challengesBySummary[s.id] || []).map((c) => {
                           const detail = challengeDetailsById[c.id]
                           const lastAt = detail?.payload?.lastAttempt?.at
+                          const last = detail?.payload?.lastAttempt
                           const dateLabel = lastAt
                             ? ` | ${new Date(lastAt).toLocaleDateString()}`
                             : ''
+                          let scoreLabel = ''
+                          if (detail?.type === 'quiz' && last) {
+                            const total = detail?.payload?.lastAttempt?.total
+                            const totalSuffix = total ? '/' + total : ''
+                            scoreLabel = ` – ${last.score}${totalSuffix}`
+                          } else if (
+                            last &&
+                            (detail?.type === 'text' ||
+                              detail?.type === 'hangman' ||
+                              detail?.type === 'matrix')
+                          ) {
+                            const val =
+                              detail?.type === 'text'
+                                ? Number(last.score).toFixed(1)
+                                : String(last.score)
+                            scoreLabel = ` – ${val}`
+                          }
                           const display = {
                             id: c.id,
-                            title: `${c.title}${dateLabel}`,
+                            title: `${c.title}${scoreLabel}${dateLabel}`,
                           }
 
                           const openReview = () => {
@@ -147,5 +189,11 @@ const createStyles = (theme: ThemeType) =>
     summaryRow: { paddingVertical: 4 },
     summaryText: { color: theme.colors.textPrimary },
     emptyText: { color: theme.colors.textPrimary, fontStyle: 'italic' },
-    link: { color: '#60a5fa', fontWeight: '700' },
+    link: { color: theme.colors.accentBlue, fontWeight: '700' },
+    linkRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 6,
+    },
   })

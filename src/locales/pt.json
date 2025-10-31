@@ -57,22 +57,5 @@
   "topicAdd.save_error_title": "Erro",
   "topicAdd.save_error_message": "Não foi possível salvar o tópico. Tente novamente.",
   "topic.validation.title_required": "Título obrigatório",
-  "topic.validation.color_required": "Cor obrigatória",
-  "fastWay.calendar": "Calendário",
-  "fastWay.notifications": "Notificações",
-  "fastWay.summary_fallback": "Resumo",
-  "fastWay.challenge_fallback": "Desafio",
-  "fastWay.loading": "Carregando...",
-  "fastWay.no_topics": "Nenhum tópico encontrado.",
-  "fastWay.goto_topics": "Ir para Tópicos →",
-  "fastWay.no_summaries_for_topic": "Sem resumos para este tópico.",
-  "fastWay.add_summary": "＋ Adicionar resumo",
-  "fastWay.goto_summary": "Ir para resumo →",
-  "fastWay.goto_challenges": "Ir para desafios →",
-  "fastWay.add_challenge": "＋ Adicionar desafio",
-  "fastWay.no_challenges_for_summary": "Sem desafios para este resumo.",
-  "fastWay.loading_challenge": "Carregando desafio...",
-  "fastWay.title_label": "Título",
-  "fastWay.type_label": "Tipo",
-  "fastWay.payload_label": "Payload"
+  "topic.validation.color_required": "Cor obrigatória"
 }

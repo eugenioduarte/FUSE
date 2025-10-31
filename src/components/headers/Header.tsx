@@ -13,6 +13,7 @@ import { useOverlay } from '../../store/useOverlay'
 import { useThemeStore } from '../../store/useThemeStore'
 import HeaderAddTopic from './HeaderAddTopic'
 import HeaderDashboard from './HeaderDashboard'
+import HeaderTopicList from './HeaderTopicList'
 
 const DefaultHeader = ({ title }: { title: string }) => {
   const isReady = navigationRef.isReady()
@@ -93,6 +94,7 @@ export const Header: React.FC = () => {
   const { title, visible, type } = headerConfig
   const [currentType, setCurrentType] = useState(type)
   const backgroundColor = useThemeStore((state) => state.backgroundColor)
+
   useEffect(() => {
     if (visible) {
       setCurrentType(type)
@@ -102,10 +104,9 @@ export const Header: React.FC = () => {
   if (!visible) return null
 
   const renderHeader = () => {
-    console.log('Rendering header of type:', currentType)
-
-    if (currentType === 'DashboardScreen') return <HeaderDashboard />
-    if (currentType === 'TopicAddScreen') return <HeaderAddTopic />
+    if (currentType === ROUTES.DashboardScreen) return <HeaderDashboard />
+    if (currentType === ROUTES.TopicAddScreen) return <HeaderAddTopic />
+    if (currentType === ROUTES.TopicScreen) return <HeaderTopicList />
     return <DefaultHeader title={title} />
   }
 
