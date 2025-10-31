@@ -1,17 +1,20 @@
-import { CloseIcon } from '@/assets/icons'
+import { CloseIcon, HomeIcon } from '@/assets/icons'
 import { Text } from '@/components'
 import IconButton from '@/components/buttons/IconButton'
 import { useTheme } from '@/hooks/useTheme'
+import { navigatorManager } from '@/navigation/navigatorManager'
 import { ThemeType } from '@/types/theme.type'
 import React, { useMemo } from 'react'
 import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { navigatorManager } from '../../../../navigation/navigatorManager'
 import HeaderTopics from './HeaderTopics'
 import HeaderWithBack from './HeaderWithBack'
 import SummaryItem from './SummaryItem'
 import TopicBlock from './TopicBlock'
 import { useFastWayOverlayLogic } from './useFastWayOverlayLogic'
+// import { t } from '@/locales/translation'
+
 type FWMode = 'topics' | 'topic' | 'summaries' | 'challenges' | 'challenge'
+
 const FastWayOverlay: React.FC = () => {
   const {
     topics,
@@ -35,7 +38,6 @@ const FastWayOverlay: React.FC = () => {
     goToSummaryDetails,
     goToChallengesListForSummary,
     isOnDashboard,
-    goToDashboard,
     setFastWayOverlay,
     fast,
     fastWayOverlay,
@@ -68,18 +70,33 @@ const FastWayOverlay: React.FC = () => {
       statusBarTranslucent
     >
       <View style={styles.backdrop}>
-        <IconButton
-          onPress={() => {
-            setFastWayOverlay(false)
-            fast.reset()
-          }}
-          icon={<CloseIcon width={24} height={24} />}
-          styles={{
-            position: 'absolute',
-            top: '10%',
-            right: '10%',
-          }}
-        />
+        <View
+          style={[
+            styles.topBar,
+            isOnDashboard ? styles.topBarDashboard : styles.topBarNotDashboard,
+          ]}
+        >
+          {!isOnDashboard && (
+            <IconButton
+              onPress={() => {
+                navigatorManager.goToDashboard()
+                setFastWayOverlay(false)
+                fast.reset()
+              }}
+              styles={styles.iconButtonTransparent}
+              icon={<HomeIcon width={24} height={24} />}
+            />
+          )}
+          <IconButton
+            onPress={() => {
+              setFastWayOverlay(false)
+              fast.reset()
+            }}
+            styles={styles.iconButtonTransparent}
+            icon={<CloseIcon width={24} height={24} />}
+          />
+        </View>
+
         <View style={styles.card}>
           {mode === 'topics' && (
             <>
@@ -94,7 +111,7 @@ const FastWayOverlay: React.FC = () => {
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.headerRow, { marginBottom: 8 }]}
+                style={[styles.headerRow, styles.headerRowBottom]}
                 onPress={() => {
                   setFastWayOverlay(false)
                   navigatorManager.goToNotifications()
@@ -127,20 +144,13 @@ const FastWayOverlay: React.FC = () => {
           )}
 
           {loading && (
-            <View style={{ padding: 20 }}>
+            <View style={styles.loadingWrapper}>
               <Text style={styles.emptyText}>Carregando...</Text>
             </View>
           )}
 
           {!loading && mode === 'topics' && (
             <>
-              {!isOnDashboard && (
-                <View style={{ alignItems: 'flex-end', marginBottom: 6 }}>
-                  <TouchableOpacity onPress={goToDashboard}>
-                    <Text style={styles.link}>Ir para Dashboard →</Text>
-                  </TouchableOpacity>
-                </View>
-              )}
               {topics.length === 0 ? (
                 <Text style={styles.emptyText}>Nenhum topic encontrado.</Text>
               ) : (
@@ -167,7 +177,7 @@ const FastWayOverlay: React.FC = () => {
 
           {!loading && mode === 'topic' && (
             <View>
-              <View style={{ alignItems: 'flex-end', marginBottom: 6 }}>
+              <View style={styles.alignEndMb6}>
                 <TouchableOpacity onPress={goToTopicsScreen}>
                   <Text style={styles.link}>Ir para Topics →</Text>
                 </TouchableOpacity>
@@ -227,7 +237,7 @@ const FastWayOverlay: React.FC = () => {
                       Sem challenges para este summary.
                     </Text>
                   ) : (
-                    <View style={{ paddingVertical: 6 }}>
+                    <View style={styles.paddingVertical6}>
                       {(challengesBySummary[fast.selectedSummaryId] || []).map(
                         (c) => (
                           <TouchableOpacity
@@ -241,7 +251,7 @@ const FastWayOverlay: React.FC = () => {
                       )}
                       {/* Adicionar challenge no fim da lista */}
                       <TouchableOpacity
-                        style={[styles.summaryRow, { marginTop: 8 }]}
+                        style={[styles.summaryRow, styles.mt8]}
                         onPress={onAddChallenge}
                       >
                         <Text style={styles.link}>＋ Adicionar challenge</Text>
@@ -255,7 +265,7 @@ const FastWayOverlay: React.FC = () => {
                 (challengesBySummary[fast.selectedSummaryId] || []).length ===
                   0 && (
                   <TouchableOpacity
-                    style={[styles.summaryRow, { marginTop: 8 }]}
+                    style={[styles.summaryRow, styles.mt8]}
                     onPress={onAddChallenge}
                   >
                     <Text style={styles.link}>＋ Adicionar challenge</Text>
@@ -267,20 +277,16 @@ const FastWayOverlay: React.FC = () => {
           {mode === 'challenge' && (
             <View>
               {selectedChallenge ? (
-                <View style={{ gap: 8 }}>
+                <View style={styles.detailGap8}>
                   <Text style={styles.detailLabel}>Título</Text>
                   <Text style={styles.detailValue}>
                     {selectedChallenge.title}
                   </Text>
-                  <Text style={[styles.detailLabel, { marginTop: 8 }]}>
-                    Tipo
-                  </Text>
+                  <Text style={[styles.detailLabel, styles.mt8]}>Tipo</Text>
                   <Text style={styles.detailValue}>
                     {selectedChallenge.type}
                   </Text>
-                  <Text style={[styles.detailLabel, { marginTop: 8 }]}>
-                    Payload
-                  </Text>
+                  <Text style={[styles.detailLabel, styles.mt8]}>Payload</Text>
                   <Text style={styles.detailValueMono}>
                     {JSON.stringify(selectedChallenge.payload, null, 2)}
                   </Text>
@@ -358,5 +364,43 @@ const createStyles = (theme: ThemeType) =>
       color: theme.colors.textPrimary,
       fontFamily: 'Courier',
       fontSize: 12,
+    },
+    topBar: {
+      width: '100%',
+      flexDirection: 'row',
+      position: 'absolute',
+      top: 100,
+    },
+    topBarDashboard: {
+      justifyContent: 'flex-end',
+    },
+    topBarNotDashboard: {
+      justifyContent: 'space-between',
+    },
+    iconButtonTransparent: {
+      borderWidth: 0,
+      backgroundColor: 'transparent',
+    },
+    headerRowBottom: {
+      marginBottom: 8,
+    },
+    loadingWrapper: {
+      padding: 20,
+    },
+    alignEndMb6: {
+      alignItems: 'flex-end',
+      marginBottom: 6,
+    },
+    paddingVertical6: {
+      paddingVertical: 6,
+    },
+    mt8: {
+      marginTop: 8,
+    },
+    mt4: {
+      marginTop: 4,
+    },
+    detailGap8: {
+      gap: 8,
     },
   })

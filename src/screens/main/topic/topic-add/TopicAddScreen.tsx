@@ -1,166 +1,178 @@
-import React, { useMemo, useState } from 'react'
-import {
-  Alert,
-  ScrollView,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native'
-import { Colors } from '../../../../constants/theme'
-import { navigatorManager } from '../../../../navigation/navigatorManager'
-import { topicsRepository } from '../../../../services/repositories/topics.repository'
+import { Button, Container, Text, TextInput } from '@/components'
+import SubContainer from '@/components/containers/SubContainer'
+import { useSnackbar } from '@/components/ui/SnackbarProvider'
+import { Colors } from '@/constants/theme'
+import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
+import { navigatorManager } from '@/navigation/navigatorManager'
+import { topicSchema, TopicSchema } from '@/schemas/topicSchemas'
+import { topicsRepository } from '@/services/repositories/topics.repository'
+import { ThemeType } from '@/types/theme.type'
+import { zodResolver } from '@hookform/resolvers/zod'
+import React, { useMemo } from 'react'
+import { Controller, useForm } from 'react-hook-form'
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const TopicAddScreen: React.FC = () => {
-  const [title, setTitle] = useState('')
-  const [description, setDescription] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [backgroundColor, setBackgroundColor] = useState<string | undefined>()
+  const theme = useTheme()
+  const styles = createStyles(theme)
+  const {
+    control,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting, isValid },
+  } = useForm<TopicSchema>({
+    resolver: zodResolver(topicSchema),
+    defaultValues: { title: '', description: '', backgroundColor: '' },
+    mode: 'onChange',
+  })
+
+  const backgroundColor = watch('backgroundColor')
 
   const colorEntries = useMemo(
     () => Object.entries(Colors.backgroundTextColors),
     [],
   )
 
-  const onSave = async () => {
-    if (!title.trim()) {
-      Alert.alert(
-        'Título obrigatório',
-        'Por favor, preencha o título do tópico.',
-      )
-      return
-    }
-    if (!backgroundColor) {
-      Alert.alert(
-        'Cor obrigatória',
-        'Selecione uma cor de fundo para o tópico.',
-      )
-      return
-    }
-    setSaving(true)
+  const { showSnackbar } = useSnackbar()
+
+  const onSave = async (values: TopicSchema) => {
     const now = Date.now()
     const topic = {
       id: `${now}`,
-      title: title.trim(),
-      description: description.trim() || undefined,
-      backgroundColor: backgroundColor || undefined,
+      title: values.title.trim(),
+      description: values.description?.trim() || undefined,
+      backgroundColor: values.backgroundColor || undefined,
       createdAt: now,
       updatedAt: now,
     }
+
     try {
       await topicsRepository.upsert(topic as any, '/sync/topic')
       navigatorManager.goBack()
     } catch {
-      console.warn('Falha ao guardar tópico')
-      Alert.alert('Erro', 'Não foi possível salvar o tópico. Tente novamente.')
-    } finally {
-      setSaving(false)
+      showSnackbar(t('topicAdd.save_error_message'), 'error')
     }
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#0b0b0c', padding: 16 }}>
-      <Text
-        style={{
-          color: 'white',
-          fontSize: 18,
-          fontWeight: '700',
-          marginBottom: 12,
-        }}
-      >
-        Novo tópico
-      </Text>
-      <Text style={{ color: '#bbb', marginBottom: 6 }}>Título</Text>
-      <TextInput
-        placeholder="Ex: Algoritmos"
-        placeholderTextColor="#666"
-        value={title}
-        onChangeText={setTitle}
-        style={{
-          backgroundColor: '#1c1c1e',
-          color: 'white',
-          borderRadius: 8,
-          padding: 12,
-          borderColor: '#2f2f31',
-          borderWidth: 1,
-          marginBottom: 12,
-        }}
-      />
+    <Container style={styles.container}>
+      <SubContainer>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.contentContainer}
+          style={styles.scrollView}
+        >
+          <Text variant="large">{t('topicAdd.title')}</Text>
+          <Controller
+            control={control}
+            name="title"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                placeholder={t('topicAdd.title_placeholder')}
+                value={value}
+                onChangeText={onChange}
+                style={styles.input}
+                error={errors.title?.message}
+              />
+            )}
+          />
 
-      <Text style={{ color: '#bbb', marginBottom: 6 }}>
-        Descrição (opcional)
-      </Text>
-      <TextInput
-        placeholder="Breve descrição"
-        placeholderTextColor="#666"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-        numberOfLines={4}
-        style={{
-          backgroundColor: '#1c1c1e',
-          color: 'white',
-          borderRadius: 8,
-          padding: 12,
-          borderColor: '#2f2f31',
-          borderWidth: 1,
-          marginBottom: 16,
-          minHeight: 100,
-          textAlignVertical: 'top',
-        }}
-      />
+          <Text variant="large">{t('topicAdd.description')}</Text>
+          <Controller
+            control={control}
+            name="description"
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                placeholder={t('topicAdd.description_placeholder')}
+                value={value}
+                onChangeText={onChange}
+                multiline
+                numberOfLines={4}
+                style={styles.textArea}
+                error={errors.description?.message}
+              />
+            )}
+          />
 
-      {/* Color selector */}
-      <Text style={{ color: '#bbb', marginBottom: 6 }}>Cor de fundo</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingBottom: 8 }}
-        style={{ marginBottom: 12 }}
-      >
-        {colorEntries.map(([name, color]) => {
-          const selected = backgroundColor === color
-          return (
-            <TouchableOpacity
-              key={name}
-              onPress={() => setBackgroundColor(color)}
-              style={{
-                paddingVertical: 8,
-                paddingHorizontal: 12,
-                borderRadius: 999,
-                backgroundColor: color,
-                borderWidth: selected ? 2 : 1,
-                borderColor: selected ? '#3b82f6' : '#2f2f31',
-              }}
-            >
-              <Text style={{ color: '#111', fontWeight: '700' }}>{name}</Text>
-            </TouchableOpacity>
-          )
-        })}
-      </ScrollView>
+          <Text variant="large" style={{ marginTop: 16 }}>
+            {t('topicAdd.background_label')}
+          </Text>
 
-      {(() => {
-        const canSave = !!title.trim() && !!backgroundColor
-        const bg = canSave ? (saving ? '#3b82f699' : '#3b82f6') : '#1f2937'
-        return (
-          <TouchableOpacity
-            onPress={onSave}
-            disabled={saving || !canSave}
-            style={{
-              backgroundColor: bg,
-              borderRadius: 10,
-              padding: 14,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: 'white', fontWeight: '700' }}>
-              {saving ? 'A guardar…' : 'Guardar tópico'}
-            </Text>
-          </TouchableOpacity>
-        )
-      })()}
-    </View>
+          <View style={styles.colorsContainer}>
+            {colorEntries.map(([name, color]) => {
+              const selected = backgroundColor === color
+              return (
+                <TouchableOpacity
+                  key={name}
+                  onPress={() =>
+                    setValue('backgroundColor', color, { shouldValidate: true })
+                  }
+                  style={[
+                    styles.colorDot,
+                    { backgroundColor: color, borderWidth: selected ? 3 : 1 },
+                  ]}
+                />
+              )
+            })}
+          </View>
+        </ScrollView>
+
+        <Button
+          onPress={handleSubmit(onSave)}
+          disabled={isSubmitting || !isValid}
+          title={isSubmitting ? t('topicAdd.saving') : t('topicAdd.save')}
+          style={styles.saveButton}
+          background={theme.colors.accentPurple}
+        />
+      </SubContainer>
+    </Container>
   )
 }
 
 export default TopicAddScreen
+
+const createStyles = (theme: ThemeType) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: theme.colors.accentPurple,
+    },
+    scrollView: {
+      flex: 1,
+      width: '100%',
+    },
+    contentContainer: {
+      flexGrow: 1,
+      paddingTop: theme.spacings.medium,
+      paddingBottom: 80,
+    },
+    input: {
+      marginVertical: theme.spacings.xMedium,
+    },
+    textArea: {
+      marginVertical: theme.spacings.xMedium,
+      height: 100,
+      borderRadius: theme.spacings.large,
+    },
+    colorsContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'center',
+      alignItems: 'center',
+      width: '100%',
+      gap: theme.spacings.small,
+      marginTop: theme.spacings.xMedium,
+    },
+    colorDot: {
+      width: 40,
+      height: 40,
+      borderRadius: 999,
+      borderColor: theme.colors.borderColor,
+      alignItems: 'center',
+    },
+    saveButton: {
+      marginTop: theme.spacings.medium,
+      alignSelf: 'center',
+    },
+  })

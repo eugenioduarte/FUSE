@@ -1,12 +1,18 @@
 import { useTheme } from '@/hooks/useTheme'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, View, ViewStyle } from 'react-native'
 
-const SubContainer = ({ children }: { children: React.ReactNode }) => {
+const SubContainer = ({
+  children,
+  styleContainer,
+}: {
+  children: React.ReactNode
+  styleContainer?: ViewStyle
+}) => {
   const theme = useTheme()
   const styles = createStyles(theme)
-  return <View style={styles.container}>{children}</View>
+  return <View style={[styles.container, styleContainer]}>{children}</View>
 }
 
 export default SubContainer

@@ -1,4 +1,5 @@
 import { isColorDark } from '@/utils/colorUtils'
+import { useFocusEffect } from '@react-navigation/native'
 import React, { useEffect } from 'react'
 import { StatusBar, View, ViewProps } from 'react-native'
 import { Colors } from '../../constants/theme'
@@ -12,24 +13,16 @@ type ContainerProps = {
 const Container = ({ children, style, ...props }: ContainerProps) => {
   const setBackgroundColor = useThemeStore((state) => state.setBackgroundColor)
   let bgColor = Colors.light.backgroundPrimary
-  let paddingTop = 50
+  let paddingTop = 0
 
   if (style) {
     const stylesArray = Array.isArray(style) ? style : [style]
     for (const s of stylesArray) {
       if (s && typeof s === 'object') {
-        if (
-          'backgroundColor' in s &&
-          typeof s.backgroundColor === 'string' &&
-          s.backgroundColor
-        ) {
+        if ('backgroundColor' in s && typeof s.backgroundColor === 'string') {
           bgColor = s.backgroundColor
         }
-        if (
-          'paddingTop' in s &&
-          typeof s.paddingTop === 'number' &&
-          s.paddingTop
-        ) {
+        if ('paddingTop' in s && typeof s.paddingTop === 'number') {
           paddingTop = s.paddingTop
         }
       }
@@ -38,20 +31,19 @@ const Container = ({ children, style, ...props }: ContainerProps) => {
 
   const dark = isColorDark(bgColor)
 
+  useFocusEffect(
+    React.useCallback(() => {
+      setBackgroundColor(bgColor)
+    }, [bgColor, setBackgroundColor]),
+  )
+
   useEffect(() => {
     setBackgroundColor(bgColor)
   }, [bgColor, setBackgroundColor])
 
   return (
     <View
-      style={[
-        {
-          flex: 1,
-          backgroundColor: bgColor,
-          paddingTop,
-        },
-        style,
-      ]}
+      style={[{ flex: 1, backgroundColor: bgColor, paddingTop }, style]}
       {...props}
     >
       <StatusBar

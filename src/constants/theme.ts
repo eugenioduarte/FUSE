@@ -53,6 +53,7 @@ export const spacings = {
   xTiny: 2,
   xSmall: 4,
   small: 8,
+  xMedium: 12,
   medium: 16,
   large: 24,
   xLarge: 32,

@@ -11,6 +11,7 @@ import { navigationRef } from '../../navigation/navigationRef'
 import { summariesRepository } from '../../services/repositories/summaries.repository'
 import { useOverlay } from '../../store/useOverlay'
 import { useThemeStore } from '../../store/useThemeStore'
+import HeaderAddTopic from './HeaderAddTopic'
 import HeaderDashboard from './HeaderDashboard'
 
 const DefaultHeader = ({ title }: { title: string }) => {
@@ -101,7 +102,10 @@ export const Header: React.FC = () => {
   if (!visible) return null
 
   const renderHeader = () => {
+    console.log('Rendering header of type:', currentType)
+
     if (currentType === 'DashboardScreen') return <HeaderDashboard />
+    if (currentType === 'TopicAddScreen') return <HeaderAddTopic />
     return <DefaultHeader title={title} />
   }
 

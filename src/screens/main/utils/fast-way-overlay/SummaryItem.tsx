@@ -23,7 +23,7 @@ const SummaryItem = ({
     <View style={styles.summaryRow}>
       <TouchableOpacity style={styles.textContainer} onPress={onPress}>
         <Text
-          variant="medium"
+          variant="large"
           numberOfLines={1}
           ellipsizeMode="tail"
           style={styles.summaryText}
