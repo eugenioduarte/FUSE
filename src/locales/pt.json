@@ -47,6 +47,9 @@
   "dashboard.calendar.topic": "Tópico",
   "dashboard.notifications.title": "Notificações",
   "dashboard.notifications.empty": "Sem notificações",
+
+  "topicScreen.button.add": "Adicionar Tópico",
+
   "topicAdd.title": "Título",
   "topicAdd.title_placeholder": "Título do tópico",
   "topicAdd.description": "Descrição (opcional)",

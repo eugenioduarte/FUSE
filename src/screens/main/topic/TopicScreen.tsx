@@ -1,26 +1,29 @@
+import { Button } from '@/components'
 import Container from '@/components/containers/Container'
 import SubContainer from '@/components/containers/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
+import { navigatorManager } from '@/navigation/navigatorManager'
+import { topicsRepository } from '@/services/repositories/topics.repository'
+import { useThemeStore } from '@/store/useThemeStore'
+import { Topic } from '@/types/domain'
+import { ThemeType } from '@/types/theme.type'
 import { useFocusEffect } from '@react-navigation/native'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
-  Text,
-  TouchableOpacity,
+  StyleSheet,
   View,
 } from 'react-native'
-import { navigatorManager } from '../../../navigation/navigatorManager'
-import { topicsRepository } from '../../../services/repositories/topics.repository'
-import { useThemeStore } from '../../../store/useThemeStore'
-import { Topic } from '../../../types/domain'
-
-const Separator = () => <View style={{ height: 8 }} />
+import TopicCard from './components/TopicCard/TopicCard'
 
 const TopicScreen = () => {
   const theme = useTheme()
+  const styles = createStyles(theme)
   const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
+
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [topics, setTopics] = useState<Topic[]>([])
@@ -44,26 +47,25 @@ const TopicScreen = () => {
     load()
   }, [load])
 
-  // Ensure header background updates immediately when TopicScreen gains focus
   useFocusEffect(
     React.useCallback(() => {
       setBackgroundColor(theme.colors.accentGreen)
     }, [setBackgroundColor, theme.colors.accentGreen]),
   )
+
   useEffect(() => {
     setBackgroundColor(theme.colors.accentGreen)
   }, [setBackgroundColor, theme.colors.accentGreen])
 
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={styles.loading}>
         <ActivityIndicator />
       </View>
     )
   }
-
   return (
-    <Container style={{ backgroundColor: theme.colors.accentGreen }}>
+    <Container style={styles.container}>
       <SubContainer>
         <FlatList
           data={topics}
@@ -71,65 +73,48 @@ const TopicScreen = () => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          ItemSeparatorComponent={Separator}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
           renderItem={({ item }) => {
-            const colored = !!item.backgroundColor
-            const bg = item.backgroundColor || '#1c1c1e'
-            const titleColor = colored ? '#111' : 'white'
-            const descColor = colored ? '#222' : '#cfcfcf'
-            return (
-              <TouchableOpacity
-                onPress={() => navigatorManager.goToTopicDetails(item.id)}
-                style={{
-                  backgroundColor: bg,
-                  borderRadius: 10,
-                  padding: 12,
-                  borderColor: '#2f2f31',
-                  borderWidth: 1,
-                }}
-              >
-                <Text style={{ color: titleColor, fontWeight: '700' }}>
-                  {item.title}
-                </Text>
-                {!!item.description && (
-                  <Text
-                    style={{ color: descColor, marginTop: 6 }}
-                    numberOfLines={2}
-                  >
-                    {item.description}
-                  </Text>
-                )}
-              </TouchableOpacity>
-            )
+            return <TopicCard item={item} />
           }}
-          contentContainerStyle={{ paddingBottom: 80 }}
-          style={{ width: '100%' }}
+          contentContainerStyle={styles.flatContent}
+          style={styles.flatStyle}
         />
-        <View
-          style={{
-            position: 'absolute',
-            left: 12,
-            right: 12,
-            bottom: 16,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => navigatorManager.goToTopicAdd()}
-            style={{
-              backgroundColor: '#3b82f6',
-              borderRadius: 10,
-              padding: 14,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: 'white', fontWeight: '700' }}>
-              Criar tópico
-            </Text>
-          </TouchableOpacity>
-        </View>
+
+        <Button
+          title={t('topicScreen.button.add')}
+          onPress={() => navigatorManager.goToTopicAdd()}
+          style={styles.createButton}
+          background={theme.colors.accentGreen}
+        />
       </SubContainer>
     </Container>
   )
 }
 
 export default TopicScreen
+
+const createStyles = (theme: ThemeType) =>
+  StyleSheet.create({
+    loading: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    container: {
+      backgroundColor: theme.colors.accentGreen,
+    },
+    flatContent: {
+      paddingBottom: 80,
+    },
+    flatStyle: {
+      width: '100%',
+    },
+    createButton: {
+      alignSelf: 'center',
+      marginTop: theme.spacings.medium,
+    },
+    separator: {
+      height: theme.spacings.small,
+    },
+  })

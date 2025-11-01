@@ -47,6 +47,7 @@ export const border = {
   radius10: 10,
   radius12: 12,
   radius16: 16,
+  shadow: 4,
 }
 
 export const spacings = {
