@@ -118,5 +118,4 @@ const createStyles = (theme: ThemeType) =>
       position: 'absolute',
       bottom: 20,
     },
-    // separator removed; using GLOBAL_SEPARATOR to satisfy linter
   })

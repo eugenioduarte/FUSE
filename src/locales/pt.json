@@ -96,5 +96,9 @@
   "summary.create_child_error": "Não foi possível criar o sub-resumo.",
   "summary.parent_fetch_error": "Erro ao buscar o resumo pai.",
   "summary.keywords_title": "Palavras‑chave",
-  "summary.date_label": "Data"
+  "summary.date_label": "Data",
+
+  "challenge.card.challenges_label": "Challenges",
+  "challenge.card.no_score": "Ainda não fez nenhum desafio desse tipo",
+  "challenge.card.total": "Total: {total}"
 }

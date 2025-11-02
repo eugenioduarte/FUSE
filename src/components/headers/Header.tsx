@@ -12,6 +12,7 @@ import { summariesRepository } from '../../services/repositories/summaries.repos
 import { useOverlay } from '../../store/useOverlay'
 import { useThemeStore } from '../../store/useThemeStore'
 import HeaderAddTopic from './HeaderAddTopic'
+import HeaderChallengeAdd from './HeaderChallengeAdd'
 import HeaderDashboard from './HeaderDashboard'
 import HeaderSummaryDetails from './HeaderSummaryDetails'
 import HeaderTopicDetails from './HeaderTopicDetails'
@@ -114,7 +115,9 @@ export const Header: React.FC = () => {
     if (currentType === ROUTES.SummaryDetailsScreen) {
       return <HeaderSummaryDetails />
     }
-
+    if (currentType === ROUTES.ChallengeAddScreen) {
+      return <HeaderChallengeAdd />
+    }
     return <DefaultHeader title={title} />
   }
 
