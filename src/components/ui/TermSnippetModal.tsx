@@ -1,6 +1,13 @@
+import { CloseIcon } from '@/assets/icons'
+import { Button, Text } from '@/components'
+import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
+import { ThemeType } from '@/types/theme.type'
+import { DEFAULT_ICON_SIZE } from '@expo/vector-icons/build/createIconSet'
 import React from 'react'
-import { Modal, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, StyleSheet, View } from 'react-native'
 import type { ExpandableTerm } from '../../types/domain'
+import IconButton from '../buttons/IconButton'
 
 type Props = {
   visible: boolean
@@ -15,6 +22,9 @@ const TermSnippetModal: React.FC<Props> = ({
   onClose,
   onCreateSummary,
 }) => {
+  const theme = useTheme()
+  const styles = createStyles(theme)
+
   return (
     <Modal
       visible={visible}
@@ -22,65 +32,29 @@ const TermSnippetModal: React.FC<Props> = ({
       transparent
       onRequestClose={onClose}
     >
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: 'rgba(0,0,0,0.5)',
-          justifyContent: 'flex-end',
-        }}
-      >
-        <View
-          style={{
-            backgroundColor: '#0f1115',
-            borderTopLeftRadius: 16,
-            borderTopRightRadius: 16,
-            padding: 16,
-          }}
-        >
-          <View style={{ height: 4, alignItems: 'center', marginBottom: 12 }}>
-            <View
-              style={{
-                width: 48,
-                height: 4,
-                backgroundColor: '#333',
-                borderRadius: 2,
-              }}
-            />
-          </View>
-          <Text style={{ color: 'white', fontSize: 16, fontWeight: '700' }}>
-            {term?.term || 'Detalhes'}
-          </Text>
-          {!!term?.mini && (
-            <Text style={{ color: '#cbd5e1', marginTop: 8 }}>{term.mini}</Text>
-          )}
-          <View style={{ height: 16 }} />
-          <TouchableOpacity
-            onPress={() => term && onCreateSummary(term)}
-            style={{
-              backgroundColor: '#3b82f6',
-              padding: 12,
-              borderRadius: 10,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: 'white', fontWeight: '700' }}>
-              Criar resumo sobre este tema
-            </Text>
-          </TouchableOpacity>
-          <View style={{ height: 8 }} />
-          <TouchableOpacity
+      <View style={styles.backdrop}>
+        <View style={styles.sheet}>
+          <IconButton
+            icon={
+              <CloseIcon width={DEFAULT_ICON_SIZE} height={DEFAULT_ICON_SIZE} />
+            }
             onPress={onClose}
-            style={{
-              backgroundColor: '#111214',
-              borderWidth: 1,
-              borderColor: '#2B2C30',
-              padding: 12,
-              borderRadius: 10,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: '#9ca3af', fontWeight: '700' }}>Fechar</Text>
-          </TouchableOpacity>
+            styles={styles.closeButton}
+          />
+          <Text variant="xLarge">{t('termSnippet.title')}</Text>
+          {!!term?.mini && (
+            <Text variant={'large'} style={styles.miniText}>
+              {term.mini} {t('termSnippet.mini_suffix')}
+            </Text>
+          )}
+          <View style={styles.spacer} />
+
+          <Button
+            title={t('termSnippet.create_button')}
+            onPress={() => term && onCreateSummary(term)}
+            background={theme.colors.accentYellow}
+            style={styles.createButton}
+          />
         </View>
       </View>
     </Modal>
@@ -88,3 +62,33 @@ const TermSnippetModal: React.FC<Props> = ({
 }
 
 export default TermSnippetModal
+
+const createStyles = (theme: ThemeType) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      justifyContent: 'flex-end',
+    },
+    sheet: {
+      backgroundColor: theme.colors.backgroundSecondary,
+      borderTopLeftRadius: theme.border.radius16,
+      borderTopRightRadius: theme.border.radius16,
+      padding: theme.spacings.medium,
+      borderWidth: theme.border.size,
+      borderColor: theme.colors.borderColor,
+      overflow: 'hidden',
+    },
+    closeButton: {
+      alignSelf: 'flex-end',
+    },
+    miniText: {
+      marginTop: theme.spacings.small,
+    },
+    spacer: {
+      height: theme.spacings.medium,
+    },
+    createButton: {
+      alignSelf: 'center',
+      marginVertical: theme.spacings.medium,
+    },
+  })

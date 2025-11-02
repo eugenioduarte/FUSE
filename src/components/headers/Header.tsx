@@ -13,6 +13,8 @@ import { useOverlay } from '../../store/useOverlay'
 import { useThemeStore } from '../../store/useThemeStore'
 import HeaderAddTopic from './HeaderAddTopic'
 import HeaderDashboard from './HeaderDashboard'
+import HeaderSummaryDetails from './HeaderSummaryDetails'
+import HeaderTopicDetails from './HeaderTopicDetails'
 import HeaderTopicList from './HeaderTopicList'
 
 const DefaultHeader = ({ title }: { title: string }) => {
@@ -93,7 +95,6 @@ export const Header: React.FC = () => {
   const { headerConfig } = useThemeStore()
   const { title, visible, type } = headerConfig
   const [currentType, setCurrentType] = useState(type)
-  const backgroundColor = useThemeStore((state) => state.backgroundColor)
 
   useEffect(() => {
     if (visible) {
@@ -107,6 +108,13 @@ export const Header: React.FC = () => {
     if (currentType === ROUTES.DashboardScreen) return <HeaderDashboard />
     if (currentType === ROUTES.TopicAddScreen) return <HeaderAddTopic />
     if (currentType === ROUTES.TopicScreen) return <HeaderTopicList />
+    if (currentType === ROUTES.TopicDetailsScreen) {
+      return <HeaderTopicDetails />
+    }
+    if (currentType === ROUTES.SummaryDetailsScreen) {
+      return <HeaderSummaryDetails />
+    }
+
     return <DefaultHeader title={title} />
   }
 
@@ -121,7 +129,7 @@ export const Header: React.FC = () => {
         .easing(Easing.in(Easing.cubic))
         .damping(100)
         .withInitialValues({ opacity: 1 })}
-      style={[styles.container, { backgroundColor: backgroundColor }]}
+      style={styles.container}
     >
       {renderHeader()}
     </Animated.View>
@@ -130,7 +138,7 @@ export const Header: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    height: 100,
+    height: 80,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',

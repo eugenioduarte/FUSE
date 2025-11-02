@@ -141,7 +141,11 @@ export default function DashboardScreen() {
         <Button
           title={' Criar novo tópico'}
           onPress={() => navigatorManager.goToTopicAdd()}
-          style={{ marginTop: 16, alignSelf: 'center' }}
+          style={{
+            alignSelf: 'center',
+            position: 'absolute',
+            bottom: 20,
+          }}
           background={theme.colors.accentRed}
           textColor={theme.colors.backgroundPrimary}
         />

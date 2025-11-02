@@ -174,5 +174,7 @@ const createStyles = (theme: ThemeType) =>
     saveButton: {
       marginTop: theme.spacings.medium,
       alignSelf: 'center',
+      position: 'absolute',
+      bottom: 20,
     },
   })

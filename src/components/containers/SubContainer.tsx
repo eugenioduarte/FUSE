@@ -30,6 +30,5 @@ const createStyles = (theme: ThemeType) =>
       borderColor: theme.colors.borderColor,
       paddingTop: theme.spacings.xSmall,
       paddingHorizontal: theme.spacings.medium,
-      paddingBottom: theme.spacings.xLarge,
     },
   })

@@ -1,15 +1,18 @@
-import { RouteProp, useRoute } from '@react-navigation/native'
-import React, { useEffect, useState } from 'react'
-import { Text, TouchableOpacity, View } from 'react-native'
+import { Container } from '@/components'
+import SubContainer from '@/components/containers/SubContainer'
 import {
   navigatorManager,
   RootStackParamList,
-} from '../../../../navigation/navigatorManager'
-import { challengesRepository } from '../../../../services/repositories/challenges.repository'
-import { summariesRepository } from '../../../../services/repositories/summaries.repository'
-import { topicsRepository } from '../../../../services/repositories/topics.repository'
-import { useOverlay } from '../../../../store/useOverlay'
-import { Challenge } from '../../../../types/domain'
+} from '@/navigation/navigatorManager'
+import { challengesRepository } from '@/services/repositories/challenges.repository'
+import { summariesRepository } from '@/services/repositories/summaries.repository'
+import { topicsRepository } from '@/services/repositories/topics.repository'
+import { useOverlay } from '@/store/useOverlay'
+import { Challenge } from '@/types/domain'
+import { RouteProp, useRoute } from '@react-navigation/native'
+import React, { useEffect, useState } from 'react'
+import { Text, TouchableOpacity } from 'react-native'
+import ChallengeOptionCard from './components/ChallengeOptionCard'
 
 const ChallengeAddScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'ChallengeAddScreen'>>()
@@ -146,27 +149,35 @@ const ChallengeAddScreen = () => {
 
   const colored = !!topicColor
   const bg = topicColor || '#0b0b0c'
-  const titleColor = colored ? '#111' : 'white'
 
   return (
-    <View style={{ flex: 1, backgroundColor: bg, padding: 16 }}>
-      <Text style={{ color: titleColor, fontSize: 18, fontWeight: '700' }}>
-        Tipo de Challenge
-      </Text>
-      <View style={{ height: 16 }} />
+    <Container style={{ backgroundColor: bg }}>
+      <SubContainer
+        styleContainer={{
+          alignItems: 'flex-start',
+          justifyContent: 'flex-start',
+          paddingTop: 20,
+        }}
+      >
+        <ChallengeOptionCard label="Quiz" onPress={handleStartQuiz} score={0} />
+        <Option label="Quiz" onPress={handleStartQuiz} colored={colored} />
 
-      <Option label="Quiz" onPress={handleStartQuiz} colored={colored} />
-      <Option label="Hangman" onPress={handleStartHangman} colored={colored} />
-      <Option label="Matrix" onPress={handleStartMatrix} colored={colored} />
-      {/* Flashcard removido */}
-      <Option
-        label="Resposta em Texto"
-        onPress={() =>
-          navigatorManager.goToChallengeAddTextAnswer({ summaryId })
-        }
-        colored={colored}
-      />
-    </View>
+        <Option
+          label="Hangman"
+          onPress={handleStartHangman}
+          colored={colored}
+        />
+        <Option label="Matrix" onPress={handleStartMatrix} colored={colored} />
+        {/* Flashcard removido */}
+        <Option
+          label="Resposta em Texto"
+          onPress={() =>
+            navigatorManager.goToChallengeAddTextAnswer({ summaryId })
+          }
+          colored={colored}
+        />
+      </SubContainer>
+    </Container>
   )
 }
 

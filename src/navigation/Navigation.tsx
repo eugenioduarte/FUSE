@@ -55,9 +55,7 @@ import SummaryDetailsScreen from '../screens/main/topic/summary/SummaryDetailsSc
 import SummaryScreen from '../screens/main/topic/summary/SummaryScreen'
 import TopicAddScreen from '../screens/main/topic/topic-add/TopicAddScreen'
 import TopicChatScreen from '../screens/main/topic/topic-chat/TopicChatScreen'
-import TopicDetailsScreen, {
-  TopicRankingScreen,
-} from '../screens/main/topic/topic-details'
+import TopicDetailsScreen from '../screens/main/topic/topic-details'
 
 // Menu screens (as regular stack screens)
 import ComponentsScreen from '../screens/main/components/ComponentsScreen'
@@ -74,6 +72,8 @@ import ErrorOverlay from '../screens/main/utils/error-overlay/ErrorOverlay'
 import FastWayOverlay from '../screens/main/utils/fast-way-overlay/FastWayOverlay'
 import LoadingOverlay from '../screens/main/utils/loading-overlay/LoadingOverlay'
 import NotificationOverlay from '../screens/main/utils/notification-overlay/NotificationOverlay'
+import RankingOverlay from '../screens/main/utils/ranking-overlay/RankingOverlay'
+import ShareOverlay from '../screens/main/utils/share-overlay/ShareOverlay'
 import SuccessOverlay from '../screens/main/utils/success-overlay/SuccessOverlay'
 import {
   initFirebaseAuthListener,
@@ -315,11 +315,7 @@ function MainStack() {
         component={SummaryAudioScreen}
         options={{ title: ROUTES.SummaryAudioScreen }}
       />
-      <Stack.Screen
-        name={ROUTES.TopicRankingScreen}
-        component={TopicRankingScreen}
-        options={{ title: ROUTES.TopicRankingScreen }}
-      />
+
       <Stack.Screen
         name={ROUTES.TopicChatScreen}
         component={TopicChatScreen}
@@ -617,6 +613,8 @@ export default function Navigation() {
         </Drawer.Navigator>
       </NavigationContainer>
       <NotificationOverlay />
+      <ShareOverlay />
+      <RankingOverlay />
       <OverlayHost />
     </>
   )

@@ -1,5 +1,6 @@
 import { DrawerActions } from '@react-navigation/native'
 import { ROUTES } from '../constants/routes'
+import { useOverlay } from '../store/useOverlay'
 import { navigationRef } from './navigationRef'
 
 export type RootStackParamList = {
@@ -39,7 +40,7 @@ export type RootStackParamList = {
   ConnectionsScreen: undefined
   PaymentScreen: undefined
   NotificationsScreen: undefined
-  WhiteboardScreen: undefined
+  WhiteboardScreen: { summaryId?: string } | undefined
   TopicRankingScreen: { topicId: string }
   TopicChatScreen: { topicId: string }
   ComponentsScreen: undefined
@@ -214,13 +215,19 @@ export const navigatorManager = {
   },
 
   // Whiteboard
-  goToWhiteboard: () => {
-    if (navigationRef.isReady()) navigationRef.navigate(ROUTES.WhiteboardScreen)
+  goToWhiteboard: (params?: { summaryId?: string }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.WhiteboardScreen, params as any)
   },
 
   goToTopicRanking: (topicId: string) => {
-    if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.TopicRankingScreen, { topicId } as any)
+    try {
+      const { setRankingOverlay } = useOverlay.getState()
+      setRankingOverlay({ id: `ranking-${topicId}`, topicId })
+    } catch {
+      if (navigationRef.isReady())
+        navigationRef.navigate(ROUTES.TopicRankingScreen, { topicId } as any)
+    }
   },
 
   goToTopicChat: (topicId: string) => {

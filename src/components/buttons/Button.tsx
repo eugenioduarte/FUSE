@@ -29,6 +29,7 @@ type ButtonProps = {
   size?: ButtonSize
   background?: string
   textColor?: string
+  loading?: boolean
 }
 
 type SizeStyle = {
@@ -58,6 +59,7 @@ const Button: React.FC<ButtonProps> = ({
   size = 'default',
   background,
   textColor,
+  loading,
   ...rest
 }) => {
   const theme = useTheme()
@@ -150,7 +152,7 @@ const Button: React.FC<ButtonProps> = ({
             numberOfLines={1}
             ellipsizeMode="tail"
           >
-            {title}
+            {loading ? 'carregando...' : title}
           </Text>
         </View>
         {rightIcon ? <View style={styles.iconRight}>{rightIcon}</View> : null}

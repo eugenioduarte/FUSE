@@ -1,27 +1,29 @@
-import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
-import React, { useCallback, useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  Alert,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import { Button, Container, Text } from '@/components'
+import SubContainer from '@/components/containers/SubContainer'
+import { useTheme } from '@/hooks/useTheme'
 import {
   navigatorManager,
   RootStackParamList,
-} from '../../../../navigation/navigatorManager'
-import { listAcceptedConnections } from '../../../../services/firebase/connections.service'
-import { sendTopicInviteToUid } from '../../../../services/firebase/invites.service'
-import { summariesRepository } from '../../../../services/repositories/summaries.repository'
-import { topicsRepository } from '../../../../services/repositories/topics.repository'
-import { useAuthStore } from '../../../../store/useAuthStore'
-import { useOverlay } from '../../../../store/useOverlay'
-import { useThemeStore } from '../../../../store/useThemeStore'
-import { Summary, Topic } from '../../../../types/domain'
+} from '@/navigation/navigatorManager'
+import { listAcceptedConnections } from '@/services/firebase/connections.service'
+import { summariesRepository } from '@/services/repositories/summaries.repository'
+import { topicsRepository } from '@/services/repositories/topics.repository'
+import { useAuthStore } from '@/store/useAuthStore'
+import { useOverlay } from '@/store/useOverlay'
+import { useThemeStore } from '@/store/useThemeStore'
+import { Summary, Topic } from '@/types/domain'
+import { ThemeType } from '@/types/theme.type'
+import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
+import React, { useCallback, useEffect, useState } from 'react'
+import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
+import { SummaryProgressArcs } from './components/TopicDetailsGraph'
+import TopicLinksContainer from './components/TopicLinksContainer'
+import TopicNotFounded from './components/TopicNotFounded'
+import TopicSummaryCard from './components/TopicSummaryCard'
 
 const TopicDetailsScreen: React.FC = () => {
+  const theme = useTheme()
+  const styles = createStyles(theme)
   const route = useRoute<RouteProp<RootStackParamList, 'TopicDetailsScreen'>>()
   const { topicId } = route.params
   const { setEditOverlay } = useOverlay()
@@ -29,9 +31,7 @@ const TopicDetailsScreen: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [summaries, setSummaries] = useState<Summary[]>([])
   const [loadingSummaries, setLoadingSummaries] = useState(false)
-  // Removed inline modal; we navigate to SummaryDetailsScreen instead
-  const [showShare, setShowShare] = useState(false)
-  const [shareLoading, setShareLoading] = useState(false)
+
   const [connections, setConnections] = useState<
     {
       uid: string
@@ -40,7 +40,7 @@ const TopicDetailsScreen: React.FC = () => {
       avatarUrl: string | null
     }[]
   >([])
-  const myUid = useAuthStore((s) => s.user?.id)
+  const myUid = useAuthStore((s) => s.user?.id ?? null)
 
   useEffect(() => {
     let mounted = true
@@ -70,7 +70,6 @@ const TopicDetailsScreen: React.FC = () => {
     }, [topicId]),
   )
 
-  // Sync header background with this screen's background (even before data resolves)
   const bgForHeader = topic?.backgroundColor || '#0b0b0c'
   const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
   useEffect(() => {
@@ -82,323 +81,126 @@ const TopicDetailsScreen: React.FC = () => {
     }, [bgForHeader, setBackgroundColor]),
   )
 
-  if (loading) {
+  if (loadingSummaries || loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={styles.loading}>
         <ActivityIndicator />
       </View>
     )
   }
 
   if (!topic) {
-    return (
-      <View style={{ padding: 16 }}>
-        <Text style={{ color: 'white' }}>Tópico não encontrado.</Text>
-        <Text style={{ color: 'white' }}>ID: {topicId}</Text>
-      </View>
-    )
+    return <TopicNotFounded />
   }
 
-  const colored = !!topic.backgroundColor
-  const bg = topic.backgroundColor || '#0b0b0c'
-  const titleColor = colored ? '#111' : 'white'
-  const textColor = colored ? '#222' : '#ddd'
+  const bg = topic.backgroundColor || theme.colors.backgroundPrimary
+
+  const mockSummaries = [
+    {
+      title: 'Introdução à História',
+      minutes: 42,
+      color: theme.colors.accentBlue,
+    },
+    {
+      title: 'Revolução Industrial',
+      minutes: 35,
+      color: theme.colors.accentYellow,
+    },
+    {
+      title: 'Primeira Guerra Mundial',
+      minutes: 25,
+      color: theme.colors.accentRed,
+    },
+    {
+      title: 'Segunda Guerra Mundial',
+      minutes: 18,
+      color: theme.colors.accentGreen,
+    },
+    {
+      title: 'Guerra Fria',
+      minutes: 10,
+      color: theme.colors.accentPurple,
+    },
+  ]
 
   return (
-    <View style={{ flex: 1, backgroundColor: bg }}>
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
+    <Container style={[styles.container, { backgroundColor: bg }]}>
+      <SubContainer>
+        <TopicLinksContainer
+          topicId={topicId}
+          topic={topic}
+          myUid={myUid}
+          connections={connections}
+          setConnections={setConnections}
+          setEditOverlay={setEditOverlay}
+          setTopic={setTopic}
+          listAcceptedConnections={listAcceptedConnections}
+        />
+
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          <View style={{ flex: 1, marginRight: 12 }}>
-            <Text
-              style={{ color: titleColor, fontSize: 20, fontWeight: '700' }}
-            >
-              {topic.title}
+          <Text variant="xxLarge">{topic.title}</Text>
+          {!!topic.description && (
+            <Text variant="large" style={styles.description}>
+              {topic.description}
             </Text>
-          </View>
-          <TouchableOpacity
-            onPress={() =>
-              setEditOverlay({
-                type: 'topic',
-                topic,
-                onSaved: () => {
-                  topicsRepository
-                    .getById(topicId)
-                    .then((updated) => setTopic(updated))
-                },
-              })
-            }
-          >
-            <Text style={{ color: '#2563eb', fontWeight: '700' }}>Editar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={async () => {
-              if (!myUid) return
-              const next = !showShare
-              setShowShare(next)
-              if (next && connections.length === 0) {
-                try {
-                  setShareLoading(true)
-                  const list = await listAcceptedConnections(myUid)
-                  setConnections(
-                    list.map((u) => ({
-                      uid: u.uid,
-                      name: u.name,
-                      email: u.email,
-                      avatarUrl: u.avatarUrl,
-                    })),
-                  )
-                } catch {
-                } finally {
-                  setShareLoading(false)
-                }
-              }
-            }}
-            style={{ marginLeft: 12 }}
-          >
-            <Text style={{ color: '#10b981', fontWeight: '700' }}>
-              Partilhar
-            </Text>
-          </TouchableOpacity>
-          {(topic.members?.length ?? 0) > 1 && (
-            <TouchableOpacity
-              onPress={() => navigatorManager.goToTopicRanking(topicId)}
-              style={{ marginLeft: 12 }}
-            >
-              <Text style={{ color: '#f59e0b', fontWeight: '700' }}>
-                Ranking
-              </Text>
-            </TouchableOpacity>
           )}
-          {/* Topic chat: visible only when shared (2+ members) and I am a member/owner */}
-          {(() => {
-            const membersCount = topic.members?.length ?? 0
-            const isMember =
-              !!myUid &&
-              ((topic.members || []).includes(myUid) ||
-                topic.createdBy === myUid)
-            if (membersCount >= 2 && isMember) {
-              return (
-                <TouchableOpacity
-                  onPress={() => navigatorManager.goToTopicChat(topicId)}
-                  style={{ marginLeft: 12 }}
-                >
-                  <Text style={{ color: '#22c55e', fontWeight: '700' }}>
-                    Chat
-                  </Text>
-                </TouchableOpacity>
-              )
-            }
-            return null
-          })()}
-          <TouchableOpacity
-            onPress={() => {
-              Alert.alert(
-                'Apagar tópico?',
-                'Isto irá apagar o tópico e todos os seus resumos e challenges associados. Deseja continuar?',
-                [
-                  { text: 'Cancelar', style: 'cancel' },
-                  {
-                    text: 'Apagar',
-                    style: 'destructive',
-                    onPress: () => {
-                      ;(async () => {
-                        try {
-                          await topicsRepository.deleteById(topicId)
-                          navigatorManager.goBack()
-                        } catch (e) {
-                          console.error(e)
-                          Alert.alert(
-                            'Erro',
-                            'Não foi possível apagar o tópico.',
-                          )
-                        }
-                      })()
-                    },
-                  },
-                ],
-              )
-            }}
-            style={{ marginLeft: 12 }}
-          >
-            <Text style={{ color: '#ef4444', fontWeight: '700' }}>Apagar</Text>
-          </TouchableOpacity>
-        </View>
-        {!!topic.description && (
-          <Text style={{ color: textColor, marginTop: 8 }}>
-            {topic.description}
-          </Text>
-        )}
-        <Text style={{ color: colored ? '#333' : '#aaa', marginTop: 12 }}>
-          Atualizado em: {new Date(topic.updatedAt).toLocaleString()}
-        </Text>
 
-        {/* Share with connections panel */}
-        {showShare ? (
-          <View
-            style={{
-              marginTop: 12,
-              padding: 12,
-              borderRadius: 10,
-              backgroundColor: colored ? '#f4f4f5' : '#141416',
-              borderWidth: 1,
-              borderColor: colored ? '#e5e7eb' : '#27272a',
-            }}
-          >
-            <Text
-              style={{
-                color: colored ? '#111' : 'white',
-                fontWeight: '800',
-                marginBottom: 10,
-              }}
-            >
-              Partilhar com conexão
-            </Text>
-            {shareLoading ? (
-              <ActivityIndicator />
-            ) : connections.length === 0 ? (
-              <Text style={{ color: colored ? '#333' : '#aaa' }}>
-                Não há conexões aceites.
-              </Text>
-            ) : (
-              <View style={{ gap: 10 }}>
-                {connections.map((u) => (
-                  <View
-                    key={u.uid}
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                    }}
-                  >
-                    <View style={{ flex: 1, marginRight: 12 }}>
-                      <Text
-                        style={{
-                          color: colored ? '#111' : 'white',
-                          fontWeight: '700',
-                        }}
-                        numberOfLines={1}
-                      >
-                        {u.name || u.email || u.uid}
-                      </Text>
-                      {!!u.email && (
-                        <Text
-                          style={{ color: colored ? '#222' : '#bbb' }}
-                          numberOfLines={1}
-                        >
-                          {u.email}
-                        </Text>
-                      )}
-                    </View>
-                    <TouchableOpacity
-                      onPress={async () => {
-                        try {
-                          await sendTopicInviteToUid(u.uid, topicId)
-                          Alert.alert(
-                            'Convite enviado',
-                            'O utilizador irá receber uma notificação para aceitar o acesso ao tópico.',
-                          )
-                        } catch (e) {
-                          console.error('Failed to send topic invite', e)
-                          Alert.alert(
-                            'Erro',
-                            'Não foi possível enviar o convite.',
-                          )
-                        }
-                      }}
-                      style={{
-                        backgroundColor: '#2563eb',
-                        paddingHorizontal: 12,
-                        paddingVertical: 8,
-                        borderRadius: 8,
-                      }}
-                    >
-                      <Text style={{ color: 'white', fontWeight: '700' }}>
-                        Convidar
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                ))}
-              </View>
-            )}
-          </View>
-        ) : null}
+          <SummaryProgressArcs data={mockSummaries} />
 
-        <View style={{ height: 20 }} />
-        <Text style={{ color: titleColor, fontSize: 16, fontWeight: '700' }}>
-          Summaries
-        </Text>
-        {loadingSummaries ? (
-          <View style={{ paddingVertical: 16 }}>
-            <ActivityIndicator />
-          </View>
-        ) : summaries.length === 0 ? (
-          <Text style={{ color: colored ? '#444' : '#bbb', marginTop: 8 }}>
-            Nenhum summary ainda. Crie o primeiro acima.
-          </Text>
-        ) : (
-          <View style={{ marginTop: 8 }}>
+          <Text variant="xxLarge">Summaries</Text>
+          <View style={styles.summariesWrapper}>
             {summaries.map((s) => {
-              const title = s.title || s.content.slice(0, 60)
-              const snippet = s.content.slice(0, 160)
               return (
-                <TouchableOpacity
+                <TopicSummaryCard
                   key={s.id}
-                  onPress={() => navigatorManager.goToSummaryDetails(s.id, s)}
-                  style={{
-                    backgroundColor: s.backgroundColor || '#1c1c1e',
-                    borderRadius: 10,
-                    padding: 12,
-                    borderColor: '#2f2f31',
-                    borderWidth: 1,
-                    marginBottom: 10,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: s.backgroundColor ? '#111' : 'white',
-                      fontWeight: '700',
-                      marginBottom: 6,
-                    }}
-                  >
-                    {title}
-                  </Text>
-                  <Text
-                    style={{ color: s.backgroundColor ? '#222' : '#cfcfcf' }}
-                    numberOfLines={3}
-                  >
-                    {snippet}
-                  </Text>
-                </TouchableOpacity>
+                  summary={s}
+                  bg={topic.backgroundColor}
+                />
               )
             })}
           </View>
-        )}
-
-        {/* Modal removed: we navigate to SummaryDetailsScreen instead */}
-      </ScrollView>
-      <View style={{ position: 'absolute', left: 16, right: 16, bottom: 16 }}>
-        <TouchableOpacity
+        </ScrollView>
+        <Button
+          title="Criar resumo"
           onPress={() => navigatorManager.goToSummary({ topicId })}
-          style={{
-            backgroundColor: '#3b82f6',
-            borderRadius: 10,
-            paddingVertical: 14,
-            alignItems: 'center',
-          }}
-        >
-          <Text style={{ color: 'white', fontWeight: '700' }}>
-            Criar resumo com ChatGPT
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+          background={bg}
+          style={styles.createButtonAlign}
+        />
+      </SubContainer>
+    </Container>
   )
 }
 
 export default TopicDetailsScreen
+
+const createStyles = (theme: ThemeType) =>
+  StyleSheet.create({
+    loading: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    container: {
+      flex: 1,
+    },
+    scrollContent: {
+      paddingVertical: theme.spacings.medium,
+      paddingBottom: 100,
+      width: '100%',
+    },
+    description: {
+      marginTop: theme.spacings.small,
+    },
+    summariesWrapper: {
+      marginTop: theme.spacings.small,
+      width: '100%',
+    },
+    createButtonAlign: {
+      alignSelf: 'center',
+      position: 'absolute',
+      bottom: 20,
+    },
+  })

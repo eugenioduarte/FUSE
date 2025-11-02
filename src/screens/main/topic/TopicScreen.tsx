@@ -19,6 +19,8 @@ import {
 } from 'react-native'
 import TopicCard from './components/TopicCard/TopicCard'
 
+const GLOBAL_SEPARATOR = () => <View style={{ height: 8 }} />
+
 const TopicScreen = () => {
   const theme = useTheme()
   const styles = createStyles(theme)
@@ -73,7 +75,7 @@ const TopicScreen = () => {
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
           }
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          ItemSeparatorComponent={GLOBAL_SEPARATOR}
           renderItem={({ item }) => {
             return <TopicCard item={item} />
           }}
@@ -113,8 +115,8 @@ const createStyles = (theme: ThemeType) =>
     createButton: {
       alignSelf: 'center',
       marginTop: theme.spacings.medium,
+      position: 'absolute',
+      bottom: 20,
     },
-    separator: {
-      height: theme.spacings.small,
-    },
+    // separator removed; using GLOBAL_SEPARATOR to satisfy linter
   })

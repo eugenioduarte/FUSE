@@ -8,12 +8,14 @@ type Props = TextProps & {
   variant?: Variant
   weight?: keyof typeof textWeight
   color?: string
+  includeFontPadding?: boolean
 }
 
 export const Text: React.FC<Props> = ({
   variant = 'medium',
   weight,
   color,
+  includeFontPadding,
   style,
   ...rest
 }) => {
@@ -24,7 +26,11 @@ export const Text: React.FC<Props> = ({
     fontFamily: weight ? textWeight[weight] : base.fontFamily,
   }
 
-  return <RNText {...rest} style={[computedStyle, style]} />
+  const rnProps: any = { ...(rest as any) }
+  if (includeFontPadding !== undefined)
+    rnProps.includeFontPadding = includeFontPadding
+
+  return <RNText {...rnProps} style={[computedStyle, style]} />
 }
 
 export default Text

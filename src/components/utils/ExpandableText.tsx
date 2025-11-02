@@ -1,15 +1,15 @@
+import { Text } from '@/components'
+import { useTheme } from '@/hooks/useTheme'
+import type { ExpandableTerm } from '@/types/domain'
 import React, { useMemo } from 'react'
-import { Text, TextProps, TouchableOpacity } from 'react-native'
-import type { ExpandableTerm } from '../../types/domain'
+import { TextProps } from 'react-native'
 
 export type ExpandableTextProps = TextProps & {
   content: string
   terms: ExpandableTerm[]
   onPressTerm?: (term: ExpandableTerm) => void
-  highlightColor?: string
 }
 
-// Build non-overlapping highlights for first occurrence of each term
 function computeMatches(content: string, terms: ExpandableTerm[]) {
   const hay = content.toLowerCase()
   const ranges: { start: number; end: number; term: ExpandableTerm }[] = []
@@ -26,7 +26,7 @@ function computeMatches(content: string, terms: ExpandableTerm[]) {
     }
   }
   ranges.sort((a, b) => a.start - b.start)
-  // drop overlaps
+
   const filtered: typeof ranges = []
   let lastEnd = -1
   for (const r of ranges) {
@@ -42,10 +42,10 @@ const ExpandableText: React.FC<ExpandableTextProps> = ({
   content,
   terms,
   onPressTerm,
-  highlightColor = '#fef08a',
   style,
   ...rest
 }) => {
+  const theme = useTheme()
   const ranges = useMemo(() => computeMatches(content, terms), [content, terms])
 
   if (!ranges.length)
@@ -57,28 +57,35 @@ const ExpandableText: React.FC<ExpandableTextProps> = ({
 
   const parts: React.ReactNode[] = []
   let cursor = 0
+  const font = theme.typography.medium
+  const computedVPad = Math.max(
+    0,
+    Math.floor((font.lineHeight - font.fontSize) / 2),
+  )
   for (const r of ranges) {
     if (cursor < r.start) {
       parts.push(
-        <Text key={`p-${cursor}`}>{content.slice(cursor, r.start)}</Text>,
+        <Text variant="medium" key={`p-${cursor}`}>
+          {content.slice(cursor, r.start)}
+        </Text>,
       )
     }
     const slice = content.slice(r.start, r.end)
     parts.push(
-      <TouchableOpacity
+      <Text
         key={`h-${r.start}`}
+        variant="medium"
+        includeFontPadding={false}
         onPress={() => onPressTerm?.(r.term)}
+        style={{
+          backgroundColor: theme.colors.textHighlight,
+          color: theme.colors.textPrimary,
+          paddingVertical: computedVPad,
+          overflow: 'hidden',
+        }}
       >
-        <Text
-          style={{
-            backgroundColor: highlightColor,
-            color: '#111',
-            fontWeight: '700',
-          }}
-        >
-          {slice}
-        </Text>
-      </TouchableOpacity>,
+        {slice}
+      </Text>,
     )
     cursor = r.end
   }
@@ -86,7 +93,7 @@ const ExpandableText: React.FC<ExpandableTextProps> = ({
     parts.push(<Text key={`tail-${cursor}`}>{content.slice(cursor)}</Text>)
 
   return (
-    <Text {...rest} style={style}>
+    <Text variant="medium" {...rest} style={style}>
       {parts}
     </Text>
   )

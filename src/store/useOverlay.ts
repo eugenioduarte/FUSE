@@ -32,12 +32,26 @@ interface OverlayState {
     onDeny?: () => void
     onClose?: () => void
   } | null
+  shareOverlay: {
+    id: string
+    topicId: string
+    connections: import('../services/firebase/connections.service').PublicUser[]
+    onInvite?: (uid: string) => Promise<void>
+    onClose?: () => void
+  } | null
+  rankingOverlay: {
+    id: string
+    topicId: string
+    onClose?: () => void
+  } | null
   setErrorOverlay: (visible: boolean, message?: string) => void
   setFastWayOverlay: (visible: boolean) => void
   setLoadingOverlay: (visible: boolean, message?: string) => void
   setSuccessOverlay: (visible: boolean, message?: string) => void
   setEditOverlay: (payload: EditOverlayPayload | null) => void
   setNotificationOverlay: (payload: OverlayState['notificationOverlay']) => void
+  setShareOverlay: (payload: OverlayState['shareOverlay']) => void
+  setRankingOverlay: (payload: OverlayState['rankingOverlay']) => void
 }
 
 export const useOverlay = create<OverlayState>((set) => ({
@@ -50,6 +64,8 @@ export const useOverlay = create<OverlayState>((set) => ({
   successMessage: undefined,
   editOverlay: null,
   notificationOverlay: null,
+  shareOverlay: null,
+  rankingOverlay: null,
 
   setErrorOverlay: (visible, message) =>
     set({ errorOverlay: visible, errorMessage: message }),
@@ -60,4 +76,6 @@ export const useOverlay = create<OverlayState>((set) => ({
     set({ successOverlay: visible, successMessage: message }),
   setEditOverlay: (payload) => set({ editOverlay: payload }),
   setNotificationOverlay: (payload) => set({ notificationOverlay: payload }),
+  setShareOverlay: (payload) => set({ shareOverlay: payload }),
+  setRankingOverlay: (payload) => set({ rankingOverlay: payload }),
 }))

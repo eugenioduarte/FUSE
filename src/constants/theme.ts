@@ -9,7 +9,7 @@ export const Colors = {
     textPrimary: '#3A001D', // cor principal do texto
     textSecondary: '#5A2E3D', // opcional – tom mais suave derivado
     borderColor: '#3A001D', // cor padrão de borda
-
+    textHighlight: '#F3D8B4', // para destaques / links
     // ---- Cores de estado / ênfase ----
     accentRed: '#EA3D5C', // destaque / erro / delete
     accentRedDark: '#A01538', // tom escuro para hover/press
