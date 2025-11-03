@@ -50,13 +50,52 @@ export async function upsertGroupChallenge(
   opts?: { topicId?: string },
 ) {
   const ref = doc(db(), 'challenges', challenge.id)
-  const payload = toFsDoc<Challenge & { topicId?: string }>({
+  // Sanitize payload to avoid nested arrays (Firestore doesn't support arrays
+  // that directly contain other arrays, e.g. grid: string[][]). We specifically
+  // transform matrix grid rows into strings to keep the structure safe.
+  const base: any = {
     ...challenge,
     authorId:
       challenge.authorId || useAuthStore.getState().user?.id || undefined,
-    // Include topicId to make listeners simpler (not part of Challenge type locally)
     ...(opts?.topicId ? { topicId: opts.topicId } : {}),
-  } as any)
+  }
+
+  // Deep-copy attempts array and sanitize known nested-array fields
+  const payloadCopy: any = { ...base }
+  try {
+    const rawAttempts = base?.payload?.attempts
+    if (Array.isArray(rawAttempts)) {
+      payloadCopy.payload = { ...(base.payload || {}) }
+      payloadCopy.payload.attempts = rawAttempts.map((a: any) => {
+        const attempt = { ...a }
+        // Matrix attempts include a grid: string[][] -> convert each row to a string
+        if (
+          Array.isArray(attempt.grid) &&
+          attempt.grid.some((r: any) => Array.isArray(r))
+        ) {
+          attempt.grid = attempt.grid.map((r: any) =>
+            Array.isArray(r) ? r.join('') : String(r),
+          )
+        }
+        // Ensure placements (array of objects with cells arrays) are kept as-is
+        // but convert any inner arrays-of-arrays just in case
+        if (Array.isArray(attempt.placements)) {
+          attempt.placements = attempt.placements.map((pl: any) => ({
+            ...pl,
+            cells: Array.isArray(pl.cells)
+              ? pl.cells.map((c: any) => ({ ...c }))
+              : pl.cells,
+          }))
+        }
+        return attempt
+      })
+    }
+  } catch (e) {
+    // If sanitization fails for any reason, fall back to the raw base object.
+    console.warn('collabData: failed to sanitize challenge payload', e)
+  }
+
+  const payload = toFsDoc<Challenge & { topicId?: string }>(payloadCopy as any)
   await setDoc(ref, payload, { merge: true })
 }
 
