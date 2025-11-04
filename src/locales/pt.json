@@ -41,6 +41,7 @@
 
   "topicCard.label.scores": "Pontuações",
 
+  "dashboard.agent.title": "Agente",
   "dashboard.calendar.day": "Dia",
   "dashboard.calendar.hour": "Hora",
   "dashboard.calendar.noEvents": "Nenhum compromisso hoje",
@@ -88,7 +89,7 @@
   "summary.share_dialog_title": "Compartilhar PDF",
   "summary.pdf_saved": "PDF salvo em: {path}",
   "summary.delete.confirm_title": "Apagar resumo?",
-  "summary.delete.confirm_body": "Isto irá apagar o resumo, seus sub-resumos, challenges relacionados e limpar o quadro (whiteboard). Deseja continuar?",
+  "summary.delete.confirm_body": "Isto irá apagar o resumo, seus sub-resumos, challenges relacionados. Deseja continuar?",
   "summary.delete.accept": "Apagar",
   "summary.delete.cancel": "Cancelar",
   "summary.download_error": "Não foi possível gerar o PDF deste resumo.",

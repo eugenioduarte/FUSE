@@ -41,8 +41,6 @@ export const ROUTES = {
   ConnectionsScreen: 'ConnectionsScreen',
   PaymentScreen: 'PaymentScreen',
   NotificationsScreen: 'NotificationsScreen',
-  // Main - Whiteboard
-  WhiteboardScreen: 'WhiteboardScreen',
   // Main - Dev / Components
   ComponentsScreen: 'ComponentsScreen',
   // Tabs/Other

@@ -1,20 +1,17 @@
+import { Text } from '@/components'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
-import { useOverlay } from '@/store/useOverlay'
-import { ThemeType } from '@/types/theme.type'
-import React, { useEffect, useState } from 'react'
-import { Image, StyleSheet, View } from 'react-native'
-import { Text } from '../../../../components'
-import { aiService } from '../../../../services/ai/ai.service'
+import { aiService } from '@/services/ai/ai.service'
 import {
   AppNotification,
   listenUserNotificationsTopLevel,
-} from '../../../../services/firebase/notifications.service'
-import { useAuthStore } from '../../../../store/useAuthStore'
-import { useCalendarStore } from '../../../../store/useCalendarStore'
-
-const IMAGE_SIZE = 60
-const IMAGE_PLACEHOLDER = 'https://picsum.photos/200/300'
+} from '@/services/firebase/notifications.service'
+import { useAuthStore } from '@/store/useAuthStore'
+import { useCalendarStore } from '@/store/useCalendarStore'
+import { useOverlay } from '@/store/useOverlay'
+import { ThemeType } from '@/types/theme.type'
+import React, { useEffect, useState } from 'react'
+import { StyleSheet, View } from 'react-native'
 
 export default function DashboardAgentDisplay() {
   const theme = useTheme()
@@ -34,7 +31,6 @@ export default function DashboardAgentDisplay() {
     } catch {}
   }, [])
 
-  // Subscribe once to the top-level user notifications (if available).
   useEffect(() => {
     if (!user?.id) return
     let unsub: (() => void) | undefined
@@ -48,7 +44,6 @@ export default function DashboardAgentDisplay() {
     return () => unsub?.()
   }, [user?.id])
 
-  // Helpers: find next event details (ev + Date) or null
   function getNextEventDetails(): { ev: any; dt: Date } | null {
     const now = Date.now()
     let best: { ev: any; dt: Date } | null = null
@@ -81,7 +76,7 @@ export default function DashboardAgentDisplay() {
 
   function formatWhenFriendly(dt: Date) {
     const now = new Date()
-    // midnight for day comparison
+
     const tzNow = new Date(now.getFullYear(), now.getMonth(), now.getDate())
     const tzDt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate())
     const dayDiff = Math.round(
@@ -116,12 +111,10 @@ export default function DashboardAgentDisplay() {
     return { kind: 'count', count: notifs.length }
   }
 
-  // Build a humanized message (friendly tone + user's first name when available)
   const agentMessage = (() => {
     const firstName = (user?.name || '').split(' ').find(Boolean)
     const greet = firstName ? `Olá, ${firstName}! ` : 'Olá! '
 
-    // 1) notifications should be top priority
     const n = getNotificationsMessage()
     if (n) {
       if ((n as any).kind === 'invite')
@@ -132,22 +125,18 @@ export default function DashboardAgentDisplay() {
         return `${greet}Você tem ${(n as any).count} novas notificações.`
     }
 
-    // 2) next event
     const next = getNextEventDetails()
     if (next) {
       const when = formatWhenFriendly(next.dt)
       return `${greet}Não esqueça: “${next.ev.title}” ${when}.`
     }
 
-    // 3) ranking hint
     if (rankingOverlay?.topicId)
       return `${greet}Há novidades no ranking do seu tópico — confira para ver sua posição.`
 
-    // fallback
     return `${greet}Sem novidades urgentes — que tal revisar um resumo rápido hoje?`
   })()
 
-  // If both a latest notification and a next event exist, build a deterministic combined message
   function buildCombinedMessage(
     latestNotif: AppNotification | null,
     nextEvent: { ev: any; dt: Date } | null,
@@ -162,17 +151,14 @@ export default function DashboardAgentDisplay() {
       : null
     const when = nextEvent ? formatWhenFriendly(nextEvent.dt) : null
     const evTitle = nextEvent ? nextEvent.ev?.title || 'um compromisso' : null
-    // Compose concise secretary-style sentence
+
     if (notifLabel && when && evTitle) {
-      // Example: "Olá, João, existe uma nova mensagem nas notificações e amanhã temos um compromisso 'Teste' às 09:00. Não se esqueça."
-      // Keep it short and factual
       return `${greet}existe uma nova mensagem nas notificações${notifLabel ? `: "${notifLabel}"` : ''} e ${when} temos um compromisso "${evTitle}". Não se esqueça.`
     }
-    // Fallback to agentMessage if something missing
+
     return agentMessage
   }
 
-  // Use AI to generate a combined friendly message when there are new notifications or upcoming events.
   const next = getNextEventDetails()
   const latestNotif =
     notifs && notifs.length > 0 ? (notifs[0] as AppNotification) : null
@@ -197,10 +183,7 @@ export default function DashboardAgentDisplay() {
     if (next) {
       parts.push(`Próximo compromisso: '${next.ev.title}' ${whenFriendly}.`)
     }
-    // Strong instruction: return a single concise factual sentence (like a secretary).
-    // - Max ~25 words
-    // - No opinions, no suggestions, no multi-sentence answers
-    // - Start with a short greeting 'Olá, {Nome}, ' when name provided
+
     prompt = `Você é uma secretária objetiva. Gere UMA única frase curta e direta em PT-BR (máx. 25 palavras). Sem opiniões, sem sugestões, sem parágrafos. Comece com uma saudação curta 'Olá${name ? ', ' + name : ''}' e relate apenas os fatos: ${parts.join(' ')}.`
     promptHash = JSON.stringify([parts, user?.name || ''])
   }
@@ -219,9 +202,8 @@ export default function DashboardAgentDisplay() {
         if (cancelled) return
         const raw = (summary?.content || summary?.title || '').trim()
         if (raw) {
-          // normalize whitespace
           const norm = raw.split(/\s+/).join(' ')
-          // take only the first sentence and limit length (defensive)
+
           const firstSentence = norm.split(/[.?!]\s/)[0]
           const limited =
             firstSentence.length > 180
@@ -232,7 +214,6 @@ export default function DashboardAgentDisplay() {
           setLastPromptHash(promptHash)
         }
       } catch (err) {
-        // keep fallback agentMessage if AI fails
         console.warn('AI generate failed', err)
       }
     })()
@@ -242,33 +223,22 @@ export default function DashboardAgentDisplay() {
   }, [prompt, promptHash, lastPromptHash])
 
   return (
-    <View style={styles.container}>
-      <View style={styles.card}>
-        <View style={styles.avatarContainer}>
-          <View
-            style={[
-              styles.avatarBorder,
-              { backgroundColor: theme.colors.accentYellow },
-            ]}
-          >
-            <Image style={styles.avatar} source={{ uri: IMAGE_PLACEHOLDER }} />
-          </View>
-        </View>
-
-        <Text variant="xLarge" style={styles.name}>
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <Text variant="xLarge" style={styles.headerTitle}>
           {t('dashboard.agent.title') || 'Agente'}
         </Text>
+        <Text variant="xxLarge" style={styles.headerDay}>
+          {new Date().getDay()}
+        </Text>
+      </View>
 
-        <View style={styles.messageBubble}>
-          <Text variant="medium">
-            {
-              // prefer combined local message when both notif+event exist; else prefer AI-generated short message; else fallback
-              notifs && notifs.length > 0 && next
-                ? buildCombinedMessage(notifs[0] as AppNotification, next)
-                : (generatedMessage ?? agentMessage)
-            }
-          </Text>
-        </View>
+      <View style={styles.messageBubble}>
+        <Text variant="medium">
+          {notifs && notifs.length > 0 && next
+            ? buildCombinedMessage(notifs[0] as AppNotification, next)
+            : (generatedMessage ?? agentMessage)}
+        </Text>
       </View>
     </View>
   )
@@ -276,51 +246,40 @@ export default function DashboardAgentDisplay() {
 
 const createStyles = (theme: ThemeType) =>
   StyleSheet.create({
-    container: { paddingTop: 8, minWidth: 0 },
     card: {
-      backgroundColor: theme.colors.backgroundSecondary,
-      borderColor: theme.colors.borderColor,
       borderWidth: 1,
-      borderRadius: theme.border.radius16,
-      alignItems: 'center',
-      paddingTop: 36,
-      paddingBottom: 12,
-      paddingHorizontal: theme.spacings.small,
-      width: '100%',
-      alignSelf: 'center',
-      position: 'relative',
-      marginBottom: theme.spacings.small,
-    },
-    avatarContainer: {
-      position: 'absolute',
-      top: -30,
-      alignSelf: 'center',
-    },
-    avatarBorder: {
-      borderWidth: theme.border.size,
       borderColor: theme.colors.borderColor,
-      borderRadius: 60,
-      padding: 2,
-      borderBottomWidth: 6,
+      borderRadius: theme.border.radius16,
+      backgroundColor: theme.colors.backgroundPrimary,
+      overflow: 'hidden',
+      marginBottom: theme.spacings.small,
+      borderBottomWidth: theme.border.shadow,
+      borderRightWidth: theme.border.shadow,
     },
-    avatar: {
-      width: IMAGE_SIZE,
-      height: IMAGE_SIZE,
-      borderRadius: IMAGE_SIZE / 2,
-      backgroundColor: theme.colors.borderColor,
+
+    header: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-end',
+      backgroundColor: theme.colors.accentRed,
+      paddingHorizontal: theme.spacings.medium,
+      paddingVertical: theme.spacings.small,
+      borderTopLeftRadius: theme.border.radius16,
+      borderTopRightRadius: theme.border.radius16,
     },
-    name: {
-      width: '100%',
-      textAlign: 'center',
-      borderBottomColor: theme.colors.borderColor,
-      borderBottomWidth: theme.border.size,
-      paddingVertical: theme.spacings.xSmall,
+
+    headerTitle: {
+      color: theme.colors.textPrimary,
     },
+
+    headerDay: {
+      fontSize: 40,
+      lineHeight: 40,
+      color: theme.colors.textPrimary,
+    },
+
     messageBubble: {
-      marginTop: theme.spacings.medium,
-      width: '100%',
-      backgroundColor: theme.colors.white,
-      borderRadius: 12,
-      padding: theme.spacings.small,
+      borderRadius: theme.border.radius12,
+      padding: theme.spacings.medium,
     },
   })

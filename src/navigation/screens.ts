@@ -20,6 +20,5 @@ export enum NavigationScreenName {
   ConnectionsScreen = 'ConnectionsScreen',
   PaymentScreen = 'PaymentScreen',
   NotificationsScreen = 'NotificationsScreen',
-  WhiteboardScreen = 'WhiteboardScreen',
   SummaryListTab = 'SummaryListTab',
 }

@@ -1,5 +1,3 @@
-export type WhiteboardMode = 'select' | 'draw' | 'text' | 'emoji' | 'icon'
-
 export type Viewport = {
   translateX: number
   translateY: number
@@ -46,9 +44,3 @@ export type IconElement = BaseElement & {
   strokeWidth?: number
   fill?: string
 }
-
-export type WhiteboardElement =
-  | StrokeElement
-  | TextElement
-  | EmojiElement
-  | IconElement

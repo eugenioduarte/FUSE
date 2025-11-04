@@ -1,9 +1,4 @@
-import {
-  AudioIcon,
-  ChevronIcon,
-  QuizIcon,
-  WhiteboardIcon,
-} from '@/assets/icons'
+import { AudioIcon, ChevronIcon, QuizIcon } from '@/assets/icons'
 import { Text } from '@/components'
 import IconButton from '@/components/buttons/IconButton'
 import { useTheme } from '@/hooks/useTheme'
@@ -42,12 +37,6 @@ const TopicSummaryCard = ({ summary, bg }: TopicSummaryCardProps) => {
         </Text>
         <View style={styles.row}>
           <View style={styles.leftIcons}>
-            <IconButton
-              icon={<WhiteboardIcon width={ICON_SIZE} height={ICON_SIZE} />}
-              onPress={() =>
-                navigatorManager.goToWhiteboard({ summaryId: summary.id })
-              }
-            />
             <IconButton
               icon={<AudioIcon width={ICON_SIZE} height={ICON_SIZE} />}
               onPress={() =>

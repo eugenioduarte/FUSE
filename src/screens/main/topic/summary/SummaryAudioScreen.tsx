@@ -194,7 +194,7 @@ const SummaryAudioScreen: React.FC = () => {
     try {
       setDownloading(true)
       const filename = `Resumo_${summaryId}_${Date.now()}.mp3`
-      const dest = `${FileSystem.documentDirectory}${filename}`
+      const dest = `${(FileSystem as any).documentDirectory || ''}${filename}`
       await FileSystem.copyAsync({ from: audioUri, to: dest })
       Alert.alert('Salvo', `Áudio salvo em: ${dest}`)
     } catch (e) {
@@ -309,10 +309,10 @@ const SummaryAudioScreen: React.FC = () => {
 }
 
 async function writeBase64ToCache(filename: string, base64: string) {
-  const target = `${FileSystem.cacheDirectory}${filename}`
+  const target = `${(FileSystem as any).cacheDirectory || ''}${filename}`
   try {
     await FileSystem.writeAsStringAsync(target, base64, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: 'base64',
     })
     return target
   } catch (e) {

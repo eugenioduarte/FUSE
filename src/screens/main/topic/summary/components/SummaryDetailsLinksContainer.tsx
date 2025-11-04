@@ -1,10 +1,4 @@
-import {
-  AudioIcon,
-  DeleteIcon,
-  DownloadIcon,
-  QuizIcon,
-  WhiteboardIcon,
-} from '@/assets/icons'
+import { AudioIcon, DeleteIcon, DownloadIcon, QuizIcon } from '@/assets/icons'
 import IconButton from '@/components/buttons/IconButton'
 import { useTheme } from '@/hooks/useTheme'
 import { navigatorManager } from '@/navigation/navigatorManager'
@@ -33,10 +27,6 @@ const SummaryDetailsLinksContainer = ({
 
   return (
     <View style={styles.row}>
-      <IconButton
-        icon={<WhiteboardIcon width={ICON_SIZE} height={ICON_SIZE} />}
-        onPress={() => navigatorManager.goToWhiteboard({ summaryId: id })}
-      />
       <IconButton
         icon={<AudioIcon width={ICON_SIZE} height={ICON_SIZE} />}
         onPress={() => navigatorManager.goToSummaryAudio({ summaryId: id })}

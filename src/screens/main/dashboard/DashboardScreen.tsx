@@ -10,8 +10,7 @@ import { navigatorManager } from '../../../navigation/navigatorManager'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
 import TopicCard from '../topic/components/TopicCard/TopicCard'
-import DashboardCalendarDisplay from './components/DashboardCalendarDisplay'
-import DashboardNotificationDisplay from './components/DashboardNotificationDisplay'
+import DashboardAgentDisplay from './components/DashboardAgentDisplay'
 
 type DashItem = {
   id: string
@@ -57,6 +56,28 @@ export default function DashboardScreen() {
     })()
     return () => {
       mounted = false
+    }
+  }, [])
+
+  useEffect(() => {
+    // Subscribe to topics repository changes so dashboard refreshes immediately after upsert/delete
+    const unsub = topicsRepository.onChange(async () => {
+      const topics = await topicsRepository.list()
+      const enriched: DashItem[] = []
+      for (const t of topics) {
+        const summaries = await summariesRepository.list(t.id)
+        enriched.push({
+          id: t.id,
+          topicName: t.title,
+          createdAt: new Date(t.createdAt).toLocaleDateString(),
+          summaries: summaries.map((s) => ({ id: s.id, title: s.title })),
+          backgroundColor: t.backgroundColor,
+        })
+      }
+      setItems(enriched)
+    })
+    return () => {
+      unsub()
     }
   }, [])
 
@@ -115,12 +136,7 @@ export default function DashboardScreen() {
           renderItem={({ item }) => (
             <TopicCard item={{ id: item.id, title: item.topicName }} />
           )}
-          ListHeaderComponent={
-            <View style={{ marginBottom: 24, gap: 8, marginTop: 20 }}>
-              <DashboardNotificationDisplay />
-              <DashboardCalendarDisplay />
-            </View>
-          }
+          ListHeaderComponent={<DashboardAgentDisplay />}
           ListEmptyComponent={
             loading ? null : (
               <View style={{ padding: 16 }}>
@@ -135,7 +151,7 @@ export default function DashboardScreen() {
             paddingTop: 16,
           }}
           showsVerticalScrollIndicator={false}
-          style={{ width: '100%' }}
+          style={{ width: '100%', paddingTop: 20 }}
         />
 
         {/* Bottom CTA to create a new topic */}

@@ -64,14 +64,10 @@ import PaymentScreen from '../screens/main/menu/payment/PaymentScreen'
 import ProfileScreen from '../screens/main/menu/profile/ProfileScreen'
 import NotificationsScreen from '../screens/main/notifications/NotificationsScreen'
 
-// Whiteboard (keep legacy path casing for now)
-import WhiteboardScreen from '../screens/main/whiteBoard/WhiteBoardScreen'
-
 import EditOverlay from '../screens/main/utils/edit-overlay/EditOverlay'
 import ErrorOverlay from '../screens/main/utils/error-overlay/ErrorOverlay'
 import FastWayOverlay from '../screens/main/utils/fast-way-overlay/FastWayOverlay'
 import LoadingOverlay from '../screens/main/utils/loading-overlay/LoadingOverlay'
-import NotificationOverlay from '../screens/main/utils/notification-overlay/NotificationOverlay'
 import RankingOverlay from '../screens/main/utils/ranking-overlay/RankingOverlay'
 import ShareOverlay from '../screens/main/utils/share-overlay/ShareOverlay'
 import SuccessOverlay from '../screens/main/utils/success-overlay/SuccessOverlay'
@@ -350,13 +346,6 @@ function MainStack() {
         component={ComponentsScreen}
         options={{ title: ROUTES.ComponentsScreen }}
       />
-
-      {/* Whiteboard */}
-      <Stack.Screen
-        name={ROUTES.WhiteboardScreen}
-        component={WhiteboardScreen}
-        options={{ title: ROUTES.WhiteboardScreen }}
-      />
     </Stack.Navigator>
   )
 }
@@ -612,7 +601,6 @@ export default function Navigation() {
           <Drawer.Screen name={DRAWER_APP} component={MainStack} />
         </Drawer.Navigator>
       </NavigationContainer>
-      <NotificationOverlay />
       <ShareOverlay />
       <RankingOverlay />
       <OverlayHost />

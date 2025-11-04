@@ -326,16 +326,16 @@ const styles = StyleSheet.create<{
 }>({
   screen: {
     flex: 1,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.backgroundPrimary,
     padding: spacings.medium,
   },
   header: {
-    color: Colors.light.text,
+    color: Colors.light.textPrimary,
     ...(typography.xLarge as unknown as TextStyle),
     marginBottom: spacings.small,
   },
   label: {
-    color: Colors.light.text,
+    color: Colors.light.textPrimary,
     opacity: 0.8,
     marginTop: spacings.small,
   },
@@ -358,7 +358,7 @@ const styles = StyleSheet.create<{
     marginTop: 6,
   },
   readonlyText: {
-    color: Colors.light.text,
+    color: Colors.light.textPrimary,
   },
   pill: {
     backgroundColor: '#F3F4F6',
@@ -368,11 +368,15 @@ const styles = StyleSheet.create<{
     marginRight: 8,
   },
   pillActive: { backgroundColor: '#DBEAFE' },
-  pillText: { color: Colors.light.text },
-  pillTextActive: { color: Colors.light.tertiary, fontWeight: '700' },
-  helperText: { color: Colors.light.text, opacity: 0.6, alignSelf: 'center' },
+  pillText: { color: Colors.light.textPrimary },
+  pillTextActive: { color: Colors.light.textSecondary, fontWeight: '700' },
+  helperText: {
+    color: Colors.light.textPrimary,
+    opacity: 0.6,
+    alignSelf: 'center',
+  },
   saveBtn: {
-    backgroundColor: Colors.light.primary,
+    backgroundColor: Colors.light.accentBlue,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',

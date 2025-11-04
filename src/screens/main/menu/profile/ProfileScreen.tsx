@@ -261,7 +261,7 @@ const Profile: React.FC = () => {
             onChangeText={setDisplayName}
             style={styles.input}
           />
-          <UIText variant="small" color={Colors.light.grey}>
+          <UIText variant="small" color={Colors.light.textSecondary}>
             Se não definir, mostraremos um nome padrão como Explorador(a) ou
             Utilizador(a) #1234.
           </UIText>
@@ -282,7 +282,7 @@ const Profile: React.FC = () => {
           {saveMsg ? (
             <UIText
               variant="small"
-              style={{ marginTop: 6, color: Colors.light.text }}
+              style={{ marginTop: 6, color: Colors.light.textPrimary }}
             >
               {saveMsg}
             </UIText>
@@ -312,7 +312,7 @@ const Profile: React.FC = () => {
           {emailError ? (
             <UIText
               variant="small"
-              style={{ color: Colors.light.warning_text }}
+              style={{ color: Colors.light.accentYellow }}
             >
               {emailError}
             </UIText>
@@ -323,7 +323,7 @@ const Profile: React.FC = () => {
           >
             <UIText style={styles.buttonSecondaryText}>Guardar email</UIText>
           </TouchableOpacity>
-          <UIText variant="small" color={Colors.light.grey}>
+          <UIText variant="small" color={Colors.light.textSecondary}>
             Ao alterar, enviaremos um email de confirmação.
           </UIText>
         </View>
@@ -421,7 +421,7 @@ const styles = StyleSheet.create({
     height: 80,
     borderRadius: 40,
     marginRight: spacings.medium,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.backgroundPrimary,
   },
   stylesRow: {
     flexDirection: 'row',
@@ -432,14 +432,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 16,
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.backgroundSecondary,
   },
   chipSelected: {
-    backgroundColor: Colors.light.primary,
+    backgroundColor: Colors.light.accentBlue,
   },
   chipText: {
     ...typography.small,
-    color: Colors.light.text,
+    color: Colors.light.textPrimary,
   },
   chipTextSelected: {
     color: '#fff',
@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   buttonPrimary: {
-    backgroundColor: Colors.light.primary,
+    backgroundColor: Colors.light.accentBlue,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
@@ -464,7 +464,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   buttonSecondary: {
-    backgroundColor: Colors.light.background,
+    backgroundColor: Colors.light.backgroundSecondary,
     borderRadius: 8,
     paddingVertical: 12,
     alignItems: 'center',
@@ -472,7 +472,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   buttonSecondaryText: {
-    color: Colors.light.text,
+    color: Colors.light.textPrimary,
     fontWeight: '700',
   },
   strengthRow: {

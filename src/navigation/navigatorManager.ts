@@ -40,7 +40,6 @@ export type RootStackParamList = {
   ConnectionsScreen: undefined
   PaymentScreen: undefined
   NotificationsScreen: undefined
-  WhiteboardScreen: { summaryId?: string } | undefined
   TopicRankingScreen: { topicId: string }
   TopicChatScreen: { topicId: string }
   ComponentsScreen: undefined
@@ -212,12 +211,6 @@ export const navigatorManager = {
   goToNotifications: () => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.NotificationsScreen)
-  },
-
-  // Whiteboard
-  goToWhiteboard: (params?: { summaryId?: string }) => {
-    if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.WhiteboardScreen, params as any)
   },
 
   goToTopicRanking: (topicId: string) => {

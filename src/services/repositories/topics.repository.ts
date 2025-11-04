@@ -7,6 +7,12 @@ import { summariesRepository } from './summaries.repository'
 const CACHE_KEY = 'topics:list'
 
 export const topicsRepository = {
+  // Simple change listeners so UI can react to local cache updates (e.g. after upsert)
+  _listeners: new Set<() => void>(),
+  onChange(fn: () => void) {
+    this._listeners.add(fn)
+    return () => this._listeners.delete(fn)
+  },
   async list(): Promise<Topic[]> {
     const cached = await localCache.get<Topic[]>(CACHE_KEY)
     return cached?.data ?? []
@@ -43,6 +49,15 @@ export const topicsRepository = {
     else current.unshift(topic)
     await localCache.set(CACHE_KEY, current, topic.updatedAt)
 
+    // Notify listeners about the change
+    try {
+      for (const l of this._listeners) {
+        try {
+          l()
+        } catch {}
+      }
+    } catch {}
+
     // Queue mutation for server
     if (!opts?.fromSync) {
       await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: topic })
@@ -68,6 +83,15 @@ export const topicsRepository = {
     const current = (await localCache.get<Topic[]>(CACHE_KEY))?.data ?? []
     const next = current.filter((t) => t.id !== id)
     await localCache.set(CACHE_KEY, next)
+
+    // Notify listeners about the change
+    try {
+      for (const l of this._listeners) {
+        try {
+          l()
+        } catch {}
+      }
+    } catch {}
 
     // Enqueue delete for server
     await offlineQueue.enqueue({

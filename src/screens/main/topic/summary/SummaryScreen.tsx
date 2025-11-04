@@ -1,3 +1,12 @@
+import { Text } from '@/components'
+import PdfTextExtractor from '@/components/utils/PdfTextExtractor'
+import {
+  RootStackParamList,
+  navigatorManager,
+} from '@/navigation/navigatorManager'
+import { summariesRepository } from '@/services/repositories/summaries.repository'
+import { useOverlay } from '@/store/useOverlay'
+import { Summary } from '@/types/domain'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import * as DocumentPicker from 'expo-document-picker'
 import * as FileSystem from 'expo-file-system'
@@ -5,19 +14,10 @@ import React, { useState } from 'react'
 import {
   ActivityIndicator,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   View,
 } from 'react-native'
-import PdfTextExtractor from '../../../../components/utils/PdfTextExtractor'
-import {
-  RootStackParamList,
-  navigatorManager,
-} from '../../../../navigation/navigatorManager'
-import { summariesRepository } from '../../../../services/repositories/summaries.repository'
-import { useOverlay } from '../../../../store/useOverlay'
-import { Summary } from '../../../../types/domain'
 
 const SummaryScreen = () => {
   const { setErrorOverlay, setLoadingOverlay, setEditOverlay } = useOverlay()
@@ -64,7 +64,7 @@ const SummaryScreen = () => {
       if (!file?.uri) return
       setExtracting(true)
       const base64 = await FileSystem.readAsStringAsync(file.uri, {
-        encoding: FileSystem.EncodingType.Base64,
+        encoding: 'base64',
       })
       setPdfB64(base64)
     } catch {
@@ -109,11 +109,6 @@ const SummaryScreen = () => {
               </Text>
             </TouchableOpacity>
           )}
-          <TouchableOpacity onPress={() => navigatorManager.goToWhiteboard()}>
-            <Text style={{ color: '#34d399', fontWeight: '700' }}>
-              Whiteboard
-            </Text>
-          </TouchableOpacity>
         </View>
       </View>
       <View style={{ height: 12 }} />
