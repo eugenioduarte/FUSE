@@ -9,9 +9,9 @@ import { FlatList, Text, View } from 'react-native'
 import { navigatorManager } from '../../../navigation/navigatorManager'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { topicsRepository } from '../../../services/repositories/topics.repository'
+import TopicCard from '../topic/components/TopicCard/TopicCard'
 import DashboardCalendarDisplay from './components/DashboardCalendarDisplay'
 import DashboardNotificationDisplay from './components/DashboardNotificationDisplay'
-import TopicCard from './components/TopicCard'
 
 type DashItem = {
   id: string
@@ -112,7 +112,9 @@ export default function DashboardScreen() {
         <FlatList
           data={items}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <TopicCard {...item} />}
+          renderItem={({ item }) => (
+            <TopicCard item={{ id: item.id, title: item.topicName }} />
+          )}
           ListHeaderComponent={
             <View style={{ marginBottom: 24, flexDirection: 'row', gap: 8 }}>
               <DashboardCalendarDisplay />

@@ -1,4 +1,5 @@
 import { ChevronIcon, PathIcon } from '@/assets/icons'
+import { Text } from '@/components'
 import { useTheme } from '@/hooks/useTheme'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { useOverlay } from '@/store/useOverlay'
@@ -31,7 +32,7 @@ const HeaderChallengeAdd = () => {
         }
         onPress={handleMenuPress}
       />
-
+      <Text variant="xxLarge">Challenges</Text>
       <IconButton icon={<PathIcon />} onPress={handleFastWayPress} />
     </View>
   )
