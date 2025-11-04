@@ -116,9 +116,9 @@ export default function DashboardScreen() {
             <TopicCard item={{ id: item.id, title: item.topicName }} />
           )}
           ListHeaderComponent={
-            <View style={{ marginBottom: 24, flexDirection: 'row', gap: 8 }}>
-              <DashboardCalendarDisplay />
+            <View style={{ marginBottom: 24, gap: 8, marginTop: 20 }}>
               <DashboardNotificationDisplay />
+              <DashboardCalendarDisplay />
             </View>
           }
           ListEmptyComponent={

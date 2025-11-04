@@ -14,13 +14,7 @@ export default function DashboardCalendarDisplay() {
   const theme = useTheme()
   const styles = createStyles(theme)
 
-  const getEventsForDate = useCalendarStore((s) => s.getEventsForDate)
-
-  const today = new Date()
-  const pad = (n: number) => String(n).padStart(2, '0')
-  const todayKey = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(
-    today.getDate(),
-  )}`
+  const eventsAll = useCalendarStore((s) => s.events)
 
   useEffect(() => {
     try {
@@ -28,10 +22,25 @@ export default function DashboardCalendarDisplay() {
     } catch {}
   }, [])
 
-  const events = useMemo(
-    () => getEventsForDate(todayKey),
-    [getEventsForDate, todayKey],
-  )
+  // compute next 3 upcoming events (date + time)
+  const events = useMemo(() => {
+    const now = Date.now()
+    const parsed = eventsAll
+      .map((e) => {
+        // combine date (YYYY-MM-DD) and time (HH:MM) into Date
+        const [y, m, d] = String(e.date).split('-').map(Number)
+        const [hh, mm] = String(e.time || '00:00')
+          .split(':')
+          .map(Number)
+        const dt = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0).getTime()
+        return { ev: e, at: dt }
+      })
+      .filter((p) => !Number.isNaN(p.at) && p.at >= now)
+      .sort((a, b) => a.at - b.at)
+      .slice(0, 3)
+      .map((p) => p.ev)
+    return parsed
+  }, [eventsAll])
 
   const [topicMeta, setTopicMeta] = useState<
     Record<string, { title: string; backgroundColor?: string }>
@@ -86,90 +95,94 @@ export default function DashboardCalendarDisplay() {
 
   if (!events || events.length === 0) return null
 
+  const fmtDateTime = (ev: any) => {
+    try {
+      const [y, m, d] = String(ev.date).split('-').map(Number)
+      const [hh, mm] = String(ev.time || '00:00')
+        .split(':')
+        .map(Number)
+      const dt = new Date(y, (m || 1) - 1, d || 1, hh || 0, mm || 0)
+      return dt.toLocaleString()
+    } catch {
+      return `${ev.date} ${ev.time || ''}`
+    }
+  }
+
   return (
     <View style={styles.container}>
-      {events.map((ev) => {
-        const day = ev.date.split('-')[2] || ''
-        const time = ev.time || ''
-        const topicTitle = ev.topicId ? topicMeta[ev.topicId]?.title || '' : ''
-        const topicBg = ev.topicId
-          ? topicMeta[ev.topicId]?.backgroundColor || theme.colors.accentYellow
-          : theme.colors.accentYellow
-
-        return (
-          <View key={ev.id} style={styles.card}>
-            <View style={styles.avatarContainer}>
-              <View style={[styles.avatarBorder, { backgroundColor: topicBg }]}>
-                <Image
-                  style={styles.avatar}
-                  source={{ uri: IMAGE_PLACEHOLDER }}
-                />
-              </View>
-            </View>
-
-            <Text variant="xLarge" style={styles.name}>
-              {ev.title}
-            </Text>
-
-            <View style={styles.statsRow}>
-              <View style={styles.stat}>
-                <Text variant="large" style={styles.statValue}>
-                  {day}
-                </Text>
-                <Text variant="small" style={styles.statLabel}>
-                  {t('dashboard.calendar.day')}
-                </Text>
-              </View>
-              <View style={[styles.divider, { backgroundColor: topicBg }]} />
-              <View style={styles.stat}>
-                <Text variant="large" style={styles.statValue}>
-                  {time}
-                </Text>
-                <Text variant="small" style={styles.statLabel}>
-                  {t('dashboard.calendar.hour')}
-                </Text>
-              </View>
-            </View>
-
-            <View style={styles.tagsContainer}>
-              <View
-                style={[
-                  styles.tag,
-                  {
-                    backgroundColor: topicBg,
-                    borderWidth: theme.border.size,
-                    borderColor: theme.colors.borderColor,
-                  },
-                ]}
-              >
-                <Text variant="medium" style={styles.tagText} numberOfLines={1}>
-                  {topicTitle || t('dashboard.calendar.topic')}
-                </Text>
-              </View>
-            </View>
+      <View style={styles.card}>
+        <View style={styles.avatarContainer}>
+          <View
+            style={[
+              styles.avatarBorder,
+              { backgroundColor: theme.colors.accentYellow },
+            ]}
+          >
+            <Image style={styles.avatar} source={{ uri: IMAGE_PLACEHOLDER }} />
           </View>
-        )
-      })}
+        </View>
+
+        <Text variant="xLarge" style={styles.name}>
+          {t('dashboard.calendar.title')}
+        </Text>
+
+        <View style={styles.listContainer}>
+          {events.map((ev) => {
+            const topicTitle = ev.topicId
+              ? topicMeta[ev.topicId]?.title || ''
+              : ''
+            return (
+              <View key={ev.id} style={styles.listRow}>
+                <View style={styles.listLeft}>
+                  <Text
+                    variant="medium"
+                    style={styles.rowTitle}
+                    numberOfLines={1}
+                  >
+                    {ev.title}
+                  </Text>
+                  <Text
+                    variant="small"
+                    style={styles.rowMeta}
+                    numberOfLines={1}
+                  >
+                    {topicTitle}
+                  </Text>
+                </View>
+                <View style={styles.listRight}>
+                  <Text
+                    variant="small"
+                    style={styles.rowTime}
+                    numberOfLines={1}
+                  >
+                    {fmtDateTime(ev)}
+                  </Text>
+                </View>
+              </View>
+            )
+          })}
+        </View>
+      </View>
     </View>
   )
 }
 
 const createStyles = (theme: ThemeType) =>
   StyleSheet.create({
-    container: { paddingTop: 30, flex: 1, minWidth: 0, height: 250 },
+    container: { paddingTop: 8, minWidth: 0 },
     card: {
       backgroundColor: theme.colors.backgroundSecondary,
       borderColor: theme.colors.borderColor,
       borderWidth: 1,
       borderRadius: theme.border.radius16,
       alignItems: 'center',
-      paddingTop: 40,
-      paddingBottom: 20,
+      paddingTop: 36,
+      paddingBottom: 12,
       paddingHorizontal: theme.spacings.small,
       width: '100%',
       alignSelf: 'center',
       position: 'relative',
-      height: '100%',
+      marginBottom: theme.spacings.small,
     },
     avatarContainer: {
       position: 'absolute',
@@ -214,11 +227,22 @@ const createStyles = (theme: ThemeType) =>
     statLabel: { color: '#A28D9F', fontWeight: '500' },
     divider: { width: 1, height: 30 },
     tagsContainer: {
-      marginTop: 16,
-      gap: 8,
+      marginTop: theme.spacings.medium,
       width: '100%',
-      alignItems: 'center',
     },
-    tag: { borderRadius: 20, paddingHorizontal: 14, paddingVertical: 4 },
-    tagText: { overflow: 'hidden', textOverflow: 'ellipsis' },
+    listContainer: { width: '100%' },
+    listRow: {
+      width: '100%',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: theme.spacings.xSmall,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.colors.borderColor,
+    },
+    listLeft: { flex: 1, paddingRight: theme.spacings.small },
+    listRight: { minWidth: 100, alignItems: 'flex-end' },
+    rowTitle: { fontWeight: '700' },
+    rowMeta: { color: theme.colors.textSecondary, marginTop: 2 },
+    rowTime: { color: theme.colors.textSecondary },
   })
