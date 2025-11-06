@@ -68,6 +68,7 @@ import EditOverlay from '../screens/main/utils/edit-overlay/EditOverlay'
 import ErrorOverlay from '../screens/main/utils/error-overlay/ErrorOverlay'
 import FastWayOverlay from '../screens/main/utils/fast-way-overlay/FastWayOverlay'
 import LoadingOverlay from '../screens/main/utils/loading-overlay/LoadingOverlay'
+import NotificationOverlay from '../screens/main/utils/notification-overlay/NotificationOverlay'
 import RankingOverlay from '../screens/main/utils/ranking-overlay/RankingOverlay'
 import ShareOverlay from '../screens/main/utils/share-overlay/ShareOverlay'
 import SuccessOverlay from '../screens/main/utils/success-overlay/SuccessOverlay'
@@ -618,6 +619,7 @@ const OverlayHost: React.FC = () => {
       {errorOverlay ? <ErrorOverlay /> : null}
       {fastWayOverlay ? <FastWayOverlay /> : null}
       {editOverlay ? <EditOverlay /> : null}
+      <NotificationOverlay />
       <SuccessOverlay />
     </>
   )

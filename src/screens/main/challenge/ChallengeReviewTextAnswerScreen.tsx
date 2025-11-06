@@ -1,3 +1,4 @@
+import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
@@ -13,6 +14,7 @@ const ChallengeReviewTextAnswerScreen: React.FC = () => {
   const { setErrorOverlay } = useOverlay()
 
   const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [topicId, setTopicId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -24,6 +26,12 @@ const ChallengeReviewTextAnswerScreen: React.FC = () => {
         const ch = all.find((c) => c.id === challengeId) || null
         if (!ch) throw new Error('Challenge not found')
         setChallenge(ch)
+        try {
+          const summary = await (
+            await import('../../../services/repositories/summaries.repository')
+          ).summariesRepository.getById(ch.summaryId)
+          if (summary) setTopicId(summary.topicId)
+        } catch {}
       } catch (e) {
         console.error(e)
         setErrorOverlay(true, 'Não foi possível carregar o review.')
@@ -35,6 +43,8 @@ const ChallengeReviewTextAnswerScreen: React.FC = () => {
       active = false
     }
   }, [challengeId, setErrorOverlay])
+
+  useTrackTopicSession(topicId, 'challenge', challenge?.id)
 
   if (loading) {
     return (

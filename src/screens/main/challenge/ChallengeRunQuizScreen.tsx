@@ -1,3 +1,14 @@
+import {
+  RootStackParamList,
+  navigatorManager,
+} from '@/navigation/navigatorManager'
+import { challengesRepository } from '@/services/repositories/challenges.repository'
+import { summariesRepository } from '@/services/repositories/summaries.repository'
+import { topicsRepository } from '@/services/repositories/topics.repository'
+import { startSession, stopSessionByKey } from '@/services/usage/usageTracker'
+import { useAuthStore } from '@/store/useAuthStore'
+import { useOverlay } from '@/store/useOverlay'
+import { Challenge } from '@/types/domain'
 import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
 import React, { useEffect, useRef, useState } from 'react'
 import {
@@ -10,20 +21,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import {
-  RootStackParamList,
-  navigatorManager,
-} from '../../../navigation/navigatorManager'
-import { challengesRepository } from '../../../services/repositories/challenges.repository'
-import { summariesRepository } from '../../../services/repositories/summaries.repository'
-import { topicsRepository } from '../../../services/repositories/topics.repository'
-import {
-  startSession,
-  stopSessionByKey,
-} from '../../../services/usage/usageTracker'
-import { useAuthStore } from '../../../store/useAuthStore'
-import { useOverlay } from '../../../store/useOverlay'
-import { Challenge } from '../../../types/domain'
 
 // Types for AI quiz
 type AIQuizQuestion = {
@@ -221,7 +218,7 @@ const ChallengeRunQuizScreen: React.FC = () => {
     try {
       setLoadingOverlay(true, 'Sincronizando…')
       const { immediateCollaborativeFlush } = await import(
-        '../../../services/firebase/immediateFlush'
+        '@/services/firebase/immediateFlush'
       )
       await immediateCollaborativeFlush(1500)
     } catch {

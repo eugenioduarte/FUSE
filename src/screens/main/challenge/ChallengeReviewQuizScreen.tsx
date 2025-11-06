@@ -1,3 +1,4 @@
+import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import {
@@ -12,6 +13,7 @@ import {
   navigatorManager,
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
+import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { Challenge } from '../../../types/domain'
 
 // Types aligned with ChallengeRunQuizScreen persisted payload
@@ -41,6 +43,7 @@ const ChallengeReviewQuizScreen: React.FC = () => {
   const challengeId = (route.params as any)?.challengeId as string
 
   const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [topicId, setTopicId] = useState<string | null>(null)
   const [attempt, setAttempt] = useState<Attempt | null>(null)
   const [loading, setLoading] = useState(true)
   const [explainIdxByQ, setExplainIdxByQ] = useState<
@@ -63,6 +66,10 @@ const ChallengeReviewQuizScreen: React.FC = () => {
         const attempts: Attempt[] = ch.payload?.attempts || []
         const last = (attempts as Attempt[]).at(-1) || null
         setAttempt(last)
+        try {
+          const summary = await summariesRepository.getById(ch.summaryId)
+          if (summary) setTopicId(summary.topicId)
+        } catch {}
         if (last) {
           const init: Record<number, number | null> = {}
           for (let i = 0; i < last.questions.length; i++) init[i] = null
@@ -78,6 +85,8 @@ const ChallengeReviewQuizScreen: React.FC = () => {
       active = false
     }
   }, [challengeId])
+
+  useTrackTopicSession(topicId, 'challenge', challenge?.id)
 
   if (loading) {
     return (

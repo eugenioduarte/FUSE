@@ -1,3 +1,4 @@
+import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -214,6 +215,7 @@ const ChallengeRunMatrixScreen: React.FC = () => {
   const { setLoadingOverlay, setErrorOverlay } = useOverlay()
 
   const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [topicId, setTopicId] = useState<string | null>(null)
   const [question, setQuestion] = useState('')
   const [words, setWords] = useState<string[]>([])
   const [grid, setGrid] = useState<string[][]>([])
@@ -289,6 +291,7 @@ const ChallengeRunMatrixScreen: React.FC = () => {
         const summary = await summariesRepository.getById(ch.summaryId)
         if (!active) return
         if (!summary) throw new Error('Summary not found')
+        if (active) setTopicId(summary.topicId)
 
         const qa = await generateMatrixQA(summary.content)
         setQuestion(qa.question)
@@ -310,6 +313,9 @@ const ChallengeRunMatrixScreen: React.FC = () => {
       active = false
     }
   }, [challengeId, setErrorOverlay, setLoadingOverlay])
+
+  // Track session for this challenge run
+  useTrackTopicSession(topicId, 'challenge', challengeId)
 
   // When we have words and a measured available height, compute rows and place grid
   useEffect(() => {

@@ -188,6 +188,7 @@ export const useSummaryDetails = ({
   const handleDeleteSummary = useCallback(
     async (onDone?: () => void) => {
       if (!summary) return
+
       useOverlay.getState().setNotificationOverlay({
         id: `delete-summary-${summary.id}`,
         title: t('summary.delete.confirm_title'),

@@ -14,6 +14,7 @@ import { useThemeStore } from '../../store/useThemeStore'
 import HeaderAddTopic from './HeaderAddTopic'
 import HeaderChallengeAdd from './HeaderChallengeAdd'
 import HeaderDashboard from './HeaderDashboard'
+import HeaderSummaryAdd from './HeaderSummaryAdd'
 import HeaderSummaryDetails from './HeaderSummaryDetails'
 import HeaderTopicDetails from './HeaderTopicDetails'
 import HeaderTopicList from './HeaderTopicList'
@@ -117,6 +118,9 @@ export const Header: React.FC = () => {
     }
     if (currentType === ROUTES.ChallengeAddScreen) {
       return <HeaderChallengeAdd />
+    }
+    if (currentType === ROUTES.SummaryScreen) {
+      return <HeaderSummaryAdd />
     }
     return <DefaultHeader title={title} />
   }

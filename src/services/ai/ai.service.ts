@@ -251,6 +251,11 @@ async function doRequestWithRetry(body: string): Promise<Response | null> {
   while (attempt < maxAttempts) {
     attempt++
     try {
+      // Add per-request timeout to avoid hanging fetches. AbortController is
+      // supported in React Native and modern runtimes.
+      const timeoutMs = 30000
+      const controller = new AbortController()
+      const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs)
       const res = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
         method: 'POST',
         headers: {
@@ -261,7 +266,9 @@ async function doRequestWithRetry(body: string): Promise<Response | null> {
             : {}),
         },
         body,
+        signal: controller.signal,
       })
+      clearTimeout(timeoutHandle)
       if (res.ok) return res
       if (res.status === 429) {
         const retryAfter = Number(res.headers.get('retry-after') || '0')
@@ -277,6 +284,7 @@ async function doRequestWithRetry(body: string): Promise<Response | null> {
       }
       return res
     } catch {
+      // If the fetch was aborted or errored, wait then retry.
       await sleep(300 * attempt)
     }
   }

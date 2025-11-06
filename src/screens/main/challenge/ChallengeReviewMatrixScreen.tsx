@@ -1,3 +1,4 @@
+import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect, useMemo, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
@@ -26,6 +27,7 @@ const ChallengeReviewMatrixScreen: React.FC = () => {
   const challengeId = (route.params as any)?.challengeId as string
 
   const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [topicId, setTopicId] = useState<string | null>(null)
   const [attempt, setAttempt] = useState<MatrixAttempt | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -41,6 +43,13 @@ const ChallengeReviewMatrixScreen: React.FC = () => {
         const attempts: MatrixAttempt[] = ch.payload?.attempts || []
         const last = attempts.at(-1) || null
         setAttempt(last)
+        try {
+          const { summariesRepository } = await import(
+            '../../../services/repositories/summaries.repository'
+          )
+          const summary = await summariesRepository.getById(ch.summaryId)
+          if (summary) setTopicId(summary.topicId)
+        } catch {}
       } catch (e) {
         console.error(e)
       } finally {
@@ -51,6 +60,8 @@ const ChallengeReviewMatrixScreen: React.FC = () => {
       active = false
     }
   }, [challengeId])
+
+  useTrackTopicSession(topicId, 'challenge', challenge?.id)
 
   const foundCells = useMemo(() => {
     const set = new Set<string>()

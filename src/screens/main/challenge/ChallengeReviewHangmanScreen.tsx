@@ -1,3 +1,4 @@
+import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
@@ -6,6 +7,7 @@ import {
   navigatorManager,
 } from '../../../navigation/navigatorManager'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
+import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { Challenge } from '../../../types/domain'
 
 type AttemptRound = {
@@ -34,6 +36,7 @@ const ChallengeReviewHangmanScreen: React.FC = () => {
   const challengeId = (route.params as any)?.challengeId as string
 
   const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [topicId, setTopicId] = useState<string | null>(null)
   const [attempt, setAttempt] = useState<Attempt | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -46,6 +49,10 @@ const ChallengeReviewHangmanScreen: React.FC = () => {
         const ch = all.find((c) => c.id === challengeId) || null
         if (!ch) throw new Error('Challenge não encontrado')
         setChallenge(ch)
+        try {
+          const summary = await summariesRepository.getById(ch.summaryId)
+          if (summary) setTopicId(summary.topicId)
+        } catch {}
         const attempts: Attempt[] = ch.payload?.attempts || []
         const last = (attempts as Attempt[]).at(-1) || null
         setAttempt(last)
@@ -59,6 +66,9 @@ const ChallengeReviewHangmanScreen: React.FC = () => {
       active = false
     }
   }, [challengeId])
+
+  // Track session for this challenge review
+  useTrackTopicSession(topicId, 'challenge', challenge?.id)
 
   if (loading) {
     return (

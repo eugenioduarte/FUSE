@@ -1,3 +1,4 @@
+import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import {
@@ -42,6 +43,7 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
   const { setLoadingOverlay, setErrorOverlay } = useOverlay()
 
   const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [topicId, setTopicId] = useState<string | null>(null)
   const [exercises, setExercises] = useState<TAExercise[]>([])
   const [step, setStep] = useState(0)
   const [timer, setTimer] = useState(PER_EXERCISE_SECONDS)
@@ -74,6 +76,8 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
         if (!active) return
         if (!summary) throw new Error('Summary not found')
 
+        if (active) setTopicId(summary.topicId)
+
         const setQ = await generateOpenQuestionSet(
           summary.content,
           TOTAL_EXERCISES,
@@ -93,6 +97,9 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
       active = false
     }
   }, [challengeId, setLoadingOverlay, setErrorOverlay])
+
+  // Track session for this challenge run
+  useTrackTopicSession(topicId, 'challenge', challengeId)
 
   // Timer per exercise
   useEffect(() => {

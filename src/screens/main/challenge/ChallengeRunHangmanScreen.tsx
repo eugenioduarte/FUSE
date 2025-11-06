@@ -1,3 +1,4 @@
+import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
@@ -61,6 +62,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
   const { setLoadingOverlay, setErrorOverlay } = useOverlay()
 
   const [challenge, setChallenge] = useState<Challenge | null>(null)
+  const [topicId, setTopicId] = useState<string | null>(null)
   const [rounds, setRounds] = useState<Round[]>([])
   const [loading, setLoading] = useState(true)
   const [topicColor, setTopicColor] = useState<string | undefined>()
@@ -128,6 +130,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
         const summary = await summariesRepository.getById(ch.summaryId)
         if (!active) return
         if (!summary) throw new Error('Summary not found for this challenge')
+        if (active) setTopicId(summary.topicId)
 
         // Resolve topic color for theming
         try {
@@ -189,6 +192,9 @@ const ChallengeRunHangmanScreen: React.FC = () => {
       active = false
     }
   }, [challengeId, setErrorOverlay, setLoadingOverlay])
+
+  // Track session for this challenge (topicId becomes available after loading summary)
+  useTrackTopicSession(topicId, 'challenge', challengeId)
 
   const onGuess = (letter: string) => {
     if (!currentRound || canContinue) return

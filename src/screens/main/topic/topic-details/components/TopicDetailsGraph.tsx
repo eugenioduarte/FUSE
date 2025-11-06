@@ -3,7 +3,7 @@ import React from 'react'
 import { StyleSheet, Text, View, useWindowDimensions } from 'react-native'
 import Svg, { Circle, G, Path, Text as SvgText } from 'react-native-svg'
 
-type Item = { title: string; minutes: number; color: string }
+type Item = { title: string; value: number; color: string }
 type Props = { data: Item[] }
 
 export function SummaryProgressArcs({ data }: Props) {
@@ -31,7 +31,7 @@ export function SummaryProgressArcs({ data }: Props) {
   const cx = size / 2
   const cy = size / 2
 
-  const maxMinutes = Math.max(...data.map((d) => d.minutes))
+  const maxValue = Math.max(...data.map((d) => d.value))
 
   return (
     <View style={styles.wrapper}>
@@ -41,7 +41,7 @@ export function SummaryProgressArcs({ data }: Props) {
           <G rotation={-90} origin={`${cx},${cy}`}>
             {data.map((item, i) => {
               const r = outerBase * scale + gap * (data.length - 1 - i)
-              const progress = maxMinutes ? item.minutes / maxMinutes : 0
+              const progress = maxValue ? item.value / maxValue : 0
               const endAngle = startAngle + sweep * progress
               const endFull = startAngle + sweep
 
@@ -119,6 +119,8 @@ export function SummaryProgressArcs({ data }: Props) {
       >
         {data.map((item, i) => {
           const index = i + 1
+          const fmt = (v: number) =>
+            v % 1 === 0 ? `${v.toFixed(0)}h` : `${v.toFixed(1)}h`
           return (
             <View key={item.title} style={styles.legendItem}>
               <View
@@ -130,7 +132,7 @@ export function SummaryProgressArcs({ data }: Props) {
                 <Text style={styles.legendNumber}>{index}</Text>
               </View>
               <Text style={[styles.legendText, { color: item.color }]}>
-                {item.title}
+                {`${index} - ${item.title} - ${fmt(item.value)}`}
               </Text>
             </View>
           )

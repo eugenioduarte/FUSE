@@ -1,6 +1,7 @@
 import { Button, Container, Text } from '@/components'
 import SubContainer from '@/components/containers/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
+import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import {
   navigatorManager,
   RootStackParamList,
@@ -16,7 +17,6 @@ import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
 import React, { useCallback, useEffect, useState } from 'react'
 import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
-import { SummaryProgressArcs } from './components/TopicDetailsGraph'
 import TopicLinksContainer from './components/TopicLinksContainer'
 import TopicNotFounded from './components/TopicNotFounded'
 import TopicSummaryCard from './components/TopicSummaryCard'
@@ -54,6 +54,9 @@ const TopicDetailsScreen: React.FC = () => {
       mounted = false
     }
   }, [topicId])
+
+  // Track time spent browsing this topic's summaries list
+  useTrackTopicSession(topicId, 'summary_list')
 
   useFocusEffect(
     useCallback(() => {
@@ -95,34 +98,6 @@ const TopicDetailsScreen: React.FC = () => {
 
   const bg = topic.backgroundColor || theme.colors.backgroundPrimary
 
-  const mockSummaries = [
-    {
-      title: 'Introdução à História',
-      minutes: 42,
-      color: theme.colors.accentBlue,
-    },
-    {
-      title: 'Revolução Industrial',
-      minutes: 35,
-      color: theme.colors.accentYellow,
-    },
-    {
-      title: 'Primeira Guerra Mundial',
-      minutes: 25,
-      color: theme.colors.accentRed,
-    },
-    {
-      title: 'Segunda Guerra Mundial',
-      minutes: 18,
-      color: theme.colors.accentGreen,
-    },
-    {
-      title: 'Guerra Fria',
-      minutes: 10,
-      color: theme.colors.accentPurple,
-    },
-  ]
-
   return (
     <Container style={[styles.container, { backgroundColor: bg }]}>
       <SubContainer>
@@ -140,6 +115,7 @@ const TopicDetailsScreen: React.FC = () => {
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
+          style={{ width: '100%' }}
         >
           <Text variant="xxLarge">{topic.title}</Text>
           {!!topic.description && (
@@ -148,20 +124,19 @@ const TopicDetailsScreen: React.FC = () => {
             </Text>
           )}
 
-          <SummaryProgressArcs data={mockSummaries} />
-
-          <Text variant="xxLarge">Summaries</Text>
-          <View style={styles.summariesWrapper}>
-            {summaries.map((s) => {
-              return (
-                <TopicSummaryCard
-                  key={s.id}
-                  summary={s}
-                  bg={topic.backgroundColor}
-                />
-              )
-            })}
-          </View>
+          {summaries.length > 0 && (
+            <View style={styles.summariesWrapper}>
+              {summaries.map((s) => {
+                return (
+                  <TopicSummaryCard
+                    key={s.id}
+                    summary={s}
+                    bg={topic.backgroundColor}
+                  />
+                )
+              })}
+            </View>
+          )}
         </ScrollView>
         <Button
           title="Criar resumo"
@@ -190,6 +165,7 @@ const createStyles = (theme: ThemeType) =>
       paddingVertical: theme.spacings.medium,
       paddingBottom: 100,
       width: '100%',
+      alignItems: 'flex-start',
     },
     description: {
       marginTop: theme.spacings.small,

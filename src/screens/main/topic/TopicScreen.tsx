@@ -5,6 +5,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { topicsRepository } from '@/services/repositories/topics.repository'
+import { getDailyTotals } from '@/services/usage/usageTracker'
 import { useThemeStore } from '@/store/useThemeStore'
 import { Topic } from '@/types/domain'
 import { ThemeType } from '@/types/theme.type'
@@ -18,6 +19,7 @@ import {
   View,
 } from 'react-native'
 import TopicCard from './components/TopicCard/TopicCard'
+import { SummaryProgressArcs } from './topic-details/components/TopicDetailsGraph'
 
 const GLOBAL_SEPARATOR = () => <View style={{ height: 8 }} />
 
@@ -29,21 +31,76 @@ const TopicScreen = () => {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [topics, setTopics] = useState<Topic[]>([])
+  const [summaryData, setSummaryData] = useState<
+    { title: string; value: number; color: string }[]
+  >([])
 
   const load = useCallback(async () => {
     setLoading(true)
     await topicsRepository.seedIfEmpty()
     const list = await topicsRepository.list()
     setTopics(list)
+    try {
+      const data = await Promise.all(
+        list.map(async (t) => {
+          try {
+            const totals = await getDailyTotals(t.id)
+            const minutes = Object.values(totals).reduce(
+              (acc, v) => acc + (Number(v) || 0),
+              0,
+            )
+            const hours = Math.round((minutes / 60) * 10) / 10
+            return {
+              title: t.title,
+              value: hours,
+              color: t.backgroundColor || theme.colors.accentBlue,
+            }
+          } catch {
+            return {
+              title: t.title,
+              value: 0,
+              color: t.backgroundColor || theme.colors.accentBlue,
+            }
+          }
+        }),
+      )
+      setSummaryData(data)
+    } catch {}
     setLoading(false)
-  }, [])
+  }, [theme.colors.accentBlue])
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true)
     const list = await topicsRepository.list()
     setTopics(list)
+    try {
+      const data = await Promise.all(
+        list.map(async (t) => {
+          try {
+            const totals = await getDailyTotals(t.id)
+            const minutes = Object.values(totals).reduce(
+              (acc, v) => acc + (Number(v) || 0),
+              0,
+            )
+            const hours = Math.round((minutes / 60) * 10) / 10
+            return {
+              title: t.title,
+              value: hours,
+              color: t.backgroundColor || theme.colors.accentBlue,
+            }
+          } catch {
+            return {
+              title: t.title,
+              value: 0,
+              color: t.backgroundColor || theme.colors.accentBlue,
+            }
+          }
+        }),
+      )
+      setSummaryData(data)
+    } catch {}
     setRefreshing(false)
-  }, [])
+  }, [theme.colors.accentBlue])
 
   useEffect(() => {
     load()
@@ -66,6 +123,7 @@ const TopicScreen = () => {
       </View>
     )
   }
+
   return (
     <Container style={styles.container}>
       <SubContainer>
@@ -81,6 +139,8 @@ const TopicScreen = () => {
           }}
           contentContainerStyle={styles.flatContent}
           style={styles.flatStyle}
+          ListHeaderComponent={<SummaryProgressArcs data={summaryData} />}
+          showsVerticalScrollIndicator={false}
         />
 
         <Button
