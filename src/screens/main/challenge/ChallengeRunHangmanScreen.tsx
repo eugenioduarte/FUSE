@@ -21,6 +21,7 @@ import { topicsRepository } from '../../../services/repositories/topics.reposito
 import { useAuthStore } from '../../../store/useAuthStore'
 import { useOverlay } from '../../../store/useOverlay'
 import { Challenge } from '../../../types/domain'
+import ChallengeRunClose from './components/ChallengeRunClose'
 
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
@@ -279,6 +280,63 @@ const ChallengeRunHangmanScreen: React.FC = () => {
     }
   }
 
+  const forceFinish = async () => {
+    if (!challenge) return
+    try {
+      setLoadingOverlay(true)
+      const currentAttempt: AttemptRound = {
+        word: currentRound?.word || '',
+        success: !!isSolved,
+        wrongs,
+        guesses: guesses.map((g) => g.toUpperCase()),
+      }
+      // build final rounds: persisted + current + remaining as failed
+      const finalRounds = [...persistedRoundsRef.current, currentAttempt]
+      const remaining = rounds.length - finalRounds.length
+      for (let i = 0; i < remaining; i++) {
+        finalRounds.push({
+          word: '',
+          success: false,
+          wrongs: maxWrongs,
+          guesses: [],
+        })
+      }
+      const finalScore = finalRounds.filter((r) => r.success).length
+      const now = Date.now()
+      const attempt: Attempt & { userId?: string } = {
+        at: now,
+        score: finalScore,
+        total: rounds.length,
+        userId: meId || undefined,
+        rounds: finalRounds,
+      }
+      const updated: Challenge = {
+        ...challenge,
+        updatedAt: now,
+        payload: {
+          ...challenge.payload,
+          attempts: [...(challenge.payload?.attempts ?? []), attempt],
+          lastAttempt: { score: finalScore, total: rounds.length, at: now },
+        },
+      }
+      await challengesRepository.upsert(updated, '/sync/challenge', {
+        summaryId: challenge.summaryId,
+      })
+      setChallenge(updated)
+      setFinished({ score: finalScore, total: rounds.length })
+      try {
+        const { immediateCollaborativeFlush } = await import(
+          '../../../services/firebase/immediateFlush'
+        )
+        await immediateCollaborativeFlush(1500)
+      } catch {}
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoadingOverlay(false)
+    }
+  }
+
   // Local accumulation of per-round attempt details
   const persistedRoundsRef = useRef<AttemptRound[]>([])
   const setPersistedRounds = (
@@ -320,6 +378,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: topicColor || '#0b0b0c' }}>
+      <ChallengeRunClose onConfirm={forceFinish} />
       {/* Header with progress */}
       <View
         style={{

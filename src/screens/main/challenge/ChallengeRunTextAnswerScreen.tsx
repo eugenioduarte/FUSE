@@ -17,6 +17,7 @@ import { summariesRepository } from '../../../services/repositories/summaries.re
 import { useAuthStore } from '../../../store/useAuthStore'
 import { useOverlay } from '../../../store/useOverlay'
 import { Challenge } from '../../../types/domain'
+import ChallengeRunClose from './components/ChallengeRunClose'
 
 // Types
 export type TAExercise = { question: string; correctAnswer: string }
@@ -199,6 +200,76 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
     }
   }
 
+  const forceFinish = async () => {
+    if (!challenge) return
+    try {
+      setLoadingOverlay(true)
+      // Build final attempt: include evaluated items, current (if evaluated) or mark as 0, and remaining as 0
+      const items = [...attemptItems]
+      // current step may have evaluation
+      if (evaluated) {
+        // already added to attemptItems when evaluated; nothing to do
+      } else {
+        // add current as zero
+        const cur = exercises[step]
+        if (cur) {
+          items.push({
+            ...cur,
+            userAnswer: answer.trim(),
+            score: 0,
+            feedback: 'Abandonado.',
+          })
+        }
+      }
+      // fill remaining with zeros
+      for (let i = items.length; i < TOTAL_EXERCISES; i++) {
+        const ex = exercises[i]
+        items.push({
+          question: ex?.question || '—',
+          correctAnswer: ex?.correctAnswer || '',
+          userAnswer: '',
+          score: 0,
+        })
+      }
+      const sum = items.reduce((acc, it) => acc + it.score, 0)
+      const avg = items.length ? sum / items.length : 0
+      const final = Math.round(avg * 10) / 10
+      const now = Date.now()
+      const attempt: TAAttempt & { userId?: string } = {
+        at: now,
+        score: final,
+        total: 10,
+        userId: meId || undefined,
+        exercises: items,
+      }
+      const updated: Challenge = {
+        ...challenge,
+        updatedAt: now,
+        payload: {
+          ...challenge.payload,
+          attempts: [...(challenge.payload?.attempts ?? []), attempt],
+          lastAttempt: { score: final, total: 10, at: now },
+        },
+      }
+      await challengesRepository.upsert(updated, '/sync/challenge', {
+        summaryId: challenge.summaryId,
+      })
+      setChallenge(updated)
+      setFinished({ score: final })
+      try {
+        setLoadingOverlay(true, 'Sincronizando…')
+        const { immediateCollaborativeFlush } = await import(
+          '../../../services/firebase/immediateFlush'
+        )
+        await immediateCollaborativeFlush(1500)
+      } catch {}
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoadingOverlay(false)
+    }
+  }
+
   if (loading) {
     return (
       <View
@@ -226,6 +297,7 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#0b0b0c' }}>
+      <ChallengeRunClose onConfirm={forceFinish} />
       {/* Header */}
       <View
         style={{

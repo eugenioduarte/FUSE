@@ -18,6 +18,7 @@ import { summariesRepository } from '../../../services/repositories/summaries.re
 import { useAuthStore } from '../../../store/useAuthStore'
 import { useOverlay } from '../../../store/useOverlay'
 import { Challenge } from '../../../types/domain'
+import ChallengeRunClose from './components/ChallengeRunClose'
 
 // Types persisted for attempts
 type MatrixAttempt = {
@@ -394,6 +395,50 @@ const ChallengeRunMatrixScreen: React.FC = () => {
     setLoadingOverlay,
   ])
 
+  const forceFinish = async () => {
+    if (!challenge) return
+    try {
+      setLoadingOverlay(true)
+      const now = Date.now()
+      const score = found.length
+      const attempt: any = {
+        at: now,
+        score,
+        total,
+        userId: meId || undefined,
+        question,
+        words,
+        found,
+        grid,
+        placements,
+      }
+      const updated: Challenge = {
+        ...challenge,
+        updatedAt: now,
+        payload: {
+          ...challenge.payload,
+          attempts: [...(challenge.payload?.attempts ?? []), attempt],
+          lastAttempt: { score, total, at: now },
+        },
+      }
+      await challengesRepository.upsert(updated, '/sync/challenge', {
+        summaryId: challenge.summaryId,
+      })
+      setChallenge(updated)
+      setFinished({ score, total })
+      try {
+        const { immediateCollaborativeFlush } = await import(
+          '../../../services/firebase/immediateFlush'
+        )
+        await immediateCollaborativeFlush(1500)
+      } catch {}
+    } catch (e) {
+      console.error(e)
+    } finally {
+      setLoadingOverlay(false)
+    }
+  }
+
   // Measure absolute grid coords for hit testing
   const gridLayoutRef = useRef<{ x: number; y: number } | null>(null)
   const onGridMeasure = () => {
@@ -497,6 +542,7 @@ const ChallengeRunMatrixScreen: React.FC = () => {
 
   return (
     <View style={{ flex: 1, backgroundColor: '#0b0b0c' }}>
+      <ChallengeRunClose onConfirm={forceFinish} />
       {/* Header */}
       <View
         style={{

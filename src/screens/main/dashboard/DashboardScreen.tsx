@@ -148,7 +148,6 @@ export default function DashboardScreen() {
           }
           contentContainerStyle={{
             paddingBottom: 100,
-            paddingTop: 16,
           }}
           showsVerticalScrollIndicator={false}
           style={{ width: '100%', paddingTop: 20 }}

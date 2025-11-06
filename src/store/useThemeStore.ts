@@ -25,7 +25,14 @@ export const useThemeStore = create<ThemeState>((set) => ({
       'RegisterScreen',
       'RecoveryScreen',
     ]
-    const visible = !authScreens.includes(type)
+    // Hide header for auth screens and challenge run screens where we render a custom X close
+    const runScreens: RouteName[] = [
+      'ChallengeRunQuizScreen',
+      'ChallengeRunHangmanScreen',
+      'ChallengeRunMatrixScreen',
+      'ChallengeRunTextAnswerScreen',
+    ]
+    const visible = !authScreens.includes(type) && !runScreens.includes(type)
     set({ headerConfig: { title, type, visible } })
   },
   backgroundColor: Colors.light.backgroundSecondary,
