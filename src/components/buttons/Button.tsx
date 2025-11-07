@@ -212,7 +212,7 @@ const createStyles = (
         backgroundColor: opts.bgColor,
         borderColor: opts.borderColor,
         borderWidth: theme.border.size,
-        opacity: opts.disabled ? 0.6 : 1,
+        opacity: opts.disabled ? 0.3 : 1,
         borderRadius: 999,
         height: 50,
         paddingVertical: opts.sizeStyle.paddingVertical,

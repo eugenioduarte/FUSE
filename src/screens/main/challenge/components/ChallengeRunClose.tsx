@@ -1,3 +1,4 @@
+import { useTheme } from '@/hooks/useTheme'
 import { useOverlay } from '@/store/useOverlay'
 import { useThemeStore } from '@/store/useThemeStore'
 import { Ionicons } from '@expo/vector-icons'
@@ -11,12 +12,12 @@ type Props = {
 }
 
 const ChallengeRunClose: React.FC<Props> = ({ onConfirm, title, body }) => {
+  const theme = useTheme()
   const setNotification = useOverlay((s) => s.setNotificationOverlay)
-  // hide global header while a challenge is running; restore on unmount
+
   React.useEffect(() => {
     try {
       const prev = useThemeStore.getState().headerConfig
-      // store on the element for restore
       ;(ChallengeRunClose as any)._prevHeader = prev
       useThemeStore.setState({
         headerConfig: { title: prev.title, type: prev.type, visible: false },
@@ -58,7 +59,7 @@ const ChallengeRunClose: React.FC<Props> = ({ onConfirm, title, body }) => {
     <SafeAreaView pointerEvents="box-none" style={styles.container}>
       <View style={styles.inner}>
         <TouchableOpacity onPress={ask} style={styles.btn}>
-          <Ionicons name="close" size={26} color="white" />
+          <Ionicons name="close" size={26} color={theme.colors.textPrimary} />
         </TouchableOpacity>
       </View>
     </SafeAreaView>
@@ -80,11 +81,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   btn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 30,
+    height: 30,
+    borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.4)',
   },
 })

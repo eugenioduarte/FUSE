@@ -7,6 +7,7 @@ import {
   navigatorManager,
   RootStackParamList,
 } from '@/navigation/navigatorManager'
+import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React from 'react'
@@ -23,7 +24,8 @@ import { useSummaryDetails } from './hooks/useSummaryDetails'
 
 const SummaryDetailsScreen: React.FC = () => {
   const theme = useTheme()
-  const styles = createStyles(theme)
+  const color = useThemeStore((s) => s.colorLevelUp.level_two)
+  const styles = createStyles(theme, color)
   const route =
     useRoute<RouteProp<RootStackParamList, 'SummaryDetailsScreen'>>()
   const { summaryId } = route.params
@@ -32,7 +34,6 @@ const SummaryDetailsScreen: React.FC = () => {
   const {
     summary,
     loading,
-    bg,
     bodyColor,
     snippetOpen,
     snippetTerm,
@@ -56,7 +57,7 @@ const SummaryDetailsScreen: React.FC = () => {
 
   if (!summary) {
     return (
-      <View style={[styles.notFound, { backgroundColor: bg }]}>
+      <View style={[styles.notFound, { backgroundColor: color }]}>
         <Text style={styles.notFoundTitle}>Resumo não encontrado</Text>
         <Text style={styles.notFoundId}>ID: {summaryId}</Text>
       </View>
@@ -64,7 +65,7 @@ const SummaryDetailsScreen: React.FC = () => {
   }
 
   return (
-    <Container style={{ backgroundColor: bg }}>
+    <Container style={{ backgroundColor: color }}>
       <SubContainer>
         <SummaryDetailsLinksContainer
           summary={summary}
@@ -123,7 +124,7 @@ const SummaryDetailsScreen: React.FC = () => {
           onPress={() => navigatorManager.goToChallengeAdd({ summaryId })}
           title="Criar challenge"
           style={styles.createButton}
-          background={bg}
+          background={color}
         />
 
         <TermSnippetModal
@@ -142,7 +143,7 @@ const SummaryDetailsScreen: React.FC = () => {
 
 export default SummaryDetailsScreen
 
-const createStyles = (theme: ThemeType) =>
+const createStyles = (theme: ThemeType, color: string) =>
   StyleSheet.create({
     loading: {
       flex: 1,

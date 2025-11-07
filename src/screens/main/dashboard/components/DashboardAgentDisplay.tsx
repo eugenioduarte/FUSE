@@ -9,13 +9,64 @@ import {
 import { useAuthStore } from '@/store/useAuthStore'
 import { useCalendarStore } from '@/store/useCalendarStore'
 import { useOverlay } from '@/store/useOverlay'
+import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
+import * as Localization from 'expo-localization'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 
+function buildHeaderDay(): string {
+  const now = new Date()
+  const locale =
+    Localization.getLocales?.()[0]?.languageTag ||
+    Localization.getLocales?.()[0]?.languageCode ||
+    'pt-BR'
+  const monthShort = new Intl.DateTimeFormat(locale, { month: 'short' })
+    .format(now)
+    .replace('.', '')
+    .toLowerCase()
+  return `${now.getDate()}-${monthShort}`
+}
+
+function formatTime(dt: Date) {
+  const hh = String(dt.getHours()).padStart(2, '0')
+  const mm = String(dt.getMinutes()).padStart(2, '0')
+  return `${hh}:${mm}`
+}
+
+const WEEKDAYS_PT = [
+  'domingo',
+  'segunda-feira',
+  'terça-feira',
+  'quarta-feira',
+  'quinta-feira',
+  'sexta-feira',
+  'sábado',
+]
+
+function formatWhenFriendly(dt: Date) {
+  const now = new Date()
+
+  const tzNow = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const tzDt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate())
+  const dayDiff = Math.round(
+    (tzDt.getTime() - tzNow.getTime()) / (1000 * 60 * 60 * 24),
+  )
+  const time = formatTime(dt)
+  if (dayDiff === 0) return `hoje às ${time}`
+  if (dayDiff === 1) return `amanhã às ${time}`
+  if (dayDiff > 1 && dayDiff <= 6)
+    return `na ${WEEKDAYS_PT[dt.getDay()]} às ${time}`
+  // fallback to numeric date
+  const dd = String(dt.getDate()).padStart(2, '0')
+  const mm = String(dt.getMonth() + 1).padStart(2, '0')
+  return `em ${dd}/${mm} às ${time}`
+}
+
 export default function DashboardAgentDisplay() {
   const theme = useTheme()
-  const styles = createStyles(theme)
+  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+  const styles = createStyles(theme, color)
 
   const user = useAuthStore((s) => s.user)
   const events = useCalendarStore((s) => s.events)
@@ -56,41 +107,6 @@ export default function DashboardAgentDisplay() {
       if (!best || ts < best.dt.getTime()) best = { ev, dt }
     }
     return best
-  }
-
-  function formatTime(dt: Date) {
-    const hh = String(dt.getHours()).padStart(2, '0')
-    const mm = String(dt.getMinutes()).padStart(2, '0')
-    return `${hh}:${mm}`
-  }
-
-  const WEEKDAYS_PT = [
-    'domingo',
-    'segunda-feira',
-    'terça-feira',
-    'quarta-feira',
-    'quinta-feira',
-    'sexta-feira',
-    'sábado',
-  ]
-
-  function formatWhenFriendly(dt: Date) {
-    const now = new Date()
-
-    const tzNow = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const tzDt = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate())
-    const dayDiff = Math.round(
-      (tzDt.getTime() - tzNow.getTime()) / (1000 * 60 * 60 * 24),
-    )
-    const time = formatTime(dt)
-    if (dayDiff === 0) return `hoje às ${time}`
-    if (dayDiff === 1) return `amanhã às ${time}`
-    if (dayDiff > 1 && dayDiff <= 6)
-      return `na ${WEEKDAYS_PT[dt.getDay()]} às ${time}`
-    // fallback to numeric date
-    const dd = String(dt.getDate()).padStart(2, '0')
-    const mm = String(dt.getMonth() + 1).padStart(2, '0')
-    return `em ${dd}/${mm} às ${time}`
   }
 
   function getNotificationsMessage() {
@@ -153,7 +169,16 @@ export default function DashboardAgentDisplay() {
     const evTitle = nextEvent ? nextEvent.ev?.title || 'um compromisso' : null
 
     if (notifLabel && when && evTitle) {
-      return `${greet}existe uma nova mensagem nas notificações${notifLabel ? `: "${notifLabel}"` : ''} e ${when} temos um compromisso "${evTitle}". Não se esqueça.`
+      return (
+        greet +
+        'existe uma nova mensagem nas notificações' +
+        (notifLabel ? ': "' + notifLabel + '"' : '') +
+        ' e ' +
+        when +
+        ' temos um compromisso "' +
+        evTitle +
+        '". Não se esqueça.'
+      )
     }
 
     return agentMessage
@@ -222,6 +247,8 @@ export default function DashboardAgentDisplay() {
     }
   }, [prompt, promptHash, lastPromptHash])
 
+  const headerDayText = buildHeaderDay()
+
   return (
     <View style={styles.card}>
       <View style={styles.header}>
@@ -229,7 +256,7 @@ export default function DashboardAgentDisplay() {
           {t('dashboard.agent.title') || 'Agente'}
         </Text>
         <Text variant="xxLarge" style={styles.headerDay}>
-          {new Date().getDay()}
+          {headerDayText}
         </Text>
       </View>
 
@@ -244,7 +271,7 @@ export default function DashboardAgentDisplay() {
   )
 }
 
-const createStyles = (theme: ThemeType) =>
+const createStyles = (theme: ThemeType, color: string) =>
   StyleSheet.create({
     card: {
       borderWidth: 1,
@@ -261,7 +288,7 @@ const createStyles = (theme: ThemeType) =>
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'flex-end',
-      backgroundColor: theme.colors.accentRed,
+      backgroundColor: color,
       paddingHorizontal: theme.spacings.medium,
       paddingVertical: theme.spacings.small,
       borderTopLeftRadius: theme.border.radius16,

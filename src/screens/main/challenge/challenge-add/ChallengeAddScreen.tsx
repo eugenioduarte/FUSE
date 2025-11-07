@@ -1,19 +1,22 @@
 import { Container } from '@/components'
 import SubContainer from '@/components/containers/SubContainer'
+import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
 import {
   navigatorManager,
   RootStackParamList,
 } from '@/navigation/navigatorManager'
+import { useThemeStore } from '@/store/useThemeStore'
+import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React from 'react'
+import { StyleSheet } from 'react-native'
 import ChallengeOptionCard from './components/ChallengeOptionCard'
 import useChallengeAdd from './hooks/useChallengeAdd'
-
 const ChallengeAddScreen = () => {
   const route = useRoute<RouteProp<RootStackParamList, 'ChallengeAddScreen'>>()
   const summaryId = (route.params as any)?.summaryId as string | undefined
   const {
-    topicColor,
     avgScores,
     totals,
     handleStartQuiz,
@@ -21,40 +24,33 @@ const ChallengeAddScreen = () => {
     handleStartMatrix,
   } = useChallengeAdd(summaryId)
 
-  const bg = topicColor || '#0b0b0c'
+  const theme = useTheme()
+  const color = useThemeStore((s) => s.colorLevelUp.level_two)
+  const styles = createStyles(theme, color)
 
   return (
-    <Container style={{ backgroundColor: bg }}>
-      <SubContainer
-        styleContainer={{
-          flexDirection: 'row',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          paddingHorizontal: 8,
-          gap: 8,
-          paddingTop: 8,
-        }}
-      >
+    <Container style={styles.container}>
+      <SubContainer styleContainer={styles.subContainer}>
         <ChallengeOptionCard
-          label="Quiz"
+          label={t('challengeAdd.option.quiz')}
           onPress={handleStartQuiz}
           score={avgScores['quiz'] ?? 0}
           total={totals['quiz'] ?? 0}
         />
         <ChallengeOptionCard
-          label="Hangman"
+          label={t('challengeAdd.option.hangman')}
           onPress={handleStartHangman}
           score={avgScores['hangman'] ?? 0}
           total={totals['hangman'] ?? 0}
         />
         <ChallengeOptionCard
-          label="Matrix"
+          label={t('challengeAdd.option.matrix')}
           onPress={handleStartMatrix}
           score={avgScores['matrix'] ?? 0}
           total={totals['matrix'] ?? 0}
         />
         <ChallengeOptionCard
-          label="Resposta em Texto"
+          label={t('challengeAdd.option.text_answer')}
           onPress={() =>
             navigatorManager.goToChallengeAddTextAnswer({ summaryId })
           }
@@ -67,3 +63,18 @@ const ChallengeAddScreen = () => {
 }
 
 export default ChallengeAddScreen
+
+const createStyles = (theme: ThemeType, color: string) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: color,
+    },
+    subContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      justifyContent: 'space-between',
+      paddingHorizontal: 8,
+      paddingTop: 8,
+      gap: 8 as any,
+    },
+  })

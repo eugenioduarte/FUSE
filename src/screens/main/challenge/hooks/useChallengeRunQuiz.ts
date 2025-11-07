@@ -24,7 +24,7 @@ type Attempt = {
   questions: AttemptQuestion[]
 }
 
-export const useChallengeRunQuiz = (challengeId: string) => {
+export const useChallengeRunQuiz = (challengeId: string, mock = false) => {
   const { setLoadingOverlay, setErrorOverlay } = useOverlay()
   const meId = useAuthStore((s) => s.user?.id)
 
@@ -68,7 +68,8 @@ export const useChallengeRunQuiz = (challengeId: string) => {
             Math.floor(Math.random() * (10 - 5 + 1)) + 5,
         )
         const prompt = buildQuizPrompt(summary.content, total)
-        const quiz = await generateQuiz(prompt)
+        // If mock flag is true, use the local mockQuiz instead of calling the AI
+        const quiz = mock ? mockQuiz() : await generateQuiz(prompt)
         if (!active) return
         const shuffled = quiz.questions.map((q) => ({
           ...q,
@@ -92,7 +93,7 @@ export const useChallengeRunQuiz = (challengeId: string) => {
     return () => {
       active = false
     }
-  }, [challengeId, setErrorOverlay, setLoadingOverlay])
+  }, [challengeId, setErrorOverlay, setLoadingOverlay, mock])
 
   useFocusEffect(
     React.useCallback(() => {
@@ -116,9 +117,17 @@ export const useChallengeRunQuiz = (challengeId: string) => {
   )
 
   const isLast = step >= Math.max(0, questions.length - 1)
-  const canContinue = currentChoice !== null
+
+  // Consider the recorded first choice for the current step as the ground truth
+  // for whether the user can continue. This prevents swapping the chosen option
+  // by tapping other choices after the first selection.
+  const canContinue = (firstChoiceByIndex[step] ?? null) !== null
 
   const onSelect = (optionIdx: number) => {
+    // If the user already made a first choice for this step, ignore further clicks
+    // so they cannot change the recorded answer by tapping other options.
+    if ((firstChoiceByIndex[step] ?? null) !== null) return
+
     setCurrentChoice(optionIdx)
     setFirstChoiceByIndex((prev) => ({
       ...prev,

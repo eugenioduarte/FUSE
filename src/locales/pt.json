@@ -48,6 +48,8 @@
   "dashboard.calendar.topic": "Tópico",
   "dashboard.notifications.title": "Notificações",
   "dashboard.notifications.empty": "Sem notificações",
+  "dashboard.empty.topics": "Nenhum tópico encontrado. Crie um tópico para começar.",
+  "dashboard.button.create_topic": "Criar novo tópico",
 
   "topicScreen.button.add": "Adicionar Tópico",
 
@@ -101,5 +103,13 @@
 
   "challenge.card.challenges_label": "Challenges",
   "challenge.card.no_score": "Ainda não fez nenhum desafio desse tipo",
-  "challenge.card.total": "Total: {total}"
+  "challenge.card.total": "Total: {total}",
+  "challengeAdd.option.quiz": "Quiz",
+  "challengeAdd.option.hangman": "Hangman",
+  "challengeAdd.option.matrix": "Matrix",
+  "challengeAdd.option.text_answer": "Resposta em Texto",
+  "challengeRunQuiz.question": "Pergunta",
+  "challengeRunQuiz.button.finish": "Finalizar",
+  "challengeRunQuiz.button.continue": "Continuar",
+  "challengeFinished.you_scored": "Você marcou {score} de {total}"
 }

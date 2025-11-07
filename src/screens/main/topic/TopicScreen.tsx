@@ -25,7 +25,8 @@ const GLOBAL_SEPARATOR = () => <View style={{ height: 8 }} />
 
 const TopicScreen = () => {
   const theme = useTheme()
-  const styles = createStyles(theme)
+  const color = useThemeStore((s) => s.colorLevelUp.level_four)
+  const styles = createStyles(theme, color)
   const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
 
   const [loading, setLoading] = useState(true)
@@ -147,7 +148,7 @@ const TopicScreen = () => {
           title={t('topicScreen.button.add')}
           onPress={() => navigatorManager.goToTopicAdd()}
           style={styles.createButton}
-          background={theme.colors.accentGreen}
+          background={color}
         />
       </SubContainer>
     </Container>
@@ -156,7 +157,7 @@ const TopicScreen = () => {
 
 export default TopicScreen
 
-const createStyles = (theme: ThemeType) =>
+const createStyles = (theme: ThemeType, color: string) =>
   StyleSheet.create({
     loading: {
       flex: 1,
@@ -164,7 +165,7 @@ const createStyles = (theme: ThemeType) =>
       justifyContent: 'center',
     },
     container: {
-      backgroundColor: theme.colors.accentGreen,
+      backgroundColor: color,
     },
     flatContent: {
       paddingBottom: 80,

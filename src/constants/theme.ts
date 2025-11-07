@@ -1,5 +1,6 @@
 export const Colors = {
   light: {
+    // tom médio de vinho (secundário)
     // ---- Backgrounds ----
     backgroundPrimary: '#FFFAF0', // fundo principal (mais claro)
     backgroundSecondary: '#F7F0E0', // fundo de seções / cartões

@@ -3,6 +3,7 @@ import { Text } from '@/components'
 import IconButton from '@/components/buttons/IconButton'
 import { useTheme } from '@/hooks/useTheme'
 import { navigatorManager } from '@/navigation/navigatorManager'
+import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React, { useMemo } from 'react'
 import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native'
@@ -44,7 +45,8 @@ const FastWayOverlay: React.FC = () => {
   } = useFastWayOverlayLogic()
 
   const theme = useTheme()
-  const styles = createStyles(theme)
+  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+  const styles = createStyles(theme, color)
 
   const mode: FWMode = useMemo(() => {
     switch (fast.level) {
@@ -281,14 +283,14 @@ const FastWayOverlay: React.FC = () => {
                                 if (details.type === 'text') {
                                   return `• ${c.title} – ${Number(last.score).toFixed(1)}`
                                 }
-                                // hangman/matrix or others
+
                                 return `• ${c.title} – ${last.score}`
                               })()}
                             </Text>
                           </TouchableOpacity>
                         ),
                       )}
-                      {/* Adicionar challenge no fim da lista */}
+
                       <TouchableOpacity
                         style={[styles.summaryRow, styles.mt8]}
                         onPress={onAddChallenge}
@@ -343,11 +345,11 @@ const FastWayOverlay: React.FC = () => {
 
 export default FastWayOverlay
 
-const createStyles = (theme: ThemeType) =>
+const createStyles = (theme: ThemeType, color: string) =>
   StyleSheet.create({
     backdrop: {
       flex: 1,
-      backgroundColor: theme.colors.accentYellow,
+      backgroundColor: color,
       alignItems: 'center',
       justifyContent: 'center',
       padding: 24,
@@ -374,14 +376,14 @@ const createStyles = (theme: ThemeType) =>
       paddingVertical: 8,
     },
     topicName: { color: 'white', fontSize: 16, fontWeight: '600' },
-    smallLink: { color: '#93c5fd', fontWeight: '700' },
+    smallLink: { color: theme.colors.black, fontWeight: '700' },
     summaryList: { paddingLeft: 12, paddingTop: 6 },
     summaryRow: { paddingVertical: 4 },
     summaryText: { color: theme.colors.textPrimary },
     emptyText: { color: theme.colors.textPrimary, fontStyle: 'italic' },
     closeBtn: {
       alignSelf: 'flex-end',
-      backgroundColor: '#3b82f6',
+      backgroundColor: theme.colors.black,
       borderRadius: 8,
       paddingVertical: 10,
       paddingHorizontal: 16,

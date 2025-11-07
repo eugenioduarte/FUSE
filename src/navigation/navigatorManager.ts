@@ -28,6 +28,7 @@ export type RootStackParamList = {
   ChallengeReviewMatrixScreen: { challengeId: string } | undefined
   ChallengeRunTextAnswerScreen: { challengeId: string } | undefined
   ChallengeReviewTextAnswerScreen: { challengeId: string } | undefined
+  ChallengeFinishedScoreScreen: { score: number; total?: number } | undefined
   TopicDetailsScreen: { topicId: string }
   SummaryDetailsScreen: {
     summaryId: string
@@ -149,6 +150,10 @@ export const navigatorManager = {
   goToChallengeRunTextAnswer: (params: { challengeId: string }) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeRunTextAnswerScreen, params as any)
+  },
+  goToChallengeFinishedScore: (params: { score: number; total?: number }) => {
+    if (navigationRef.isReady())
+      navigationRef.navigate(ROUTES.ChallengeFinishedScoreScreen, params as any)
   },
   goToChallengeReviewQuiz: (params: { challengeId: string }) => {
     if (navigationRef.isReady())

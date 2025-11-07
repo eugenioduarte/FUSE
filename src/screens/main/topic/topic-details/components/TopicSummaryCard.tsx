@@ -3,6 +3,7 @@ import { Text } from '@/components'
 import IconButton from '@/components/buttons/IconButton'
 import { useTheme } from '@/hooks/useTheme'
 import { navigatorManager } from '@/navigation/navigatorManager'
+import { useThemeStore } from '@/store/useThemeStore'
 import { Summary } from '@/types/domain'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
@@ -18,7 +19,8 @@ const TOTAL_CHARACTERS = 160
 
 const TopicSummaryCard = ({ summary, bg }: TopicSummaryCardProps) => {
   const theme = useTheme()
-  const styles = createStyles(theme, bg || theme.colors.backgroundSecondary)
+  const color = useThemeStore((s) => s.colorLevelUp.level_three)
+  const styles = createStyles(theme, color)
 
   return (
     <TouchableOpacity
@@ -66,7 +68,6 @@ const createStyles = (theme: ThemeType, bg: string) =>
       marginBottom: theme.spacings.small,
       borderWidth: theme.border.size,
       borderColor: theme.colors.borderColor,
-      backgroundColor: theme.colors.backgroundTertiary,
       overflow: 'hidden',
     },
     titleContainer: {

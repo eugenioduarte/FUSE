@@ -23,7 +23,8 @@ import TopicSummaryCard from './components/TopicSummaryCard'
 
 const TopicDetailsScreen: React.FC = () => {
   const theme = useTheme()
-  const styles = createStyles(theme)
+  const color = useThemeStore((s) => s.colorLevelUp.level_three)
+  const styles = createStyles(theme, color)
   const route = useRoute<RouteProp<RootStackParamList, 'TopicDetailsScreen'>>()
   const { topicId } = route.params
   const { setEditOverlay } = useOverlay()
@@ -55,7 +56,6 @@ const TopicDetailsScreen: React.FC = () => {
     }
   }, [topicId])
 
-  // Track time spent browsing this topic's summaries list
   useTrackTopicSession(topicId, 'summary_list')
 
   useFocusEffect(
@@ -73,7 +73,7 @@ const TopicDetailsScreen: React.FC = () => {
     }, [topicId]),
   )
 
-  const bgForHeader = topic?.backgroundColor || '#0b0b0c'
+  const bgForHeader = topic?.backgroundColor || color
   const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
   useEffect(() => {
     setBackgroundColor(bgForHeader)
@@ -96,10 +96,8 @@ const TopicDetailsScreen: React.FC = () => {
     return <TopicNotFounded />
   }
 
-  const bg = topic.backgroundColor || theme.colors.backgroundPrimary
-
   return (
-    <Container style={[styles.container, { backgroundColor: bg }]}>
+    <Container style={[styles.container, { backgroundColor: color }]}>
       <SubContainer>
         <TopicLinksContainer
           topicId={topicId}
@@ -141,7 +139,7 @@ const TopicDetailsScreen: React.FC = () => {
         <Button
           title="Criar resumo"
           onPress={() => navigatorManager.goToSummary({ topicId })}
-          background={bg}
+          background={color}
           style={styles.createButtonAlign}
         />
       </SubContainer>
@@ -151,7 +149,7 @@ const TopicDetailsScreen: React.FC = () => {
 
 export default TopicDetailsScreen
 
-const createStyles = (theme: ThemeType) =>
+const createStyles = (theme: ThemeType, color: string) =>
   StyleSheet.create({
     loading: {
       flex: 1,

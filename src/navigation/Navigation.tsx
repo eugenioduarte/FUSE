@@ -38,6 +38,7 @@ import ChallengeAddMatrixScreen from '../screens/main/challenge/challenge-add/Ch
 import ChallengeAddQuizScreen from '../screens/main/challenge/challenge-add/ChallengeAddQuizScreen'
 import ChallengeAddScreen from '../screens/main/challenge/challenge-add/ChallengeAddScreen'
 import ChallengeAddTextAnswerScreen from '../screens/main/challenge/challenge-add/ChallengeAddTextAnswerScreen'
+import ChallengeFinishedScoreScreen from '../screens/main/challenge/ChallengeFinishedScoreScreen'
 import ChallengeReviewHangmanScreen from '../screens/main/challenge/ChallengeReviewHangmanScreen'
 import ChallengeReviewMatrixScreen from '../screens/main/challenge/ChallengeReviewMatrixScreen'
 import ChallengeReviewQuizScreen from '../screens/main/challenge/ChallengeReviewQuizScreen'
@@ -261,6 +262,11 @@ function MainStack() {
         name={ROUTES.ChallengeRunQuizScreen}
         component={ChallengeRunQuizScreen}
         options={{ title: ROUTES.ChallengeRunQuizScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.ChallengeFinishedScoreScreen}
+        component={ChallengeFinishedScoreScreen}
+        options={{ title: ROUTES.ChallengeFinishedScoreScreen }}
       />
       <Stack.Screen
         name={ROUTES.ChallengeRunHangmanScreen}

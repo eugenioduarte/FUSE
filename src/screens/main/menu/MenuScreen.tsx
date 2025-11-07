@@ -1,6 +1,7 @@
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/useTheme'
 import { useAuthStore } from '@/store'
+import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
@@ -9,7 +10,8 @@ import { isDevUser } from '../../../services/firebase/dev.service'
 
 const MenuScreen = () => {
   const theme = useTheme()
-  const styles = createStyles(theme)
+  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+  const styles = createStyles(theme, color)
   const userId = useAuthStore((s) => s.user?.id)
   const logout = useAuthStore((s) => s.logout)
   const [isDev, setIsDev] = React.useState(false)
@@ -99,13 +101,13 @@ const MenuScreen = () => {
 
 export default MenuScreen
 
-const createStyles = (theme: ThemeType) =>
+const createStyles = (theme: ThemeType, color: string) =>
   StyleSheet.create({
     container: {
       flexGrow: 1,
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: theme.colors.accentRed,
+      backgroundColor: color,
       paddingTop: '10%',
       paddingBottom: '10%',
     },
