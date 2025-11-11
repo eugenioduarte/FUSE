@@ -129,7 +129,7 @@ export default function useChallengeAdd(
     }
 
     try {
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ChallengeAddScreen')
       const now = Date.now()
       const id = `${now}`
 

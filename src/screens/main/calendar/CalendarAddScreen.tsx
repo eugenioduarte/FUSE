@@ -105,7 +105,6 @@ const CalendarAddScreen: React.FC = () => {
     setInviteBusy(true)
     setInviteError(null)
     try {
-      console.log('--------------> 1')
       const eventId = await createSharedEvent(
         ownerUid,
         {
@@ -118,7 +117,7 @@ const CalendarAddScreen: React.FC = () => {
         },
         selectedInviteUids,
       )
-      console.log('--------------> 2')
+
       if (selectedInviteUids.length > 0) {
         await Promise.all(
           selectedInviteUids.map((toUid) =>

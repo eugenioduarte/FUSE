@@ -87,7 +87,7 @@ const ChallengeAddQuizScreen: React.FC = () => {
       return
     }
     try {
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ChallengeAddQuizScreen')
       const now = Date.now()
       const id = `${now}`
       const payload = {

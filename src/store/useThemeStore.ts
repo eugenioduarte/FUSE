@@ -1,4 +1,3 @@
-import { lightenHex } from '@/utils/colorUtils'
 import { create } from 'zustand'
 import { RouteName, ROUTES } from '../constants/routes'
 import { Colors } from '../constants/theme'
@@ -61,17 +60,30 @@ function generateLevelSteps(baseColor: string) {
     'level_three',
     'level_four',
     'level_five',
+    'level_six',
+    'level_seven',
+    'level_eight',
+    'level_nine',
+    'level_ten',
   ]
+
+  const colors = [
+    '#000000', // level_one - preto
+    '#004547', // level_two
+    '#008A8D', // level_three
+    '#00B7BB', // level_four
+    '#00CED1', // level_five - base
+    '#33D9DB', // level_six
+    '#66E3E5', // level_seven
+    '#99EEEE', // level_eight
+    '#CCF8F8', // level_nine
+    '#FFFFFF', // level_ten - branco
+  ]
+
   const result: { [key: string]: string } = {}
 
-  // level_five será o mais escuro (a cor base)
-  // os níveis anteriores serão progressivamente mais claros
   for (let i = 0; i < keys.length; i++) {
-    const t = i / (keys.length - 1)
-    // t = 0 → mais claro | t = 1 → cor base
-    // o expoente 1.5 gera contraste mais perceptível
-    const percent = Math.pow(1 - t, 1.5)
-    result[keys[i]] = lightenHex(baseColor, percent)
+    result[keys[i]] = colors[i]
   }
 
   return result

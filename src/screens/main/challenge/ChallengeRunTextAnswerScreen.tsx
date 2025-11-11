@@ -66,7 +66,7 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
     let active = true
     ;(async () => {
       try {
-        setLoadingOverlay(true)
+        setLoadingOverlay(true, 'ChallengeRunTextAnswerScreen')
         const all = await challengesRepository.list()
         const ch = all.find((c) => c.id === challengeId) || null
         if (!active) return
@@ -132,7 +132,7 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
   const doSubmit = async () => {
     if (!challenge || !exercises[step] || !canSubmit) return
     try {
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ChallengeRunTextAnswerScreen')
       const ex = exercises[step]
       const evalRes = await evaluateOpenAnswer(ex, answer)
       const item: TAAttemptItem = {
@@ -203,7 +203,7 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
   const forceFinish = async () => {
     if (!challenge) return
     try {
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ChallengeRunTextAnswerScreen')
       // Build final attempt: include evaluated items, current (if evaluated) or mark as 0, and remaining as 0
       const items = [...attemptItems]
       // current step may have evaluation

@@ -1,3 +1,8 @@
+import { ROUTES } from '@/constants/routes'
+import { navigationRef } from '@/navigation/navigationRef'
+import { summariesRepository } from '@/services/repositories/summaries.repository'
+import { useOverlay } from '@/store/useOverlay'
+import { useThemeStore } from '@/store/useThemeStore'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -6,11 +11,6 @@ import Animated, {
   SlideInUp,
   SlideOutDown,
 } from 'react-native-reanimated'
-import { ROUTES } from '../../constants/routes'
-import { navigationRef } from '../../navigation/navigationRef'
-import { summariesRepository } from '../../services/repositories/summaries.repository'
-import { useOverlay } from '../../store/useOverlay'
-import { useThemeStore } from '../../store/useThemeStore'
 import HeaderAddTopic from './HeaderAddTopic'
 import HeaderChallengeAdd from './HeaderChallengeAdd'
 import HeaderDashboard from './HeaderDashboard'

@@ -136,7 +136,7 @@ const Profile: React.FC = () => {
     try {
       setSaveLoading(true)
       setSaveMsg(null)
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ProfileScreen')
       await Promise.all(tasks)
       setSuccessOverlay(true, 'Alterações guardadas')
       setSaveMsg('Alterações guardadas')
@@ -174,7 +174,7 @@ const Profile: React.FC = () => {
     }
     setEmailError(null)
     try {
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ProfileScreen')
       await changeEmail(emailCurrentPassword, email.trim())
       await upsertUserProfile({ email: email.trim() })
       setSuccessOverlay(true, 'Email atualizado. Verifica a caixa de entrada')
@@ -195,7 +195,7 @@ const Profile: React.FC = () => {
     if (!currentPassword || !newPassword) return
     if (newPassword !== confirmPassword) return
     try {
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ProfileScreen')
       await changePassword(currentPassword, newPassword)
       setSuccessOverlay(true, 'Senha atualizada com sucesso')
       setCurrentPassword('')

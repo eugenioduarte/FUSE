@@ -44,9 +44,14 @@ const ChallengeRunMatrixScreen: React.FC = () => {
 
   const { setLoadingOverlay } = useOverlay()
 
+  // Keep global loading overlay visible not only while the hook-level `loading`
+  // flag is true, but also while the grid hasn't been laid out and computed
+  // (gridRows === 0). Otherwise we may hide the overlay too early and show
+  // an empty screen for a short moment before the matrix renders.
   React.useEffect(() => {
-    setLoadingOverlay(loading, 'ChallengeRunMatrixScreen')
-  }, [loading, setLoadingOverlay])
+    const show = loading || gridRows === 0
+    setLoadingOverlay(show, 'ChallengeRunMatrixScreen')
+  }, [loading, gridRows, setLoadingOverlay])
 
   React.useEffect(() => {
     if (!finished) return

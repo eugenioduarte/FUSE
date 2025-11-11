@@ -1,16 +1,23 @@
 import { PathIcon, Settings } from '@/assets/icons'
 import { useTheme } from '@/hooks/useTheme'
+import { navigatorManager } from '@/navigation/navigatorManager'
+import { useOverlay } from '@/store/useOverlay'
+import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Image, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { navigatorManager } from '../../navigation/navigatorManager'
-import { useOverlay } from '../../store/useOverlay'
 
 const HeaderDashboard = () => {
   const theme = useTheme()
   const styles = createStyles(theme)
 
   const setFastWayOverlay = useOverlay((s) => s.setFastWayOverlay)
+  const setBackgroundColor = useThemeStore((state) => state.setBackgroundColor)
+  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+
+  useEffect(() => {
+    setBackgroundColor(color)
+  }, [color, setBackgroundColor])
 
   const handleMenuPress = () => {
     navigatorManager.toggleMenu()

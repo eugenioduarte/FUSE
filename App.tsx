@@ -9,10 +9,6 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import Navigation from './src/navigation/Navigation'
 import { useThemeStore } from './src/store/useThemeStore'
 
-import { firebaseConfig } from '@/services'
-import { initializeApp } from 'firebase/app'
-import { addDoc, collection, getFirestore } from 'firebase/firestore'
-
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -24,7 +20,6 @@ const queryClient = new QueryClient({
 })
 
 export default function App() {
-  // printHello()
   const { backgroundColor } = useThemeStore()
   const [fontsLoaded] = useFonts({
     'Fredoka-Light': require('./assets/fonts/Fredoka-Light.ttf'),
@@ -36,15 +31,9 @@ export default function App() {
 
   if (!fontsLoaded) return null
 
-  const app = initializeApp(firebaseConfig)
-  const db = getFirestore(app)
-
-  addDoc(collection(db, 'test'), { foo: 'bar' })
-  console.log('ok!')
-
   return (
     <SafeAreaProvider>
-      <StatusBar backgroundColor="#000" barStyle="dark-content" />
+      <StatusBar backgroundColor="transparent" barStyle="dark-content" />
       <SafeAreaView
         edges={['top']}
         style={{ flex: 1, backgroundColor: backgroundColor }}

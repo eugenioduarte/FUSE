@@ -34,11 +34,21 @@ const TopicCard = ({ item }: TopicCardProps) => {
         </View>
         <View style={styles.spacer} />
         <View style={styles.content}>
-          <Text variant="xxLarge">{item.title.split(' ')[0]}</Text>
-          <Text variant="large">
-            {item.title.split(' ').slice(1).join(' ')}
+          <Text variant="xxLarge" style={{ fontSize: 50, lineHeight: 60 }}>
+            {item.title.split(' ')[0]}
           </Text>
-          <ChevronIcon onPress={handleNavigation} style={styles.chevron} />
+          <View
+            style={{
+              alignItems: 'center',
+              flexDirection: 'row',
+              justifyContent: 'center',
+            }}
+          >
+            <Text variant="large">
+              {item.title.split(' ').slice(1).join(' ')}
+            </Text>
+            <ChevronIcon onPress={handleNavigation} style={styles.chevron} />
+          </View>
         </View>
       </TouchableOpacity>
     </View>
@@ -62,6 +72,7 @@ const createStyles = (theme: ThemeType) =>
       borderBottomWidth: theme.border.shadow,
       borderRightWidth: theme.border.shadow,
       backgroundColor: theme.colors.backgroundPrimary,
+      maxHeight: 100,
     },
     imageContainer: {
       justifyContent: 'center',
@@ -83,6 +94,7 @@ const createStyles = (theme: ThemeType) =>
       alignItems: 'flex-end',
     },
     chevron: {
-      marginTop: theme.spacings.small,
+      marginTop: theme.spacings.xSmall,
+      marginLeft: theme.spacings.xSmall,
     },
   })

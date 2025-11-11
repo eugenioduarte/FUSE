@@ -20,7 +20,7 @@ const ChallengeAddTextAnswerScreen = () => {
       return
     }
     try {
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ChallengeAddTextAnswerScreen')
       const now = Date.now()
       const id = `${now}`
       const challenge: Challenge = {

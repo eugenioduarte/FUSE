@@ -1,11 +1,12 @@
 import { Button } from '@/components'
 import Container from '@/components/containers/Container'
+import EmptyContainer from '@/components/containers/EmptyContainer'
 import SubContainer from '@/components/containers/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { useThemeStore } from '@/store/useThemeStore'
 import React from 'react'
-import { FlatList, StyleSheet, Text, View } from 'react-native'
+import { FlatList, StyleSheet } from 'react-native'
 import { navigatorManager } from '../../../navigation/navigatorManager'
 import TopicCard from '../topic/components/TopicCard/TopicCard'
 import DashboardAgentDisplay from './components/DashboardAgentDisplay'
@@ -28,15 +29,7 @@ export default function DashboardScreen() {
             <TopicCard item={{ id: item.id, title: item.topicName }} />
           )}
           ListHeaderComponent={<DashboardAgentDisplay />}
-          ListEmptyComponent={
-            loading ? null : (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyText}>
-                  {t('dashboard.empty.topics')}
-                </Text>
-              </View>
-            )
-          }
+          ListEmptyComponent={loading ? null : <EmptyContainer />}
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
           style={styles.list}
@@ -47,7 +40,6 @@ export default function DashboardScreen() {
           onPress={() => navigatorManager.goToTopicAdd()}
           style={styles.button}
           background={color}
-          textColor={theme.colors.backgroundPrimary}
         />
       </SubContainer>
     </Container>
@@ -57,12 +49,16 @@ export default function DashboardScreen() {
 const createStyles = (theme: any, color?: string) =>
   StyleSheet.create({
     container: {
-      backgroundColor: color || theme.colors.accentRed,
+      backgroundColor: color,
       paddingTop: 0,
     },
-    list: { width: '100%', paddingTop: 20 },
+    list: { width: '100%', paddingTop: theme.spacings.medium },
     contentContainer: { paddingBottom: 100 },
-    emptyContainer: { padding: 16 },
+    emptyContainer: { padding: theme.spacings.medium },
     emptyText: { color: theme.colors.textPrimary },
-    button: { alignSelf: 'center', position: 'absolute', bottom: 20 },
+    button: {
+      alignSelf: 'center',
+      position: 'absolute',
+      bottom: theme.spacings.large,
+    },
   })

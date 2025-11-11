@@ -121,7 +121,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
     let active = true
     ;(async () => {
       try {
-        setLoadingOverlay(true)
+        setLoadingOverlay(true, 'ChallengeRunHangmanScreen')
         const all = await challengesRepository.list()
         const ch = all.find((c) => c.id === challengeId) || null
         if (!active) return
@@ -283,7 +283,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
   const forceFinish = async () => {
     if (!challenge) return
     try {
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ChallengeRunHangmanScreen')
       const currentAttempt: AttemptRound = {
         word: currentRound?.word || '',
         success: !!isSolved,

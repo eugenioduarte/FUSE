@@ -57,7 +57,6 @@ function formatWhenFriendly(dt: Date) {
   if (dayDiff === 1) return `amanhã às ${time}`
   if (dayDiff > 1 && dayDiff <= 6)
     return `na ${WEEKDAYS_PT[dt.getDay()]} às ${time}`
-  // fallback to numeric date
   const dd = String(dt.getDate()).padStart(2, '0')
   const mm = String(dt.getMonth() + 1).padStart(2, '0')
   return `em ${dd}/${mm} às ${time}`

@@ -37,7 +37,7 @@ const SummaryScreen = () => {
       setLoading(true)
       // call setter directly from the store to avoid stale closures when
       // navigating away while the async op is running
-      useOverlay.getState().setLoadingOverlay(true)
+      useOverlay.getState().setLoadingOverlay(true, 'SummaryScreen')
       const summary = await summariesRepository.createWithAI(topicId, prompt)
       // Navigate to details after creation
       setLastSaved(summary)
@@ -234,7 +234,7 @@ const SummaryScreen = () => {
                 }
                 try {
                   // call setter directly from the store to avoid stale closures
-                  useOverlay.getState().setLoadingOverlay(true)
+                  useOverlay.getState().setLoadingOverlay(true, 'SummaryScreen')
                   const normalized = res.text.replaceAll(/\s+/g, ' ').trim()
                   const truncated = normalized.slice(0, 8000)
                   const summary = await summariesRepository.createWithAI(

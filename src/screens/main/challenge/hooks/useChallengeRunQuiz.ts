@@ -48,7 +48,7 @@ export const useChallengeRunQuiz = (challengeId: string, mock = false) => {
     let active = true
     ;(async () => {
       try {
-        setLoadingOverlay(true)
+        setLoadingOverlay(true, 'ChallengeRunQuizScreen')
         const all = await challengesRepository.list()
         const ch = all.find((c) => c.id === challengeId) || null
         if (!active) return
@@ -182,7 +182,7 @@ export const useChallengeRunQuiz = (challengeId: string, mock = false) => {
   const forceFinish = async () => {
     if (!challenge) return
     try {
-      setLoadingOverlay(true)
+      setLoadingOverlay(true, 'ChallengeRunQuizScreen')
       const score = computeScore(questions, firstChoiceByIndex)
       const now = Date.now()
       const attempt: Attempt & { userId?: string } = {

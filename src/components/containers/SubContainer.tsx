@@ -24,11 +24,11 @@ const createStyles = (theme: ThemeType) =>
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: theme.colors.backgroundPrimary,
-      borderTopLeftRadius: 25,
-      borderTopRightRadius: 25,
       borderWidth: theme.border.size,
       borderColor: theme.colors.borderColor,
       paddingTop: theme.spacings.xSmall,
       paddingHorizontal: theme.spacings.medium,
+      borderTopLeftRadius: theme.border.radius16,
+      borderTopRightRadius: theme.border.radius16,
     },
   })
