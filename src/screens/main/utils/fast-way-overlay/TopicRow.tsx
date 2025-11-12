@@ -44,7 +44,7 @@ const createStyles = (theme: ThemeType) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingVertical: 8,
+      paddingVertical: theme.spacings.small,
     },
     smallLink: { fontWeight: '700' },
   })

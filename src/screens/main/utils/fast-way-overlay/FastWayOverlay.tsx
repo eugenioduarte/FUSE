@@ -1,18 +1,25 @@
-import { CloseIcon, HomeIcon } from '@/assets/icons'
+import { HomeIcon } from '@/assets/icons'
 import { Text } from '@/components'
+import CloseButton from '@/components/buttons/CloseButton'
 import IconButton from '@/components/buttons/IconButton'
 import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React, { useMemo } from 'react'
-import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native'
+import {
+  Modal,
+  ScrollView,
+  StyleSheet,
+  TouchableOpacity,
+  View,
+} from 'react-native'
 import HeaderTopics from './HeaderTopics'
 import HeaderWithBack from './HeaderWithBack'
 import SummaryItem from './SummaryItem'
 import TopicBlock from './TopicBlock'
 import { useFastWayOverlayLogic } from './useFastWayOverlayLogic'
-// import { t } from '@/locales/translation'
 
 type FWMode = 'topics' | 'topic' | 'summaries' | 'challenges' | 'challenge'
 
@@ -89,17 +96,14 @@ const FastWayOverlay: React.FC = () => {
               icon={<HomeIcon width={24} height={24} />}
             />
           )}
-          <IconButton
+          <CloseButton
             onPress={() => {
               setFastWayOverlay(false)
               fast.reset()
             }}
-            styles={styles.iconButtonTransparent}
-            icon={<CloseIcon width={24} height={24} />}
           />
         </View>
-
-        <View style={styles.card}>
+        <ScrollView style={styles.card} showsVerticalScrollIndicator={false}>
           {mode === 'topics' && (
             <>
               <TouchableOpacity
@@ -109,7 +113,7 @@ const FastWayOverlay: React.FC = () => {
                   navigatorManager.goToCalendar()
                 }}
               >
-                <Text variant="xxLarge">Calendário</Text>
+                <Text variant="xxLarge">{t('fastWay.calendar')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -119,7 +123,7 @@ const FastWayOverlay: React.FC = () => {
                   navigatorManager.goToNotifications()
                 }}
               >
-                <Text variant="xxLarge">Notificações</Text>
+                <Text variant="xxLarge">{t('fastWay.notifications')}</Text>
               </TouchableOpacity>
 
               <HeaderTopics onAddTopic={onAddTopic} />
@@ -129,22 +133,22 @@ const FastWayOverlay: React.FC = () => {
                 style={styles.linkRow}
                 onPress={goToTopicsScreen}
               >
-                <Text style={styles.link}>Ver todos os tópicos</Text>
+                <Text variant="medium">{t('fastWay.view_all_topics')}</Text>
               </TouchableOpacity>
             </>
           )}
           {mode === 'summaries' && (
             <HeaderWithBack
-              title={selectedSummary?.title || 'Summary'}
-              rightLabel="+ Challenge"
+              title={selectedSummary?.title || t('fastWay.summary')}
+              rightLabel={t('fastWay.add_challenge_label')}
               onBack={() => fast.backFromSummary()}
               onRightPress={onAddChallenge}
             />
           )}
           {mode === 'challenge' && (
             <HeaderWithBack
-              title={selectedChallenge?.title || 'Challenge'}
-              rightLabel="Fechar"
+              title={selectedChallenge?.title || t('fastWay.challenge')}
+              rightLabel={t('fastWay.close')}
               onBack={() => fast.backFromChallenge()}
               onRightPress={() => {
                 setFastWayOverlay(false)
@@ -155,14 +159,14 @@ const FastWayOverlay: React.FC = () => {
 
           {loading && (
             <View style={styles.loadingWrapper}>
-              <Text style={styles.emptyText}>Carregando...</Text>
+              <Text variant="medium">{t('fastWay.loading')}</Text>
             </View>
           )}
 
           {!loading && mode === 'topics' && (
             <>
               {topics.length === 0 ? (
-                <Text style={styles.emptyText}>Nenhum topic encontrado.</Text>
+                <Text variant="medium">{t('fastWay.no_topics_found')}</Text>
               ) : (
                 <View>
                   {topics.map((t) => (
@@ -189,7 +193,7 @@ const FastWayOverlay: React.FC = () => {
             <View>
               <View style={styles.alignEndMb6}>
                 <TouchableOpacity onPress={goToTopicsScreen}>
-                  <Text style={styles.link}>Ir para Topics</Text>
+                  <Text variant="medium">{t('fastWay.go_to_topics')}</Text>
                 </TouchableOpacity>
               </View>
               {/* Link para lista de summaries do tópico */}
@@ -201,13 +205,13 @@ const FastWayOverlay: React.FC = () => {
                     navigatorManager.goToTopicDetails(fast.selectedTopicId!)
                   }}
                 >
-                  <Text style={styles.link}>Ver summaries do tópico</Text>
+                  <Text variant="medium">
+                    {t('fastWay.view_topic_summaries')}
+                  </Text>
                 </TouchableOpacity>
               )}
               {topicSummaries.length === 0 ? (
-                <Text style={styles.emptyText}>
-                  Sem summaries para este topic.
-                </Text>
+                <Text variant="medium">{t('fastWay.no_topic_summaries')}</Text>
               ) : (
                 <View style={styles.summaryList}>
                   {topicSummaries.map((s) => (
@@ -219,20 +223,20 @@ const FastWayOverlay: React.FC = () => {
                   ))}
 
                   <TouchableOpacity
-                    style={[styles.summaryRow, { marginTop: 8 }]}
+                    style={[styles.summaryRow, styles.mt8]}
                     onPress={onAddSummary}
                   >
-                    <Text style={styles.link}>＋ Adicionar summary</Text>
+                    <Text variant="medium">{t('fastWay.add_summary')}</Text>
                   </TouchableOpacity>
                 </View>
               )}
 
               {topicSummaries.length === 0 && (
                 <TouchableOpacity
-                  style={[styles.summaryRow, { marginTop: 8 }]}
+                  style={[styles.summaryRow, styles.mt8]}
                   onPress={onAddSummary}
                 >
-                  <Text style={styles.link}>＋ Adicionar summary</Text>
+                  <Text variant="medium">{t('fastWay.add_summary')}</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -240,26 +244,28 @@ const FastWayOverlay: React.FC = () => {
 
           {!loading && mode === 'summaries' && (
             <View>
-              <View style={{ marginBottom: 6 }}>
+              <View style={styles.mb6}>
                 <TouchableOpacity
                   style={styles.linkRow}
                   onPress={goToSummaryDetails}
                 >
-                  <Text style={styles.link}>Ir para summary</Text>
+                  <Text variant="medium">{t('fastWay.go_to_summary')}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.linkRow, styles.mt4]}
                   onPress={goToChallengesListForSummary}
                 >
-                  <Text style={styles.link}>Ver challenges efetuados</Text>
+                  <Text variant="medium">
+                    {t('fastWay.view_challenges_done')}
+                  </Text>
                 </TouchableOpacity>
               </View>
               {fast.selectedSummaryId && (
                 <View>
                   {(challengesBySummary[fast.selectedSummaryId] || [])
                     .length === 0 ? (
-                    <Text style={styles.emptyText}>
-                      Sem challenges para este summary.
+                    <Text variant="medium">
+                      {t('fastWay.no_challenges_for_summary')}
                     </Text>
                   ) : (
                     <View style={styles.paddingVertical6}>
@@ -295,7 +301,9 @@ const FastWayOverlay: React.FC = () => {
                         style={[styles.summaryRow, styles.mt8]}
                         onPress={onAddChallenge}
                       >
-                        <Text style={styles.link}>＋ Adicionar challenge</Text>
+                        <Text variant="medium">
+                          {t('fastWay.add_challenge')}
+                        </Text>
                       </TouchableOpacity>
                     </View>
                   )}
@@ -309,7 +317,7 @@ const FastWayOverlay: React.FC = () => {
                     style={[styles.summaryRow, styles.mt8]}
                     onPress={onAddChallenge}
                   >
-                    <Text style={styles.link}>＋ Adicionar challenge</Text>
+                    <Text variant="medium">{t('fastWay.add_challenge')}</Text>
                   </TouchableOpacity>
                 )}
             </View>
@@ -319,25 +327,25 @@ const FastWayOverlay: React.FC = () => {
             <View>
               {selectedChallenge ? (
                 <View style={styles.detailGap8}>
-                  <Text style={styles.detailLabel}>Título</Text>
-                  <Text style={styles.detailValue}>
-                    {selectedChallenge.title}
+                  <Text variant="medium">{t('fastWay.detail.title')}</Text>
+                  <Text variant="medium">{selectedChallenge.title}</Text>
+                  <Text variant="medium" style={styles.mt8}>
+                    {t('fastWay.detail.type')}
                   </Text>
-                  <Text style={[styles.detailLabel, styles.mt8]}>Tipo</Text>
-                  <Text style={styles.detailValue}>
-                    {selectedChallenge.type}
+                  <Text variant="medium">{selectedChallenge.type}</Text>
+                  <Text variant="medium" style={styles.mt8}>
+                    {t('fastWay.detail.payload')}
                   </Text>
-                  <Text style={[styles.detailLabel, styles.mt8]}>Payload</Text>
-                  <Text style={styles.detailValueMono}>
+                  <Text variant="medium">
                     {JSON.stringify(selectedChallenge.payload, null, 2)}
                   </Text>
                 </View>
               ) : (
-                <Text style={styles.emptyText}>Carregando challenge...</Text>
+                <Text variant="medium">{t('fastWay.loading_challenge')}</Text>
               )}
             </View>
           )}
-        </View>
+        </ScrollView>
       </View>
     </Modal>
   )
@@ -352,65 +360,30 @@ const createStyles = (theme: ThemeType, color: string) =>
       backgroundColor: color,
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 24,
+      padding: theme.spacings.large,
     },
     card: {
       width: '100%',
-      maxHeight: '85%',
-      borderRadius: 12,
-      padding: 16,
+      borderRadius: theme.spacings.xMedium,
+      padding: theme.spacings.medium,
     },
     headerRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: 12,
+      marginBottom: theme.spacings.xMedium,
     },
-    headerTitle: { color: 'white', fontSize: 18, fontWeight: '700' },
-    link: { color: theme.colors.accentBlue, fontWeight: '700' },
-    topicBlock: { marginBottom: 10 },
-    topicRow: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: 8,
-    },
-    topicName: { color: 'white', fontSize: 16, fontWeight: '600' },
-    smallLink: { color: theme.colors.black, fontWeight: '700' },
-    summaryList: { paddingLeft: 12, paddingTop: 6 },
+    summaryList: { paddingLeft: theme.spacings.xMedium, paddingTop: 6 },
     summaryRow: { paddingVertical: 4 },
     summaryText: { color: theme.colors.textPrimary },
-    emptyText: { color: theme.colors.textPrimary, fontStyle: 'italic' },
-    closeBtn: {
-      alignSelf: 'flex-end',
-      backgroundColor: theme.colors.black,
-      borderRadius: 8,
-      paddingVertical: 10,
-      paddingHorizontal: 16,
-      marginTop: 8,
-    },
-    buttonText: { color: 'white', fontWeight: '700' },
-    detailLabel: {
-      color: theme.colors.textPrimary,
-      fontSize: 12,
-      fontWeight: '700',
-      textTransform: 'uppercase',
-      letterSpacing: 0.5,
-    },
     detailValue: {
       color: theme.colors.textPrimary,
       fontSize: 14,
     },
-    detailValueMono: {
-      color: theme.colors.textPrimary,
-      fontFamily: 'Courier',
-      fontSize: 12,
-    },
     topBar: {
       width: '100%',
       flexDirection: 'row',
-      position: 'absolute',
-      top: 100,
+      marginVertical: 50,
     },
     topBarDashboard: {
       justifyContent: 'flex-end',
@@ -432,6 +405,7 @@ const createStyles = (theme: ThemeType, color: string) =>
       alignItems: 'flex-end',
       marginBottom: 6,
     },
+    mb6: { marginBottom: 6 },
     paddingVertical6: {
       paddingVertical: 6,
     },

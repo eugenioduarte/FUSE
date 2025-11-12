@@ -1,5 +1,6 @@
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
@@ -20,12 +21,12 @@ const HeaderWithBack = ({
   return (
     <View style={styles.headerRow}>
       <TouchableOpacity onPress={onBack}>
-        <Text style={styles.link}>← Voltar</Text>
+        <Text variant="medium">← {t('common.goBack')}</Text>
       </TouchableOpacity>
-      <Text style={styles.headerTitle}>{title}</Text>
+      <Text variant="large">{title}</Text>
       {rightLabel ? (
         <TouchableOpacity onPress={onRightPress}>
-          <Text style={styles.link}>{rightLabel}</Text>
+          <Text variant="medium">{rightLabel}</Text>
         </TouchableOpacity>
       ) : (
         <View style={{ width: 64 }} />
@@ -42,8 +43,6 @@ const createStyles = (theme: ThemeType) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginBottom: 12,
+      marginBottom: theme.spacings.medium,
     },
-    headerTitle: { color: 'white', fontSize: 18, fontWeight: '700' },
-    link: { color: '#60a5fa', fontWeight: '700' },
   })

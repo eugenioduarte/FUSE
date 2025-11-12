@@ -2,23 +2,50 @@ import { create } from 'zustand'
 import { RouteName, ROUTES } from '../constants/routes'
 import { Colors } from '../constants/theme'
 
-interface HeaderConfig {
+/* -------------------------------------------------------------------------- */
+/* 🧩 TYPES EXPORTADOS                                                        */
+/* -------------------------------------------------------------------------- */
+
+/** Define os 10 níveis de cor gerados automaticamente */
+export type ColorLevels = {
+  level_one: string
+  level_two: string
+  level_three: string
+  level_four: string
+  level_five: string
+  level_six: string
+  level_seven: string
+  level_eight: string
+  level_nine: string
+  level_ten: string
+}
+
+/** Configuração do header global da aplicação */
+export interface HeaderConfig {
   title: string
   type: RouteName
   visible: boolean
 }
 
-interface ThemeState {
+/** Estrutura da store de tema */
+export interface ThemeState {
   headerConfig: HeaderConfig
   setHeaderConfig: (type: RouteName) => void
+
   backgroundColor: string
   setBackgroundColor: (color: string) => void
-  /** base color for the highest level (level_ten) */
+
+  /** Cor base do nível mais alto (level_ten) */
   levelTenColor: string
   setLevelTenColor: (color: string) => void
-  /** generated colors for level_one .. level_ten */
-  colorLevelUp: { [key: string]: string }
+
+  /** Conjunto de cores geradas automaticamente */
+  colorLevelUp: ColorLevels
 }
+
+/* -------------------------------------------------------------------------- */
+/* 🧠 STORE ZUSTAND                                                           */
+/* -------------------------------------------------------------------------- */
 
 export const useThemeStore = create<ThemeState>((set) => ({
   headerConfig: { title: '', type: '' as RouteName, visible: true },
@@ -30,30 +57,35 @@ export const useThemeStore = create<ThemeState>((set) => ({
       'RegisterScreen',
       'RecoveryScreen',
     ]
-    // Hide header for auth screens and challenge run screens where we render a custom X close
     const runScreens: RouteName[] = [
       'ChallengeRunQuizScreen',
       'ChallengeRunHangmanScreen',
       'ChallengeRunMatrixScreen',
       'ChallengeRunTextAnswerScreen',
-      // Finished screen should also hide the global header
       'ChallengeFinishedScoreScreen',
     ]
     const visible = !authScreens.includes(type) && !runScreens.includes(type)
     set({ headerConfig: { title, type, visible } })
   },
+
   backgroundColor: Colors.light.backgroundSecondary,
   setBackgroundColor: (color: string) => set({ backgroundColor: color }),
+
   levelTenColor: '#00CED1',
   setLevelTenColor: (color: string) =>
-    set((state) => ({
+    set(() => ({
       levelTenColor: color,
       colorLevelUp: generateLevelSteps(color),
     })),
+
   colorLevelUp: generateLevelSteps('#00CED1'),
 }))
 
-function generateLevelSteps(baseColor: string) {
+/* -------------------------------------------------------------------------- */
+/* 🎨 FUNÇÃO GERADORA DE CORES                                                */
+/* -------------------------------------------------------------------------- */
+
+export function generateLevelSteps(baseColor: string): ColorLevels {
   const keys = [
     'level_one',
     'level_two',
@@ -65,7 +97,7 @@ function generateLevelSteps(baseColor: string) {
     'level_eight',
     'level_nine',
     'level_ten',
-  ]
+  ] as const
 
   const colors = [
     '#000000', // level_one - preto
@@ -78,13 +110,12 @@ function generateLevelSteps(baseColor: string) {
     '#99EEEE', // level_eight
     '#CCF8F8', // level_nine
     '#FFFFFF', // level_ten - branco
-  ]
+  ] as const
 
-  const result: { [key: string]: string } = {}
-
-  for (let i = 0; i < keys.length; i++) {
-    result[keys[i]] = colors[i]
-  }
+  const result = {} as ColorLevels
+  keys.forEach((key, i) => {
+    result[key] = colors[i]
+  })
 
   return result
 }

@@ -1,7 +1,8 @@
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
 import { useAuthStore } from '@/store'
-import { useThemeStore } from '@/store/useThemeStore'
+import { ColorLevels, useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
@@ -10,8 +11,8 @@ import { isDevUser } from '../../../services/firebase/dev.service'
 
 const MenuScreen = () => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_five)
-  const styles = createStyles(theme, color)
+  const colors = useThemeStore((s) => s.colorLevelUp)
+  const styles = createStyles(theme, colors)
   const userId = useAuthStore((s) => s.user?.id)
   const logout = useAuthStore((s) => s.logout)
   const [isDev, setIsDev] = React.useState(false)
@@ -31,6 +32,7 @@ const MenuScreen = () => {
       mounted = false
     }
   }, [userId])
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View>
@@ -42,7 +44,7 @@ const MenuScreen = () => {
           }}
         >
           <Text variant="xLarge" style={styles.itemText}>
-            Profile
+            {t('menu.profile')}
           </Text>
         </TouchableOpacity>
 
@@ -54,7 +56,7 @@ const MenuScreen = () => {
           }}
         >
           <Text variant="xLarge" style={styles.itemText}>
-            Connections
+            {t('menu.connections')}
           </Text>
         </TouchableOpacity>
 
@@ -67,22 +69,10 @@ const MenuScreen = () => {
             }}
           >
             <Text variant="xLarge" style={styles.itemText}>
-              Components
+              {t('menu.components')}
             </Text>
           </TouchableOpacity>
         ) : null}
-
-        <TouchableOpacity
-          style={styles.item}
-          onPress={() => {
-            navigatorManager.goToPayment()
-            navigatorManager.closeMenu()
-          }}
-        >
-          <Text variant="xLarge" style={styles.itemText}>
-            Payment
-          </Text>
-        </TouchableOpacity>
       </View>
       <TouchableOpacity
         style={styles.item}
@@ -92,7 +82,7 @@ const MenuScreen = () => {
         }}
       >
         <Text variant="xLarge" style={styles.itemText}>
-          Logout
+          {t('menu.logout')}
         </Text>
       </TouchableOpacity>
     </ScrollView>
@@ -101,27 +91,21 @@ const MenuScreen = () => {
 
 export default MenuScreen
 
-const createStyles = (theme: ThemeType, color: string) =>
+const createStyles = (theme: ThemeType, colors: ColorLevels) =>
   StyleSheet.create({
     container: {
       flexGrow: 1,
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: color,
+      backgroundColor: colors.level_five,
       paddingTop: '10%',
       paddingBottom: '10%',
-    },
-    title: {
-      color: theme.colors.white,
-      fontSize: 22,
-      fontWeight: '700',
-      marginBottom: 24,
     },
     item: {
       paddingVertical: 14,
       alignItems: 'center',
     },
     itemText: {
-      color: theme.colors.white,
+      color: colors.level_one,
     },
   })

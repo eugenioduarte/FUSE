@@ -1,6 +1,7 @@
 import { PlusIcon } from '@/assets/icons'
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
@@ -11,7 +12,7 @@ const HeaderTopics = ({ onAddTopic }: { onAddTopic: () => void }) => {
 
   return (
     <View style={styles.headerRow}>
-      <Text variant="xxLarge">Topics</Text>
+      <Text variant="xxLarge">{t('fastWay.topics')}</Text>
       <TouchableOpacity onPress={onAddTopic}>
         <PlusIcon width={20} height={20} fill={theme.colors.textPrimary} />
       </TouchableOpacity>
@@ -27,6 +28,6 @@ const createStyles = (theme: ThemeType) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      marginVertical: 12,
+      marginVertical: theme.spacings.xMedium,
     },
   })

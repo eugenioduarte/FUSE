@@ -29,7 +29,7 @@ export default ChallengeRow
 const createStyles = (theme: ThemeType) =>
   StyleSheet.create({
     summaryRow: {
-      paddingVertical: 4,
+      paddingVertical: theme.spacings.xSmall,
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'center',

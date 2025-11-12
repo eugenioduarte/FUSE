@@ -1,6 +1,7 @@
 import { PlusIcon } from '@/assets/icons'
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'
@@ -47,7 +48,6 @@ const TopicBlock = ({
       />
       {expandedTopicId === topic.id && (
         <View style={styles.summaryList}>
-          {/* Link para lista completa de resumos do tópico */}
           <TouchableOpacity
             style={styles.linkRow}
             onPress={() => {
@@ -55,10 +55,10 @@ const TopicBlock = ({
               navigatorManager.goToTopicDetails(topic.id)
             }}
           >
-            <Text style={styles.link}>Ver todos os resumos</Text>
+            <Text variant="medium">{t('fastWay.view_all_summaries')}</Text>
           </TouchableOpacity>
           {summariesForTopic.length === 0 ? (
-            <Text style={styles.emptyText}>Sem summaries para este topic.</Text>
+            <Text variant="medium">{t('fastWay.no_topic_summaries')}</Text>
           ) : (
             <View>
               {summariesForTopic.map((s) => (
@@ -83,72 +83,74 @@ const TopicBlock = ({
                           })
                         }}
                       >
-                        <Text style={styles.link}>
-                          Ver challenges deste resumo
+                        <Text variant="medium">
+                          {t('fastWay.view_challenges_of_summary')}
                         </Text>
                       </TouchableOpacity>
                       {(challengesBySummary[s.id] || []).length === 0 ? (
-                        <Text style={styles.emptyText}>
-                          Sem challenges para este summary.
+                        <Text variant="medium">
+                          {t('fastWay.no_challenges_for_summary')}
                         </Text>
                       ) : (
-                        (challengesBySummary[s.id] || []).map((c) => {
-                          const detail = challengeDetailsById[c.id]
-                          const lastAt = detail?.payload?.lastAttempt?.at
-                          const last = detail?.payload?.lastAttempt
-                          const dateLabel = lastAt
-                            ? ` | ${new Date(lastAt).toLocaleDateString()}`
-                            : ''
-                          let scoreLabel = ''
-                          if (detail?.type === 'quiz' && last) {
-                            const total = detail?.payload?.lastAttempt?.total
-                            const totalSuffix = total ? '/' + total : ''
-                            scoreLabel = ` – ${last.score}${totalSuffix}`
-                          } else if (
-                            last &&
-                            (detail?.type === 'text' ||
-                              detail?.type === 'hangman' ||
-                              detail?.type === 'matrix')
-                          ) {
-                            const val =
-                              detail?.type === 'text'
-                                ? Number(last.score).toFixed(1)
-                                : String(last.score)
-                            scoreLabel = ` – ${val}`
-                          }
-                          const display = {
-                            id: c.id,
-                            title: `${c.title}${scoreLabel}${dateLabel}`,
-                          }
+                        (challengesBySummary[s.id] || [])
+                          .slice(0, 3)
+                          .map((c) => {
+                            const detail = challengeDetailsById[c.id]
+                            const lastAt = detail?.payload?.lastAttempt?.at
+                            const last = detail?.payload?.lastAttempt
+                            const dateLabel = lastAt
+                              ? ` | ${new Date(lastAt).toLocaleDateString()}`
+                              : ''
+                            let scoreLabel = ''
+                            if (detail?.type === 'quiz' && last) {
+                              const total = detail?.payload?.lastAttempt?.total
+                              const totalSuffix = total ? '/' + total : ''
+                              scoreLabel = ` – ${last.score}${totalSuffix}`
+                            } else if (
+                              last &&
+                              (detail?.type === 'text' ||
+                                detail?.type === 'hangman' ||
+                                detail?.type === 'matrix')
+                            ) {
+                              const val =
+                                detail?.type === 'text'
+                                  ? Number(last.score).toFixed(1)
+                                  : String(last.score)
+                              scoreLabel = ` – ${val}`
+                            }
+                            const display = {
+                              id: c.id,
+                              title: `${c.title}${scoreLabel}${dateLabel}`,
+                            }
 
-                          const openReview = () => {
-                            setFastWayOverlay(false)
-                            const type = detail?.type
-                            if (type === 'hangman')
-                              navigatorManager.goToChallengeReviewHangman({
-                                challengeId: c.id,
-                              })
-                            else if (type === 'matrix')
-                              navigatorManager.goToChallengeReviewMatrix({
-                                challengeId: c.id,
-                              })
-                            else if (type === 'text')
-                              navigatorManager.goToChallengeReviewTextAnswer({
-                                challengeId: c.id,
-                              })
-                            else
-                              navigatorManager.goToChallengeReviewQuiz({
-                                challengeId: c.id,
-                              })
-                          }
-                          return (
-                            <ChallengeRow
-                              key={c.id}
-                              challenge={display}
-                              onGoToList={openReview}
-                            />
-                          )
-                        })
+                            const openReview = () => {
+                              setFastWayOverlay(false)
+                              const type = detail?.type
+                              if (type === 'hangman')
+                                navigatorManager.goToChallengeReviewHangman({
+                                  challengeId: c.id,
+                                })
+                              else if (type === 'matrix')
+                                navigatorManager.goToChallengeReviewMatrix({
+                                  challengeId: c.id,
+                                })
+                              else if (type === 'text')
+                                navigatorManager.goToChallengeReviewTextAnswer({
+                                  challengeId: c.id,
+                                })
+                              else
+                                navigatorManager.goToChallengeReviewQuiz({
+                                  challengeId: c.id,
+                                })
+                            }
+                            return (
+                              <ChallengeRow
+                                key={c.id}
+                                challenge={display}
+                                onGoToList={openReview}
+                              />
+                            )
+                          })
                       )}
                     </View>
                   )}
@@ -184,16 +186,18 @@ export default TopicBlock
 
 const createStyles = (theme: ThemeType) =>
   StyleSheet.create({
-    topicBlock: { marginBottom: 10 },
-    summaryList: { paddingLeft: 12, paddingTop: 6 },
-    summaryRow: { paddingVertical: 4 },
+    topicBlock: { marginBottom: theme.spacings.xMedium },
+    summaryList: {
+      paddingLeft: theme.spacings.xMedium,
+      paddingTop: theme.spacings.xSmall,
+    },
+    summaryRow: { paddingVertical: theme.spacings.xSmall },
     summaryText: { color: theme.colors.textPrimary },
-    emptyText: { color: theme.colors.textPrimary, fontStyle: 'italic' },
-    link: { color: theme.colors.accentBlue, fontWeight: '700' },
+
     linkRow: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingVertical: 6,
+      paddingVertical: theme.spacings.xSmall,
     },
   })
