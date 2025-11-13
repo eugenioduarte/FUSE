@@ -1,13 +1,14 @@
 import { Text } from '@/components'
+import PressableScale from '@/components/containers/PressableScale'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
+import { navigatorManager } from '@/navigation/navigatorManager'
+import { isDevUser } from '@/services/firebase/dev.service'
 import { useAuthStore } from '@/store'
 import { ColorLevels, useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
-import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
-import { navigatorManager } from '../../../navigation/navigatorManager'
-import { isDevUser } from '../../../services/firebase/dev.service'
+import { ScrollView, StyleSheet, View } from 'react-native'
 
 const MenuScreen = () => {
   const theme = useTheme()
@@ -36,7 +37,7 @@ const MenuScreen = () => {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View>
-        <TouchableOpacity
+        <PressableScale
           style={styles.item}
           onPress={() => {
             navigatorManager.goToProfile()
@@ -46,9 +47,9 @@ const MenuScreen = () => {
           <Text variant="xLarge" style={styles.itemText}>
             {t('menu.profile')}
           </Text>
-        </TouchableOpacity>
+        </PressableScale>
 
-        <TouchableOpacity
+        <PressableScale
           style={styles.item}
           onPress={() => {
             navigatorManager.goToConnections()
@@ -58,10 +59,10 @@ const MenuScreen = () => {
           <Text variant="xLarge" style={styles.itemText}>
             {t('menu.connections')}
           </Text>
-        </TouchableOpacity>
+        </PressableScale>
 
         {isDev ? (
-          <TouchableOpacity
+          <PressableScale
             style={styles.item}
             onPress={() => {
               navigatorManager.goToComponents()
@@ -71,10 +72,10 @@ const MenuScreen = () => {
             <Text variant="xLarge" style={styles.itemText}>
               {t('menu.components')}
             </Text>
-          </TouchableOpacity>
+          </PressableScale>
         ) : null}
       </View>
-      <TouchableOpacity
+      <PressableScale
         style={styles.item}
         onPress={() => {
           logout()
@@ -84,7 +85,7 @@ const MenuScreen = () => {
         <Text variant="xLarge" style={styles.itemText}>
           {t('menu.logout')}
         </Text>
-      </TouchableOpacity>
+      </PressableScale>
     </ScrollView>
   )
 }
@@ -102,7 +103,7 @@ const createStyles = (theme: ThemeType, colors: ColorLevels) =>
       paddingBottom: '10%',
     },
     item: {
-      paddingVertical: 14,
+      paddingVertical: theme.spacings.medium,
       alignItems: 'center',
     },
     itemText: {

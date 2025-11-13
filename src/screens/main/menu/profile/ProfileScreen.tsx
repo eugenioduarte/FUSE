@@ -1,378 +1,308 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import {
-  Image,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native'
-import Container from '../../../../components/containers/Container'
-import UIText from '../../../../components/ui/UiText'
-import { Colors, spacings, typography } from '../../../../constants/theme'
-import {
-  changeEmail,
-  changePassword,
-  updateAvatarUrl,
-  updateDisplayName,
-} from '../../../../services/firebase/authService'
-import {
-  setUserAvatarMeta,
-  upsertUserProfile,
-} from '../../../../services/firebase/userProfile.service'
-import {
-  AVATAR_STYLES,
-  AvatarStyle,
-  generateAvatarUrl,
-  parseAvatarUrl,
-  randomSeed,
-} from '../../../../services/profile/avatar.service'
-import { useAuthStore } from '../../../../store/useAuthStore'
-import { useOverlay } from '../../../../store/useOverlay'
-import { passwordStrength } from '../../../../utils/password'
-import { isValidEmail } from '../../../../utils/validators'
+import { Button, Text, TextInput } from '@/components'
+import Container from '@/components/containers/Container'
+import HeaderCloseTitle from '@/components/headers/HeaderCloseTitle'
+import { Colors } from '@/constants/theme'
+import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
+import { ColorLevels, useThemeStore } from '@/store/useThemeStore'
+import { ThemeType } from '@/types/theme.type'
+import React from 'react'
+import { Image, ScrollView, StatusBar, StyleSheet, View } from 'react-native'
+import useProfile from './useProfile'
 
-const DEFAULT_STYLE: AvatarStyle = 'adventurer'
+type Styles = ReturnType<typeof createStyles>
+
+type AvatarSectionProps = {
+  styles: Styles
+  pendingAvatarUrl: string
+  onGenerateNewAvatar: () => void
+  color?: string
+}
+
+const AvatarSection = ({
+  styles,
+  pendingAvatarUrl,
+  onGenerateNewAvatar,
+  color,
+}: AvatarSectionProps) => (
+  <View style={styles.cardNoBottom}>
+    <Text variant="large" weight="semiBold" style={styles.cardTitle}>
+      {t('profile.avatar.title')}
+    </Text>
+
+    <View style={styles.avatarRow}>
+      <Image source={{ uri: pendingAvatarUrl }} style={styles.avatar} />
+      <Button
+        title={t('profile.avatar.generate')}
+        onPress={onGenerateNewAvatar}
+        background={color}
+        style={styles.buttonCenter}
+      />
+    </View>
+  </View>
+)
+
+type DisplayNameSectionProps = {
+  styles: Styles
+  displayName: string
+  setDisplayName: (val: string) => void
+  computedDisplayName: string
+  saveLoading: boolean
+  onSaveProfile: () => void
+  originalName: string
+  avatarDirty: boolean
+  color?: string
+}
+
+const DisplayNameSection = ({
+  styles,
+  displayName,
+  setDisplayName,
+  computedDisplayName,
+  saveLoading,
+  onSaveProfile,
+  originalName,
+  avatarDirty,
+  color,
+}: DisplayNameSectionProps) => (
+  <View style={styles.cardNoTop}>
+    <Text variant="large" weight="semiBold" style={styles.cardTitle}>
+      {t('profile.displayName.title')}
+    </Text>
+
+    <TextInput
+      placeholder={computedDisplayName}
+      value={displayName}
+      onChangeText={setDisplayName}
+      style={styles.input}
+    />
+
+    <Button
+      title={saveLoading ? t('profile.saving') : t('profile.save')}
+      onPress={onSaveProfile}
+      background={color}
+      style={styles.buttonCenter}
+      disabled={displayName.trim() === originalName && !avatarDirty}
+    />
+  </View>
+)
+
+type EmailSectionProps = {
+  styles: Styles
+  email: string
+  setEmail: (val: string) => void
+  emailError: string | null
+  emailCurrentPassword: string
+  setEmailCurrentPassword: (val: string) => void
+  onSaveEmail: () => void
+  color?: string
+}
+
+const EmailSection = ({
+  styles,
+  email,
+  setEmail,
+  emailError,
+  emailCurrentPassword,
+  setEmailCurrentPassword,
+  onSaveEmail,
+  color,
+}: EmailSectionProps) => (
+  <View style={styles.card}>
+    <Text variant="large" weight="semiBold" style={styles.cardTitle}>
+      {t('profile.email.title')}
+    </Text>
+
+    <TextInput
+      autoCapitalize="none"
+      keyboardType="email-address"
+      placeholder={t('profile.email.placeholder')}
+      value={email}
+      onChangeText={setEmail}
+      style={styles.input}
+    />
+
+    <TextInput
+      placeholder={t('profile.email.current_password_placeholder')}
+      secureTextEntry
+      value={emailCurrentPassword}
+      onChangeText={setEmailCurrentPassword}
+      style={styles.input}
+    />
+
+    {emailError ? <Text style={styles.error}>{emailError}</Text> : null}
+
+    <Button
+      title={t('profile.email.save')}
+      onPress={onSaveEmail}
+      background={color}
+      style={styles.buttonCenterMargin}
+    />
+
+    <Text variant="small" color={Colors.light.textSecondary}>
+      {t('profile.email.note')}
+    </Text>
+  </View>
+)
+
+type PasswordSectionProps = {
+  styles: Styles
+  currentPassword: string
+  newPassword: string
+  confirmPassword: string
+  setCurrentPassword: (val: string) => void
+  setNewPassword: (val: string) => void
+  setConfirmPassword: (val: string) => void
+  pStrength: { label: string; color: string }
+  onChangePassword: () => void
+  color?: string
+}
+
+const PasswordSection = ({
+  styles,
+  currentPassword,
+  newPassword,
+  confirmPassword,
+  setCurrentPassword,
+  setNewPassword,
+  setConfirmPassword,
+  pStrength,
+  onChangePassword,
+  color,
+}: PasswordSectionProps) => (
+  <View style={styles.card}>
+    <Text variant="large" weight="semiBold" style={styles.cardTitle}>
+      {t('profile.password.title')}
+    </Text>
+
+    <TextInput
+      placeholder={t('profile.password.current')}
+      secureTextEntry
+      value={currentPassword}
+      onChangeText={setCurrentPassword}
+      style={styles.input}
+    />
+
+    <TextInput
+      placeholder={t('profile.password.new')}
+      secureTextEntry
+      value={newPassword}
+      onChangeText={setNewPassword}
+      style={styles.input}
+    />
+
+    <View style={styles.strengthRow}>
+      <View
+        style={[styles.strengthBar, { backgroundColor: pStrength.color }]}
+      />
+      <Text style={styles.strengthLabel}>{pStrength.label}</Text>
+    </View>
+
+    <TextInput
+      placeholder={t('profile.password.confirm')}
+      secureTextEntry
+      value={confirmPassword}
+      onChangeText={setConfirmPassword}
+      style={styles.input}
+    />
+
+    <Button
+      title={t('profile.password.update')}
+      onPress={onChangePassword}
+      background={color}
+      style={styles.buttonCenterMargin}
+    />
+  </View>
+)
 
 const Profile: React.FC = () => {
-  const user = useAuthStore((s) => s.user)
-  const updateUser = useAuthStore((s) => s.updateUser)
-  const { setLoadingOverlay, setErrorOverlay, setSuccessOverlay } = useOverlay()
+  const {
+    displayName,
+    setDisplayName,
+    email,
+    setEmail,
+    emailError,
+    emailCurrentPassword,
+    setEmailCurrentPassword,
 
-  const [displayName, setDisplayName] = useState(user?.name ?? '')
-  const [email, setEmail] = useState(user?.email ?? '')
-  const [emailError, setEmailError] = useState<string | null>(null)
-  const [emailCurrentPassword, setEmailCurrentPassword] = useState('')
+    pendingAvatarUrl,
+    avatarDirty,
+    onGenerateNewAvatar,
 
-  const initialStyle = useMemo<AvatarStyle>(() => {
-    const s = (user?.avatarStyle as AvatarStyle) || DEFAULT_STYLE
-    return (AVATAR_STYLES as string[]).includes(s) ? s : DEFAULT_STYLE
-  }, [user?.avatarStyle])
-  const initialSeed = useMemo<string>(
-    () => user?.avatarSeed || randomSeed(),
-    [user?.avatarSeed],
-  )
-  const [avatarStyle, setAvatarStyle] = useState<AvatarStyle>(initialStyle)
-  const [avatarSeed, setAvatarSeed] = useState<string>(initialSeed)
-  const generatedAvatarUrl = useMemo(
-    () => generateAvatarUrl(avatarStyle, avatarSeed),
-    [avatarStyle, avatarSeed],
-  )
-  const [pendingAvatarUrl, setPendingAvatarUrl] = useState<string>(
-    user?.avatarUrl || generatedAvatarUrl,
-  )
-  const avatarDirty = pendingAvatarUrl !== (user?.avatarUrl || '')
+    onSaveProfile,
+    saveLoading,
+    computedDisplayName,
 
-  // UI feedback for Profile save
-  const [saveLoading, setSaveLoading] = useState(false)
-  const [saveMsg, setSaveMsg] = useState<string | null>(null)
+    onSaveEmail,
 
-  const computedDisplayName = useMemo(() => {
-    if (displayName?.trim()) return displayName.trim()
-    const suffix = (user?.id || '').slice(0, 4) || '1234'
-    return user?.email ? user.email.split('@')[0] : `Utilizador(a) #${suffix}`
-  }, [displayName, user?.email, user?.id])
+    currentPassword,
+    setCurrentPassword,
+    newPassword,
+    setNewPassword,
+    confirmPassword,
+    setConfirmPassword,
+    pStrength,
+    onChangePassword,
 
-  // Initialize avatar if not set
-  useEffect(() => {
-    if (user?.avatarUrl) {
-      // Keep currently stored avatar
-      updateUser({ avatarUrl: user.avatarUrl })
-      // If we don't have avatar metadata yet, try to infer from URL and persist
-      if (!user?.avatarStyle || !user?.avatarSeed) {
-        const parsed = parseAvatarUrl(user.avatarUrl)
-        if (parsed) {
-          setUserAvatarMeta({
-            avatarStyle: parsed.style,
-            avatarSeed: parsed.seed,
-          }).catch(() => {
-            // ignore
-          })
-        }
-      }
-    } else {
-      const url = generateAvatarUrl(avatarStyle, avatarSeed)
-      // Persist both photoURL and avatar metadata on first-time setup
-      Promise.all([
-        updateAvatarUrl(url),
-        setUserAvatarMeta({ avatarStyle, avatarSeed }),
-      ]).catch(() => {
-        // ignore
-      })
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+    originalName,
+  } = useProfile()
 
-  // New unified save handler; we no longer autosave name on blur
-  const onSaveProfile = async () => {
-    if (!user) {
-      setSaveMsg('Não autenticado')
-      setErrorOverlay(true, 'Precisas de iniciar sessão para guardar o perfil')
-      return
-    }
-    const tasks: Promise<any>[] = []
-    const nextName = displayName.trim()
-    if (nextName && nextName !== (user?.name || '')) {
-      tasks.push(
-        Promise.all([
-          updateDisplayName(nextName),
-          upsertUserProfile({ name: nextName }),
-        ]),
-      )
-    }
-    if (pendingAvatarUrl && pendingAvatarUrl !== (user?.avatarUrl || '')) {
-      // Persist photoURL and avatar identity together
-      tasks.push(
-        Promise.all([
-          updateAvatarUrl(pendingAvatarUrl),
-          setUserAvatarMeta({ avatarStyle, avatarSeed }),
-        ]),
-      )
-    }
-    if (!tasks.length) {
-      setSaveMsg('Nada para guardar')
-      return
-    }
-    try {
-      setSaveLoading(true)
-      setSaveMsg(null)
-      setLoadingOverlay(true, 'ProfileScreen')
-      await Promise.all(tasks)
-      setSuccessOverlay(true, 'Alterações guardadas')
-      setSaveMsg('Alterações guardadas')
-    } catch (e: any) {
-      const msg = e?.message || 'Não foi possível guardar as alterações'
-      setErrorOverlay(true, msg)
-      setSaveMsg(msg)
-    } finally {
-      setSaveLoading(false)
-      setLoadingOverlay(false)
-    }
-  }
-
-  const onGenerateNewAvatar = () => {
-    const seed = randomSeed()
-    setAvatarSeed(seed)
-    const url = generateAvatarUrl(avatarStyle, seed)
-    setPendingAvatarUrl(url)
-  }
-
-  const onChangeStyle = (style: AvatarStyle) => {
-    setAvatarStyle(style)
-    const url = generateAvatarUrl(style, avatarSeed)
-    setPendingAvatarUrl(url)
-  }
-
-  const onSaveEmail = async () => {
-    if (!isValidEmail(email)) {
-      setEmailError('Email inválido')
-      return
-    }
-    if (!emailCurrentPassword) {
-      setEmailError('Introduz a senha atual para confirmar a alteração')
-      return
-    }
-    setEmailError(null)
-    try {
-      setLoadingOverlay(true, 'ProfileScreen')
-      await changeEmail(emailCurrentPassword, email.trim())
-      await upsertUserProfile({ email: email.trim() })
-      setSuccessOverlay(true, 'Email atualizado. Verifica a caixa de entrada')
-    } catch (e: any) {
-      const msg = normalizeFirebaseError(e)
-      setErrorOverlay(true, msg)
-      setEmailError(msg)
-    }
-    setLoadingOverlay(false)
-  }
-
-  const [currentPassword, setCurrentPassword] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const pStrength = passwordStrength(newPassword)
-
-  const onChangePassword = async () => {
-    if (!currentPassword || !newPassword) return
-    if (newPassword !== confirmPassword) return
-    try {
-      setLoadingOverlay(true, 'ProfileScreen')
-      await changePassword(currentPassword, newPassword)
-      setSuccessOverlay(true, 'Senha atualizada com sucesso')
-      setCurrentPassword('')
-      setNewPassword('')
-      setConfirmPassword('')
-    } catch {
-      setErrorOverlay(true, 'Não foi possível alterar a senha')
-    }
-    setLoadingOverlay(false)
-  }
+  const theme = useTheme()
+  const colors = useThemeStore((s) => s.colorLevelUp)
+  const styles = createStyles(theme, colors)
 
   return (
-    <Container>
-      <ScrollView contentContainerStyle={styles.content}>
-        <UIText variant="xxLarge" weight="semiBold" style={styles.title}>
-          Perfil
-        </UIText>
+    <Container style={styles.container}>
+      <StatusBar backgroundColor={colors.level_five} barStyle="light-content" />
 
-        {/* Avatar */}
-        <View style={styles.card}>
-          <UIText variant="large" weight="semiBold" style={styles.cardTitle}>
-            Avatar
-          </UIText>
-          <View style={styles.avatarRow}>
-            <Image source={{ uri: pendingAvatarUrl }} style={styles.avatar} />
-            <View style={{ flex: 1 }}>
-              <TouchableOpacity
-                style={styles.buttonPrimary}
-                onPress={onGenerateNewAvatar}
-              >
-                <UIText style={styles.buttonPrimaryText}>Gerar novo</UIText>
-              </TouchableOpacity>
-            </View>
-          </View>
-          <View style={styles.stylesRow}>
-            {AVATAR_STYLES.map((s) => (
-              <TouchableOpacity
-                key={s}
-                onPress={() => onChangeStyle(s)}
-                style={[styles.chip, avatarStyle === s && styles.chipSelected]}
-              >
-                <UIText
-                  style={[
-                    styles.chipText,
-                    avatarStyle === s && styles.chipTextSelected,
-                  ]}
-                >
-                  {s}
-                </UIText>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
+      <ScrollView
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        <HeaderCloseTitle title={t('profile.title')} />
 
-        {/* Display name */}
-        <View style={styles.card}>
-          <UIText variant="large" weight="semiBold" style={styles.cardTitle}>
-            Nome de exibição
-          </UIText>
-          <TextInput
-            placeholder={computedDisplayName}
-            value={displayName}
-            onChangeText={setDisplayName}
-            style={styles.input}
-          />
-          <UIText variant="small" color={Colors.light.textSecondary}>
-            Se não definir, mostraremos um nome padrão como Explorador(a) ou
-            Utilizador(a) #1234.
-          </UIText>
-          <TouchableOpacity
-            style={[
-              styles.buttonPrimary,
-              displayName.trim() === (user?.name || '') && !avatarDirty
-                ? { opacity: 0.6 }
-                : null,
-            ]}
-            onPress={onSaveProfile}
-            disabled={displayName.trim() === (user?.name || '') && !avatarDirty}
-          >
-            <UIText style={styles.buttonPrimaryText}>
-              {saveLoading ? 'A guardar…' : 'Guardar alterações'}
-            </UIText>
-          </TouchableOpacity>
-          {saveMsg ? (
-            <UIText
-              variant="small"
-              style={{ marginTop: 6, color: Colors.light.textPrimary }}
-            >
-              {saveMsg}
-            </UIText>
-          ) : null}
-        </View>
+        <AvatarSection
+          styles={styles}
+          pendingAvatarUrl={pendingAvatarUrl}
+          onGenerateNewAvatar={onGenerateNewAvatar}
+          color={colors.level_five}
+        />
 
-        {/* Email */}
-        <View style={styles.card}>
-          <UIText variant="large" weight="semiBold" style={styles.cardTitle}>
-            Email
-          </UIText>
-          <TextInput
-            autoCapitalize="none"
-            keyboardType="email-address"
-            placeholder="o.teu@email.com"
-            value={email}
-            onChangeText={setEmail}
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Senha atual (necessária para alterar o email)"
-            secureTextEntry
-            value={emailCurrentPassword}
-            onChangeText={setEmailCurrentPassword}
-            style={styles.input}
-          />
-          {emailError ? (
-            <UIText
-              variant="small"
-              style={{ color: Colors.light.accentYellow }}
-            >
-              {emailError}
-            </UIText>
-          ) : null}
-          <TouchableOpacity
-            style={styles.buttonSecondary}
-            onPress={onSaveEmail}
-          >
-            <UIText style={styles.buttonSecondaryText}>Guardar email</UIText>
-          </TouchableOpacity>
-          <UIText variant="small" color={Colors.light.textSecondary}>
-            Ao alterar, enviaremos um email de confirmação.
-          </UIText>
-        </View>
+        <DisplayNameSection
+          styles={styles}
+          displayName={displayName}
+          setDisplayName={setDisplayName}
+          computedDisplayName={computedDisplayName}
+          saveLoading={saveLoading}
+          onSaveProfile={onSaveProfile}
+          originalName={originalName}
+          avatarDirty={avatarDirty}
+          color={colors.level_five}
+        />
 
-        {/* Password */}
-        <View style={styles.card}>
-          <UIText variant="large" weight="semiBold" style={styles.cardTitle}>
-            Alterar palavra‑passe
-          </UIText>
-          <TextInput
-            placeholder="Senha atual"
-            secureTextEntry
-            value={currentPassword}
-            onChangeText={setCurrentPassword}
-            style={styles.input}
-          />
-          <TextInput
-            placeholder="Nova senha"
-            secureTextEntry
-            value={newPassword}
-            onChangeText={setNewPassword}
-            style={styles.input}
-          />
-          {/* Strength meter */}
-          <View style={styles.strengthRow}>
-            <View
-              style={[styles.strengthBar, { backgroundColor: pStrength.color }]}
-            />
-            <UIText style={{ marginLeft: 8 }}>{pStrength.label}</UIText>
-          </View>
-          <TextInput
-            placeholder="Confirmar nova senha"
-            secureTextEntry
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            style={styles.input}
-          />
-          <TouchableOpacity
-            style={styles.buttonPrimary}
-            onPress={onChangePassword}
-            disabled={
-              !currentPassword ||
-              !newPassword ||
-              newPassword !== confirmPassword
-            }
-          >
-            <UIText style={styles.buttonPrimaryText}>Atualizar senha</UIText>
-          </TouchableOpacity>
-        </View>
+        <EmailSection
+          styles={styles}
+          email={email}
+          setEmail={setEmail}
+          emailError={emailError}
+          emailCurrentPassword={emailCurrentPassword}
+          setEmailCurrentPassword={setEmailCurrentPassword}
+          onSaveEmail={onSaveEmail}
+          color={colors.level_five}
+        />
+
+        <PasswordSection
+          styles={styles}
+          currentPassword={currentPassword}
+          newPassword={newPassword}
+          confirmPassword={confirmPassword}
+          setCurrentPassword={setCurrentPassword}
+          setNewPassword={setNewPassword}
+          setConfirmPassword={setConfirmPassword}
+          pStrength={pStrength}
+          onChangePassword={onChangePassword}
+          color={colors.level_five}
+        />
       </ScrollView>
     </Container>
   )
@@ -380,110 +310,148 @@ const Profile: React.FC = () => {
 
 export default Profile
 
-// Temporary simple secure prompt. In native, there's no prompt; you can replace with a proper modal.
-function normalizeFirebaseError(e: any): string {
-  const code = e?.code || ''
-  if (code.includes('auth/requires-recent-login'))
-    return 'É necessário voltar a autenticar.'
-  if (code.includes('auth/email-already-in-use')) return 'Email já em uso.'
-  if (code.includes('auth/invalid-email')) return 'Email inválido.'
-  return 'Não foi possível atualizar o email.'
-}
+const createStyles = (theme: ThemeType, colors?: ColorLevels) =>
+  StyleSheet.create({
+    container: {
+      backgroundColor: colors?.level_five,
+      paddingTop: 0,
+    },
+    contentContainer: {
+      paddingBottom: theme.spacings.xLarge,
+      paddingHorizontal: theme.spacings.medium,
+    },
 
-const styles = StyleSheet.create({
-  content: {
-    paddingBottom: spacings.xLarge,
-  },
-  title: {
-    marginBottom: spacings.large,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: spacings.medium,
-    marginBottom: spacings.large,
-    shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 1,
-  },
-  cardTitle: {
-    marginBottom: spacings.small,
-  },
-  avatarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: spacings.small,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    marginRight: spacings.medium,
-    backgroundColor: Colors.light.backgroundPrimary,
-  },
-  stylesRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  chip: {
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: Colors.light.backgroundSecondary,
-  },
-  chipSelected: {
-    backgroundColor: Colors.light.accentBlue,
-  },
-  chipText: {
-    ...typography.small,
-    color: Colors.light.textPrimary,
-  },
-  chipTextSelected: {
-    color: '#fff',
-  },
-  input: {
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    marginBottom: 8,
-  },
-  buttonPrimary: {
-    backgroundColor: Colors.light.accentBlue,
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 4,
-  },
-  buttonPrimaryText: {
-    color: '#fff',
-    fontWeight: '700',
-  },
-  buttonSecondary: {
-    backgroundColor: Colors.light.backgroundSecondary,
-    borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
-    marginTop: 4,
-    marginBottom: 6,
-  },
-  buttonSecondaryText: {
-    color: Colors.light.textPrimary,
-    fontWeight: '700',
-  },
-  strengthRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  strengthBar: {
-    height: 6,
-    borderRadius: 3,
-    flex: 1,
-    backgroundColor: '#ddd',
-  },
-})
+    card: {
+      backgroundColor: theme.colors.backgroundPrimary,
+      borderRadius: theme.spacings.xMedium,
+      padding: theme.spacings.medium,
+      marginBottom: theme.spacings.large,
+      borderWidth: theme.border.size,
+      borderColor: theme.colors.borderColor,
+    },
+    cardNoBottom: {
+      backgroundColor: theme.colors.backgroundPrimary,
+      borderRadius: theme.spacings.xMedium,
+      padding: theme.spacings.medium,
+      marginBottom: 0,
+      borderWidth: theme.border.size,
+      borderColor: theme.colors.borderColor,
+      borderBottomEndRadius: 0,
+      borderBottomStartRadius: 0,
+      borderBottomWidth: 0,
+    },
+    cardNoTop: {
+      backgroundColor: theme.colors.backgroundPrimary,
+      borderRadius: theme.spacings.xMedium,
+      padding: theme.spacings.medium,
+      marginBottom: theme.spacings.large,
+      borderWidth: theme.border.size,
+      borderColor: theme.colors.borderColor,
+      borderTopEndRadius: 0,
+      borderTopStartRadius: 0,
+      borderTopWidth: 0,
+    },
+    cardTitle: {
+      marginBottom: theme.spacings.small,
+    },
+
+    avatarRow: {
+      alignItems: 'center',
+    },
+    avatar: {
+      width: 80,
+      height: 80,
+      borderRadius: 40,
+      marginBottom: theme.spacings.medium,
+      backgroundColor: theme.colors.backgroundPrimary,
+    },
+    stylesRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: 8,
+    },
+    chip: {
+      paddingHorizontal: 10,
+      paddingVertical: 6,
+      borderRadius: theme.spacings.medium,
+      backgroundColor: theme.colors.backgroundSecondary,
+    },
+    chipSelected: {
+      backgroundColor: theme.colors.accentBlue,
+    },
+    chipText: {
+      color: theme.colors.textPrimary,
+      ...theme.typography.small,
+    },
+    chipTextSelected: {
+      color: '#fff',
+    },
+
+    input: {
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: theme.spacings.small,
+      paddingHorizontal: theme.spacings.xMedium,
+      paddingVertical: theme.spacings.xMedium,
+      marginBottom: theme.spacings.small,
+    },
+
+    buttonPrimary: {
+      backgroundColor: theme.colors.accentBlue,
+      borderRadius: theme.spacings.small,
+      paddingVertical: theme.spacings.xMedium,
+      alignItems: 'center',
+      marginTop: 4,
+    },
+    buttonPrimaryText: {
+      color: '#fff',
+      fontWeight: '700',
+    },
+    buttonSecondary: {
+      backgroundColor: theme.colors.backgroundSecondary,
+      borderRadius: theme.spacings.small,
+      paddingVertical: theme.spacings.xMedium,
+      alignItems: 'center',
+      marginTop: 4,
+      marginBottom: 6,
+    },
+    buttonSecondaryText: {
+      color: theme.colors.textPrimary,
+      fontWeight: '700',
+    },
+    disabled: {
+      opacity: 0.6,
+    },
+    buttonCenter: {
+      alignSelf: 'center',
+      marginBottom: theme.spacings.medium,
+    },
+    buttonCenterMargin: {
+      alignSelf: 'center',
+      marginVertical: theme.spacings.medium,
+    },
+    saveMsg: {
+      marginTop: 6,
+      color: theme.colors.textPrimary,
+    },
+
+    strengthRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginBottom: theme.spacings.small,
+    },
+    strengthBar: {
+      height: 6,
+      borderRadius: 3,
+      flex: 1,
+      backgroundColor: '#ddd',
+    },
+    strengthLabel: {
+      marginLeft: theme.spacings.small,
+      color: theme.colors.textPrimary,
+    },
+
+    error: {
+      color: theme.colors.accentYellow,
+    },
+  })

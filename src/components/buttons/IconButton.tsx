@@ -1,22 +1,31 @@
 import { useTheme } from '@/hooks/useTheme'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
-import { StyleSheet, TouchableOpacity, ViewStyle } from 'react-native'
+import {
+  StyleProp,
+  StyleSheet,
+  TouchableOpacity,
+  ViewStyle,
+} from 'react-native'
 
 type IconButtonProps = {
   icon: React.ReactNode
   onPress: () => void
-  styles?: ViewStyle
+  styles?: StyleProp<ViewStyle>
 }
 
 const IconButton = ({ icon, onPress, styles, ...props }: IconButtonProps) => {
   const theme = useTheme()
   const defaultStyles = createStyles(theme)
+
+  // garante que styles seja sempre array
+  const mergedStyles: StyleProp<ViewStyle> = [
+    defaultStyles.touchable,
+    ...(Array.isArray(styles) ? styles : [styles]),
+  ]
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={[defaultStyles.touchable, styles]}
-    >
+    <TouchableOpacity onPress={onPress} style={mergedStyles} {...props}>
       {icon}
     </TouchableOpacity>
   )

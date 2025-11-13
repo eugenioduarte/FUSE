@@ -1,9 +1,9 @@
+import { navigatorManager } from '@/navigation/navigatorManager'
+import { summariesRepository } from '@/services/repositories/summaries.repository'
+import { topicsRepository } from '@/services/repositories/topics.repository'
 import { useAuthStore } from '@/store'
 import { useFocusEffect } from '@react-navigation/native'
 import { useCallback, useEffect, useState } from 'react'
-import { navigatorManager } from '../../../../navigation/navigatorManager'
-import { summariesRepository } from '../../../../services/repositories/summaries.repository'
-import { topicsRepository } from '../../../../services/repositories/topics.repository'
 
 export type DashItem = {
   id: string
@@ -75,23 +75,22 @@ export default function useDashboard() {
     useCallback(() => {
       let active = true
       ;(async () => {
-        // Ensure we sync any topics where the user was added as a member
         try {
           const { syncUserTopicsMembership } = await import(
-            '../../../../services/firebase/invites.service'
+            '@/services/firebase/invites.service'
           )
           await syncUserTopicsMembership()
         } catch {}
-        // Flush local changes to backend and Firestore collaborators only when entering Dashboard
+
         try {
           const { processOfflineQueue } = await import(
-            '../../../../services/sync/sync.service'
+            '@/services/sync/sync.service'
           )
           await processOfflineQueue()
         } catch {}
         try {
           const { flushLocalCollaborativeChanges } = await import(
-            '../../../../services/firebase/collabFlush.service'
+            '@/services/firebase/collabFlush.service'
           )
           await flushLocalCollaborativeChanges()
         } catch {}

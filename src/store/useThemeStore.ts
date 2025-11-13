@@ -63,6 +63,7 @@ export const useThemeStore = create<ThemeState>((set) => ({
       'ChallengeRunMatrixScreen',
       'ChallengeRunTextAnswerScreen',
       'ChallengeFinishedScoreScreen',
+      'ProfileScreen',
     ]
     const visible = !authScreens.includes(type) && !runScreens.includes(type)
     set({ headerConfig: { title, type, visible } })

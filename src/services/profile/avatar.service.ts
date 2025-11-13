@@ -11,13 +11,11 @@ export type AvatarStyle =
   | 'identicon'
   | 'pixel-art'
   | 'pixel-art-neutral'
+  | 'thumbs'
 
 export const AVATAR_STYLES: AvatarStyle[] = [
-  'adventurer',
-  'bottts',
-  'identicon',
-  'pixel-art',
-  'fun-emoji',
+  // Use only DiceBear's Thumbs style for generated avatars
+  'thumbs',
 ]
 
 export function randomSeed() {
