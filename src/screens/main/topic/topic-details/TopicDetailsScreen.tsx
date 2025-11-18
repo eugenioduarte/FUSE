@@ -1,7 +1,9 @@
 import { Button, Container, Text } from '@/components'
+import EmptyContainer from '@/components/containers/EmptyContainer'
 import SubContainer from '@/components/containers/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
 import useTrackTopicSession from '@/hooks/useTrackTopicSession'
+import { t } from '@/locales/translation'
 import {
   navigatorManager,
   RootStackParamList,
@@ -16,18 +18,17 @@ import { Summary, Topic } from '@/types/domain'
 import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
 import React, { useCallback, useEffect, useState } from 'react'
-import { ActivityIndicator, ScrollView, StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import TopicLinksContainer from './components/TopicLinksContainer'
-import TopicNotFounded from './components/TopicNotFounded'
 import TopicSummaryCard from './components/TopicSummaryCard'
 
 const TopicDetailsScreen: React.FC = () => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_three)
+  const color = useThemeStore((s) => s.colorLevelUp.level_four)
   const styles = createStyles(theme, color)
   const route = useRoute<RouteProp<RootStackParamList, 'TopicDetailsScreen'>>()
   const { topicId } = route.params
-  const { setEditOverlay } = useOverlay()
+  const { setEditOverlay, setLoadingOverlay } = useOverlay()
   const [topic, setTopic] = useState<Topic | null>(null)
   const [loading, setLoading] = useState(true)
   const [summaries, setSummaries] = useState<Summary[]>([])
@@ -73,27 +74,16 @@ const TopicDetailsScreen: React.FC = () => {
     }, [topicId]),
   )
 
-  const bgForHeader = topic?.backgroundColor || color
-  const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
   useEffect(() => {
-    setBackgroundColor(bgForHeader)
-  }, [bgForHeader, setBackgroundColor])
-  useFocusEffect(
-    useCallback(() => {
-      setBackgroundColor(bgForHeader)
-    }, [bgForHeader, setBackgroundColor]),
-  )
-
-  if (loadingSummaries || loading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator />
-      </View>
-    )
-  }
+    const isLoading = loading || loadingSummaries
+    setLoadingOverlay(isLoading, t('common.loading'))
+    return () => {
+      setLoadingOverlay(false)
+    }
+  }, [loading, loadingSummaries, setLoadingOverlay])
 
   if (!topic) {
-    return <TopicNotFounded />
+    return <EmptyContainer />
   }
 
   return (
@@ -125,19 +115,13 @@ const TopicDetailsScreen: React.FC = () => {
           {summaries.length > 0 && (
             <View style={styles.summariesWrapper}>
               {summaries.map((s) => {
-                return (
-                  <TopicSummaryCard
-                    key={s.id}
-                    summary={s}
-                    bg={topic.backgroundColor}
-                  />
-                )
+                return <TopicSummaryCard key={s.id} summary={s} bg={color} />
               })}
             </View>
           )}
         </ScrollView>
         <Button
-          title="Criar resumo"
+          title={t('topicDetails.create_summary')}
           onPress={() => navigatorManager.goToSummary({ topicId })}
           background={color}
           style={styles.createButtonAlign}
@@ -151,11 +135,6 @@ export default TopicDetailsScreen
 
 const createStyles = (theme: ThemeType, color: string) =>
   StyleSheet.create({
-    loading: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
     container: {
       flex: 1,
     },

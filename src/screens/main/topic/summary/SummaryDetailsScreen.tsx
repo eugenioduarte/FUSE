@@ -1,35 +1,32 @@
 import { Button, Container, Text } from '@/components'
+import EmptyContainer from '@/components/containers/EmptyContainer'
 import SubContainer from '@/components/containers/SubContainer'
 import TermSnippetModal from '@/components/ui/TermSnippetModal'
 import ExpandableText from '@/components/utils/ExpandableText'
 import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
 import {
   navigatorManager,
   RootStackParamList,
 } from '@/navigation/navigatorManager'
+import { useOverlay } from '@/store/useOverlay'
 import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useRoute } from '@react-navigation/native'
-import React from 'react'
-import {
-  ActivityIndicator,
-  ScrollView,
-  StyleSheet,
-  TouchableOpacity,
-  View,
-} from 'react-native'
+import React, { useEffect } from 'react'
+import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import SummaryDetailsLinksContainer from './components/SummaryDetailsLinksContainer'
 import { useSummaryDetails } from './hooks/useSummaryDetails'
 
 const SummaryDetailsScreen: React.FC = () => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_two)
-  const styles = createStyles(theme, color)
+  const color = useThemeStore((s) => s.colorLevelUp.level_six)
   const route =
     useRoute<RouteProp<RootStackParamList, 'SummaryDetailsScreen'>>()
   const { summaryId } = route.params
   const insets = useSafeAreaInsets()
+  const { setLoadingOverlay } = useOverlay()
 
   const {
     summary,
@@ -47,25 +44,19 @@ const SummaryDetailsScreen: React.FC = () => {
     initialSummary: route.params.summary ?? null,
   })
 
-  if (loading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator />
-      </View>
-    )
-  }
+  const styles = createStyles(theme, color, insets.bottom, bodyColor)
+
+  useEffect(() => {
+    setLoadingOverlay(loading, t('common.loading'))
+    return () => setLoadingOverlay(false)
+  }, [loading, setLoadingOverlay])
 
   if (!summary) {
-    return (
-      <View style={[styles.notFound, { backgroundColor: color }]}>
-        <Text style={styles.notFoundTitle}>Resumo não encontrado</Text>
-        <Text style={styles.notFoundId}>ID: {summaryId}</Text>
-      </View>
-    )
+    return <EmptyContainer />
   }
 
   return (
-    <Container style={{ backgroundColor: color }}>
+    <Container style={styles.container}>
       <SubContainer>
         <SummaryDetailsLinksContainer
           summary={summary}
@@ -73,19 +64,13 @@ const SummaryDetailsScreen: React.FC = () => {
           handleDownload={handleDownload}
         />
 
-        <Text
-          variant="xxLarge"
-          style={{ marginVertical: theme.spacings.medium }}
-        >
-          {summary.title || 'Resumo'}
+        <Text variant="xxLarge" style={styles.title}>
+          {summary.title || t('summary.default_title')}
         </Text>
 
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={[
-            styles.scrollContent,
-            { paddingBottom: insets.bottom + 80 },
-          ]}
+          contentContainerStyle={styles.scrollContent}
           horizontal={false}
         >
           <ExpandableText
@@ -95,12 +80,12 @@ const SummaryDetailsScreen: React.FC = () => {
               (summary.keywords || []).map((k) => ({ term: k }))
             }
             onPressTerm={openSnippet}
-            style={{ color: bodyColor, lineHeight: 20 }}
+            style={styles.contentText}
           />
 
           {!!summary.recommendations?.length && (
             <View style={styles.recommendationsWrapper}>
-              <Text variant="large">Você também pode querer explorar…</Text>
+              <Text variant="large">{t('summary.recommendations.title')}</Text>
 
               <View style={styles.recommendationsList}>
                 {summary.recommendations.map((rec) => (
@@ -122,7 +107,7 @@ const SummaryDetailsScreen: React.FC = () => {
 
         <Button
           onPress={() => navigatorManager.goToChallengeAdd({ summaryId })}
-          title="Criar challenge"
+          title={t('summary.create_challenge')}
           style={styles.createButton}
           background={color}
         />
@@ -143,30 +128,32 @@ const SummaryDetailsScreen: React.FC = () => {
 
 export default SummaryDetailsScreen
 
-const createStyles = (theme: ThemeType, color: string) =>
+const createStyles = (
+  theme: ThemeType,
+  color: string,
+  insetBottom: number,
+  bodyColor: string,
+) =>
   StyleSheet.create({
-    loading: {
-      flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
+    container: {
+      backgroundColor: color,
+    },
+    title: {
+      marginVertical: theme.spacings.medium,
+    },
+    contentText: {
+      color: bodyColor,
+      lineHeight: 20,
     },
     notFound: {
       flex: 1,
       padding: theme.spacings.medium,
     },
-    notFoundTitle: {
-      color: '#fff',
-      fontSize: 18,
-      fontWeight: '700',
-    },
-    notFoundId: {
-      color: '#9ca3af',
-      marginTop: theme.spacings.small,
-    },
     scrollContent: {
       flexGrow: 1,
       width: '100%',
       overflow: 'hidden',
+      paddingBottom: insetBottom + 80,
     },
     recommendationsWrapper: {
       marginTop: theme.spacings.medium,
@@ -192,7 +179,7 @@ const createStyles = (theme: ThemeType, color: string) =>
       alignSelf: 'center',
     },
     bullet: {
-      backgroundColor: theme.colors.accentYellow,
+      backgroundColor: color,
       width: 10,
       height: 10,
       borderRadius: 5,

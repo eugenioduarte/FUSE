@@ -87,6 +87,8 @@
   "termSnippet.create_button": "Criar resumo sobre este tema",
   "termSnippet.mini_suffix": "...",
   "summary.default_title": "Resumo",
+  "summary.recommendations.title": "Você também pode querer explorar…",
+  "summary.create_challenge": "Criar challenge",
   "summary.download_not_supported": "O download em PDF não é suportado no Web.",
   "summary.share_dialog_title": "Compartilhar PDF",
   "summary.pdf_saved": "PDF salvo em: {path}",

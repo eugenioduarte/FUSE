@@ -32,9 +32,12 @@ const TopicCard = ({ item }: TopicCardProps) => {
             resizeMode="contain"
           />
         </View>
-        <View style={styles.spacer} />
+
         <View style={styles.content}>
-          <Text variant="xxLarge" style={{ fontSize: 50, lineHeight: 60 }}>
+          <Text
+            variant="xxLarge"
+            style={{ fontSize: 50, lineHeight: 60, textAlign: 'right' }}
+          >
             {item.title.split(' ')[0]}
           </Text>
           <View
@@ -79,6 +82,7 @@ const createStyles = (theme: ThemeType) =>
       position: 'absolute',
       bottom: 0,
       left: theme.spacings.small,
+      zIndex: 1,
     },
     image: {
       width: 120,
@@ -92,6 +96,7 @@ const createStyles = (theme: ThemeType) =>
       flex: 1,
       justifyContent: 'flex-end',
       alignItems: 'flex-end',
+      width: '100%',
     },
     chevron: {
       marginTop: theme.spacings.xSmall,

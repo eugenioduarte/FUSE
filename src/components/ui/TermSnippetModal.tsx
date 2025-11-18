@@ -2,6 +2,7 @@ import { CloseIcon } from '@/assets/icons'
 import { Button, Text } from '@/components'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
+import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import { DEFAULT_ICON_SIZE } from '@expo/vector-icons/build/createIconSet'
 import React from 'react'
@@ -24,7 +25,7 @@ const TermSnippetModal: React.FC<Props> = ({
 }) => {
   const theme = useTheme()
   const styles = createStyles(theme)
-
+  const color = useThemeStore((s) => s.colorLevelUp.level_six)
   return (
     <Modal
       visible={visible}
@@ -52,7 +53,7 @@ const TermSnippetModal: React.FC<Props> = ({
           <Button
             title={t('termSnippet.create_button')}
             onPress={() => term && onCreateSummary(term)}
-            background={theme.colors.accentYellow}
+            background={color}
             style={styles.createButton}
           />
         </View>
@@ -70,7 +71,7 @@ const createStyles = (theme: ThemeType) =>
       justifyContent: 'flex-end',
     },
     sheet: {
-      backgroundColor: theme.colors.backgroundSecondary,
+      backgroundColor: theme.colors.backgroundPrimary,
       borderTopLeftRadius: theme.border.radius16,
       borderTopRightRadius: theme.border.radius16,
       padding: theme.spacings.medium,

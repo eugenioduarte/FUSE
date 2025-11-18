@@ -3,7 +3,6 @@ import { Text } from '@/components'
 import IconButton from '@/components/buttons/IconButton'
 import { useTheme } from '@/hooks/useTheme'
 import { navigatorManager } from '@/navigation/navigatorManager'
-import { useThemeStore } from '@/store/useThemeStore'
 import { Summary } from '@/types/domain'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
@@ -11,7 +10,7 @@ import { StyleSheet, TouchableOpacity, View } from 'react-native'
 
 type TopicSummaryCardProps = {
   summary: Summary
-  bg?: string
+  bg?: string | undefined
 }
 
 const ICON_SIZE = 20
@@ -19,8 +18,7 @@ const TOTAL_CHARACTERS = 160
 
 const TopicSummaryCard = ({ summary, bg }: TopicSummaryCardProps) => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_three)
-  const styles = createStyles(theme, color)
+  const styles = createStyles(theme, bg)
 
   return (
     <TouchableOpacity
@@ -61,7 +59,7 @@ const TopicSummaryCard = ({ summary, bg }: TopicSummaryCardProps) => {
 
 export default TopicSummaryCard
 
-const createStyles = (theme: ThemeType, bg: string) =>
+const createStyles = (theme: ThemeType, bg?: string) =>
   StyleSheet.create({
     card: {
       borderRadius: theme.border.radius10,
