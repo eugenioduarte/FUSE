@@ -18,7 +18,6 @@ const IconButton = ({ icon, onPress, styles, ...props }: IconButtonProps) => {
   const theme = useTheme()
   const defaultStyles = createStyles(theme)
 
-  // garante que styles seja sempre array
   const mergedStyles: StyleProp<ViewStyle> = [
     defaultStyles.touchable,
     ...(Array.isArray(styles) ? styles : [styles]),
@@ -36,7 +35,7 @@ export default IconButton
 const createStyles = (theme: ThemeType) =>
   StyleSheet.create({
     touchable: {
-      backgroundColor: theme.colors.backgroundSecondary,
+      backgroundColor: theme.colors.backgroundPrimary,
       width: 35,
       height: 35,
       borderRadius: 99,

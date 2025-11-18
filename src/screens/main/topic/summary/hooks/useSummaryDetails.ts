@@ -5,7 +5,6 @@ import { topicsRepository } from '@/services/repositories/topics.repository'
 import { whiteboardRepository } from '@/services/repositories/whiteboard.repository'
 import { startSession, stopSessionByKey } from '@/services/usage/usageTracker'
 import { useOverlay } from '@/store/useOverlay'
-import { useThemeStore } from '@/store/useThemeStore'
 import { Summary } from '@/types/domain'
 import { reportError } from '@/utils/errorLogger'
 import * as FileSystem from 'expo-file-system/legacy'
@@ -64,8 +63,6 @@ export const useSummaryDetails = ({
   const colored = !!topicColor
   const titleColor = colored ? '#111' : 'white'
   const bodyColor = colored ? '#222' : '#ddd'
-  const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
-  useEffect(() => setBackgroundColor(bg), [bg, setBackgroundColor])
 
   useEffect(() => {
     let sessionKey: string | null = null
@@ -90,8 +87,8 @@ export const useSummaryDetails = ({
     (s: string) =>
       (s || '')
         .normalize('NFD')
-        .replace(/[^\\w\\s-]/g, '')
-        .replace(/\\s+/g, '_')
+        .replace(/[^\w\s-]/g, '')
+        .replace(/\s+/g, '_')
         .replace(/_+/g, '_')
         .replace(/(^_+)|(_+$)/g, ''),
     [],

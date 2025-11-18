@@ -27,21 +27,24 @@ const SummaryDetailsLinksContainer = ({
 
   return (
     <View style={styles.row}>
-      <IconButton
-        icon={<AudioIcon width={ICON_SIZE} height={ICON_SIZE} />}
-        onPress={() => navigatorManager.goToSummaryAudio({ summaryId: id })}
-      />
-      <IconButton
-        icon={<QuizIcon width={ICON_SIZE} height={ICON_SIZE} />}
-        onPress={() => navigatorManager.goToChallengesList({ summaryId: id })}
-      />
+      <View style={styles.subRow}>
+        <IconButton
+          icon={<AudioIcon width={ICON_SIZE} height={ICON_SIZE} />}
+          onPress={() => navigatorManager.goToSummaryAudio({ summaryId: id })}
+        />
+        <IconButton
+          icon={<QuizIcon width={ICON_SIZE} height={ICON_SIZE} />}
+          onPress={() => navigatorManager.goToChallengesList({ summaryId: id })}
+        />
+        <IconButton
+          icon={<DownloadIcon width={ICON_SIZE} height={ICON_SIZE} />}
+          onPress={() => handleDownload()}
+        />
+      </View>
+
       <IconButton
         icon={<DeleteIcon width={ICON_SIZE} height={ICON_SIZE} />}
         onPress={() => handleDeleteSummary(() => navigatorManager.goBack())}
-      />
-      <IconButton
-        icon={<DownloadIcon width={ICON_SIZE} height={ICON_SIZE} />}
-        onPress={() => handleDownload()}
       />
     </View>
   )
@@ -57,5 +60,7 @@ const createStyles = (theme: ThemeType) =>
       alignItems: 'center',
       marginTop: theme.spacings.small,
       gap: theme.spacings.small,
+      width: '100%',
     },
+    subRow: { flexDirection: 'row', gap: theme.spacings.small },
   })
