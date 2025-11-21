@@ -23,7 +23,7 @@ const createStyles = (theme: ThemeType) =>
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: theme.colors.backgroundPrimary,
+      backgroundColor: theme.colors.backgroundTertiary,
       borderWidth: theme.border.size,
       borderColor: theme.colors.borderColor,
       paddingTop: theme.spacings.xSmall,

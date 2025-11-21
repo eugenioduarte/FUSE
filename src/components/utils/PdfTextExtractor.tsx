@@ -49,10 +49,21 @@ export default function PdfTextExtractor({
     result: { ok: true; text: string } | { ok: false; error: string },
   ) => void
 }>) {
-  const injected = useMemo(
-    () => `(${String(() => {})})(); extractPdfText(${JSON.stringify(base64)});`,
-    [base64],
-  )
+  const injected = useMemo(() => {
+    const b64 = JSON.stringify(base64)
+    return `
+      (function(b64){
+        function run(){
+          if(window.pdfjsLib && typeof extractPdfText === 'function'){
+            try{ extractPdfText(b64); }catch(e){ window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'err', error: String(e) })) }
+          } else {
+            setTimeout(run, 100);
+          }
+        }
+        run();
+      })(${b64});
+    `
+  }, [base64])
 
   const onMessage = (e: WebViewMessageEvent) => {
     try {

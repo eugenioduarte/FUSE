@@ -1,6 +1,5 @@
-import { HomeIcon } from '@/assets/icons'
+import { CloseIcon, HomeIcon } from '@/assets/icons'
 import { Text } from '@/components'
-import CloseButton from '@/components/buttons/CloseButton'
 import IconButton from '@/components/buttons/IconButton'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
@@ -96,11 +95,13 @@ const FastWayOverlay: React.FC = () => {
               icon={<HomeIcon width={24} height={24} />}
             />
           )}
-          <CloseButton
+          <IconButton
             onPress={() => {
               setFastWayOverlay(false)
               fast.reset()
             }}
+            styles={styles.iconButtonTransparent}
+            icon={<CloseIcon width={24} height={24} />}
           />
         </View>
         <ScrollView style={styles.card} showsVerticalScrollIndicator={false}>
@@ -393,7 +394,7 @@ const createStyles = (theme: ThemeType, color: string) =>
     },
     iconButtonTransparent: {
       borderWidth: 0,
-      backgroundColor: 'transparent',
+      backgroundColor: theme.colors.backgroundTertiary,
     },
     headerRowBottom: {
       marginBottom: 8,

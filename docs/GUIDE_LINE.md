@@ -217,5 +217,3 @@ A Pull Request can only be approved if:
 > **Any PR that does not follow these rules will be automatically rejected.**
 
 ---
-
-If you want, I can also generate a version for README, onboarding, or a printable cheat sheet.

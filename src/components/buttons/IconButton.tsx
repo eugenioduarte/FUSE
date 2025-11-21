@@ -35,7 +35,7 @@ export default IconButton
 const createStyles = (theme: ThemeType) =>
   StyleSheet.create({
     touchable: {
-      backgroundColor: theme.colors.backgroundPrimary,
+      backgroundColor: theme.colors.backgroundTertiary,
       width: 35,
       height: 35,
       borderRadius: 99,

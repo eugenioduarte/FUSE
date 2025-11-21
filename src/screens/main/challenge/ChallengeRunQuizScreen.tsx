@@ -7,7 +7,7 @@ import {
 } from '@/navigation/navigatorManager'
 import { useThemeStore } from '@/store/useThemeStore'
 import { RouteProp, useRoute } from '@react-navigation/native'
-import React, { useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 
 import { t } from '@/locales/translation'
 import {
@@ -50,7 +50,7 @@ const StepDot = ({ active, styles, theme, questionsLength }: StepDotProps) => {
 
 const ChallengeRunQuizScreen: React.FC = () => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_two)
+  const color = useThemeStore((s) => s.colorLevelUp.level_eight)
   const styles = createStyles(theme, color)
   const route =
     useRoute<RouteProp<RootStackParamList, 'ChallengeRunQuizScreen'>>()
@@ -71,6 +71,11 @@ const ChallengeRunQuizScreen: React.FC = () => {
     onContinue,
     forceFinish,
   } = useChallengeRunQuiz(challengeId, true)
+
+  const setBackgroundColor = useThemeStore((state) => state.setBackgroundColor)
+  useEffect(() => {
+    setBackgroundColor(color)
+  }, [color, setBackgroundColor])
 
   React.useEffect(() => {
     if (!finished) return

@@ -9,7 +9,7 @@ import { useOverlay } from '@/store/useOverlay'
 import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useRoute } from '@react-navigation/native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
 import ChallengeErrorDisplay from './components/ChallengeErrorDisplay'
 import ChallengeRunClose from './components/ChallengeRunClose'
@@ -17,8 +17,11 @@ import ChallengeRunClose from './components/ChallengeRunClose'
 const ChallengeRunMatrixScreen: React.FC = () => {
   const theme = useTheme()
   const styles = createStyles(theme)
-  const color = useThemeStore((s) => s.colorLevelUp.level_five)
-
+  const color = useThemeStore((s) => s.colorLevelUp.level_eight)
+  const setBackgroundColor = useThemeStore((state) => state.setBackgroundColor)
+  useEffect(() => {
+    setBackgroundColor(color)
+  }, [color, setBackgroundColor])
   const route =
     useRoute<RouteProp<RootStackParamList, 'ChallengeRunMatrixScreen'>>()
   const challengeId = route.params?.challengeId!

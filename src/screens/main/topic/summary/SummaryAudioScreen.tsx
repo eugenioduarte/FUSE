@@ -1,7 +1,7 @@
 import { RouteProp, useRoute } from '@react-navigation/native'
 import type { AVPlaybackStatus } from 'expo-av'
 import { Audio } from 'expo-av'
-import * as FileSystem from 'expo-file-system'
+import * as FileSystem from 'expo-file-system/legacy'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import {
   ActivityIndicator,

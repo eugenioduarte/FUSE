@@ -7,7 +7,7 @@ import { t } from '@/locales/translation'
 import { ColorLevels, useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
-import { Image, ScrollView, StatusBar, StyleSheet, View } from 'react-native'
+import { Image, ScrollView, StyleSheet, View } from 'react-native'
 import useProfile from './useProfile'
 
 type Styles = ReturnType<typeof createStyles>
@@ -253,8 +253,6 @@ const Profile: React.FC = () => {
 
   return (
     <Container style={styles.container}>
-      <StatusBar backgroundColor={colors.level_five} barStyle="light-content" />
-
       <ScrollView
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
