@@ -3,6 +3,7 @@ import { useThemeStore } from '@/store/useThemeStore'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Dimensions, Easing } from 'react-native'
 // navigatorManager not required in hook
+import { buildHangmanPrompt, HANGMAN_SYSTEM } from '@/services/prompts'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
@@ -386,31 +387,14 @@ function pickWordsFromText(text: string, total: number): string[] {
 
 type HangmanGen = { question: string; answer: string }
 
-function buildHangmanPrompt(summaryText: string, total: number) {
-  return [
-    'Você criará desafios de Hangman baseados no texto de estudo.',
-    'Responda SOMENTE em JSON com a chave: rounds (array).',
-    'Cada item de rounds deve ter:',
-    '- question: string (a pergunta ou dica)',
-    '- answer: string (apenas uma palavra, somente letras, até 10 caracteres, sem espaços)',
-    `Gere exatamente ${Math.max(2, Math.min(5, total))} itens.`,
-    'Baseie-se exclusivamente no texto abaixo:',
-    '"""',
-    summaryText,
-    '""",',
-  ].join('\n')
-}
+// buildHangmanPrompt moved to src/services/prompts
 
 async function generateHangmanRounds(prompt: string): Promise<HangmanGen[]> {
   try {
     const body = JSON.stringify({
       model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
       messages: [
-        {
-          role: 'system',
-          content:
-            'Você gera rounds de Hangman. Responda SOMENTE em JSON com { rounds: Array<{question, answer}> }.',
-        },
+        { role: 'system', content: HANGMAN_SYSTEM },
         { role: 'user', content: prompt },
       ],
       temperature: 0.4,

@@ -1,4 +1,5 @@
 import useTrackTopicSession from '@/hooks/useTrackTopicSession'
+import { MATRIX_SYSTEM, matrixUserPrompt } from '@/services/prompts'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -32,22 +33,8 @@ async function generateMatrixQA(
     const body = JSON.stringify({
       model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
       messages: [
-        {
-          role: 'system',
-          content:
-            'Crie uma pergunta objetiva e 5 respostas de uma palavra, relacionadas ao texto. Responda SOMENTE em JSON: { question: string, words: string[5] }',
-        },
-        {
-          role: 'user',
-          content: [
-            'Gere uma pergunta (ex.: Cite 5 países da América Latina) e 5 palavras exatas como respostas.',
-            'Restrições das palavras: apenas letras (sem espaços), até 10 caracteres, maiúsculas.',
-            'Retorne SOMENTE JSON válido.',
-            'Texto base:\n"""',
-            summary,
-            '"""',
-          ].join('\n'),
-        },
+        { role: 'system', content: MATRIX_SYSTEM },
+        { role: 'user', content: matrixUserPrompt(summary) },
       ],
       temperature: 0.4,
     })

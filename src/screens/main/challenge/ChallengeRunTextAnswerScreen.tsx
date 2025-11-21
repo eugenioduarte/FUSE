@@ -12,6 +12,11 @@ import {
   RootStackParamList,
   navigatorManager,
 } from '../../../navigation/navigatorManager'
+import {
+  TEXT_EVALUATION_PROMPT,
+  TEXT_EXERCISES_SYSTEM,
+  buildTextExercisesPrompt,
+} from '../../../services/prompts'
 import { challengesRepository } from '../../../services/repositories/challenges.repository'
 import { summariesRepository } from '../../../services/repositories/summaries.repository'
 import { useAuthStore } from '../../../store/useAuthStore'
@@ -464,21 +469,8 @@ async function generateOpenQuestionSet(
     const body = JSON.stringify({
       model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
       messages: [
-        {
-          role: 'system',
-          content:
-            'Crie perguntas abertas (respostas discursivas) sobre o texto. Responda SOMENTE em JSON: { exercises: Array<{ question: string, correctAnswer: string }> }.',
-        },
-        {
-          role: 'user',
-          content: [
-            `Gere exatamente ${total} perguntas elaboradas que exijam resposta discursiva.`,
-            'Inclua para cada uma a resposta correta concisa e objetiva. Responda somente em JSON válido.',
-            'Texto base:\n"""',
-            summary,
-            '"""',
-          ].join('\n'),
-        },
+        { role: 'system', content: TEXT_EXERCISES_SYSTEM },
+        { role: 'user', content: buildTextExercisesPrompt(summary, total) },
       ],
       temperature: 0.4,
     })
@@ -521,11 +513,7 @@ async function evaluateOpenAnswer(
     const body = JSON.stringify({
       model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
       messages: [
-        {
-          role: 'system',
-          content:
-            'Avalie a resposta do aluno. Responda SOMENTE JSON: { score: number (0-10), feedback?: string }',
-        },
+        { role: 'system', content: TEXT_EVALUATION_PROMPT },
         {
           role: 'user',
           content: [

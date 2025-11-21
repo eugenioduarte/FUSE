@@ -1,3 +1,4 @@
+import { buildQuizPrompt, QUIZ_SYSTEM } from '@/services/prompts'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
@@ -253,31 +254,14 @@ function computeScore(
   return score
 }
 
-function buildQuizPrompt(summaryText: string, total: number) {
-  return [
-    'Você é um assistente que cria quizzes de múltipla escolha a partir de um texto de estudo.',
-    'Responda SOMENTE em JSON com a chave: questions (array).',
-    'Cada item de questions deve ter:',
-    '- question: string;',
-    '- options: array de 5 itens, cada item: { text: string; correct: boolean; explanation: string }',
-    `Gere exatamente ${total} perguntas.`,
-    'O texto de estudo é o seguinte:',
-    '"""',
-    summaryText,
-    '"""',
-  ].join('\n')
-}
+// Prompt builder moved to src/services/prompts
 
 async function generateQuiz(prompt: string): Promise<AIQuizResponse> {
   try {
     const body = JSON.stringify({
       model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
       messages: [
-        {
-          role: 'system',
-          content:
-            'Você cria quizzes. Responda SOMENTE em JSON com { questions: Array } conforme especificado.',
-        },
+        { role: 'system', content: QUIZ_SYSTEM },
         { role: 'user', content: prompt },
       ],
       temperature: 0.3,
