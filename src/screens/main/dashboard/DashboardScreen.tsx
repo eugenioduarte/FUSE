@@ -14,7 +14,7 @@ import useDashboard from './hooks/useDashboard'
 
 export default function DashboardScreen() {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const { items, loading } = useDashboard()
 
   const styles = createStyles(theme, color)

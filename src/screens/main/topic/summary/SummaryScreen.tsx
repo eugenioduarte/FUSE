@@ -13,7 +13,7 @@ import useSummaryScreen from './useSummaryScreen'
 const SummaryScreen = () => {
   const theme = useTheme()
   const route = useRoute<RouteProp<RootStackParamList, 'SummaryScreen'>>()
-  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const styles = createStyles(theme, color)
 
   const initialTopicId = route.params?.topicId ?? 'topic-1'
@@ -103,7 +103,8 @@ const createStyles = (theme: any, color?: string) =>
       borderColor: theme.colors.borderColor,
       borderRadius: 16,
       padding: 10,
-      minHeight: 150,
+      minHeight: '40%',
+      backgroundColor: theme.colors.backgroundPrimary,
     },
     buttonRow: {
       alignItems: 'center',

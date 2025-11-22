@@ -47,7 +47,6 @@ import ChallengeRunHangmanScreen from '../screens/main/challenge/ChallengeRunHan
 import ChallengeRunMatrixScreen from '../screens/main/challenge/ChallengeRunMatrixScreen'
 import ChallengeRunQuizScreen from '../screens/main/challenge/ChallengeRunQuizScreen'
 import ChallengeRunTextAnswerScreen from '../screens/main/challenge/ChallengeRunTextAnswerScreen'
-import ChallengeScreen from '../screens/main/challenge/ChallengeScreen'
 import ChallengesListScreen from '../screens/main/challenge/ChallengesListScreen'
 
 // Topic details & summary
@@ -205,11 +204,6 @@ function MainStack() {
       />
 
       {/* Challenge */}
-      <Stack.Screen
-        name={ROUTES.ChallengeScreen}
-        component={ChallengeScreen}
-        options={{ title: ROUTES.ChallengeScreen }}
-      />
       <Stack.Screen
         name={ROUTES.ChallengeAddScreen}
         component={ChallengeAddScreen}

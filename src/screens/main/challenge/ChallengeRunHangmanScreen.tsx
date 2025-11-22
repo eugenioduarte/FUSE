@@ -1,46 +1,42 @@
+import { Button, Text } from '@/components'
+import EmptyContainer from '@/components/containers/EmptyContainer'
+import LoadingContainer from '@/components/containers/LoadingContainer'
+import StepDot from '@/components/stepDot/StepDot'
+import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
 import {
   navigatorManager,
   RootStackParamList,
 } from '@/navigation/navigatorManager'
+import { useThemeStore } from '@/store/useThemeStore'
+import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React from 'react'
 import {
-  ActivityIndicator,
   Animated,
   ScrollView,
-  Text,
+  StyleSheet,
   TouchableOpacity,
   View,
 } from 'react-native'
 import ChallengeRunClose from './components/ChallengeRunClose'
 import useChallengeRunHangman from './hooks/useChallengeRunHangman'
-
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 
-const StepDot = ({ active }: { active: boolean }) => (
-  <View
-    style={{
-      width: 10,
-      height: 10,
-      borderRadius: 5,
-      marginHorizontal: 4,
-      backgroundColor: active ? '#60a5fa' : '#374151',
-    }}
-  />
-)
-
 const ChallengeRunHangmanScreen: React.FC = () => {
+  const theme = useTheme()
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
+  const styles = createStyles(theme, color)
+
   const route =
     useRoute<RouteProp<RootStackParamList, 'ChallengeRunHangmanScreen'>>()
   const challengeId = route.params?.challengeId!
 
   const {
-    loading,
-    topicColor,
     challenge,
     rounds,
     step,
-    revealed,
+    loading,
     letters,
     wrongs,
     maxWrongs,
@@ -54,215 +50,204 @@ const ChallengeRunHangmanScreen: React.FC = () => {
     finished,
   } = useChallengeRunHangman(challengeId)
 
+  React.useEffect(() => {
+    if (!finished) return
+    navigatorManager.goToChallengeFinishedScore({
+      score: finished.score,
+      total: finished.total,
+    })
+  }, [finished])
+
   if (loading) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundColor: topicColor || '#0b0b0c',
-        }}
-      >
-        <ActivityIndicator />
-      </View>
-    )
+    return <LoadingContainer screenName={'Hangman'} />
   }
 
   if (!challenge || rounds.length === 0) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: topicColor || '#0b0b0c',
-          padding: 16,
-        }}
-      >
-        <Text style={{ color: topicColor ? '#111' : 'white' }}>
-          Hangman indisponível.
-        </Text>
-      </View>
-    )
+    return <EmptyContainer />
   }
 
   return (
-    <View style={{ flex: 1, backgroundColor: topicColor || '#0b0b0c' }}>
+    <View style={styles.container}>
       <ChallengeRunClose onConfirm={forceFinish} />
 
-      <View
-        style={{
-          paddingHorizontal: 16,
-          paddingTop: 16,
-          paddingBottom: 8,
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}
-      >
-        <Text
-          style={{
-            color: topicColor ? '#111' : 'white',
-            fontSize: 18,
-            fontWeight: '700',
-          }}
-        >
-          {challenge.title}
-        </Text>
-        <View style={{ flexDirection: 'row' }}>
+      <View style={styles.headerRow}>
+        <Text variant="xxLarge">{challenge.title}</Text>
+        <View style={styles.dotsRow}>
           {rounds.map((r, i) => (
             <StepDot key={`${i}-${r.word}`} active={i === step} />
           ))}
         </View>
       </View>
 
-      {finished ? (
-        <View
-          style={{ flex: 1, paddingHorizontal: 16, justifyContent: 'center' }}
-        >
-          <Text
-            style={{
-              color: 'white',
-              fontSize: 22,
-              fontWeight: '800',
-              textAlign: 'center',
-              marginBottom: 12,
-            }}
-          >
-            Resultado
-          </Text>
-          <Text style={{ color: '#e5e7eb', textAlign: 'center' }}>
-            Você marcou {finished.score} de {finished.total}
-          </Text>
-        </View>
-      ) : (
-        <ScrollView
-          style={{ flex: 1 }}
-          contentContainerStyle={{ paddingBottom: 24 }}
-        >
-          <View style={{ width: '100%', overflow: 'hidden' }}>
-            <Animated.View
-              style={{
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.contentContainer}
+      >
+        <View style={styles.list}>
+          <Animated.View
+            style={[
+              styles.animatedRow,
+              {
                 width: screenWidth * rounds.length,
-                flexDirection: 'row',
                 transform: [{ translateX: slideX }],
-              }}
-            >
-              {rounds.map((r, idx) => (
-                <View
-                  key={`${idx}-${r.word}`}
-                  style={{ width: screenWidth, paddingHorizontal: 16 }}
-                >
-                  <Text
-                    style={{
-                      color: 'white',
-                      fontWeight: '700',
-                      marginBottom: 8,
-                    }}
-                  >{`Desafio ${idx + 1}/${rounds.length}`}</Text>
+              },
+            ]}
+          >
+            {rounds.map((r, idx) => (
+              <View
+                key={`${idx}-${r.word}`}
+                style={[styles.roundContainer, { width: screenWidth }]}
+              >
+                <Text style={styles.questionHeader} variant="xLarge">
+                  {idx === step
+                    ? rounds[step]?.question
+                    : t('challengeRunHangman.placeholder_dash')}
+                </Text>
 
-                  <Text style={{ color: '#e5e7eb', marginBottom: 8 }}>
-                    {idx === step ? rounds[step]?.question : '—'}
-                  </Text>
+                <View style={styles.letterBox}>
+                  <View style={styles.lettersRow}>
+                    {r.word.split('').map((letter, letterIndex) => {
+                      const isCurrentRound = idx === step
+                      const upperLetter = letter.toUpperCase()
 
-                  <View
-                    style={{
-                      backgroundColor: '#111214',
-                      borderColor: '#2B2C30',
-                      borderWidth: 1,
-                      borderRadius: 10,
-                      padding: 16,
-                      alignItems: 'center',
-                      marginBottom: 12,
-                    }}
-                  >
-                    <Text
-                      style={{ color: 'white', fontSize: 24, letterSpacing: 2 }}
-                    >
-                      {idx === step
-                        ? revealed
-                        : r.word
-                            .split('')
-                            .map(() => '_ ')
-                            .join('')
-                            .trim()}
-                    </Text>
-                    <Text style={{ color: '#9ca3af', marginTop: 8 }}>
-                      Erros: {idx === step ? wrongs : 0}/{maxWrongs}
-                    </Text>
+                      const shouldReveal =
+                        isCurrentRound && letters.has(upperLetter)
+
+                      return (
+                        <View
+                          key={`${letter}-${letterIndex}`}
+                          style={styles.letterCell}
+                        >
+                          <Text variant="large">
+                            {shouldReveal ? upperLetter : ''}
+                          </Text>
+                        </View>
+                      )
+                    })}
                   </View>
 
-                  {idx === step && (
-                    <View
-                      style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}
-                    >
-                      {ALPHABET.map((ch) => {
-                        const pressed = letters.has(ch)
-                        return (
-                          <TouchableOpacity
-                            key={ch}
-                            disabled={pressed || canContinue}
-                            onPress={() => onGuess(ch)}
-                            style={{
-                              paddingVertical: 10,
-                              paddingHorizontal: 12,
-                              borderRadius: 6,
-                              backgroundColor: pressed ? '#1f2937' : '#3b82f6',
-                              opacity: pressed || canContinue ? 0.6 : 1,
-                            }}
-                          >
-                            <Text style={{ color: 'white', fontWeight: '700' }}>
-                              {ch}
-                            </Text>
-                          </TouchableOpacity>
-                        )
-                      })}
-                    </View>
-                  )}
+                  <Text variant="large" style={styles.attemptsText}>
+                    {t('challengeRunHangman.attempts_label')}{' '}
+                    {idx === step ? maxWrongs - wrongs : maxWrongs}
+                  </Text>
                 </View>
-              ))}
-            </Animated.View>
-          </View>
-        </ScrollView>
-      )}
 
-      <View style={{ paddingHorizontal: 16, paddingBottom: 16 }}>
-        {finished ? (
-          <TouchableOpacity
-            onPress={() =>
-              navigatorManager.goToChallengesList({
-                summaryId: challenge.summaryId,
-              })
-            }
-            style={{
-              backgroundColor: '#10b981',
-              borderRadius: 10,
-              paddingVertical: 14,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: 'white', fontWeight: '700' }}>
-              Voltar para a lista
-            </Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity
-            disabled={!canContinue}
-            onPress={onContinue}
-            style={{
-              backgroundColor: canContinue ? '#3b82f6' : '#1f2937',
-              borderRadius: 10,
-              paddingVertical: 14,
-              alignItems: 'center',
-            }}
-          >
-            <Text style={{ color: 'white', fontWeight: '700' }}>
-              {isLast && canContinue ? 'Finalizar' : 'Continuar'}
-            </Text>
-          </TouchableOpacity>
-        )}
+                {idx === step && (
+                  <View style={styles.alphabetContainer}>
+                    {ALPHABET.map((ch) => {
+                      const pressed = letters.has(ch)
+                      return (
+                        <TouchableOpacity
+                          key={ch}
+                          disabled={pressed || canContinue}
+                          onPress={() => onGuess(ch)}
+                          style={[
+                            styles.letterButton,
+                            { opacity: pressed || canContinue ? 0.4 : 1 },
+                          ]}
+                        >
+                          <Text variant="large" style={styles.letterButtonText}>
+                            {ch}
+                          </Text>
+                        </TouchableOpacity>
+                      )
+                    })}
+                  </View>
+                )}
+              </View>
+            ))}
+          </Animated.View>
+        </View>
+      </ScrollView>
+
+      <View style={styles.footer}>
+        <Button
+          title={
+            isLast && canContinue
+              ? t('challengeRunHangman.button.finish')
+              : t('challengeRunHangman.button.continue')
+          }
+          onPress={onContinue}
+          disabled={!canContinue}
+          background={theme.colors.white}
+          style={styles.continueButton}
+        />
       </View>
     </View>
   )
 }
 
 export default ChallengeRunHangmanScreen
+
+const createStyles = (theme: ThemeType, color?: string) =>
+  StyleSheet.create({
+    container: { flex: 1, backgroundColor: color },
+    headerRow: {
+      marginTop: theme.spacings.xLarge * 2,
+      marginBottom: theme.spacings.large,
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: theme.spacings.medium,
+    },
+    dotsRow: { flexDirection: 'row' },
+
+    scrollView: { flex: 1 },
+    list: { width: '100%', overflow: 'hidden' },
+    contentContainer: { paddingBottom: theme.spacings.large },
+    animatedRow: { flexDirection: 'row' },
+    roundContainer: { paddingHorizontal: theme.spacings.medium },
+    questionHeader: {
+      marginBottom: theme.spacings.medium,
+      textAlign: 'center',
+    },
+
+    letterBox: {
+      padding: theme.spacings.medium,
+      alignItems: 'center',
+      marginBottom: theme.spacings.xMedium,
+    },
+    lettersRow: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      flexWrap: 'wrap',
+      gap: theme.spacings.small,
+    },
+    letterCell: {
+      width: 40,
+      height: 40,
+      borderRadius: 6,
+      borderWidth: 2,
+      borderColor: theme.colors.borderColor,
+      justifyContent: 'center',
+      alignItems: 'center',
+      margin: 4,
+    },
+    attemptsText: { marginVertical: theme.spacings.medium },
+
+    alphabetContainer: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: theme.spacings.xSmall,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    letterButton: {
+      width: 40,
+      height: 40,
+      borderRadius: theme.spacings.small,
+      backgroundColor: theme.colors.black,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    letterButtonText: { color: theme.colors.white },
+
+    footer: {
+      paddingHorizontal: theme.spacings.medium,
+      paddingBottom: theme.spacings.medium,
+    },
+
+    continueButton: {
+      alignSelf: 'center',
+      marginBottom: theme.spacings.xLarge,
+    },
+  })

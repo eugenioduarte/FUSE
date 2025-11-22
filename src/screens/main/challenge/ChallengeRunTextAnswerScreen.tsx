@@ -1,4 +1,18 @@
 import useTrackTopicSession from '@/hooks/useTrackTopicSession'
+import {
+  RootStackParamList,
+  navigatorManager,
+} from '@/navigation/navigatorManager'
+import {
+  TEXT_EVALUATION_PROMPT,
+  TEXT_EXERCISES_SYSTEM,
+  buildTextExercisesPrompt,
+} from '@/services/prompts'
+import { challengesRepository } from '@/services/repositories/challenges.repository'
+import { summariesRepository } from '@/services/repositories/summaries.repository'
+import { useAuthStore } from '@/store/useAuthStore'
+import { useOverlay } from '@/store/useOverlay'
+import { Challenge } from '@/types/domain'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect, useState } from 'react'
 import {
@@ -8,20 +22,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import {
-  RootStackParamList,
-  navigatorManager,
-} from '../../../navigation/navigatorManager'
-import {
-  TEXT_EVALUATION_PROMPT,
-  TEXT_EXERCISES_SYSTEM,
-  buildTextExercisesPrompt,
-} from '../../../services/prompts'
-import { challengesRepository } from '../../../services/repositories/challenges.repository'
-import { summariesRepository } from '../../../services/repositories/summaries.repository'
-import { useAuthStore } from '../../../store/useAuthStore'
-import { useOverlay } from '../../../store/useOverlay'
-import { Challenge } from '../../../types/domain'
 import ChallengeRunClose from './components/ChallengeRunClose'
 
 // Types
@@ -196,7 +196,7 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
     try {
       setLoadingOverlay(true, 'Sincronizando…')
       const { immediateCollaborativeFlush } = await import(
-        '../../../services/firebase/immediateFlush'
+        '@/services/firebase/immediateFlush'
       )
       await immediateCollaborativeFlush(1500)
     } catch {
@@ -264,7 +264,7 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
       try {
         setLoadingOverlay(true, 'Sincronizando…')
         const { immediateCollaborativeFlush } = await import(
-          '../../../services/firebase/immediateFlush'
+          '@/services/firebase/immediateFlush'
         )
         await immediateCollaborativeFlush(1500)
       } catch {}

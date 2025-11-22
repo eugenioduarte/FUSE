@@ -31,7 +31,7 @@ type StepDotProps = {
 }
 
 const StepDot = ({ active, styles, theme, questionsLength }: StepDotProps) => {
-  const dotColor = useThemeStore((s) => s.colorLevelUp.level_five)
+  const dotColor = useThemeStore((s) => s.colorLevelUp.background_color)
   return (
     <View
       style={[
@@ -50,7 +50,7 @@ const StepDot = ({ active, styles, theme, questionsLength }: StepDotProps) => {
 
 const ChallengeRunQuizScreen: React.FC = () => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_eight)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const styles = createStyles(theme, color)
   const route =
     useRoute<RouteProp<RootStackParamList, 'ChallengeRunQuizScreen'>>()

@@ -51,7 +51,7 @@ const FastWayOverlay: React.FC = () => {
   } = useFastWayOverlayLogic()
 
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const styles = createStyles(theme, color)
 
   const mode: FWMode = useMemo(() => {

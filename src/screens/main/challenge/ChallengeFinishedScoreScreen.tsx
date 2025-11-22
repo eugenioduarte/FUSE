@@ -1,9 +1,11 @@
 import { Button } from '@/components'
+import EmptyContainer from '@/components/containers/EmptyContainer'
 import { t } from '@/locales/translation'
 import {
   RootStackParamList,
   navigatorManager,
 } from '@/navigation/navigatorManager'
+import { useOverlay } from '@/store/useOverlay'
 import { useThemeStore } from '@/store/useThemeStore'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React from 'react'
@@ -16,6 +18,8 @@ const ChallengeFinishedScoreScreen: React.FC = () => {
   const total = route.params?.total ?? 0
 
   const setHeaderConfig = useThemeStore((s) => s.setHeaderConfig)
+  const { setLoadingOverlay } = useOverlay()
+  const [loading, setLoading] = React.useState(true)
   React.useEffect(() => {
     setHeaderConfig('ChallengeFinishedScoreScreen')
   }, [setHeaderConfig])
@@ -29,10 +33,23 @@ const ChallengeFinishedScoreScreen: React.FC = () => {
     return () => sub.remove()
   }, [])
 
+  React.useEffect(() => {
+    setLoadingOverlay(true, t('common.loading'))
+    const timer = setTimeout(() => {
+      setLoading(false)
+      setLoadingOverlay(false)
+    }, 700)
+    return () => {
+      clearTimeout(timer)
+      setLoadingOverlay(false)
+    }
+  }, [setLoadingOverlay])
+
+  if (loading) return <EmptyContainer />
+
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>ChallengeFinishedScoreScreen</Text>
-      <Text>
+      <Text style={{ fontSize: 22, fontWeight: '800', marginBottom: 8 }}>
         {t('challengeFinished.you_scored')
           .replace('{score}', String(score))
           .replace('{total}', String(total))}

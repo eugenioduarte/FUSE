@@ -263,7 +263,7 @@ const Profile: React.FC = () => {
           styles={styles}
           pendingAvatarUrl={pendingAvatarUrl}
           onGenerateNewAvatar={onGenerateNewAvatar}
-          color={colors.level_five}
+          color={colors.background_color}
         />
 
         <DisplayNameSection
@@ -275,7 +275,7 @@ const Profile: React.FC = () => {
           onSaveProfile={onSaveProfile}
           originalName={originalName}
           avatarDirty={avatarDirty}
-          color={colors.level_five}
+          color={colors.background_color}
         />
 
         <EmailSection
@@ -286,7 +286,7 @@ const Profile: React.FC = () => {
           emailCurrentPassword={emailCurrentPassword}
           setEmailCurrentPassword={setEmailCurrentPassword}
           onSaveEmail={onSaveEmail}
-          color={colors.level_five}
+          color={colors.background_color}
         />
 
         <PasswordSection
@@ -299,7 +299,7 @@ const Profile: React.FC = () => {
           setConfirmPassword={setConfirmPassword}
           pStrength={pStrength}
           onChangePassword={onChangePassword}
-          color={colors.level_five}
+          color={colors.background_color}
         />
       </ScrollView>
     </Container>
@@ -311,7 +311,7 @@ export default Profile
 const createStyles = (theme: ThemeType, colors?: ColorLevels) =>
   StyleSheet.create({
     container: {
-      backgroundColor: colors?.level_five,
+      backgroundColor: colors?.background_color,
       paddingTop: 0,
     },
     contentContainer: {

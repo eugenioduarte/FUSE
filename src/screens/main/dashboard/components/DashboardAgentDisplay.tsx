@@ -64,7 +64,7 @@ function formatWhenFriendly(dt: Date) {
 
 export default function DashboardAgentDisplay() {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const styles = createStyles(theme, color)
 
   const user = useAuthStore((s) => s.user)

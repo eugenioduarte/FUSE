@@ -13,7 +13,7 @@ const HeaderDashboard = () => {
 
   const setFastWayOverlay = useOverlay((s) => s.setFastWayOverlay)
   const setBackgroundColor = useThemeStore((state) => state.setBackgroundColor)
-  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
 
   useEffect(() => {
     setBackgroundColor(color)

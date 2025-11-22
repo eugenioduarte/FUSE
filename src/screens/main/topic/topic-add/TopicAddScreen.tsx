@@ -15,7 +15,7 @@ import { ScrollView, StyleSheet } from 'react-native'
 
 const TopicAddScreen: React.FC = () => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_five)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
 
   const styles = createStyles(theme, color)
 

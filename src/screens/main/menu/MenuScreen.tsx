@@ -98,7 +98,7 @@ const createStyles = (theme: ThemeType, colors: ColorLevels) =>
       flexGrow: 1,
       justifyContent: 'space-between',
       alignItems: 'center',
-      backgroundColor: colors.level_five,
+      backgroundColor: colors.background_color,
       paddingTop: '10%',
       paddingBottom: '10%',
     },
@@ -107,6 +107,6 @@ const createStyles = (theme: ThemeType, colors: ColorLevels) =>
       alignItems: 'center',
     },
     itemText: {
-      color: colors.level_one,
+      color: theme.colors.black,
     },
   })

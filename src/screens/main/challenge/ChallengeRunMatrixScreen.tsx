@@ -1,4 +1,6 @@
 import { Container, Text } from '@/components'
+import EmptyContainer from '@/components/containers/EmptyContainer'
+import LoadingContainer from '@/components/containers/LoadingContainer'
 import useChallengeMatrix from '@/hooks/useChallengeMatrix'
 import { useTheme } from '@/hooks/useTheme'
 import {
@@ -11,13 +13,12 @@ import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
-import ChallengeErrorDisplay from './components/ChallengeErrorDisplay'
 import ChallengeRunClose from './components/ChallengeRunClose'
 
 const ChallengeRunMatrixScreen: React.FC = () => {
   const theme = useTheme()
   const styles = createStyles(theme)
-  const color = useThemeStore((s) => s.colorLevelUp.level_eight)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const setBackgroundColor = useThemeStore((state) => state.setBackgroundColor)
   useEffect(() => {
     setBackgroundColor(color)
@@ -47,10 +48,6 @@ const ChallengeRunMatrixScreen: React.FC = () => {
 
   const { setLoadingOverlay } = useOverlay()
 
-  // Keep global loading overlay visible not only while the hook-level `loading`
-  // flag is true, but also while the grid hasn't been laid out and computed
-  // (gridRows === 0). Otherwise we may hide the overlay too early and show
-  // an empty screen for a short moment before the matrix renders.
   React.useEffect(() => {
     const show = loading || gridRows === 0
     setLoadingOverlay(show, 'ChallengeRunMatrixScreen')
@@ -64,8 +61,12 @@ const ChallengeRunMatrixScreen: React.FC = () => {
     })
   }, [finished])
 
+  if (loading) {
+    return <LoadingContainer screenName="Matrix Challenge" />
+  }
+
   if (!challenge) {
-    return <ChallengeErrorDisplay />
+    return <EmptyContainer />
   }
 
   return (
@@ -110,9 +111,9 @@ const ChallengeRunMatrixScreen: React.FC = () => {
                       )
                       const isFoundCell = foundCellsMemo.has(`${rIdx},${cIdx}`)
                       const bg = isFoundCell
-                        ? theme.colors.accentGreen
+                        ? theme.colors.backgroundTertiary
                         : inPath
-                          ? theme.colors.accentGreen
+                          ? theme.colors.backgroundTertiary
                           : 'transparent'
 
                       const cellKey = `${ch}-${rIdx}-${cIdx}`

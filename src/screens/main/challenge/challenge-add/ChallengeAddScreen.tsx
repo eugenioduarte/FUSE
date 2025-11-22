@@ -25,7 +25,7 @@ const ChallengeAddScreen = () => {
   } = useChallengeAdd(summaryId)
 
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_two)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const styles = createStyles(theme, color)
 
   return (

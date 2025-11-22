@@ -114,7 +114,7 @@ export default function useChallengeRunHangman(
   const canContinue = isSolved || isFailed
   const isLast = step >= Math.max(0, rounds.length - 1)
 
-  const color = useThemeStore((s) => s.colorLevelUp.level_eight)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const setBackgroundColor = useThemeStore((state) => state.setBackgroundColor)
   useEffect(() => {
     setBackgroundColor(color)

@@ -24,7 +24,7 @@ import TopicSummaryCard from './components/TopicSummaryCard'
 
 const TopicDetailsScreen: React.FC = () => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_four)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const styles = createStyles(theme, color)
   const route = useRoute<RouteProp<RootStackParamList, 'TopicDetailsScreen'>>()
   const { topicId } = route.params

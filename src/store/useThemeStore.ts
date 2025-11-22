@@ -8,16 +8,7 @@ import { Colors } from '../constants/theme'
 
 /** Define os 10 níveis de cor gerados automaticamente */
 export type ColorLevels = {
-  level_one: string
-  level_two: string
-  level_three: string
-  level_four: string
-  level_five: string
-  level_six: string
-  level_seven: string
-  level_eight: string
-  level_nine: string
-  level_ten: string
+  background_color: string
 }
 
 /** Configuração do header global da aplicação */
@@ -87,30 +78,10 @@ export const useThemeStore = create<ThemeState>((set) => ({
 /* -------------------------------------------------------------------------- */
 
 export function generateLevelSteps(baseColor: string): ColorLevels {
-  const keys = [
-    'level_one',
-    'level_two',
-    'level_three',
-    'level_four',
-    'level_five',
-    'level_six',
-    'level_seven',
-    'level_eight',
-    'level_nine',
-    'level_ten',
-  ] as const
+  const keys = ['background_color'] as const
 
   const colors = [
-    '#000000', // level_one - preto
-    '#004547', // level_two
-    '#008A8D', // level_three
-    '#00B7BB', // level_four
-    '#00CED1', // level_five - base
-    '#33D9DB', // level_six
-    '#66E3E5', // level_seven
-    '#99EEEE', // level_eight
-    '#CCF8F8', // level_nine
-    '#FFFFFF', // level_ten - branco
+    '#EA3D5C', // background_color - preto
   ] as const
 
   const result = {} as ColorLevels

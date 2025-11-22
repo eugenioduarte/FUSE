@@ -21,7 +21,7 @@ import { useSummaryDetails } from './hooks/useSummaryDetails'
 
 const SummaryDetailsScreen: React.FC = () => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_six)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const route =
     useRoute<RouteProp<RootStackParamList, 'SummaryDetailsScreen'>>()
   const { summaryId } = route.params

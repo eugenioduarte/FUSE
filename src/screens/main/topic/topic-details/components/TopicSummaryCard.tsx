@@ -67,6 +67,7 @@ const createStyles = (theme: ThemeType, bg?: string) =>
       borderWidth: theme.border.size,
       borderColor: theme.colors.borderColor,
       overflow: 'hidden',
+      backgroundColor: theme.colors.backgroundPrimary,
     },
     titleContainer: {
       backgroundColor: bg,

@@ -25,7 +25,7 @@ const TermSnippetModal: React.FC<Props> = ({
 }) => {
   const theme = useTheme()
   const styles = createStyles(theme)
-  const color = useThemeStore((s) => s.colorLevelUp.level_six)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   return (
     <Modal
       visible={visible}

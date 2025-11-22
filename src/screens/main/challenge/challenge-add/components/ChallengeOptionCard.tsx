@@ -1,6 +1,7 @@
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
+import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
@@ -17,7 +18,8 @@ const ChallengeOptionCard = ({
   total: number
 }) => {
   const theme = useTheme()
-  const styles = createStyles(theme)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
+  const styles = createStyles(theme, color)
 
   return (
     <Pressable
@@ -64,7 +66,7 @@ const ChallengeOptionCard = ({
 
 export default ChallengeOptionCard
 
-const createStyles = (theme: ThemeType) =>
+const createStyles = (theme: ThemeType, bg?: string) =>
   StyleSheet.create({
     card: {
       flexBasis: '48%',
@@ -79,12 +81,10 @@ const createStyles = (theme: ThemeType) =>
       backgroundColor: theme.colors.backgroundSecondary,
     },
     header: {
-      backgroundColor: theme.colors.backgroundTertiary,
+      backgroundColor: bg,
       height: 48,
       justifyContent: 'center',
       paddingHorizontal: theme.spacings.medium,
-      borderBottomWidth: 1,
-      borderBottomColor: theme.colors.borderColor,
     },
     headerText: {
       color: theme.colors.textPrimary,

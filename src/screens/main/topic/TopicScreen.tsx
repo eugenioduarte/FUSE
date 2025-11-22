@@ -25,7 +25,7 @@ const GLOBAL_SEPARATOR = () => <View style={{ height: 8 }} />
 
 const TopicScreen = () => {
   const theme = useTheme()
-  const color = useThemeStore((s) => s.colorLevelUp.level_four)
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const styles = createStyles(theme, color)
   const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
 
