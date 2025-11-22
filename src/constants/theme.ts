@@ -95,6 +95,11 @@ export const typography = {
     fontSize: 22,
     lineHeight: 28,
   },
+  xxxLarge: {
+    fontFamily: font.bold,
+    fontSize: 80,
+    lineHeight: 88,
+  },
 }
 
 export const textWeight = {

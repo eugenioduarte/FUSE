@@ -12,6 +12,7 @@ import Animated, {
   SlideOutDown,
 } from 'react-native-reanimated'
 import HeaderAddTopic from './HeaderAddTopic'
+import HeaderCalendar from './HeaderCalendar'
 import HeaderChallengeAdd from './HeaderChallengeAdd'
 import HeaderDashboard from './HeaderDashboard'
 import HeaderSummaryAdd from './HeaderSummaryAdd'
@@ -121,6 +122,9 @@ export const Header: React.FC = () => {
     }
     if (currentType === ROUTES.SummaryScreen) {
       return <HeaderSummaryAdd />
+    }
+    if (currentType === ROUTES.CalendarScreen) {
+      return <HeaderCalendar />
     }
     return <DefaultHeader title={title} />
   }

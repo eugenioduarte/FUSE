@@ -1,408 +1,100 @@
-import { useFocusEffect } from '@react-navigation/native'
-import React, { useEffect, useMemo, useState } from 'react'
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TextStyle,
-  TouchableOpacity,
-  View,
-  ViewStyle,
-} from 'react-native'
-import { Colors, spacings, typography } from '../../constants/theme'
-import { navigatorManager } from '../../navigation/navigatorManager'
-import {
-  deleteOwnedCalendarEvent,
-  leaveCalendarEvent,
-} from '../../services/firebase/calendar.service'
-import { summariesRepository } from '../../services/repositories/summaries.repository'
-import { topicsRepository } from '../../services/repositories/topics.repository'
-import { useAuthStore } from '../../store/useAuthStore'
-import { useCalendarStore } from '../../store/useCalendarStore'
-import type { Summary, Topic } from '../../types/domain'
-
-const pad = (n: number) => (n < 10 ? `0${n}` : `${n}`)
-
-const DayButton = ({
-  label,
-  selected,
-  onPress,
-}: {
-  label: string
-  selected: boolean
-  onPress: () => void
-}) => (
-  <TouchableOpacity
-    onPress={onPress}
-    style={[styles.dayCell, selected && styles.dayCellSelected]}
-  >
-    <Text style={[styles.dayLabel, selected && styles.dayLabelSelected]}>
-      {label}
-    </Text>
-  </TouchableOpacity>
-)
-
-const CalendarGrid = ({
-  currentDate,
-  selectedDate,
-  onSelect,
-}: {
-  currentDate: Date
-  selectedDate: string | null
-  onSelect: (ymd: string) => void
-}) => {
-  const year = currentDate.getFullYear()
-  const month = currentDate.getMonth()
-  const first = new Date(year, month, 1)
-  const startWeekday = first.getDay() // 0-6 (Sun-Sat)
-  const daysInMonth = new Date(year, month + 1, 0).getDate()
-
-  const cells: { key: string; label: string; ymd?: string }[] = []
-  // Do not render visible cells before day 1; keep placeholders for layout only
-  for (let i = 0; i < startWeekday; i++)
-    cells.push({ key: `e-${i}`, label: '' })
-  for (let d = 1; d <= daysInMonth; d++) {
-    const ymd = `${year}-${pad(month + 1)}-${pad(d)}`
-    cells.push({ key: `d-${d}`, label: pad(d), ymd })
-  }
-
-  return (
-    <View style={styles.grid}>
-      {cells.map((c) => (
-        <View key={c.key} style={styles.gridItem}>
-          {c.ymd ? (
-            <DayButton
-              label={c.label}
-              selected={selectedDate === c.ymd}
-              onPress={() => onSelect(c.ymd!)}
-            />
-          ) : (
-            // Render an invisible spacer to preserve layout but not show a cell
-            <View style={{ height: 44 }} />
-          )}
-        </View>
-      ))}
-    </View>
-  )
-}
+import { ChevronIcon } from '@/assets/icons'
+import { Button, Text } from '@/components'
+import { t } from '@/locales/translation'
+import { useThemeStore } from '@/store/useThemeStore'
+import { ICON_SIZE_MEDIUM } from '@/utils/global'
+import { useTheme } from '@react-navigation/native'
+import React from 'react'
+import { ScrollView, TouchableOpacity, View } from 'react-native'
+import CalendarGrid from './components/CalendarGrid'
+import CalendarScheduleCard from './components/CalendarScheduleCard'
+import createStyles from './createStyles'
+import useCalendarScreen from './hooks/useCalendarScreen'
 
 const CalendarScreen: React.FC = () => {
-  const selectedDate = useCalendarStore((s) => s.selectedDate)
-  const setSelectedDate = useCalendarStore((s) => s.setSelectedDate)
-  const removeAppointment = useCalendarStore((s) => s.removeAppointment)
-  // Subscribe to events so the screen re-renders immediately after adding
-  const events = useCalendarStore((s) => s.events)
-  const me = useAuthStore((s) => s.user)
+  const theme = useTheme()
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
+  const styles = createStyles(theme, color)
 
-  // Month navigation state
-  const [currentMonth, setCurrentMonth] = useState<Date>(() => {
-    const now = new Date()
-    return new Date(now.getFullYear(), now.getMonth(), 1)
-  })
-
-  const [topics, setTopics] = useState<Topic[]>([])
-  const [summariesAll, setSummariesAll] = useState<Summary[]>([])
-
-  // Seed topics and load
-  useEffect(() => {
-    ;(async () => {
-      await topicsRepository.seedIfEmpty()
-      const list = await topicsRepository.list()
-      setTopics(list)
-      // load summaries for name lookup
-      const allSummaries = await summariesRepository.listAll()
-      setSummariesAll(allSummaries)
-    })()
-  }, [])
-
-  // Ensure a date is selected by default (today)
-  useEffect(() => {
-    if (!selectedDate) {
-      const now = new Date()
-      const y = now.getFullYear()
-      const m = pad(now.getMonth() + 1)
-      const d = pad(now.getDate())
-      setSelectedDate(`${y}-${m}-${d}`)
-    }
-  }, [selectedDate, setSelectedDate])
-
-  // Always open on today's date when the screen gains focus
-  useFocusEffect(
-    React.useCallback(() => {
-      const now = new Date()
-      const y = now.getFullYear()
-      const m = pad(now.getMonth() + 1)
-      const d = pad(now.getDate())
-      setSelectedDate(`${y}-${m}-${d}`)
-      setCurrentMonth(new Date(now.getFullYear(), now.getMonth(), 1))
-    }, [setSelectedDate]),
-  )
-
-  // Load summaries when topic selected in form
-  // (No inline form anymore)
-
-  const dayAppointments = useMemo(
-    () => (selectedDate ? events.filter((e) => e.date === selectedDate) : []),
-    [events, selectedDate],
-  )
-
-  const topicName = (id?: string) =>
-    topics.find((t) => t.id === id)?.title || '—'
-  const summaryName = (_topicId?: string, summaryId?: string) =>
-    summaryId ? summariesAll.find((s) => s.id === summaryId)?.title || '—' : '—'
-
-  const isPendingForMe = (
-    ev: import('../../types/calendar.type').CalendarCommitment,
-  ) => {
-    const myId = me?.id
-    if (!myId) return false
-    if (ev.ownerUid === myId) return false
-    const accepted = ev.accepted || []
-    const participants = ev.participants || []
-    return participants.includes(myId) && !accepted.includes(myId)
-  }
-
-  // Month header helpers
-  const monthNames = [
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro',
-  ]
-  const year = currentMonth.getFullYear()
-  const month = currentMonth.getMonth()
-  const goPrevMonth = () =>
-    setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() - 1, 1))
-  const goNextMonth = () =>
-    setCurrentMonth((d) => new Date(d.getFullYear(), d.getMonth() + 1, 1))
+  const {
+    currentMonth,
+    goPrevMonth,
+    goNextMonth,
+    monthNames,
+    day,
+    year,
+    month,
+    selectedDate,
+    setSelectedDate,
+    events,
+    dayAppointments,
+    topicName,
+    summaryName,
+    isPendingForMe,
+    onAddPress,
+    onEditPress,
+    onRemovePress,
+  } = useCalendarScreen()
 
   return (
     <View style={styles.screen}>
       {/* Header: 2025  < Maio > */}
       <View style={styles.monthHeader}>
-        <Text style={styles.yearText}>{year}</Text>
+        <Text variant="xLarge">{year}</Text>
         <View style={styles.monthNav}>
           <TouchableOpacity onPress={goPrevMonth}>
-            <Text style={styles.monthNavText}>{'<'}</Text>
+            <ChevronIcon
+              style={styles.chevronRotate}
+              width={ICON_SIZE_MEDIUM}
+              height={ICON_SIZE_MEDIUM}
+            />
           </TouchableOpacity>
-          <Text style={styles.monthText}>{monthNames[month]}</Text>
+          <Text variant="xLarge" style={styles.monthTitle}>
+            {monthNames[month]}
+          </Text>
           <TouchableOpacity onPress={goNextMonth}>
-            <Text style={styles.monthNavText}>{'>'}</Text>
+            <ChevronIcon width={ICON_SIZE_MEDIUM} height={ICON_SIZE_MEDIUM} />
           </TouchableOpacity>
         </View>
+        <Text variant="xxxLarge">{day}</Text>
       </View>
 
-      {/* Calendário */}
-      <CalendarGrid
-        currentDate={currentMonth}
-        selectedDate={selectedDate}
-        onSelect={(ymd) => setSelectedDate(ymd)}
-      />
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Calendário */}
+        <CalendarGrid
+          currentDate={currentMonth}
+          selectedDate={selectedDate}
+          onSelect={(ymd) => setSelectedDate(ymd)}
+          events={events}
+        />
 
-      {/* Ações + Lista do dia */}
-      {selectedDate ? (
-        <View style={{ marginTop: spacings.medium }}>
-          <TouchableOpacity
-            style={styles.addBtn}
-            onPress={() =>
-              navigatorManager.goToCalendarAdd({ date: selectedDate })
-            }
-          >
-            <Text style={styles.addBtnText}>Adicionar compromisso</Text>
-          </TouchableOpacity>
-
-          {dayAppointments.length === 0 ? (
-            <Text style={styles.emptyText}>
-              Nenhum compromisso para esta data.
-            </Text>
-          ) : (
-            <FlatList
-              style={{ marginTop: spacings.small }}
-              data={dayAppointments}
-              keyExtractor={(i) => i.id}
-              renderItem={({ item }) => (
-                <View style={styles.card}>
-                  <View style={styles.titleRow}>
-                    <Text style={styles.title}>{item.title}</Text>
-                    {isPendingForMe(item) ? (
-                      <View style={styles.badge}>
-                        <Text style={styles.badgeText}>Pendente</Text>
-                      </View>
-                    ) : null}
-                  </View>
-                  {!!item.description && (
-                    <Text style={styles.desc}>{item.description}</Text>
-                  )}
-                  <Text style={styles.meta}>
-                    {item.time ? `Hora: ${item.time} · ` : ''}Topic:{' '}
-                    {topicName(item.topicId)} · Summary:{' '}
-                    {summaryName(item.topicId, item.summaryId)}
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      gap: 12,
-                      marginTop: spacings.small,
-                    }}
-                  >
-                    <TouchableOpacity
-                      onPress={() =>
-                        navigatorManager.goToCalendarEdit({ id: item.id })
-                      }
-                    >
-                      <Text style={styles.link}>Editar</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={async () => {
-                        const myId = me?.id
-                        if (!myId) return
-                        try {
-                          if (item.ownerUid && item.ownerUid === myId) {
-                            await deleteOwnedCalendarEvent(item.id)
-                          } else {
-                            await leaveCalendarEvent(item.id, myId)
-                          }
-                          // Optimistic local removal; realtime will reconcile
-                          removeAppointment(item.id)
-                        } catch (e) {
-                          console.error('Failed to remove calendar event', e)
-                        }
-                      }}
-                    >
-                      <Text style={[styles.link, { color: '#EF4444' }]}>
-                        Remover
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
+        {/* Ações + Lista do dia */}
+        {selectedDate ? (
+          <View style={styles.actionsContainer}>
+            <Button
+              title={t('calendar.add_appointment')}
+              onPress={() => selectedDate && onAddPress(selectedDate)}
+              background={color}
+              style={styles.addButton}
             />
-          )}
-        </View>
-      ) : null}
+
+            {dayAppointments.length > 0 &&
+              dayAppointments.map((item) => (
+                <CalendarScheduleCard
+                  key={item.id}
+                  item={item}
+                  topicName={topicName}
+                  summaryName={summaryName}
+                  isPendingForMe={isPendingForMe}
+                  onEditPress={onEditPress}
+                  onRemovePress={onRemovePress}
+                />
+              ))}
+          </View>
+        ) : null}
+      </ScrollView>
     </View>
   )
 }
 
 export default CalendarScreen
-
-const styles = StyleSheet.create<{
-  screen: ViewStyle
-  grid: ViewStyle
-  gridItem: ViewStyle
-  monthHeader: ViewStyle
-  yearText: TextStyle
-  monthNav: ViewStyle
-  monthText: TextStyle
-  monthNavText: TextStyle
-  dayCell: ViewStyle
-  dayCellSelected: ViewStyle
-  dayLabel: TextStyle
-  dayLabelSelected: TextStyle
-  addBtn: ViewStyle
-  addBtnText: TextStyle
-  emptyText: TextStyle
-  card: ViewStyle
-  title: TextStyle
-  titleRow: ViewStyle
-  desc: TextStyle
-  meta: TextStyle
-  link: TextStyle
-  badge: ViewStyle
-  badgeText: TextStyle
-  // removed inline form styles
-}>({
-  screen: {
-    flex: 1,
-    backgroundColor: Colors.light.backgroundPrimary,
-    padding: spacings.medium,
-  },
-  grid: { flexDirection: 'row', flexWrap: 'wrap' },
-  gridItem: { width: '14.2857%', padding: 2 },
-  monthHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: spacings.small,
-  },
-  yearText: {
-    color: Colors.light.textPrimary,
-    fontWeight: '700',
-  },
-  monthNav: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  monthText: {
-    color: Colors.light.textPrimary,
-    fontWeight: '700',
-  },
-  monthNavText: {
-    color: Colors.light.backgroundPrimary,
-    fontWeight: '700',
-  },
-  dayCell: {
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 8,
-    backgroundColor: '#fff',
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
-  },
-  dayCellSelected: { backgroundColor: '#E5F0FF', borderColor: '#1f2937' },
-  dayLabel: { color: '#000' },
-  dayLabelSelected: { color: '#000', fontWeight: '700' },
-  addBtn: {
-    backgroundColor: Colors.light.backgroundPrimary,
-    borderRadius: 8,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  addBtnText: { color: '#fff', fontWeight: '700' },
-  emptyText: {
-    color: Colors.light.textPrimary,
-    opacity: 0.6,
-    marginTop: spacings.small,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: spacings.medium,
-    marginBottom: spacings.small,
-    borderWidth: 1,
-    borderColor: '#3a3a3a',
-  },
-  title: {
-    color: '#000',
-    ...(typography.large as unknown as TextStyle),
-  },
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    gap: 8,
-  },
-  badge: {
-    backgroundColor: '#FEF3C7',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 9999,
-    borderWidth: 1,
-    borderColor: '#F59E0B',
-  },
-  badgeText: { color: '#92400E', fontWeight: '700' },
-  desc: { color: '#000', opacity: 0.8, marginTop: 4 },
-  meta: { color: '#000', opacity: 0.7, marginTop: 6 },
-  link: { color: '#1d4ed8', fontWeight: '700' },
-  // removed modal and inline form styles
-})
