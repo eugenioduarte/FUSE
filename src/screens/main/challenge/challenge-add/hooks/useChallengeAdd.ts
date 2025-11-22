@@ -13,6 +13,7 @@ type UseChallengeAddReturn = {
   handleStartQuiz: () => Promise<void>
   handleStartHangman: () => Promise<void>
   handleStartMatrix: () => Promise<void>
+  handleStartText: () => Promise<void>
 }
 
 export default function useChallengeAdd(
@@ -181,6 +182,13 @@ export default function useChallengeAdd(
       navigatorManager.goToChallengeRunMatrix({ challengeId: id }),
     )
 
+  const handleStartText = () =>
+    createChallenge(
+      'text',
+      { totalExercises: 5, perExerciseSeconds: 0 },
+      (id) => navigatorManager.goToChallengeRunTextAnswer({ challengeId: id }),
+    )
+
   return {
     topicColor,
     avgScores,
@@ -188,5 +196,6 @@ export default function useChallengeAdd(
     handleStartQuiz,
     handleStartHangman,
     handleStartMatrix,
+    handleStartText,
   }
 }

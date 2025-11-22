@@ -1,4 +1,6 @@
+import { asyncStorage } from '@/storage/asyncStorage'
 import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
 import { RouteName, ROUTES } from '../constants/routes'
 import { Colors } from '../constants/theme'
 
@@ -38,40 +40,49 @@ export interface ThemeState {
 /* 🧠 STORE ZUSTAND                                                           */
 /* -------------------------------------------------------------------------- */
 
-export const useThemeStore = create<ThemeState>((set) => ({
-  headerConfig: { title: '', type: '' as RouteName, visible: true },
+export const useThemeStore = create<ThemeState>()(
+  persist(
+    (set) => ({
+      headerConfig: { title: '', type: '' as RouteName, visible: true },
 
-  setHeaderConfig: (type) => {
-    const title = ROUTES[type] || ''
-    const authScreens: RouteName[] = [
-      'LoginScreen',
-      'RegisterScreen',
-      'RecoveryScreen',
-    ]
-    const runScreens: RouteName[] = [
-      'ChallengeRunQuizScreen',
-      'ChallengeRunHangmanScreen',
-      'ChallengeRunMatrixScreen',
-      'ChallengeRunTextAnswerScreen',
-      'ChallengeFinishedScoreScreen',
-      'ProfileScreen',
-    ]
-    const visible = !authScreens.includes(type) && !runScreens.includes(type)
-    set({ headerConfig: { title, type, visible } })
-  },
+      setHeaderConfig: (type) => {
+        const title = ROUTES[type] || ''
+        const authScreens: RouteName[] = [
+          'LoginScreen',
+          'RegisterScreen',
+          'RecoveryScreen',
+        ]
+        const runScreens: RouteName[] = [
+          'ChallengeRunQuizScreen',
+          'ChallengeRunHangmanScreen',
+          'ChallengeRunMatrixScreen',
+          'ChallengeRunTextAnswerScreen',
+          'ChallengeFinishedScoreScreen',
+          'ProfileScreen',
+        ]
+        const visible =
+          !authScreens.includes(type) && !runScreens.includes(type)
+        set({ headerConfig: { title, type, visible } })
+      },
 
-  backgroundColor: Colors.light.backgroundSecondary,
-  setBackgroundColor: (color: string) => set({ backgroundColor: color }),
+      backgroundColor: Colors.light.backgroundSecondary,
+      setBackgroundColor: (color: string) => set({ backgroundColor: color }),
 
-  levelTenColor: '#00CED1',
-  setLevelTenColor: (color: string) =>
-    set(() => ({
-      levelTenColor: color,
-      colorLevelUp: generateLevelSteps(color),
-    })),
+      levelTenColor: '#00CED1',
+      setLevelTenColor: (color: string) =>
+        set(() => ({
+          levelTenColor: color,
+          colorLevelUp: generateLevelSteps(color),
+        })),
 
-  colorLevelUp: generateLevelSteps('#00CED1'),
-}))
+      colorLevelUp: generateLevelSteps('#00CED1'),
+    }),
+    {
+      name: 'theme-storage',
+      storage: createJSONStorage(() => asyncStorage),
+    },
+  ),
+)
 
 /* -------------------------------------------------------------------------- */
 /* 🎨 FUNÇÃO GERADORA DE CORES                                                */
@@ -85,9 +96,9 @@ export function generateLevelSteps(baseColor: string): ColorLevels {
   ] as const
 
   const result = {} as ColorLevels
-  keys.forEach((key, i) => {
+  for (const [i, key] of keys.entries()) {
     result[key] = colors[i]
-  })
+  }
 
   return result
 }

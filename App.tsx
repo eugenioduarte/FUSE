@@ -20,7 +20,7 @@ const queryClient = new QueryClient({
 })
 
 export default function App() {
-  const { backgroundColor } = useThemeStore()
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const [fontsLoaded] = useFonts({
     'Fredoka-Light': require('./assets/fonts/Fredoka-Light.ttf'),
     'Fredoka-Regular': require('./assets/fonts/Fredoka-Regular.ttf'),
@@ -34,10 +34,7 @@ export default function App() {
   return (
     <SafeAreaProvider>
       <StatusBar backgroundColor="transparent" barStyle="dark-content" />
-      <SafeAreaView
-        edges={['top']}
-        style={{ flex: 1, backgroundColor: backgroundColor }}
-      >
+      <SafeAreaView edges={['top']} style={{ flex: 1, backgroundColor: color }}>
         <QueryClientProvider client={queryClient}>
           <SnackbarProvider>
             <Navigation />

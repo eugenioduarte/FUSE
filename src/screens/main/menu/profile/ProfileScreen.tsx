@@ -8,6 +8,7 @@ import { ColorLevels, useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { Image, ScrollView, StyleSheet, View } from 'react-native'
+import { ColorWheel } from './components/ColorPicker'
 import useProfile from './useProfile'
 
 type Styles = ReturnType<typeof createStyles>
@@ -215,6 +216,20 @@ const PasswordSection = ({
   </View>
 )
 
+const ColorPickerContainer: React.FC<{ styles: Styles }> = ({ styles }) => {
+  return (
+    <View style={styles.card}>
+      <Text variant="large" weight="semiBold" style={styles.cardTitle}>
+        {t('profile.avatar.color')}
+      </Text>
+
+      <View style={{ alignItems: 'center' }}>
+        <ColorWheel />
+      </View>
+    </View>
+  )
+}
+
 const Profile: React.FC = () => {
   const {
     displayName,
@@ -258,6 +273,8 @@ const Profile: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         <HeaderCloseTitle title={t('profile.title')} />
+
+        <ColorPickerContainer styles={styles} />
 
         <AvatarSection
           styles={styles}

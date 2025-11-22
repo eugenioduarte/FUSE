@@ -1,24 +1,16 @@
 import { Button } from '@/components'
 import Container from '@/components/containers/Container'
+import LoadingContainer from '@/components/containers/LoadingContainer'
 import SubContainer from '@/components/containers/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'
-import { topicsRepository } from '@/services/repositories/topics.repository'
-import { getDailyTotals } from '@/services/usage/usageTracker'
 import { useThemeStore } from '@/store/useThemeStore'
-import { Topic } from '@/types/domain'
 import { ThemeType } from '@/types/theme.type'
-import { useFocusEffect } from '@react-navigation/native'
-import React, { useCallback, useEffect, useState } from 'react'
-import {
-  ActivityIndicator,
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  View,
-} from 'react-native'
+import React from 'react'
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
 import TopicCard from './components/TopicCard/TopicCard'
+import useTopicScreen from './hooks/useTopicScreen'
 import { SummaryProgressArcs } from './topic-details/components/TopicDetailsGraph'
 
 const GLOBAL_SEPARATOR = () => <View style={{ height: 8 }} />
@@ -29,100 +21,17 @@ const TopicScreen = () => {
   const styles = createStyles(theme, color)
   const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
 
-  const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
-  const [topics, setTopics] = useState<Topic[]>([])
-  const [summaryData, setSummaryData] = useState<
-    { title: string; value: number; color: string }[]
-  >([])
+  const { loading, refreshing, topics, summaryData, onRefresh } =
+    useTopicScreen()
 
-  const load = useCallback(async () => {
-    setLoading(true)
-    await topicsRepository.seedIfEmpty()
-    const list = await topicsRepository.list()
-    setTopics(list)
+  React.useEffect(() => {
     try {
-      const data = await Promise.all(
-        list.map(async (t) => {
-          try {
-            const totals = await getDailyTotals(t.id)
-            const minutes = Object.values(totals).reduce(
-              (acc, v) => acc + (Number(v) || 0),
-              0,
-            )
-            const hours = Math.round((minutes / 60) * 10) / 10
-            return {
-              title: t.title,
-              value: hours,
-              color: t.backgroundColor || theme.colors.accentBlue,
-            }
-          } catch {
-            return {
-              title: t.title,
-              value: 0,
-              color: t.backgroundColor || theme.colors.accentBlue,
-            }
-          }
-        }),
-      )
-      setSummaryData(data)
+      setBackgroundColor(color)
     } catch {}
-    setLoading(false)
-  }, [theme.colors.accentBlue])
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true)
-    const list = await topicsRepository.list()
-    setTopics(list)
-    try {
-      const data = await Promise.all(
-        list.map(async (t) => {
-          try {
-            const totals = await getDailyTotals(t.id)
-            const minutes = Object.values(totals).reduce(
-              (acc, v) => acc + (Number(v) || 0),
-              0,
-            )
-            const hours = Math.round((minutes / 60) * 10) / 10
-            return {
-              title: t.title,
-              value: hours,
-              color: t.backgroundColor || theme.colors.accentBlue,
-            }
-          } catch {
-            return {
-              title: t.title,
-              value: 0,
-              color: t.backgroundColor || theme.colors.accentBlue,
-            }
-          }
-        }),
-      )
-      setSummaryData(data)
-    } catch {}
-    setRefreshing(false)
-  }, [theme.colors.accentBlue])
-
-  useEffect(() => {
-    load()
-  }, [load])
-
-  useFocusEffect(
-    React.useCallback(() => {
-      setBackgroundColor(theme.colors.accentGreen)
-    }, [setBackgroundColor, theme.colors.accentGreen]),
-  )
-
-  useEffect(() => {
-    setBackgroundColor(theme.colors.accentGreen)
-  }, [setBackgroundColor, theme.colors.accentGreen])
+  }, [color, setBackgroundColor])
 
   if (loading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator />
-      </View>
-    )
+    return <LoadingContainer screenName="Topic list" />
   }
 
   return (

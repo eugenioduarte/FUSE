@@ -2,10 +2,7 @@ import { Container } from '@/components'
 import SubContainer from '@/components/containers/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
-import {
-  navigatorManager,
-  RootStackParamList,
-} from '@/navigation/navigatorManager'
+import { RootStackParamList } from '@/navigation/navigatorManager'
 import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useRoute } from '@react-navigation/native'
@@ -22,6 +19,7 @@ const ChallengeAddScreen = () => {
     handleStartQuiz,
     handleStartHangman,
     handleStartMatrix,
+    handleStartText,
   } = useChallengeAdd(summaryId)
 
   const theme = useTheme()
@@ -51,9 +49,7 @@ const ChallengeAddScreen = () => {
         />
         <ChallengeOptionCard
           label={t('challengeAdd.option.text_answer')}
-          onPress={() =>
-            navigatorManager.goToChallengeAddTextAnswer({ summaryId })
-          }
+          onPress={handleStartText}
           score={avgScores['text'] ?? 0}
           total={totals['text'] ?? 0}
         />

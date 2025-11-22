@@ -1,50 +1,15 @@
-import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import { RouteProp, useRoute } from '@react-navigation/native'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { ActivityIndicator, ScrollView, Text, View } from 'react-native'
 import { RootStackParamList } from '../../../navigation/navigatorManager'
-import { challengesRepository } from '../../../services/repositories/challenges.repository'
-import { useOverlay } from '../../../store/useOverlay'
-import { Challenge } from '../../../types/domain'
+import useChallengeReviewTextAnswer from './hooks/useChallengeReviewTextAnswer'
 
 const ChallengeReviewTextAnswerScreen: React.FC = () => {
   const route =
     useRoute<RouteProp<RootStackParamList, 'ChallengeReviewTextAnswerScreen'>>()
   const challengeId = route.params?.challengeId!
-  const { setErrorOverlay } = useOverlay()
-
-  const [challenge, setChallenge] = useState<Challenge | null>(null)
-  const [topicId, setTopicId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
-
-  useEffect(() => {
-    let active = true
-    ;(async () => {
-      try {
-        const all = await challengesRepository.list()
-        if (!active) return
-        const ch = all.find((c) => c.id === challengeId) || null
-        if (!ch) throw new Error('Challenge not found')
-        setChallenge(ch)
-        try {
-          const summary = await (
-            await import('../../../services/repositories/summaries.repository')
-          ).summariesRepository.getById(ch.summaryId)
-          if (summary) setTopicId(summary.topicId)
-        } catch {}
-      } catch (e) {
-        console.error(e)
-        setErrorOverlay(true, 'Não foi possível carregar o review.')
-      } finally {
-        setLoading(false)
-      }
-    })()
-    return () => {
-      active = false
-    }
-  }, [challengeId, setErrorOverlay])
-
-  useTrackTopicSession(topicId, 'challenge', challenge?.id)
+  const { challenge, loading, exercises, lastAttempt } =
+    useChallengeReviewTextAnswer(challengeId)
 
   if (loading) {
     return (
@@ -69,14 +34,11 @@ const ChallengeReviewTextAnswerScreen: React.FC = () => {
     )
   }
 
-  const lastAttempt = (challenge.payload?.attempts || []).at(-1)
-  const exercises = lastAttempt?.exercises || []
-
   return (
     <View style={{ flex: 1, backgroundColor: '#0b0b0c' }}>
       <View style={{ padding: 16 }}>
         <Text style={{ color: 'white', fontSize: 18, fontWeight: '700' }}>
-          {challenge.title || 'Resposta em Texto'}
+          {challenge.title || 'Resposta em Texto 1'}
         </Text>
         {lastAttempt && (
           <Text style={{ color: '#9ca3af', marginTop: 6 }}>

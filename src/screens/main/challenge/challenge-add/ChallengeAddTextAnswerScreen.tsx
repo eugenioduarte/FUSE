@@ -1,10 +1,10 @@
+import { navigatorManager } from '@/navigation/navigatorManager'
+import { challengesRepository } from '@/services/repositories/challenges.repository'
+import { useOverlay } from '@/store/useOverlay'
+import { Challenge } from '@/types/domain'
 import { useRoute } from '@react-navigation/native'
 import React from 'react'
 import { Text, TouchableOpacity, View } from 'react-native'
-import { navigatorManager } from '../../../../navigation/navigatorManager'
-import { challengesRepository } from '../../../../services/repositories/challenges.repository'
-import { useOverlay } from '../../../../store/useOverlay'
-import { Challenge } from '../../../../types/domain'
 
 const ChallengeAddTextAnswerScreen = () => {
   const route = useRoute<any>()

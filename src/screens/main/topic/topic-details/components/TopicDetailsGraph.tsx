@@ -1,61 +1,31 @@
-import { useTheme } from '@/hooks/useTheme'
+import { Text } from '@/components'
 import React from 'react'
-import { StyleSheet, Text, View, useWindowDimensions } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import Svg, { Circle, G, Path, Text as SvgText } from 'react-native-svg'
-
+import useSummaryProgressArcs from '../hooks/useSummaryProgressArcs'
 type Item = { title: string; value: number; color: string }
 type Props = { data: Item[] }
 
-export function SummaryProgressArcs({ data }: Props) {
-  const theme = useTheme()
-  const { width: screenWidth } = useWindowDimensions()
-  if (!data?.length) return null
+export function SummaryProgressArcs({ data }: Readonly<Props>) {
+  const computed = useSummaryProgressArcs(data)
+  if (!data?.length || !computed) return null
 
-  const strokeBase = 12
-  const gapBase = 18
-  const outerBase = 90
-  const maxSize = screenWidth * 0.9
-
-  const outerRadius = gapBase * (data.length - 1) + outerBase
-  const margin = 28
-  let size = (outerRadius + strokeBase / 2 + margin) * 2
-
-  const scale = size > maxSize ? maxSize / size : 1
-  size *= scale
-
-  const stroke = strokeBase * scale
-  const borderOffset = 1 * scale
-  const gap = gapBase * scale
-  const sweep = (240 * Math.PI) / 180
-  const startAngle = (-120 * Math.PI) / 180
-  const cx = size / 2
-  const cy = size / 2
-
-  const maxValue = Math.max(...data.map((d) => d.value))
+  const { theme, size, stroke, borderOffset, cx, cy, items } = computed
 
   return (
     <View style={styles.wrapper}>
       <View style={[styles.container, { width: size, height: size }]}>
         <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-          {/* O grupo principal é girado -90°, e o texto interno será compensado */}
           <G rotation={-90} origin={`${cx},${cy}`}>
-            {data.map((item, i) => {
-              const r = outerBase * scale + gap * (data.length - 1 - i)
-              const progress = maxValue ? item.value / maxValue : 0
-              const endAngle = startAngle + sweep * progress
-              const endFull = startAngle + sweep
-
-              const track = arcPath(cx, cy, r, startAngle, endFull)
-              const prog = arcPath(cx, cy, r, startAngle, endAngle)
-              const end = polar(cx, cy, r, endAngle)
+            {items.map((it) => {
+              const { item, trackPath, progPath, end, index } = it
               const color = item.color
-              const index = i + 1
 
               return (
                 <React.Fragment key={item.title}>
                   {/* Fundo */}
                   <Path
-                    d={track}
+                    d={trackPath}
                     stroke={theme.colors.backgroundTertiary}
                     strokeWidth={stroke}
                     fill="none"
@@ -64,8 +34,8 @@ export function SummaryProgressArcs({ data }: Props) {
 
                   {/* Borda preta */}
                   <Path
-                    d={prog}
-                    stroke="#000"
+                    d={progPath}
+                    stroke={theme.colors.borderColor}
                     strokeWidth={stroke + borderOffset * 2}
                     fill="none"
                     strokeLinecap="round"
@@ -74,7 +44,7 @@ export function SummaryProgressArcs({ data }: Props) {
 
                   {/* Arco colorido */}
                   <Path
-                    d={prog}
+                    d={progPath}
                     stroke={color}
                     strokeWidth={stroke}
                     fill="none"
@@ -86,15 +56,15 @@ export function SummaryProgressArcs({ data }: Props) {
                   <Circle
                     cx={end.x}
                     cy={end.y}
-                    r={10 * scale}
+                    r={10}
                     fill={color}
                     stroke={theme.colors.borderColor}
-                    strokeWidth={2 * scale}
+                    strokeWidth={2}
                   />
                   <SvgText
                     x={end.x}
-                    y={end.y + 3 * scale}
-                    fontSize={10 * scale}
+                    y={end.y + 3}
+                    fontSize={10}
                     fontWeight="700"
                     fill={theme.colors.borderColor}
                     textAnchor="middle"
@@ -124,33 +94,31 @@ export function SummaryProgressArcs({ data }: Props) {
           return (
             <View key={item.title} style={styles.legendItem}>
               <View
-                style={[
-                  styles.legendColor,
-                  { backgroundColor: item.color, borderColor: '#000' },
-                ]}
+                style={[styles.legendColor, { backgroundColor: item.color }]}
               >
-                <Text style={styles.legendNumber}>{index}</Text>
+                <Text variant="small">{index}</Text>
               </View>
-              <Text style={[styles.legendText, { color: item.color }]}>
-                {`${index} - ${item.title} - ${fmt(item.value)}`}
-              </Text>
+              <View>
+                <Text
+                  variant="medium"
+                  style={[{ color: item.color }]}
+                  numberOfLines={1}
+                >
+                  {`${index} - ${item.title.slice(0, 20)}`}
+                </Text>
+                <Text
+                  variant="medium"
+                  style={[{ color: item.color, marginTop: -6 }]}
+                >
+                  {`tempo gasto - ${fmt(item.value)}`}
+                </Text>
+              </View>
             </View>
           )
         })}
       </View>
     </View>
   )
-}
-
-function polar(cx: number, cy: number, r: number, a: number) {
-  return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) }
-}
-
-function arcPath(cx: number, cy: number, r: number, a0: number, a1: number) {
-  const p0 = polar(cx, cy, r, a0)
-  const p1 = polar(cx, cy, r, a1)
-  const large = Math.abs(a1 - a0) > Math.PI ? 1 : 0
-  return `M ${p0.x} ${p0.y} A ${r} ${r} 0 ${large} 1 ${p1.x} ${p1.y}`
 }
 
 const styles = StyleSheet.create({
@@ -183,14 +151,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 6,
-  },
-  legendNumber: {
-    color: '#000',
-    fontSize: 10,
-    fontWeight: '700',
-  },
-  legendText: {
-    fontSize: 12,
-    fontWeight: '600',
   },
 })
