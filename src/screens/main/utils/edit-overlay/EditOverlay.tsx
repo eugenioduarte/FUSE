@@ -150,7 +150,7 @@ const EditOverlay: React.FC = () => {
           }
           onPress={onSave}
           disabled={saving}
-          background={theme.colors.white}
+          background={theme.colors.backgroundTertiary}
           style={styles.centeredButton}
         />
       </OverlayContainer>

@@ -169,7 +169,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
           }
           onPress={onContinue}
           disabled={!canContinue}
-          background={theme.colors.white}
+          background={theme.colors.backgroundTertiary}
           style={styles.continueButton}
         />
       </View>
@@ -239,7 +239,7 @@ const createStyles = (theme: ThemeType, color?: string) =>
       alignItems: 'center',
       justifyContent: 'center',
     },
-    letterButtonText: { color: theme.colors.white },
+    letterButtonText: { color: theme.colors.backgroundTertiary },
 
     footer: {
       paddingHorizontal: theme.spacings.medium,

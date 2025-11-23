@@ -12,7 +12,9 @@ const StepDot = ({ active }: { active: boolean }) => {
         height: 6,
         borderRadius: 6,
         marginHorizontal: 4,
-        backgroundColor: active ? theme.colors.white : theme.colors.black,
+        backgroundColor: active
+          ? theme.colors.backgroundTertiary
+          : theme.colors.black,
         borderWidth: theme.border.size,
         borderColor: theme.colors.borderColor,
       }}

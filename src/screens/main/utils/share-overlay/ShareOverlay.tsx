@@ -1,22 +1,33 @@
+import { Text } from '@/components'
+import EmptyContainer from '@/components/containers/EmptyContainer'
+import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { sendTopicInviteToUid } from '@/services/firebase/invites.service'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useOverlay } from '@/store/useOverlay'
+import { useThemeStore } from '@/store/useThemeStore'
+import { AntDesign, Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import {
   FlatList,
   Modal,
   StyleSheet,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native'
+import OverlayContainer from '../components/OverlayContainer'
 
 const ShareOverlay: React.FC = () => {
+  const theme = useTheme()
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
+  const styles = createStyles(theme, color)
+
   const { shareOverlay, setShareOverlay, setNotificationOverlay } = useOverlay()
   const visible = !!shareOverlay
   const payload = shareOverlay
   useAuthStore((s) => s.user?.id)
+  const [invited, setInvited] = React.useState<string[]>([])
+  const [loadingIds, setLoadingIds] = React.useState<string[]>([])
 
   const close = () => {
     try {
@@ -27,9 +38,13 @@ const ShareOverlay: React.FC = () => {
   }
 
   const invite = async (uid: string) => {
+    if (loadingIds.includes(uid)) return
+    setLoadingIds((s) => [...s, uid])
     try {
       await sendTopicInviteToUid(uid, payload!.topicId)
-      // show success notification
+      // mark as invited locally so the plus button disappears for this user
+      setInvited((s) => [...s, uid])
+
       setNotificationOverlay({
         id: `invite-sent-${payload?.topicId}-${uid}`,
         title: t('topicDetails.share.invite_sent_title'),
@@ -45,11 +60,11 @@ const ShareOverlay: React.FC = () => {
         requireDecision: false,
       })
     } finally {
-      // keep overlay open so user can invite others, but optionally close
+      setLoadingIds((s) => s.filter((i) => i !== uid))
     }
   }
 
-  if (!payload) return null
+  if (!payload) return <EmptyContainer />
 
   return (
     <Modal
@@ -58,9 +73,19 @@ const ShareOverlay: React.FC = () => {
       transparent
       statusBarTranslucent
     >
-      <View style={styles.backdrop}>
+      <OverlayContainer>
         <View style={styles.card}>
-          <Text style={styles.title}>{t('topicDetails.share.heading')}</Text>
+          <View style={styles.headerRow}>
+            <Text variant="xLarge">{t('topicDetails.share.heading')}</Text>
+
+            <TouchableOpacity onPress={close}>
+              <Ionicons
+                name="close"
+                size={26}
+                color={theme.colors.textPrimary}
+              />
+            </TouchableOpacity>
+          </View>
 
           {payload.connections.length === 0 ? (
             <Text style={styles.message}>
@@ -74,76 +99,66 @@ const ShareOverlay: React.FC = () => {
               renderItem={({ item }) => (
                 <View style={styles.row}>
                   <View style={styles.info}>
-                    <Text style={styles.name}>
+                    <Text variant="xLarge">
                       {item.name || item.email || item.uid}
                     </Text>
                     {item.email ? (
-                      <Text style={styles.email}>{item.email}</Text>
+                      <Text variant="small">{item.email}</Text>
                     ) : null}
                   </View>
-                  <TouchableOpacity
-                    style={styles.inviteBtn}
-                    onPress={() => invite(item.uid)}
-                  >
-                    <Text style={styles.inviteText}>
-                      {t('topicDetails.share.invite_button')}
-                    </Text>
-                  </TouchableOpacity>
+
+                  {!invited.includes(item.uid) ? (
+                    <TouchableOpacity
+                      onPress={() => invite(item.uid)}
+                      disabled={loadingIds.includes(item.uid)}
+                    >
+                      <AntDesign
+                        name="plus"
+                        size={26}
+                        color={theme.colors.textPrimary}
+                      />
+                    </TouchableOpacity>
+                  ) : null}
                 </View>
               )}
             />
           )}
-
-          <View style={styles.footerRow}>
-            <TouchableOpacity style={styles.closeBtn} onPress={close}>
-              <Text style={styles.closeText}>{t('common.close')}</Text>
-            </TouchableOpacity>
-          </View>
         </View>
-      </View>
+      </OverlayContainer>
     </Modal>
   )
 }
 
 export default ShareOverlay
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  card: {
-    width: '100%',
-    maxHeight: '80%',
-    backgroundColor: '#1c1c1e',
-    borderRadius: 12,
-    padding: 16,
-  },
-  title: { color: 'white', fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  message: { color: '#ddd', marginBottom: 8 },
-  list: { marginTop: 8, marginBottom: 8 },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingVertical: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.04)',
-  },
-  info: { flex: 1, paddingRight: 12 },
-  name: { color: 'white', fontWeight: '600' },
-  email: { color: '#cbd5e1', fontSize: 12 },
-  inviteBtn: {
-    backgroundColor: '#3b82f6',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  inviteText: { color: 'white', fontWeight: '700' },
-  footerRow: { marginTop: 12, alignItems: 'flex-end' },
-  closeBtn: { paddingVertical: 8, paddingHorizontal: 12 },
-  closeText: { color: '#e5e7eb' },
-})
+const createStyles = (theme: any, color?: string) =>
+  StyleSheet.create({
+    card: {
+      borderRadius: 12,
+      padding: 16,
+      backgroundColor: color || theme.colors.backgroundSecondary,
+    },
+    message: { color: '#ddd', marginBottom: 8 },
+    list: { marginTop: 8, marginBottom: 8 },
+    row: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingVertical: 10,
+      borderBottomWidth: 1,
+      borderBottomColor: 'rgba(255,255,255,0.04)',
+    },
+    info: { flex: 1, paddingRight: 12 },
+
+    inviteBtn: {
+      paddingHorizontal: 12,
+      paddingVertical: 8,
+      borderRadius: 8,
+    },
+
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    },
+  })

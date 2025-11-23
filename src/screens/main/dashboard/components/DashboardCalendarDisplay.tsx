@@ -213,7 +213,7 @@ const createStyles = (theme: ThemeType) =>
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-      backgroundColor: theme.colors.white,
+      backgroundColor: theme.colors.backgroundTertiary,
       borderRadius: theme.border.radius16,
       marginTop: theme.spacings.medium,
       paddingVertical: theme.spacings.medium,

@@ -136,7 +136,7 @@ const ChallengeRunTextAnswerScreen: React.FC = () => {
         }
         onPress={evaluated ? onContinue : doSubmit}
         disabled={!canSubmit && !evaluated}
-        background={theme.colors.white}
+        background={theme.colors.backgroundTertiary}
         style={styles.button}
       />
     </Container>
@@ -184,9 +184,9 @@ const createStyles = (theme: any, color?: string) =>
       borderRadius: theme.border.radius16,
       padding: theme.spacings.large,
     },
-    correctLabel: { color: theme.colors.white, marginBottom: 6 },
-    correctAnswer: { color: theme.colors.white, marginBottom: 10 },
-    scoreText: { color: theme.colors.white },
-    feedbackText: { color: theme.colors.white, marginTop: 6 },
+    correctLabel: { color: theme.colors.backgroundTertiary, marginBottom: 6 },
+    correctAnswer: { color: theme.colors.backgroundTertiary, marginBottom: 10 },
+    scoreText: { color: theme.colors.backgroundTertiary },
+    feedbackText: { color: theme.colors.backgroundTertiary, marginTop: 6 },
     button: { alignSelf: 'center', marginBottom: theme.spacings.xLarge },
   })
