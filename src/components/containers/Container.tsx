@@ -8,7 +8,15 @@ type ContainerProps = {
 
 const Container = ({ children, style, ...props }: ContainerProps) => {
   return (
-    <View style={[{ flex: 1 }, style]} {...props}>
+    <View
+      style={[
+        {
+          flex: 1,
+        },
+        style,
+      ]}
+      {...props}
+    >
       {children}
     </View>
   )

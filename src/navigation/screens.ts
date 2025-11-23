@@ -15,7 +15,6 @@ export enum NavigationScreenName {
   ChallengeAddTextAnswerScreen = 'ChallengeAddTextAnswerScreen',
   TopicDetailsScreen = 'TopicDetailsScreen',
   SummaryScreen = 'SummaryScreen',
-  SummaryAudioScreen = 'SummaryAudioScreen',
   ProfileScreen = 'ProfileScreen',
   ConnectionsScreen = 'ConnectionsScreen',
   PaymentScreen = 'PaymentScreen',

@@ -1,4 +1,3 @@
-export { default as AudioIcon } from './audio_icon.svg'
 export { default as ChatIcon } from './chat_icon.svg'
 export { default as ChevronIcon } from './chevron_icon.svg'
 export { default as CloseIcon } from './close_icon.svg'

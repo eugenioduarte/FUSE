@@ -50,7 +50,6 @@ import ChallengeRunTextAnswerScreen from '../screens/main/challenge/ChallengeRun
 import ChallengesListScreen from '../screens/main/challenge/ChallengesListScreen'
 
 // Topic details & summary
-import SummaryAudioScreen from '../screens/main/topic/summary/SummaryAudioScreen'
 import SummaryDetailsScreen from '../screens/main/topic/summary/SummaryDetailsScreen'
 import SummaryScreen from '../screens/main/topic/summary/SummaryScreen'
 import TopicAddScreen from '../screens/main/topic/topic-add/TopicAddScreen'
@@ -306,11 +305,6 @@ function MainStack() {
         name={ROUTES.SummaryDetailsScreen}
         component={SummaryDetailsScreen}
         options={{ title: ROUTES.SummaryDetailsScreen }}
-      />
-      <Stack.Screen
-        name={ROUTES.SummaryAudioScreen}
-        component={SummaryAudioScreen}
-        options={{ title: ROUTES.SummaryAudioScreen }}
       />
 
       <Stack.Screen

@@ -32,7 +32,7 @@ export const ROUTES = {
   TopicAddScreen: 'TopicAddScreen',
 
   SummaryScreen: 'SummaryScreen',
-  SummaryAudioScreen: 'SummaryAudioScreen',
+
   // Topic - Ranking
   TopicRankingScreen: 'TopicRankingScreen',
   // Topic - Chat
