@@ -1,13 +1,23 @@
-import React from 'react'
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Button, Text } from '@/components'
+import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
 import {
   decideNotification,
   markNotificationRead,
-} from '../../../../services/firebase/notifications.service'
-import { useAuthStore } from '../../../../store/useAuthStore'
-import { useOverlay } from '../../../../store/useOverlay'
+} from '@/services/firebase/notifications.service'
+import { useAuthStore } from '@/store/useAuthStore'
+import { useOverlay } from '@/store/useOverlay'
+import { useThemeStore } from '@/store/useThemeStore'
+import { ThemeType } from '@/types/theme.type'
+import { Ionicons } from '@expo/vector-icons'
+import React from 'react'
+import { Modal, StyleSheet, TouchableOpacity, View } from 'react-native'
 
 const NotificationOverlay: React.FC = () => {
+  const theme = useTheme()
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
+  const styles = createStyles(theme, color)
+
   const { notificationOverlay, setNotificationOverlay } = useOverlay()
   const visible = !!notificationOverlay
   const payload = notificationOverlay
@@ -52,41 +62,30 @@ const NotificationOverlay: React.FC = () => {
     >
       <View style={styles.backdrop}>
         <View style={styles.card}>
-          {!!payload?.title && (
-            <Text style={styles.title}>{payload.title}</Text>
-          )}
+          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <Ionicons name="close" size={26} color={theme.colors.textPrimary} />
+          </TouchableOpacity>
+          {!!payload?.title && <Text variant="xLarge">{payload.title}</Text>}
           {!!payload?.body && (
-            <Text style={styles.message}>{payload.body}</Text>
+            <Text variant="large" style={styles.message}>
+              {payload.body}
+            </Text>
           )}
 
           <View style={styles.row}>
             {payload?.requireDecision ? (
               <>
-                <TouchableOpacity
-                  style={[styles.btn, styles.btnSecondary]}
+                <Button
+                  title={payload?.denyLabel || t('notification.deny')}
                   onPress={onDeny}
-                >
-                  <Text style={[styles.btnText, styles.btnTextSecondary]}>
-                    {payload?.denyLabel || 'Negar'}
-                  </Text>
-                </TouchableOpacity>
-                <View style={{ width: 8 }} />
-                <TouchableOpacity
-                  style={[styles.btn, styles.btnPrimary]}
+                />
+                <Button
+                  title={payload?.acceptLabel || t('notification.accept')}
                   onPress={onAccept}
-                >
-                  <Text style={styles.btnText}>
-                    {payload?.acceptLabel || 'Aceitar'}
-                  </Text>
-                </TouchableOpacity>
+                />
               </>
             ) : (
-              <TouchableOpacity
-                style={[styles.btn, styles.btnPrimary]}
-                onPress={onClose}
-              >
-                <Text style={styles.btnText}>Fechar</Text>
-              </TouchableOpacity>
+              <></>
             )}
           </View>
         </View>
@@ -97,34 +96,29 @@ const NotificationOverlay: React.FC = () => {
 
 export default NotificationOverlay
 
-const styles = StyleSheet.create({
-  backdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  card: {
-    width: '100%',
-    backgroundColor: '#1c1c1e',
-    borderRadius: 12,
-    padding: 20,
-  },
-  title: { color: 'white', fontSize: 18, fontWeight: '700', marginBottom: 8 },
-  message: { color: '#ddd', marginBottom: 16 },
-  row: { flexDirection: 'row', justifyContent: 'flex-end' },
-  btn: {
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-  },
-  btnPrimary: { backgroundColor: '#3b82f6' },
-  btnSecondary: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: '#52525b',
-  },
-  btnText: { color: 'white', fontWeight: '700' },
-  btnTextSecondary: { color: '#e5e7eb' },
-})
+const createStyles = (theme: ThemeType, color?: string) =>
+  StyleSheet.create({
+    backdrop: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.6)',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: theme.spacings.large,
+    },
+    card: {
+      width: '100%',
+      backgroundColor: color,
+      borderRadius: theme.border.radius12,
+      padding: theme.spacings.medium,
+    },
+    message: {
+      marginBottom: theme.spacings.medium,
+      marginTop: theme.spacings.small,
+    },
+    row: {
+      flexDirection: 'row',
+      justifyContent: 'flex-end',
+      gap: theme.spacings.xMedium,
+    },
+    closeButton: { alignSelf: 'flex-end' },
+  })

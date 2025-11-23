@@ -213,6 +213,8 @@
   "editOverlay.button.save": "Guardar alterações",
   "ranking.title": "Ranking do Tópico",
   "ranking.empty": "Ainda não há pontuações para este tópico.",
+  "notification.deny": "Declinar",
+  "notification.accept": "Aceitar",
   "topicChat.placeholder": "Escreva uma mensagem",
   "topicChat.you": "Você"
 }
