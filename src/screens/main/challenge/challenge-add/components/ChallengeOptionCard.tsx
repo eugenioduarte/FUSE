@@ -47,18 +47,12 @@ const ChallengeOptionCard = ({
           </Text>
         </View>
 
-        {score > 0 ? (
-          <View style={styles.scoreRow}>
-            <Text style={styles.score}>{score}</Text>
-            <Text variant="medium" style={styles.percent}>
-              %
-            </Text>
-          </View>
-        ) : (
-          <Text variant="medium" style={styles.noScore}>
-            {t('challenge.card.no_score')}
+        <View style={styles.scoreRow}>
+          <Text style={styles.score}>{score}</Text>
+          <Text variant="medium" style={styles.percent}>
+            %
           </Text>
-        )}
+        </View>
       </View>
     </Pressable>
   )
