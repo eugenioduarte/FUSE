@@ -3,9 +3,9 @@ import React, { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import Svg, { Circle, Path } from 'react-native-svg'
 
-const SIZE = 280
+const SIZE = 200
 const CENTER = SIZE / 2
-const STROKE = 30
+const STROKE = 20
 const RADIUS = (SIZE - STROKE) / 2
 
 function polarToCartesian(cx: number, cy: number, r: number, angle: number) {
@@ -36,7 +36,8 @@ function angleToColor(angle: number) {
 }
 
 export function ColorWheel() {
-  const [selectedColor, setSelectedColor] = useState('#ff0000')
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
+  const [selectedColor, setSelectedColor] = useState(color)
 
   const handlePress = (event: any) => {
     const { locationX, locationY } = event.nativeEvent

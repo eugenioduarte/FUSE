@@ -201,5 +201,14 @@
   "profile.email.updated": "Email atualizado. Verifica a caixa de entrada",
   "profile.email.current_password_required": "Introduz a senha atual para confirmar a alteração",
   "profile.password.updated": "Senha atualizada com sucesso",
-  "profile.password.update_failed": "Não foi possível alterar a senha"
+  "profile.password.update_failed": "Não foi possível alterar a senha",
+  "editOverlay.title.topic": "Editar tópico",
+  "editOverlay.title.summary": "Editar resumo",
+  "editOverlay.field.title": "Título",
+  "editOverlay.field.title_placeholder.topic": "Título do tópico",
+  "editOverlay.field.title_placeholder.summary": "Título do resumo",
+  "editOverlay.field.description": "Descrição",
+  "editOverlay.field.description_placeholder": "Breve descrição",
+  "editOverlay.button.saving": "A guardar…",
+  "editOverlay.button.save": "Guardar alterações"
 }
