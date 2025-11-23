@@ -210,5 +210,9 @@
   "editOverlay.field.description": "Descrição",
   "editOverlay.field.description_placeholder": "Breve descrição",
   "editOverlay.button.saving": "A guardar…",
-  "editOverlay.button.save": "Guardar alterações"
+  "editOverlay.button.save": "Guardar alterações",
+  "ranking.title": "Ranking do Tópico",
+  "ranking.empty": "Ainda não há pontuações para este tópico.",
+  "topicChat.placeholder": "Escreva uma mensagem",
+  "topicChat.you": "Você"
 }

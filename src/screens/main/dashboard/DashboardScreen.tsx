@@ -29,7 +29,9 @@ export default function DashboardScreen() {
             <TopicCard item={{ id: item.id, title: item.topicName }} />
           )}
           ListHeaderComponent={<DashboardAgentDisplay />}
-          ListEmptyComponent={loading ? null : <EmptyContainer />}
+          ListEmptyComponent={
+            loading || items.length ? null : <EmptyContainer />
+          }
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}
           style={styles.list}

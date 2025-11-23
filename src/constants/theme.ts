@@ -7,7 +7,7 @@ export const Colors = {
     backgroundTertiary: '#F7EFDF', // leve variação do fundo
 
     // ---- Texto e bordas ----
-    textPrimary: '#3A001D', // cor principal do texto
+    textPrimary: '#06003aff', // cor principal do texto
     textSecondary: '#5A2E3D', // opcional – tom mais suave derivado
     borderColor: '#3A001D', // cor padrão de borda
     textHighlight: '#F3D8B4', // para destaques / links
@@ -23,7 +23,7 @@ export const Colors = {
 
     // ---- Neutros ----
     white: '#FFFFFF',
-    black: '#3A001D', // reutilizado do texto primário (consistente)
+    black: '#111214', // reutilizado do texto primário (consistente)
     disabled: '#DEDEDEFF',
   },
 

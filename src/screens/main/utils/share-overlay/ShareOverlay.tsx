@@ -1,11 +1,11 @@
 import { Text } from '@/components'
-import EmptyContainer from '@/components/containers/EmptyContainer'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { sendTopicInviteToUid } from '@/services/firebase/invites.service'
 import { useAuthStore } from '@/store/useAuthStore'
 import { useOverlay } from '@/store/useOverlay'
 import { useThemeStore } from '@/store/useThemeStore'
+import { ThemeType } from '@/types/theme.type'
 import { AntDesign, Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import {
@@ -64,12 +64,12 @@ const ShareOverlay: React.FC = () => {
     }
   }
 
-  if (!payload) return <EmptyContainer />
+  if (!payload) return <></>
 
   return (
     <Modal
       visible={visible}
-      animationType="fade"
+      animationType="slide"
       transparent
       statusBarTranslucent
     >
@@ -131,29 +131,30 @@ const ShareOverlay: React.FC = () => {
 
 export default ShareOverlay
 
-const createStyles = (theme: any, color?: string) =>
+const createStyles = (theme: ThemeType, color?: string) =>
   StyleSheet.create({
     card: {
-      borderRadius: 12,
-      padding: 16,
+      borderRadius: theme.border.radius12,
+      padding: theme.spacings.medium,
       backgroundColor: color || theme.colors.backgroundSecondary,
     },
-    message: { color: '#ddd', marginBottom: 8 },
-    list: { marginTop: 8, marginBottom: 8 },
+    message: { marginBottom: theme.spacings.small },
+    list: {
+      marginTop: theme.spacings.small,
+      marginBottom: theme.spacings.small,
+    },
     row: {
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      paddingVertical: 10,
-      borderBottomWidth: 1,
-      borderBottomColor: 'rgba(255,255,255,0.04)',
+      paddingVertical: theme.spacings.small,
     },
-    info: { flex: 1, paddingRight: 12 },
+    info: { flex: 1, paddingRight: theme.spacings.medium },
 
     inviteBtn: {
       paddingHorizontal: 12,
-      paddingVertical: 8,
-      borderRadius: 8,
+      paddingVertical: theme.spacings.small,
+      borderRadius: theme.spacings.small,
     },
 
     headerRow: {

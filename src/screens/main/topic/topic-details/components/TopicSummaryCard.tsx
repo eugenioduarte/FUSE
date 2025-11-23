@@ -1,6 +1,5 @@
-import { AudioIcon, ChevronIcon, QuizIcon } from '@/assets/icons'
+import { ChevronIcon } from '@/assets/icons'
 import { Text } from '@/components'
-import IconButton from '@/components/buttons/IconButton'
 import { useTheme } from '@/hooks/useTheme'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { Summary } from '@/types/domain'
@@ -36,20 +35,6 @@ const TopicSummaryCard = ({ summary, bg }: TopicSummaryCardProps) => {
           {summary.content.slice(0, TOTAL_CHARACTERS)}
         </Text>
         <View style={styles.row}>
-          <View style={styles.leftIcons}>
-            <IconButton
-              icon={<AudioIcon width={ICON_SIZE} height={ICON_SIZE} />}
-              onPress={() =>
-                navigatorManager.goToSummaryAudio({ summaryId: summary.id })
-              }
-            />
-            <IconButton
-              icon={<QuizIcon width={ICON_SIZE} height={ICON_SIZE} />}
-              onPress={() =>
-                navigatorManager.goToChallengesList({ summaryId: summary.id })
-              }
-            />
-          </View>
           <ChevronIcon width={ICON_SIZE} height={ICON_SIZE} />
         </View>
       </View>
@@ -83,7 +68,7 @@ const createStyles = (theme: ThemeType, bg?: string) =>
     },
     row: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
+      justifyContent: 'flex-end',
       alignItems: 'center',
       marginTop: theme.spacings.small,
     },

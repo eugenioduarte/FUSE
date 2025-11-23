@@ -1,5 +1,4 @@
 import { Button, Container, Text } from '@/components'
-import EmptyContainer from '@/components/containers/EmptyContainer'
 import SubContainer from '@/components/containers/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
 import useTrackTopicSession from '@/hooks/useTrackTopicSession'
@@ -83,7 +82,7 @@ const TopicDetailsScreen: React.FC = () => {
   }, [loading, loadingSummaries, setLoadingOverlay])
 
   if (!topic) {
-    return <EmptyContainer />
+    return null
   }
 
   return (

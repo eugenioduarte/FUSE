@@ -16,6 +16,7 @@
     ".expo/types/**/*.ts",
     "expo-env.d.ts",
     "declarations.d.ts",
-    "src/components/ui/DisplayNumber.tx"
+    "src/components/ui/DisplayNumber.tx",
+    "src/components/headers/HeaderTopicChattsx"
   ]
 }
