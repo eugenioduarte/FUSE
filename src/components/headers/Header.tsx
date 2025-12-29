@@ -14,6 +14,7 @@ import Animated, {
 import HeaderAddTopic from './HeaderAddTopic'
 import HeaderCalendar from './HeaderCalendar'
 import HeaderChallengeAdd from './HeaderChallengeAdd'
+import HeaderChallengesList from './HeaderChallengesList'
 import HeaderDashboard from './HeaderDashboard'
 import HeaderSummaryAdd from './HeaderSummaryAdd'
 import HeaderSummaryDetails from './HeaderSummaryDetails'
@@ -129,6 +130,9 @@ export const Header: React.FC = () => {
     }
     if (currentType === ROUTES.TopicChatScreen) {
       return <HeaderTopicChat />
+    }
+    if (currentType === ROUTES.ChallengesListScreen) {
+      return <HeaderChallengesList />
     }
     return <DefaultHeader title={title} />
   }

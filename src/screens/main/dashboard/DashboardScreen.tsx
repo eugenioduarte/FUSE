@@ -5,6 +5,7 @@ import SubContainer from '@/components/containers/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { useThemeStore } from '@/store/useThemeStore'
+import { useUpdateBackgroundColor } from '@/store/useUpdateBackgroundColor'
 import React from 'react'
 import { FlatList, StyleSheet } from 'react-native'
 import { navigatorManager } from '../../../navigation/navigatorManager'
@@ -15,9 +16,14 @@ import useDashboard from './hooks/useDashboard'
 export default function DashboardScreen() {
   const theme = useTheme()
   const color = useThemeStore((s) => s.colorLevelUp.background_color)
+  const styles = createStyles(theme, color)
   const { items, loading } = useDashboard()
 
-  const styles = createStyles(theme, color)
+  useUpdateBackgroundColor(
+    color === theme.colors.backgroundSecondary
+      ? theme.colors.accentYellow
+      : color,
+  )
 
   return (
     <Container style={styles.container}>

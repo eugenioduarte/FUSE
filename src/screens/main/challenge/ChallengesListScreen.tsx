@@ -1,27 +1,24 @@
+import { PlusIcon } from '@/assets/icons'
+import { Container, Text } from '@/components'
+import { useTheme } from '@/hooks/useTheme'
+import {
+  RootStackParamList,
+  navigatorManager,
+} from '@/navigation/navigatorManager'
+import { getUserProfile } from '@/services/firebase/connections.service'
+import { challengesRepository } from '@/services/repositories/challenges.repository'
+import { summariesRepository } from '@/services/repositories/summaries.repository'
+import { startSession, stopSessionByKey } from '@/services/usage/usageTracker'
+import { useAuthStore } from '@/store/useAuthStore'
+import { useThemeStore } from '@/store/useThemeStore'
 import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
 import React, { useCallback, useEffect, useState } from 'react'
 import {
   ActivityIndicator,
   FlatList,
-  Text,
   TouchableOpacity,
   View,
 } from 'react-native'
-import {
-  RootStackParamList,
-  navigatorManager,
-} from '../../../navigation/navigatorManager'
-import { getUserProfile } from '../../../services/firebase/connections.service'
-import { challengesRepository } from '../../../services/repositories/challenges.repository'
-import { summariesRepository } from '../../../services/repositories/summaries.repository'
-import { topicsRepository } from '../../../services/repositories/topics.repository'
-import {
-  startSession,
-  stopSessionByKey,
-} from '../../../services/usage/usageTracker'
-import { useAuthStore } from '../../../store/useAuthStore'
-import { useThemeStore } from '../../../store/useThemeStore'
-//
 
 type Item = {
   id: string
@@ -52,23 +49,13 @@ const formatDateOnly = (ts: number) => {
 }
 
 const ChallengesListScreen: React.FC = () => {
+  const theme = useTheme()
+  const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const route =
     useRoute<RouteProp<RootStackParamList, 'ChallengesListScreen'>>()
   const summaryId = route.params?.summaryId
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
-  const [topicColor, setTopicColor] = useState<string | undefined>()
-  // Sync header background with this screen's background early
-  const setBackgroundColor = useThemeStore((s) => s.setBackgroundColor)
-  const bgEarly = topicColor || '#0b0b0c'
-  useEffect(() => {
-    setBackgroundColor(bgEarly)
-  }, [bgEarly, setBackgroundColor])
-  useFocusEffect(
-    React.useCallback(() => {
-      setBackgroundColor(bgEarly)
-    }, [bgEarly, setBackgroundColor]),
-  )
 
   const getLastUserIdFromPayload = (payload: any): string | undefined => {
     const lastAt = payload?.lastAttempt?.at
@@ -133,13 +120,10 @@ const ChallengesListScreen: React.FC = () => {
       setItems(withMeta)
       setLoading(false)
 
-      // Resolve topic color for this summary
       try {
         const summary = await summariesRepository.getById(summaryId)
         if (!summary) return
-        const topic = await topicsRepository.getById(summary.topicId)
         if (!active) return
-        setTopicColor(topic?.backgroundColor || undefined)
       } catch {}
     }
     load()
@@ -148,31 +132,29 @@ const ChallengesListScreen: React.FC = () => {
     }
   }, [summaryId, attachLastAttempt])
 
-  // On focus: flush pending local changes to backend and Firestore, then reload list
   useFocusEffect(
     React.useCallback(() => {
       let mounted = true
       ;(async () => {
         try {
           const { processOfflineQueue } = await import(
-            '../../../services/sync/sync.service'
+            '@/services/sync/sync.service'
           )
           await processOfflineQueue()
         } catch {}
         try {
           const { flushLocalCollaborativeChanges } = await import(
-            '../../../services/firebase/collabFlush.service'
+            '@/services/firebase/collabFlush.service'
           )
           await flushLocalCollaborativeChanges()
         } catch {}
-        // Backfill: fetch challenges by summaryId directly from Firestore in case
-        // some legacy docs are missing topicId (listener filter)
+
         try {
           if (summaryId) {
             const { getFirestore, collection, getDocs, query, where } =
               await import('firebase/firestore')
             const { getFirebaseApp } = await import(
-              '../../../services/firebase/firebaseInit'
+              '@/services/firebase/firebaseInit'
             )
             const db = getFirestore(getFirebaseApp())
             const q = query(
@@ -209,7 +191,7 @@ const ChallengesListScreen: React.FC = () => {
             await Promise.all(promises)
           }
         } catch {}
-        // quick reload similar to useEffect
+
         try {
           if (!mounted) return
           if (summaryId == null) {
@@ -242,7 +224,6 @@ const ChallengesListScreen: React.FC = () => {
     }, [summaryId, attachLastAttempt]),
   )
 
-  // Track study session for this summary's challenges list
   useFocusEffect(
     React.useCallback(() => {
       let sessionKey: string | null = null
@@ -264,7 +245,6 @@ const ChallengesListScreen: React.FC = () => {
     }, [summaryId]),
   )
 
-  // Fetch display names for users that completed last attempts
   useEffect(() => {
     let mounted = true
     ;(async () => {
@@ -306,42 +286,28 @@ const ChallengesListScreen: React.FC = () => {
     )
   }
 
-  const colored = !!topicColor
-  const bg = topicColor || '#0b0b0c'
-  const titleColor = colored ? '#111' : 'white'
-  const cardBg = colored ? '#ffffffaa' : '#111214'
-  const cardBorder = colored ? '#e5e7eb' : '#2B2C30'
-  const cardText = colored ? '#111' : 'white'
-
   return (
-    <View style={{ flex: 1, backgroundColor: bg, padding: 16 }}>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 12,
-        }}
-      >
-        <Text style={{ color: titleColor, fontSize: 18, fontWeight: '700' }}>
-          Challenges
-        </Text>
-        {!!summaryId && (
-          <TouchableOpacity
-            onPress={() => navigatorManager.goToChallengeAdd({ summaryId })}
-          >
-            <Text style={{ color: '#2563eb', fontWeight: '700' }}>+ Criar</Text>
-          </TouchableOpacity>
-        )}
-      </View>
+    <Container style={{ flex: 1, backgroundColor: color }}>
+      {!!summaryId && (
+        <TouchableOpacity
+          onPress={() => navigatorManager.goToChallengeAdd({ summaryId })}
+          style={{
+            alignSelf: 'flex-end',
+            paddingVertical: 16,
+            paddingHorizontal: 16,
+          }}
+        >
+          <PlusIcon width={20} height={20} fill={theme.colors.textPrimary} />
+        </TouchableOpacity>
+      )}
+
       {items.length === 0 ? (
-        <Text style={{ color: colored ? '#333' : '#9ca3af' }}>
-          Nenhum challenge.
-        </Text>
+        <Text variant="large">Nenhum challenge.</Text>
       ) : (
         <FlatList
           data={items}
           keyExtractor={(it) => it.id}
+          style={{ paddingHorizontal: 16 }}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
@@ -363,15 +329,11 @@ const ChallengesListScreen: React.FC = () => {
                   })
               }}
               style={{
-                backgroundColor: cardBg,
-                borderColor: cardBorder,
-                borderWidth: 1,
-                borderRadius: 10,
                 padding: 12,
                 marginBottom: 10,
               }}
             >
-              <Text style={{ color: cardText, fontWeight: '600' }}>
+              <Text variant="large">
                 {item.type === 'hangman'
                   ? `Hangman – ${formatDateOnly(item.lastAttempt!.at)} – ${item.lastAttempt!.score}`
                   : item.type === 'matrix'
@@ -381,7 +343,7 @@ const ChallengesListScreen: React.FC = () => {
                       : `Quiz – ${formatDateTime(item.lastAttempt!.at)} – ${item.lastAttempt!.score}/${item.lastAttempt!.total}`}
               </Text>
               {!!item.lastUserId && (
-                <Text style={{ color: cardText, opacity: 0.8, marginTop: 4 }}>
+                <Text variant="large" style={{ opacity: 0.8, marginTop: 4 }}>
                   {`por ${item.lastUserId === meId ? 'você' : userNames[item.lastUserId] || '…'}`}
                 </Text>
               )}
@@ -389,7 +351,7 @@ const ChallengesListScreen: React.FC = () => {
           )}
         />
       )}
-    </View>
+    </Container>
   )
 }
 

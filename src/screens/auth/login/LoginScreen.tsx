@@ -4,6 +4,7 @@ import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { loginSchema } from '@/schemas/authSchemas'
 import { firebaseLogin } from '@/services/firebase/authService'
+import { useUpdateBackgroundColor } from '@/store/useUpdateBackgroundColor'
 import { ThemeType } from '@/types/theme.type'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React from 'react'
@@ -44,6 +45,8 @@ const LoginScreen: React.FC = () => {
 
   const { isSubmitting, errors } = formState
   const { translateY, keyboardOpen } = useLoginAnimation(theme)
+
+  useUpdateBackgroundColor(theme.colors.backgroundSecondary)
 
   const onSubmit = async (values: LoginFormValues) => {
     try {

@@ -92,7 +92,7 @@ export function generateLevelSteps(baseColor: string): ColorLevels {
   const keys = ['background_color'] as const
 
   const colors = [
-    '#EA3D5C', // background_color - preto
+    '#F7EFDF', // background_color - preto
   ] as const
 
   const result = {} as ColorLevels
