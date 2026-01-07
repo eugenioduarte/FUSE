@@ -6,17 +6,22 @@ import { Challenge } from '@/types/domain'
 import { useEffect, useState } from 'react'
 
 export default function useChallengeReviewTextAnswer(challengeId: string) {
-  const { setErrorOverlay } = useOverlay()
+  const { setErrorOverlay, setLoadingOverlay } = useOverlay.getState()
   const [challenge, setChallenge] = useState<Challenge | null>(null)
   const [topicId, setTopicId] = useState<string | null>(null)
-  const [loading, setLoading] = useState(true)
 
   const [timeLimitSeconds, setTimeLimitSeconds] = useState<number>(60)
 
   useEffect(() => {
     let active = true
+    if (!challengeId) {
+      setLoadingOverlay(true, 'ChallengeReviewTextAnswerScreen')
+      return
+    }
+
     ;(async () => {
       try {
+        setLoadingOverlay(true, 'ChallengeReviewTextAnswerScreen')
         const all = await challengesRepository.list()
         if (!active) return
         const ch = all.find((c) => c.id === challengeId) || null
@@ -30,13 +35,13 @@ export default function useChallengeReviewTextAnswer(challengeId: string) {
         console.error(e)
         setErrorOverlay(true, 'Não foi possível carregar o review.')
       } finally {
-        if (active) setLoading(false)
+        setLoadingOverlay(false)
       }
     })()
     return () => {
       active = false
     }
-  }, [challengeId, setErrorOverlay])
+  }, [challengeId, setErrorOverlay, setLoadingOverlay])
 
   useTrackTopicSession(topicId, 'challenge', challenge?.id)
 
@@ -45,7 +50,6 @@ export default function useChallengeReviewTextAnswer(challengeId: string) {
 
   return {
     challenge,
-    loading,
     exercises,
     lastAttempt,
     timeLimitSeconds,

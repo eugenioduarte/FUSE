@@ -33,16 +33,12 @@ import CalendarDetailsScreen from '../screens/main/calendar/CalendarDetailsScree
 import CalendarEditScreen from '../screens/main/calendar/CalendarEditScreen'
 
 // Challenge
-import ChallengeAddHangmanScreen from '../screens/main/challenge/challenge-add/ChallengeAddHangmanScreen'
-import ChallengeAddMatrixScreen from '../screens/main/challenge/challenge-add/ChallengeAddMatrixScreen'
-import ChallengeAddQuizScreen from '../screens/main/challenge/challenge-add/ChallengeAddQuizScreen'
 import ChallengeAddScreen from '../screens/main/challenge/challenge-add/ChallengeAddScreen'
-import ChallengeAddTextAnswerScreen from '../screens/main/challenge/challenge-add/ChallengeAddTextAnswerScreen'
+import ChallengeReviewHangmanScreen from '../screens/main/challenge/challenge-review-hangman/ChallengeReviewHangmanScreen'
+import ChallengeReviewMatrixScreen from '../screens/main/challenge/challenge-review-matrix/ChallengeReviewMatrixScreen'
+import ChallengeReviewQuizScreen from '../screens/main/challenge/challenge-review-quiz/ChallengeReviewQuizScreen'
+import ChallengeReviewTextAnswerScreen from '../screens/main/challenge/challenge-review-text-answer/ChallengeReviewTextAnswerScreen'
 import ChallengeFinishedScoreScreen from '../screens/main/challenge/ChallengeFinishedScoreScreen'
-import ChallengeReviewHangmanScreen from '../screens/main/challenge/ChallengeReviewHangmanScreen'
-import ChallengeReviewMatrixScreen from '../screens/main/challenge/ChallengeReviewMatrixScreen'
-import ChallengeReviewQuizScreen from '../screens/main/challenge/ChallengeReviewQuizScreen'
-import ChallengeReviewTextAnswerScreen from '../screens/main/challenge/ChallengeReviewTextAnswerScreen'
 import ChallengeRunHangmanScreen from '../screens/main/challenge/ChallengeRunHangmanScreen'
 import ChallengeRunMatrixScreen from '../screens/main/challenge/ChallengeRunMatrixScreen'
 import ChallengeRunQuizScreen from '../screens/main/challenge/ChallengeRunQuizScreen'
@@ -208,16 +204,7 @@ function MainStack() {
         component={ChallengeAddScreen}
         options={{ title: ROUTES.ChallengeAddScreen }}
       />
-      <Stack.Screen
-        name={ROUTES.ChallengeAddHangmanScreen}
-        component={ChallengeAddHangmanScreen}
-        options={{ title: ROUTES.ChallengeAddHangmanScreen }}
-      />
-      <Stack.Screen
-        name={ROUTES.ChallengeAddMatrixScreen}
-        component={ChallengeAddMatrixScreen}
-        options={{ title: ROUTES.ChallengeAddMatrixScreen }}
-      />
+
       <Stack.Screen
         name={ROUTES.ChallengeRunTextAnswerScreen}
         component={ChallengeRunTextAnswerScreen}
@@ -226,11 +213,7 @@ function MainStack() {
           gestureEnabled: false,
         }}
       />
-      <Stack.Screen
-        name={ROUTES.ChallengeAddQuizScreen}
-        component={ChallengeAddQuizScreen}
-        options={{ title: ROUTES.ChallengeAddQuizScreen }}
-      />
+
       <Stack.Screen
         name={ROUTES.ChallengeReviewTextAnswerScreen}
         component={ChallengeReviewTextAnswerScreen}
@@ -241,11 +224,7 @@ function MainStack() {
         component={ChallengeReviewHangmanScreen}
         options={{ title: ROUTES.ChallengeReviewHangmanScreen }}
       />
-      <Stack.Screen
-        name={ROUTES.ChallengeAddTextAnswerScreen}
-        component={ChallengeAddTextAnswerScreen}
-        options={{ title: ROUTES.ChallengeAddTextAnswerScreen }}
-      />
+
       <Stack.Screen
         name={ROUTES.ChallengesListScreen}
         component={ChallengesListScreen}

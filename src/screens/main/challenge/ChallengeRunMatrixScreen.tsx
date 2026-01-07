@@ -18,11 +18,14 @@ import ChallengeRunClose from './components/ChallengeRunClose'
 const ChallengeRunMatrixScreen: React.FC = () => {
   const theme = useTheme()
   const styles = createStyles(theme)
+
   const color = useThemeStore((s) => s.colorLevelUp.background_color)
   const setBackgroundColor = useThemeStore((state) => state.setBackgroundColor)
+
   useEffect(() => {
     setBackgroundColor(color)
   }, [color, setBackgroundColor])
+
   const route =
     useRoute<RouteProp<RootStackParamList, 'ChallengeRunMatrixScreen'>>()
   const challengeId = route.params?.challengeId!
@@ -37,7 +40,6 @@ const ChallengeRunMatrixScreen: React.FC = () => {
     cellSize,
     gridRows,
     gridRef,
-    onGridMeasure,
     panHandlers,
     forceFinish,
     foundCellsMemo,
@@ -48,12 +50,12 @@ const ChallengeRunMatrixScreen: React.FC = () => {
 
   const { setLoadingOverlay } = useOverlay()
 
-  React.useEffect(() => {
-    const show = loading || gridRows === 0
-    setLoadingOverlay(show, 'ChallengeRunMatrixScreen')
-  }, [loading, gridRows, setLoadingOverlay])
+  useEffect(() => {
+    // overlay só durante loading inicial
+    setLoadingOverlay(loading, 'ChallengeRunMatrixScreen')
+  }, [loading, setLoadingOverlay])
 
-  React.useEffect(() => {
+  useEffect(() => {
     if (!finished) return
     navigatorManager.goToChallengeFinishedScore({
       score: finished.score,
@@ -83,6 +85,7 @@ const ChallengeRunMatrixScreen: React.FC = () => {
           {question}
         </Text>
 
+        {/* Wrapper só mede altura */}
         <View
           style={styles.gridWrapper}
           onLayout={(e) => setGridAvailH(e.nativeEvent.layout.height)}
@@ -92,15 +95,29 @@ const ChallengeRunMatrixScreen: React.FC = () => {
               ref={(r) => {
                 gridRef.current = r
               }}
-              onLayout={onGridMeasure}
-              onStartShouldSetResponderCapture={() => true}
-              onResponderTerminationRequest={() => false}
-              {...panHandlers}
+              {...panHandlers} // ✅ somente aqui
               style={[
                 styles.gridBoard,
                 { width: cellSize * 10, height: cellSize * gridRows },
               ]}
             >
+              {/* DEBUG path overlay */}
+              {currentPath.map((p, idx) => (
+                <View
+                  key={`dbg-${p.r}-${p.c}-${idx}`}
+                  style={{
+                    position: 'absolute',
+                    left: p.c * cellSize,
+                    top: p.r * cellSize,
+                    width: cellSize,
+                    height: cellSize,
+                    backgroundColor: 'rgba(99,102,241,0.35)',
+                    borderWidth: 1,
+                    borderColor: 'rgba(99,102,241,0.8)',
+                  }}
+                />
+              ))}
+
               {grid.map((row, rIdx) => {
                 const rowKey = row.join('') || `row-${rIdx}`
                 return (
@@ -110,9 +127,8 @@ const ChallengeRunMatrixScreen: React.FC = () => {
                         (p) => p.r === rIdx && p.c === cIdx,
                       )
                       const isFoundCell = foundCellsMemo.has(`${rIdx},${cIdx}`)
-                      const bg = isFoundCell
-                        ? theme.colors.backgroundTertiary
-                        : inPath
+                      const bg =
+                        isFoundCell || inPath
                           ? theme.colors.backgroundTertiary
                           : 'transparent'
 
@@ -131,11 +147,11 @@ const ChallengeRunMatrixScreen: React.FC = () => {
                         >
                           <Text
                             variant="large"
-                            style={[
+                            style={
                               allWordCellsMemo.has(`${rIdx},${cIdx}`)
                                 ? styles.cellUnderline
-                                : undefined,
-                            ]}
+                                : undefined
+                            }
                           >
                             {ch}
                           </Text>
@@ -185,6 +201,7 @@ const createStyles = (theme: ThemeType) =>
       borderColor: theme.colors.borderColor,
       borderWidth: theme.border.size,
       borderRadius: theme.spacings.small,
+      position: 'relative',
       overflow: 'hidden',
     },
     row: { flexDirection: 'row' },
@@ -195,15 +212,5 @@ const createStyles = (theme: ThemeType) =>
     },
     cellUnderline: {
       textDecorationLine: 'underline',
-    },
-
-    list: { width: '100%', paddingTop: theme.spacings.medium },
-    contentContainer: { paddingBottom: 100 },
-    emptyContainer: { padding: theme.spacings.medium },
-    emptyText: { color: theme.colors.textPrimary },
-    button: {
-      alignSelf: 'center',
-      position: 'absolute',
-      bottom: theme.spacings.large,
     },
   })

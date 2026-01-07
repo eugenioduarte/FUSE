@@ -216,5 +216,23 @@
   "notification.deny": "Declinar",
   "notification.accept": "Aceitar",
   "topicChat.placeholder": "Escreva uma mensagem",
-  "topicChat.you": "Você"
+  "topicChat.you": "Você",
+  "challengeReviewQuiz.header": "Quiz – {date} – {score}/{total}",
+  "challengeReviewQuiz.list": "Lista",
+  "challengeReviewQuiz.explanation": "Explicação",
+
+  "challengeReviewHangman.round": "Desafio {current}/{total}",
+  "challengeReviewHangman.correct": "Acertou",
+  "challengeReviewHangman.wrong": "Errou",
+
+  "challengeReview.header.type": "Challenge - {type}",
+  "challengeReview.header.date": "Data – {date}",
+  "challengeReview.header.total": "Total – {score}",
+
+  "challengeReviewMatrix.header.title": "Matrix – {date} – {score}",
+  "challengeReviewMatrix.list": "Lista",
+  "challengeReviewMatrix.noData": "Sem dados para rever.",
+  "challengeReviewMatrix.gridUnavailable": "Grid indisponível.",
+  "challengeReviewMatrix.foundPrefix": "• {word}",
+  "challengeReviewMatrix.questionLabel": "{question}"
 }

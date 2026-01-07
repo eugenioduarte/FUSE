@@ -1,4 +1,25 @@
 import useTrackTopicSession from '@/hooks/useTrackTopicSession'
+
+/**
+ * useChallengeMatrix
+ *
+ * Summary:
+ * Hook that encapsulates the data, state and interaction logic for the
+ * "Matrix" word-search challenge. Responsibilities include loading the
+ * challenge and summary metadata, generating the question and target words
+ * (using an LLM when available), constructing and measuring the letter grid,
+ * handling pan-based selection and hit-testing, and persisting attempts and
+ * found words.
+ *
+ * Behavior notes:
+ * - The hook prefers measured page coordinates for hit-testing when the
+ *   grid view layout is available; it falls back to nativeEvent location
+ *   coordinates when a measurement is not yet ready.
+ * - Selection state (`currentPath`) is exposed and a ref copy is maintained
+ *   to allow synchronous access inside PanResponder handlers.
+ *
+ * Author: Eugenio Silva
+ */
 import { MATRIX_SYSTEM, matrixUserPrompt } from '@/services/prompts'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
@@ -8,12 +29,18 @@ import { Challenge } from '@/types/domain'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Dimensions, PanResponder, View } from 'react-native'
 
-// Constants
+// Constants used by the matrix challenge.
+// ALPHABET: letters used to fill the grid's empty cells
+// GRID_COLS: the grid width is fixed at 10 columns in this implementation
+// TIMER_SECONDS: base timer fallback used until we compute a dynamic time
 const ALPHABET = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
 const GRID_COLS = 10 // fixed 10 columns
 const TIMER_SECONDS = 60
 
-// Helpers
+// Safely parse a JSON-like string coming from the LLM response.
+// The LLM sometimes returns JSON wrapped in markdown fences or with
+// minor formatting issues; this helper strips fences and attempts
+// to parse the payload, returning null on failure.
 function toJSONSafe(text: string): any {
   try {
     const cleaned = text
@@ -26,6 +53,11 @@ function toJSONSafe(text: string): any {
   }
 }
 
+// Generate question + target words for the Matrix challenge.
+// This function calls an LLM service (if an API key is configured)
+// and expects a JSON response with { question, words } or falls
+// back to a mockQA when the model is unavailable or the response
+// is malformed.
 async function generateMatrixQA(
   summary: string,
 ): Promise<{ question: string; words: string[] }> {
@@ -74,6 +106,7 @@ async function generateMatrixQA(
   }
 }
 
+// Local fallback used when LLM generation is not possible.
 function mockQA(): { question: string; words: string[] } {
   return {
     question: 'Cite 5 linguagens de programação.',
@@ -81,11 +114,16 @@ function mockQA(): { question: string; words: string[] } {
   }
 }
 
+// Return a random uppercase letter used to fill empty grid cells.
 function randomLetter() {
   const i = Math.floor(Math.random() * ALPHABET.length)
   return ALPHABET[i]
 }
 
+// Place the provided words on a grid with given rows/cols.
+// The algorithm attempts random placements horizontally or vertically
+// and avoids overwriting conflicting letters. After placing words it
+// fills remaining cells with random letters.
 function placeWordsOnGrid(words: string[], rows: number, cols: number) {
   const grid = Array.from({ length: rows }, () =>
     Array.from({ length: cols }, () => ''),
@@ -162,16 +200,26 @@ function placeWordsOnGrid(words: string[], rows: number, cols: number) {
   return { grid, placements }
 }
 
+// Hook: useChallengeMatrix
+// Encapsulates the state and interactions for the Matrix challenge.
+// Responsibilities:
+// - Load the challenge and summary metadata
+// - Generate question + target words via LLM (or fallback)
+// - Compute grid size, place words and fill the grid
+// - Handle the pan selection logic (currentPath, hit-testing)
+// - Persist attempts and update found words
 export default function useChallengeMatrix(
   challengeId: string,
   enableTimer = true,
 ) {
   const { setLoadingOverlay, setErrorOverlay } = useOverlay()
+  // Primary challenge state
   const [challenge, setChallenge] = useState<Challenge | null>(null)
   const [topicId, setTopicId] = useState<string | null>(null)
   const [question, setQuestion] = useState('')
   const [words, setWords] = useState<string[]>([])
   const [grid, setGrid] = useState<string[][]>([])
+  // placements: list of placed target words with their cell coords
   const [placements, setPlacements] = useState<
     { word: string; cells: { r: number; c: number }[] }[]
   >([])
@@ -179,6 +227,7 @@ export default function useChallengeMatrix(
   const [timer, setTimer] = useState(TIMER_SECONDS)
   const total = 5
 
+  // Loading / finished state
   const [loading, setLoading] = useState(true)
   const [finished, setFinished] = useState<null | {
     score: number
@@ -186,14 +235,17 @@ export default function useChallengeMatrix(
   }>(null)
   const meId = useAuthStore((s) => s.user?.id)
 
-  // Layout/dimensions
   const cellSize = Math.floor((Dimensions.get('window').width - 32) / GRID_COLS)
   const [gridAvailH, setGridAvailH] = useState(0)
   const [gridRows, setGridRows] = useState<number>(0)
 
-  // Selection via pan
+  // Selection state: currentPath is the in-progress selection path
+  // currentPathRef is kept in a ref for use inside pan handlers where
+  // the latest state must be read synchronously without waiting for
+  // React state updates.
   const [currentPath, setCurrentPath] = useState<{ r: number; c: number }[]>([])
   const currentPathRef = useRef<{ r: number; c: number }[]>([])
+  // Refs for grid DOM/view references and stable copies of grid/words/found
   const gridRef = useRef<View | null>(null)
   const gridDataRef = useRef<string[][]>([])
   const wordsRef = useRef<string[]>([])
@@ -212,7 +264,6 @@ export default function useChallengeMatrix(
     foundRef.current = found
   }, [found])
 
-  // Found and testing underline sets
   const foundCellsMemo = useMemo(() => {
     const set = new Set<string>()
     for (const pl of placements) {
@@ -229,7 +280,9 @@ export default function useChallengeMatrix(
     return set
   }, [placements])
 
-  // Load challenge + generate QA
+  // Load challenge metadata and generate the Matrix QA payload.
+  // Uses an async effect with `active` guard to avoid state updates
+  // after unmount.
   useEffect(() => {
     let active = true
     ;(async () => {
@@ -246,10 +299,12 @@ export default function useChallengeMatrix(
         if (!summary) throw new Error('Summary not found')
         if (active) setTopicId(summary.topicId)
 
+        // Generate question + words (LLM or fallback)
         const qa = await generateMatrixQA(summary.content)
         setQuestion(qa.question)
         setWords(qa.words)
-        // Timer: 1 minute per letter across all target words
+
+        // Timer heuristic: 1 minute per letter across target words
         const totalLetters = qa.words.reduce((acc, w) => acc + w.length, 0)
         setTimer(Math.max(60, totalLetters * 60))
         setFound([])
@@ -321,7 +376,7 @@ export default function useChallengeMatrix(
         await challengesRepository.upsert(updated, '/sync/challenge', {
           summaryId: challenge.summaryId,
         })
-        // Update UI immediately, then run a capped-time flush
+
         setChallenge(updated)
         setFinished({ score, total })
         try {
@@ -415,13 +470,33 @@ export default function useChallengeMatrix(
 
   const eventToCell = (nativeEvent: any): { r: number; c: number } | null => {
     const layout = gridLayoutRef.current
-    if (!layout) return null
-    const gx = nativeEvent.pageX - layout.x
-    const gy = nativeEvent.pageY - layout.y
-    const c = Math.floor(gx / cellSize)
-    const r = Math.floor(gy / cellSize)
-    if (r < 0 || c < 0 || r >= gridRows || c >= GRID_COLS) return null
-    return { r, c }
+    if (layout && typeof nativeEvent.pageX === 'number') {
+      const gx = nativeEvent.pageX - layout.x
+      const gy = nativeEvent.pageY - layout.y
+      const c = Math.floor(gx / cellSize)
+      const r = Math.floor(gy / cellSize)
+
+      if (r < 0 || c < 0 || r >= gridRows || c >= GRID_COLS) {
+        return null
+      }
+      return { r, c }
+    }
+
+    if (
+      typeof nativeEvent.locationX === 'number' &&
+      typeof nativeEvent.locationY === 'number'
+    ) {
+      const lx = nativeEvent.locationX
+      const ly = nativeEvent.locationY
+      const c = Math.floor(lx / cellSize)
+      const r = Math.floor(ly / cellSize)
+      if (r < 0 || c < 0 || r >= gridRows || c >= GRID_COLS) {
+        return null
+      }
+      return { r, c }
+    }
+
+    return null
   }
 
   const panResponder = PanResponder.create({
@@ -430,15 +505,63 @@ export default function useChallengeMatrix(
     onMoveShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponderCapture: () => true,
     onPanResponderGrant: (evt) => {
+      if (
+        !gridLayoutRef.current &&
+        gridRef.current &&
+        (gridRef.current as any).measure
+      ) {
+        ;(gridRef.current as any).measure(
+          (
+            _x: number,
+            _y: number,
+            _w: number,
+            _h: number,
+            pageX: number,
+            pageY: number,
+          ) => {
+            gridLayoutRef.current = { x: pageX, y: pageY }
+            const cell = eventToCell(evt.nativeEvent)
+            setCurrentPath(cell ? [cell] : [])
+          },
+        )
+        return
+      }
       const cell = eventToCell(evt.nativeEvent)
       setCurrentPath(cell ? [cell] : [])
     },
     onPanResponderMove: (evt) => {
+      if (
+        !gridLayoutRef.current &&
+        gridRef.current &&
+        (gridRef.current as any).measure
+      ) {
+        ;(gridRef.current as any).measure(
+          (
+            _x: number,
+            _y: number,
+            _w: number,
+            _h: number,
+            pageX: number,
+            pageY: number,
+          ) => {
+            gridLayoutRef.current = { x: pageX, y: pageY }
+            const cell = eventToCell(evt.nativeEvent)
+            if (!cell) return
+            const prev = currentPathRef.current
+            const already = prev.some((p) => p.r === cell.r && p.c === cell.c)
+            const next = already ? prev : [...prev, cell]
+
+            setCurrentPath(next)
+          },
+        )
+        return
+      }
       const cell = eventToCell(evt.nativeEvent)
       if (!cell) return
       const prev = currentPathRef.current
       const already = prev.some((p) => p.r === cell.r && p.c === cell.c)
       const next = already ? prev : [...prev, cell]
+
       setCurrentPath(next)
     },
     onPanResponderRelease: () => {
@@ -446,7 +569,6 @@ export default function useChallengeMatrix(
       if (!path.length) return
       const letters = path.map((p) => gridDataRef.current[p.r][p.c])
       const word = letters.join('')
-      // Only accept exact placed-path
       const matched = placements.some((pl) => {
         if (pl.word !== word) return false
         if (pl.cells.length !== path.length) return false
@@ -456,6 +578,7 @@ export default function useChallengeMatrix(
         }
         return true
       })
+
       if (matched && !foundRef.current.includes(word))
         setFound((f) => (f.includes(word) ? f : [...f, word]))
       setCurrentPath([])

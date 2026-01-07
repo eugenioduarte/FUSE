@@ -1,11 +1,10 @@
 import { ROUTES } from '@/constants/routes'
 import { navigationRef } from '@/navigation/navigationRef'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
-import { useOverlay } from '@/store/useOverlay'
 import { useThemeStore } from '@/store/useThemeStore'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { StyleSheet, TouchableOpacity, View } from 'react-native'
 import Animated, {
   Easing,
   SlideInUp,
@@ -33,7 +32,6 @@ const DefaultHeader = ({ title }: { title: string }) => {
     | string
     | undefined
   const shouldForceBackToSummary = isChallengesList && !!summaryId
-  const { setFastWayOverlay } = useOverlay()
 
   return (
     <>
@@ -76,22 +74,11 @@ const DefaultHeader = ({ title }: { title: string }) => {
           }}
           style={styles.iconWrapper}
         >
-          <Ionicons name="chevron-back" size={24} color="white" />
+          <Ionicons name="chevron-back" size={24} color="black" />
         </TouchableOpacity>
       ) : (
         <View style={styles.iconPlaceholder} />
       )}
-
-      <Text numberOfLines={1} style={styles.title}>
-        {title}
-      </Text>
-
-      <TouchableOpacity
-        onPress={() => setFastWayOverlay(true)}
-        style={[styles.iconWrapper, { alignItems: 'flex-end' }]}
-      >
-        <Ionicons name="flash" size={20} color="#60a5fa" />
-      </TouchableOpacity>
     </>
   )
 }
@@ -134,6 +121,7 @@ export const Header: React.FC = () => {
     if (currentType === ROUTES.ChallengesListScreen) {
       return <HeaderChallengesList />
     }
+
     return <DefaultHeader title={title} />
   }
 
@@ -163,7 +151,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 12,
   },
-  iconWrapper: { width: 40, alignItems: 'flex-start' },
+  iconWrapper: {
+    alignItems: 'flex-start',
+    width: '100%',
+  },
   iconPlaceholder: { width: 40 },
   title: {
     flex: 1,
