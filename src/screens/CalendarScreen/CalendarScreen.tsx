@@ -1,3 +1,4 @@
+/* eslint-disable import/no-named-as-default */
 import { ChevronIcon } from '@/assets/icons'
 import { Button, Text } from '@/components'
 import { t } from '@/locales/translation'
