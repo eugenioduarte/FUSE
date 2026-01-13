@@ -56,7 +56,7 @@ const CalendarScreen: React.FC = () => {
             <ChevronIcon width={ICON_SIZE_MEDIUM} height={ICON_SIZE_MEDIUM} />
           </TouchableOpacity>
         </View>
-        <Text variant="xxxLarge">{day}</Text>
+        <Text variant="Large4xl">{day}</Text>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>

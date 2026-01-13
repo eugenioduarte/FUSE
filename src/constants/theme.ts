@@ -97,6 +97,11 @@ export const typography = {
   },
   xxxLarge: {
     fontFamily: font.bold,
+    fontSize: 50,
+    lineHeight: 50,
+  },
+  Large4xl: {
+    fontFamily: font.bold,
     fontSize: 80,
     lineHeight: 88,
   },

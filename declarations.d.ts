@@ -6,5 +6,11 @@ declare module '*.svg' {
   export default content
 }
 
+declare module '*.png'
+declare module '*.jpg'
+declare module '*.jpeg'
+declare module '*.gif'
+declare module '*.webp'
+
 // Fallback module declaration to unblock types when the TS server hasn't loaded expo-notifications types yet
 declare module 'expo-notifications'

@@ -50,7 +50,12 @@ const TopicCard = ({ item }: TopicCardProps) => {
             <Text variant="large">
               {item.title.split(' ').slice(1).join(' ')}
             </Text>
-            <ChevronIcon onPress={handleNavigation} style={styles.chevron} />
+            <ChevronIcon
+              onPress={handleNavigation}
+              style={styles.chevron}
+              color={'red'}
+              stroke={'red'}
+            />
           </View>
         </View>
       </TouchableOpacity>

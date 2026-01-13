@@ -19,6 +19,7 @@ import MenuScreen from '../screens/main/menu/MenuScreen'
 
 // Auth
 import LoginScreen from '../screens/auth/login/LoginScreen'
+import Onboarding from '../screens/auth/onboarding/Onboarding'
 import RecoveryPassScreen from '../screens/auth/recovery-password/RecoveryPasswordScreen'
 import RegisterScreen from '../screens/auth/register/RegisterScreen'
 
@@ -136,11 +137,13 @@ const defaultScreenOptions = {
 }
 
 function MainStack() {
-  // Decide the very first screen based on auth state to avoid any login flicker
-  const { user } = useAuthStore()
+  // Decide the very first screen based on auth state and onboarding flag
+  const { user, hasShownOnboarding } = useAuthStore()
   const initialRouteName: keyof RootStackParamList = user
     ? 'DashboardScreen'
-    : 'LoginScreen'
+    : hasShownOnboarding
+      ? 'LoginScreen'
+      : 'OnboardingScreen'
 
   return (
     <Stack.Navigator
@@ -152,6 +155,11 @@ function MainStack() {
         name={ROUTES.LoginScreen}
         component={LoginScreen}
         options={{ title: ROUTES.LoginScreen }}
+      />
+      <Stack.Screen
+        name={ROUTES.OnboardingScreen}
+        component={Onboarding}
+        options={{ title: ROUTES.OnboardingScreen }}
       />
       <Stack.Screen
         name={ROUTES.RegisterScreen}
@@ -330,7 +338,16 @@ const DrawerContent = (_props: DrawerContentComponentProps) => <MenuScreen />
 export default function Navigation() {
   const [authReady, setAuthReady] = useState(false)
 
-  const { user, rehydrated } = useAuthStore()
+  const { user, rehydrated, hasShownOnboarding } = useAuthStore()
+  const initialRouteName: RouteName | '' = user
+    ? 'DashboardScreen'
+    : hasShownOnboarding
+      ? 'LoginScreen'
+      : 'OnboardingScreen'
+
+  const [currentRouteName, setCurrentRouteName] = useState<RouteName | ''>(
+    initialRouteName,
+  )
 
   // Build a stable notification handler with minimal nesting
   const buildNotificationHandler = React.useCallback((uid: string) => {
@@ -534,12 +551,24 @@ export default function Navigation() {
 
   return (
     <>
-      <Header />
+      {/* Hide global header for auth/onboarding/register screens */}
+      {(() => {
+        const noHeaderRoutes: RouteName[] = [
+          'LoginScreen',
+          'RegisterScreen',
+          'OnboardingScreen',
+          'RecoveryScreen',
+        ]
+        const showHeader =
+          currentRouteName && !noHeaderRoutes.includes(currentRouteName)
+        return showHeader ? <Header /> : null
+      })()}
       <NavigationContainer
         ref={navigationRef}
         onReady={() => {
           const route = navigationRef.getCurrentRoute()
           const name = (route?.name ?? '') as RouteName
+          setCurrentRouteName(name)
           if (prevRouteNameRef.current !== name) {
             useThemeStore.getState().setHeaderConfig(name)
             prevRouteNameRef.current = name
@@ -548,6 +577,7 @@ export default function Navigation() {
         onStateChange={() => {
           const route = navigationRef.getCurrentRoute()
           const name = (route?.name ?? '') as RouteName
+          setCurrentRouteName(name)
           if (prevRouteNameRef.current !== name) {
             useThemeStore.getState().setHeaderConfig(name)
             prevRouteNameRef.current = name

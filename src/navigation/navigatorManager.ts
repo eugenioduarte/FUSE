@@ -5,6 +5,7 @@ import { navigationRef } from './navigationRef'
 
 export type RootStackParamList = {
   LoginScreen: undefined
+  OnboardingScreen: undefined
   DashboardScreen: undefined
   RegisterScreen: undefined
   RecoveryScreen: undefined

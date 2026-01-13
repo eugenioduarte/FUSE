@@ -1,5 +1,6 @@
 export const ROUTES = {
   LoginScreen: 'LoginScreen',
+  OnboardingScreen: 'OnboardingScreen',
   DashboardScreen: 'DashboardScreen',
   RegisterScreen: 'RegisterScreen',
   RecoveryScreen: 'RecoveryScreen',

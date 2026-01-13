@@ -15,6 +15,8 @@ export type User = {
 type AuthState = {
   user: User
   rehydrated: boolean
+  hasShownOnboarding: boolean
+  setHasShownOnboarding: (v: boolean) => void
   login: (user: NonNullable<User>) => void
   logout: () => void
   updateUser: (patch: Partial<NonNullable<User>>) => void
@@ -26,11 +28,13 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       rehydrated: false,
+      hasShownOnboarding: false,
       login: (user) => set({ user }),
       logout: async () => {
         await AsyncStorage.clear()
         set({ user: null })
       },
+      setHasShownOnboarding: (v: boolean) => set({ hasShownOnboarding: v }),
       updateUser: (patch) => {
         const current = get().user
         if (!current) return
