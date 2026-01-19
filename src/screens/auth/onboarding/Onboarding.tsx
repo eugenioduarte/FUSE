@@ -141,6 +141,8 @@ const Onboarding: React.FC = () => {
           )
           setIndex(newIndex)
         }}
+        bounces={false}
+        overScrollMode="never"
       />
 
       <TouchableOpacity
