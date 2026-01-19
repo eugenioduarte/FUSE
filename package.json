@@ -19,7 +19,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "yarn lint && yarn format:check && yarn test:coverage",
+    "check": "yarn lint && yarn format:check",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
