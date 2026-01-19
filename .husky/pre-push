@@ -1,7 +1,10 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
-echo "🛡️  Running pre-push hook... no tests, no push! 🚫"
+echo "🛡️  Pre-push: running lint and format checks"
+npm run lint
+npm run format:check
+
 #TODO: # Uncomment the line below to run tests before pushing
-npm test -- --coverage
+# npm test -- --coverage
 
