@@ -114,8 +114,7 @@ const Onboarding: React.FC = () => {
       setIndex(next)
       return
     }
-
-    setHasShownOnboarding(false)
+    setHasShownOnboarding(true)
     navigatorManager.goToLoginScreen()
   }, [index, setHasShownOnboarding])
 
