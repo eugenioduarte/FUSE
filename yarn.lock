@@ -12566,17 +12566,17 @@ __metadata:
   linkType: hard
 
 "react-server-dom-webpack@npm:~19.0.0":
-  version: 19.0.0
-  resolution: "react-server-dom-webpack@npm:19.0.0"
+  version: 19.0.3
+  resolution: "react-server-dom-webpack@npm:19.0.3"
   dependencies:
     acorn-loose: ^8.3.0
     neo-async: ^2.6.1
     webpack-sources: ^3.2.0
   peerDependencies:
-    react: ^19.0.0
-    react-dom: ^19.0.0
+    react: ^19.0.3
+    react-dom: ^19.0.3
     webpack: ^5.59.0
-  checksum: 531ea0f7522096a4e1624eede3e073081375d565e9a9c711df45056ef0c1470ebaf6f1879c4c58ac0b07c256fbf4898ef65566925e17cbda2dea37e484f8bfd3
+  checksum: f6a416d7b37ac24d83c0e4895763fe73d13437a736eabb0cc8601e3036172474b874487e7820720e0f3fdfc1c45f9289545b42e22a11cc364d7d18bd8f08c438
   languageName: node
   linkType: hard
 
@@ -14183,11 +14183,11 @@ __metadata:
 
 "typescript@patch:typescript@~5.8.3#~builtin<compat/typescript>":
   version: 5.8.3
-  resolution: "typescript@patch:typescript@npm%3A5.8.3#~builtin<compat/typescript>::version=5.8.3&hash=29ae49"
+  resolution: "typescript@patch:typescript@npm%3A5.8.3#~builtin<compat/typescript>::version=5.8.3&hash=5786d5"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: 1b503525a88ff0ff5952e95870971c4fb2118c17364d60302c21935dedcd6c37e6a0a692f350892bafcef6f4a16d09073fe461158547978d2f16fbe4cb18581c
+  checksum: f1743b6850976b3debf7cbd53d2bc0b67e75d47eb6410db564c8bb475e92a8a48f8a3fcd14d89cf93426835281c31a8f8a94dad90be4dc899279a898532ba97f
   languageName: node
   linkType: hard
 
