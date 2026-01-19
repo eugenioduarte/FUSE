@@ -115,7 +115,8 @@ const Onboarding: React.FC = () => {
       return
     }
 
-    setHasShownOnboarding(false)
+    // Mark onboarding as shown so it won't reappear on next app start
+    setHasShownOnboarding(true)
     navigatorManager.goToLoginScreen()
   }, [index, setHasShownOnboarding])
 
