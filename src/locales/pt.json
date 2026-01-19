@@ -234,5 +234,13 @@
   "challengeReviewMatrix.noData": "Sem dados para rever.",
   "challengeReviewMatrix.gridUnavailable": "Grid indisponível.",
   "challengeReviewMatrix.foundPrefix": "• {word}",
-  "challengeReviewMatrix.questionLabel": "{question}"
+  "challengeReviewMatrix.questionLabel": "{question}",
+  "onboarding.title.one": "Crie tópicos",
+  "onboarding.subtitle.one": "Organize seus estudos por tópico",
+  "onboarding.title.two": "Participe de desafios",
+  "onboarding.subtitle.two": "Treine com exercícios e provas",
+  "onboarding.title.three": "Estude em grupo",
+  "onboarding.subtitle.three": "Crie ou participe de grupos de estudo",
+  "onboarding.next": "Próximo",
+  "onboarding.start": "Começar"
 }

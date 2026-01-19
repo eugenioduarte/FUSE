@@ -1,10 +1,4 @@
-import { Text } from '@/components'
-import { useTheme } from '@/hooks/useTheme'
-import { navigatorManager } from '@/navigation/navigatorManager'
-import { useAuthStore } from '@/store/useAuthStore'
-import { ThemeType } from '@/types/theme.type'
-import { Ionicons } from '@expo/vector-icons'
-import React, { useRef, useState } from 'react'
+import React, { useCallback, useMemo, useRef, useState } from 'react'
 import {
   Dimensions,
   FlatList,
@@ -15,70 +9,105 @@ import {
   View,
 } from 'react-native'
 
+import { Ionicons } from '@expo/vector-icons'
+
+import { Text } from '@/components'
+import { useTheme } from '@/hooks/useTheme'
+import { t } from '@/locales/translation'
+import { navigatorManager } from '@/navigation/navigatorManager'
+import { useAuthStore } from '@/store/useAuthStore'
+import { ThemeType } from '@/types/theme.type'
+
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 
 const screens = [
   {
     key: 'one',
-    title: 'Crie tópicos',
-    subtitle: 'Organize seus estudos por tópico',
+    titleKey: 'onboarding.title.one',
+    subtitleKey: 'onboarding.subtitle.one',
   },
   {
     key: 'two',
-    title: 'Participe de desafios',
-    subtitle: 'Treine com exercícios e provas',
+    titleKey: 'onboarding.title.two',
+    subtitleKey: 'onboarding.subtitle.two',
   },
   {
     key: 'three',
-    title: 'Estude em grupo',
-    subtitle: 'Crie ou participe de grupos de estudo',
+    titleKey: 'onboarding.title.three',
+    subtitleKey: 'onboarding.subtitle.three',
   },
 ]
 
-const Item = ({
-  item,
-  index,
-}: {
-  item: (typeof screens)[number]
-  index: number
-}) => {
-  const images = [
-    require('@/assets/images/onboarding/albert.png'),
-    require('@/assets/images/onboarding/zumbi.png'),
-    require('@/assets/images/onboarding/ipiranga.png'),
-  ]
+const IMAGES = [
+  require('@/assets/images/onboarding/albert.png'),
+  require('@/assets/images/onboarding/zumbi.png'),
+  require('@/assets/images/onboarding/ipiranga.png'),
+]
 
-  const imageSource = images[index] ?? images[0]
+type ScreenItem = (typeof screens)[number]
+
+const Item = ({ item, index }: { item: ScreenItem; index: number }) => {
   const theme = useTheme()
   const styles = createStyles(theme)
+
+  const imageSource = IMAGES[index] ?? IMAGES[0]
+  const imageStyle = useMemo(() => createImageStyle(index), [index])
+
   return (
     <View style={styles.page}>
       <Image
         source={imageSource}
-        style={styles.backgroundImage}
-        resizeMode="cover"
+        style={[styles.backgroundImage, imageStyle]}
+        resizeMode={index === 1 ? 'cover' : 'contain'}
       />
 
       <View style={styles.textWrapper} pointerEvents="box-none">
         <Text style={styles.title} variant="xxxLarge">
-          {item.title}
+          {t(item.titleKey)}
         </Text>
         <Text style={styles.subtitle} variant="xLarge">
-          {item.subtitle}
+          {t(item.subtitleKey)}
         </Text>
       </View>
     </View>
   )
 }
 
-const Onboarding = () => {
+const createImageStyle = (index: number) => {
+  const w = SCREEN_WIDTH
+  const baseHeight = w * 2.5
+
+  if (index === 1) {
+    return {
+      width: w * 1.5,
+      height: baseHeight,
+      marginLeft: -w * 0.2,
+    }
+  }
+
+  if (index === 2) {
+    return {
+      width: w * 1.5,
+      height: baseHeight,
+      marginLeft: -w * 0.2,
+    }
+  }
+
+  return {
+    width: w * 1.2,
+    height: baseHeight,
+    marginLeft: -w * 0.1,
+  }
+}
+
+const Onboarding: React.FC = () => {
   const listRef = useRef<FlatList>(null)
   const [index, setIndex] = useState(0)
   const setHasShownOnboarding = useAuthStore((s) => s.setHasShownOnboarding)
   const theme = useTheme()
   const styles = createStyles(theme)
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (index < screens.length - 1) {
       const next = index + 1
       listRef.current?.scrollToIndex({ index: next })
@@ -86,9 +115,9 @@ const Onboarding = () => {
       return
     }
 
-    setHasShownOnboarding(false) // MOCK
+    setHasShownOnboarding(false)
     navigatorManager.goToLoginScreen()
-  }
+  }, [index, setHasShownOnboarding])
 
   return (
     <View style={styles.root}>
@@ -113,8 +142,13 @@ const Onboarding = () => {
           setIndex(newIndex)
         }}
       />
-      <TouchableOpacity style={styles.nextButton} onPress={handleNext}>
-        <Ionicons name="chevron-back" size={24} color="white" />
+
+      <TouchableOpacity
+        accessibilityLabel={t('onboarding.next')}
+        style={styles.nextButton}
+        onPress={handleNext}
+      >
+        <Ionicons name="chevron-back" size={24} color={theme.colors.white} />
       </TouchableOpacity>
     </View>
   )
@@ -135,7 +169,7 @@ const createStyles = (theme: ThemeType) =>
       alignSelf: 'flex-end',
       alignItems: 'flex-end',
       justifyContent: 'center',
-      marginRight: 16,
+      marginRight: theme.spacings.large,
     },
     page: {
       height: SCREEN_HEIGHT,
@@ -143,6 +177,7 @@ const createStyles = (theme: ThemeType) =>
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: 'transparent',
+      overflow: 'hidden',
     },
     backgroundImage: {
       position: 'absolute',
@@ -158,24 +193,28 @@ const createStyles = (theme: ThemeType) =>
       paddingHorizontal: 24,
     },
     title: {
-      marginBottom: 8,
+      marginBottom: theme.spacings.medium,
       textAlign: 'right',
       backgroundColor: theme.colors.accentYellow,
       padding: theme.spacings.large,
       borderRadius: theme.border.radius16,
-      maxWidth: SCREEN_WIDTH - 60,
+      maxWidth: SCREEN_WIDTH - theme.spacings.xLarge,
+      borderWidth: 3,
+      borderColor: theme.colors.white,
     },
     subtitle: {
       textAlign: 'right',
       backgroundColor: theme.colors.accentYellow,
       padding: theme.spacings.medium,
       borderRadius: theme.border.radius16,
+      borderWidth: 3,
+      borderColor: theme.colors.white,
     },
     buttonWrapper: {
       position: 'absolute',
-      left: 16,
-      right: 16,
-      bottom: 32,
+      left: theme.spacings.medium,
+      right: theme.spacings.medium,
+      bottom: theme.spacings.xLarge,
     },
     chevron: {
       position: 'absolute',
@@ -183,15 +222,17 @@ const createStyles = (theme: ThemeType) =>
       height: 48,
       zIndex: 10,
       bottom: 100,
-      right: 16,
+      right: theme.spacings.medium,
     },
     nextButton: {
       backgroundColor: theme.colors.accentYellow,
       position: 'absolute',
-      bottom: 16,
-      right: 16,
-      padding: 10,
+      bottom: theme.spacings.medium,
+      right: theme.spacings.medium,
+      padding: theme.spacings.xMedium,
       borderRadius: 30,
       transform: [{ rotate: '180deg' }],
+      borderWidth: 3,
+      borderColor: theme.colors.white,
     },
   })
