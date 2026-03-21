@@ -22,22 +22,16 @@ Format: `[tag] Screen/Area — description`
 
 ## Pending
 
-### [2026-03-21] 🔵 AI — Agente autônomo de PR lifecycle
-
-Build an agent that handles the full PR lifecycle autonomously:
-
-1. Create PR
-2. Monitor pipeline — if it fails, read the errors (Sonar, lint, tests, etc.)
-3. Fix all QA issues found (Sonar violations, test failures, any other gate)
-4. Read PR review comments and address them
-5. Respond to comments explaining the changes made
-6. Commit, push and finalize the PR with merge
-
-**Scope:** Claude Code Agent SDK + CI/CD integration (GitHub Actions / pipeline hooks).
-**Priority:** Near future — foundation requires stable PR workflow and QA gates in place.
-
 ---
 
 ## Done
 
-<!-- Move items here once resolved -->
+### [2026-03-21] 🔵 AI — Agente autônomo de PR lifecycle ✅
+
+Build an agent that handles the full PR lifecycle autonomously.
+
+**Implemented:**
+- `.claude/commands/pr-lifecycle.md` — `/pr-lifecycle [PR_NUMBER]` slash command
+- `.ai/agents/pr-lifecycle.md` — Full agent spec (4 phases: create → CI → reviews → merge)
+- `.ai/scripts/pr-lifecycle.sh` — Status check helper script
+- `.ai/agents/README.md` — Updated with new agent entry

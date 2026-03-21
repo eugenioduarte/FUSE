@@ -145,12 +145,43 @@ This directory contains all AI agents that assist with development, code quality
 
 ### 🔄 PR Management
 
+#### **pr-lifecycle** ⭐ NEW
+
+- **Role:** Autonomous end-to-end PR lifecycle — create, monitor CI, fix failures, address reviews, merge
+- **Model:** Claude Sonnet (always remote)
+- **When to use:** Any time you push a branch and want the full PR process handled autonomously
+- **Triggers:** `/pr-lifecycle [PR_NUMBER]` slash command
+- **Documentation:** [pr-lifecycle.md](./pr-lifecycle.md)
+- **Script:** [.ai/scripts/pr-lifecycle.sh](../scripts/pr-lifecycle.sh) (status check helper)
+
+**Features:**
+
+- Creates PR with meaningful title and body from commit history
+- Monitors CI pipeline (lint, tests, Sonar) — auto-fixes failures
+- Reads PR review comments and addresses each one
+- Replies to comments with explanation of changes
+- Squash-merges and deletes branch when fully approved
+- Stops safely if a fix is ambiguous or touches security-sensitive files
+
+**Usage:**
+
+```bash
+# Create new PR and manage full lifecycle
+/pr-lifecycle
+
+# Resume lifecycle for an existing PR
+/pr-lifecycle 123
+
+# Check status manually
+.ai/scripts/pr-lifecycle.sh 123
+```
+
 #### **pr-review-fixer**
 
-- **Role:** Fix issues from PR reviews automatically (TODO)
+- **Role:** Fix issues from PR reviews automatically (superseded by pr-lifecycle)
 - **Model:** Local (mechanical) / Claude (complex)
-- **When to use:** After PR review with change requests
-- **Status:** Planned (not yet implemented)
+- **When to use:** Use `pr-lifecycle` instead
+- **Status:** Superseded — kept for reference
 
 ---
 
@@ -368,5 +399,5 @@ When adding a new agent:
 
 ---
 
-**Last Updated:** 2026-03-21  
+**Last Updated:** 2026-03-21 (pr-lifecycle agent added)
 **Maintained by:** Engineering Team
