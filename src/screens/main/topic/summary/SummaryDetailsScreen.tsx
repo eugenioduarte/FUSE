@@ -1,8 +1,8 @@
 import { Button, Container, Text } from '@/components'
-import EmptyContainer from '@/components/containers/EmptyContainer'
-import SubContainer from '@/components/containers/SubContainer'
-import TermSnippetModal from '@/components/ui/TermSnippetModal'
-import ExpandableText from '@/components/utils/ExpandableText'
+import EmptyContainer from '@/components/containers/empty-container/EmptyContainer'
+import SubContainer from '@/components/containers/sub-container/SubContainer'
+import TermSnippetModal from '@/components/term-snippet-modal/TermSnippetModal'
+import ExpandableText from '@/components/utils/expandable-text/ExpandableText'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import {

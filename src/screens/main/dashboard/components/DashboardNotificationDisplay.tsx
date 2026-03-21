@@ -24,7 +24,7 @@ export default function DashboardNotificationDisplay() {
   const MOCK_NOTIFS: AppNotification[] = [
     {
       id: 'm1',
-      title: 'Bem-vindo ao Syntry!',
+      title: 'Bem-vindo ao Fuse!',
       body: 'Veja seus tópicos e comece a estudar.',
       status: 'pending',
       createdAt: Date.now(),

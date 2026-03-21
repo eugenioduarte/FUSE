@@ -1,6 +1,6 @@
 import { CloseIcon, HomeIcon } from '@/assets/icons'
 import { Text } from '@/components'
-import IconButton from '@/components/buttons/IconButton'
+import IconButton from '@/components/buttons/icon-button/IconButton'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'

@@ -1,5 +1,5 @@
 import { Text } from '@/components'
-import PressableScale from '@/components/containers/PressableScale'
+import PressableScale from '@/components/containers/pressable-scale/PressableScale'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'

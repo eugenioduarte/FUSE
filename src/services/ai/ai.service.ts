@@ -35,7 +35,7 @@ const IS_OPENROUTER = (process.env.EXPO_PUBLIC_OPENAI_BASE_URL || '').includes(
   'openrouter.ai',
 )
 const APP_URL = process.env.EXPO_PUBLIC_APP_URL || 'http://localhost'
-const APP_NAME = process.env.EXPO_PUBLIC_APP_NAME || 'Syntry Dev'
+const APP_NAME = process.env.EXPO_PUBLIC_APP_NAME || 'Fuse Dev'
 
 function toJSONSafe(str: string) {
   try {

@@ -1,19 +1,19 @@
 {
   "expo": {
-    "name": "Syntry",
-    "slug": "Syntry",
+    "name": "Fuse",
+    "slug": "Fuse",
     "version": "1.0.0",
     "runtimeVersion": {
       "policy": "appVersion"
     },
     "orientation": "portrait",
     "icon": "./assets/images/logo.png",
-    "scheme": "syntry",
+    "scheme": "fuse",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Syntry"
+      "bundleIdentifier": "com.anonymous.Fuse"
     },
     "android": {
       "adaptiveIcon": {
@@ -21,7 +21,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.Syntry"
+      "package": "com.anonymous.Fuse"
     },
     "web": {
       "bundler": "metro",

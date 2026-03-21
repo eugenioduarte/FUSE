@@ -1,5 +1,5 @@
 import { Button, LinkButton, Text, TextInput } from '@/components'
-import Container from '@/components/containers/Container'
+import Container from '@/components/containers/container/Container'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { loginSchema } from '@/schemas/authSchemas'

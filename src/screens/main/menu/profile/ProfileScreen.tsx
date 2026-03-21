@@ -1,6 +1,6 @@
 import { Button, Text, TextInput } from '@/components'
-import Container from '@/components/containers/Container'
-import HeaderCloseTitle from '@/components/headers/HeaderCloseTitle'
+import Container from '@/components/containers/container/Container'
+import HeaderCloseTitle from '@/components/headers/header-close-title/HeaderCloseTitle'
 import { Colors } from '@/constants/theme'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'

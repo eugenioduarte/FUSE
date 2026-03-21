@@ -1,4 +1,4 @@
-import { Text } from '@/components/ui/UiText'
+import { Text } from '@/components/ui-text/UiText'
 import { useTheme } from '@/hooks/useTheme'
 import { ThemeType } from '@/types/theme.type'
 import React, { useState } from 'react'

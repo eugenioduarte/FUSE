@@ -1,5 +1,5 @@
 import { Button, Container, Text } from '@/components'
-import SubContainer from '@/components/containers/SubContainer'
+import SubContainer from '@/components/containers/sub-container/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
 import useTrackTopicSession from '@/hooks/useTrackTopicSession'
 import { t } from '@/locales/translation'

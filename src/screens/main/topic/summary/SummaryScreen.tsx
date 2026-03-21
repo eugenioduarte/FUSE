@@ -1,6 +1,6 @@
 import { Button, Container, Text, TextInput } from '@/components'
-import SubContainer from '@/components/containers/SubContainer'
-import PdfTextExtractor from '@/components/utils/PdfTextExtractor'
+import SubContainer from '@/components/containers/sub-container/SubContainer'
+import PdfTextExtractor from '@/components/utils/pdf-text-extractor/PdfTextExtractor'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { RootStackParamList } from '@/navigation/navigatorManager'

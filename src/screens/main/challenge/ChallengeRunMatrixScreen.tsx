@@ -1,6 +1,6 @@
 import { Container, Text } from '@/components'
-import EmptyContainer from '@/components/containers/EmptyContainer'
-import LoadingContainer from '@/components/containers/LoadingContainer'
+import EmptyContainer from '@/components/containers/empty-container/EmptyContainer'
+import LoadingContainer from '@/components/containers/loading-container/LoadingContainer'
 import useChallengeMatrix from '@/hooks/useChallengeMatrix'
 import { useTheme } from '@/hooks/useTheme'
 import {
