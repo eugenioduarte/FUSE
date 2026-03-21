@@ -1,3 +1,7 @@
+jest.mock('expo-localization', () => ({
+  getLocales: () => [{ languageCode: 'pt', languageTag: 'pt-BR' }],
+}))
+
 import { t } from '../translation'
 
 describe('translation.t', () => {

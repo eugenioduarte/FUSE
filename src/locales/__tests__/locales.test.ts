@@ -26,15 +26,15 @@ describe('locale JSON files', () => {
   })
 
   it('en.json contains core auth keys', () => {
-    expect(en).toHaveProperty('login.button')
-    expect(en).toHaveProperty('login.email')
-    expect(en).toHaveProperty('register.title')
+    expect(en).toHaveProperty(['login.button'])
+    expect(en).toHaveProperty(['login.email'])
+    expect(en).toHaveProperty(['register.title'])
   })
 
   it('pt.json contains core auth keys', () => {
-    expect(pt).toHaveProperty('login.button')
-    expect(pt).toHaveProperty('login.email')
-    expect(pt).toHaveProperty('register.title')
+    expect(pt).toHaveProperty(['login.button'])
+    expect(pt).toHaveProperty(['login.email'])
+    expect(pt).toHaveProperty(['register.title'])
   })
 
   it('pt.json has all keys that en.json has', () => {

@@ -1,7 +1,10 @@
-import { navigationRefMock } from '../../mock/navigation.mock'
-
 jest.mock('../navigationRef', () => ({
-  navigationRef: navigationRefMock,
+  navigationRef: {
+    isReady: jest.fn().mockReturnValue(true),
+    navigate: jest.fn(),
+    goBack: jest.fn(),
+    dispatch: jest.fn(),
+  },
 }))
 
 jest.mock('@react-navigation/native', () => ({
@@ -21,6 +24,8 @@ jest.mock('../../store/useOverlay', () => ({
 }))
 
 import { navigatorManager } from '../navigatorManager'
+
+const navigationRefMock = jest.requireMock('../navigationRef').navigationRef
 
 describe('navigatorManager', () => {
   beforeEach(() => {
