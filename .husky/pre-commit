@@ -1,12 +1,51 @@
 #!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
 
-echo "🧹 Rodando lint-staged..."
-yarn lint-staged
+# ─────────────────────────────────────────────────────────────
+# PRE-COMMIT HOOK
+# 1. Annotate modified source files with author + date + summary
+# 2. Regenerate docs/project-overview.md
+# ─────────────────────────────────────────────────────────────
 
-if [ $? -ne 0 ]; then
-  echo "❌ Commit bloqueado: erros de lint encontrados."
-  exit 1
-fi
+DEV_NAME="Eugenio Silva"
+TODAY=$(date +"%Y-%m-%d")
 
-echo "✅ Lint OK! Prosseguindo com o commit..."
+# Read commit subject from COMMIT_EDITMSG
+COMMIT_MSG=$(cat .git/COMMIT_EDITMSG 2>/dev/null | head -1 | sed 's/^[^(]*([^)]*): //' | cut -c1-80)
+[ -z "$COMMIT_MSG" ] && COMMIT_MSG="update"
+
+ANNOTATION="// last-modified: $TODAY | author: $DEV_NAME | $COMMIT_MSG"
+
+# ── 1. ANNOTATE MODIFIED FILES ────────────────────────────────
+
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep -E "^(src|app)/.*\.(ts|tsx)$" || true)
+
+for FILE in $STAGED; do
+  [ -f "$FILE" ] || continue
+
+  python3 - "$FILE" "$ANNOTATION" <<'PYEOF'
+import sys, os
+
+filepath = sys.argv[1]
+annotation = sys.argv[2]
+
+with open(filepath, 'r', encoding='utf-8') as f:
+    lines = f.readlines()
+
+# Replace existing annotation line or prepend
+if lines and '// last-modified:' in lines[0]:
+    lines[0] = annotation + '\n'
+else:
+    lines.insert(0, annotation + '\n')
+
+with open(filepath, 'w', encoding='utf-8') as f:
+    f.writelines(lines)
+PYEOF
+
+  git add "$FILE"
+done
+
+# ── 2. REGENERATE docs/project-overview.md ───────────────────
+
+node .husky/scripts/generate-overview.js
+
+git add docs/project-overview.md

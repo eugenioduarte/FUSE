@@ -1,10 +1,34 @@
-#!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
+#!/usr/bin/env sh
 
-echo "🛡️  Pre-push: running lint and format checks"
-# npm run lint
-# npm run format:check
+# ─────────────────────────────────────────────────────────────
+# PRE-PUSH HOOK
+# Runs full quality gate before any push:
+#   1. TypeScript check
+#   2. ESLint       (skipped if not configured)
+#   3. Tests        (skipped if not configured)
+# ─────────────────────────────────────────────────────────────
 
-#TODO: # Uncomment the line below to run tests before pushing
-# npm test -- --coverage
+echo "🔍 TypeScript check..."
+pnpm typecheck || { echo "❌ TypeScript errors found. Push blocked."; exit 1; }
 
+if [ -f "node_modules/.bin/eslint" ]; then
+  echo "🔍 ESLint..."
+  pnpm lint || { echo "❌ Lint errors found. Push blocked."; exit 1; }
+else
+  echo "⚠️  ESLint not installed — skipping"
+fi
+
+if [ -f "node_modules/.bin/jest" ]; then
+  echo "🧪 Tests + coverage..."
+  pnpm test || { echo "❌ Tests failed. Push blocked."; exit 1; }
+else
+  echo "⚠️  Jest not installed — skipping"
+fi
+
+# Token usage tracking
+if [ -f ".ai/router/update-token-totals.sh" ]; then
+  echo ""
+  .ai/router/update-token-totals.sh
+fi
+
+echo "✅ All checks passed. Pushing..."
