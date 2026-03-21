@@ -1,4 +1,4 @@
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { useThemeStore } from '@/store/useThemeStore'
 import { useEffect } from 'react'
 

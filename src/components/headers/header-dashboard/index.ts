@@ -1,1 +1,1 @@
-export { default } from './HeaderDashboard'
+export { default } from './header-dashboard'

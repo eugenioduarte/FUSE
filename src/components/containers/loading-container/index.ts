@@ -1,1 +1,1 @@
-export { default } from './LoadingContainer'
+export { default } from './loading-container'

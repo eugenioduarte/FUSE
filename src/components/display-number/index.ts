@@ -1,1 +1,1 @@
-export { default } from './DisplayNumber'
+export { default } from './display-number'

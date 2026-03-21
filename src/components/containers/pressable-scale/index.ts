@@ -1,1 +1,1 @@
-export { default } from './PressableScale'
+export { default } from './pressable-scale'

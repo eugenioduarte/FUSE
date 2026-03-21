@@ -1,1 +1,1 @@
-export { default } from './ExpandableText'
+export { default } from './expandable-text'

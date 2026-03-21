@@ -1,4 +1,4 @@
-import { SnackbarProvider } from '@/components/snackbar-provider/SnackbarProvider'
+import { SnackbarProvider } from '@/components'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { registerRootComponent } from 'expo'
 import { useFonts } from 'expo-font'

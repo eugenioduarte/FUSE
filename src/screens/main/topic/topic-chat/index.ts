@@ -1,1 +1,1 @@
-export { default } from './TopicChatScreen'
+export { default } from './topic-chat-screen'

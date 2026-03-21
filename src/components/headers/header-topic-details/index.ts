@@ -1,1 +1,1 @@
-export { default } from './HeaderTopicDetails'
+export { default } from './header-topic-details'

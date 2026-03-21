@@ -1,1 +1,1 @@
-export { HeaderDashboardMenuOverlay } from './HeaderDashboardMenuOverlay'
+export { HeaderDashboardMenuOverlay } from './header-dashboard-menu-overlay'

@@ -1,2 +1,2 @@
-export { default } from './TopicDetailsScreen'
-export { default as TopicRankingScreen } from './TopicRankingScreen'
+export { default } from './topic-details-screen'
+export { default as TopicRankingScreen } from './topic-ranking-screen'

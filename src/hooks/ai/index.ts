@@ -1,2 +1,2 @@
 export * from './lang'
-export * from './useAI'
+export * from './use-ai'

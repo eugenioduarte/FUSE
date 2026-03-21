@@ -1,1 +1,1 @@
-export { default } from './HeaderChallengesList'
+export { default } from './header-challenges-list'

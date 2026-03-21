@@ -1,1 +1,1 @@
-export { default } from './PdfTextExtractor'
+export { default } from './pdf-text-extractor'
