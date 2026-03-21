@@ -53,8 +53,15 @@ You must strictly follow:
 
 Features must be:
 
-features/ feature-name/ feature-name.screen.tsx feature-name.hook.ts feature-name.schema.ts
-components/ **tests**/
+```
+src/screens/<domain>/<screen-name>/
+  <screen-name>.screen.tsx
+  <screen-name>.hook.ts
+  <screen-name>.schema.ts      # (if form/input exists)
+  <screen-name>.types.ts       # (optional)
+  components/
+  __tests__/
+```
 
 No horizontal architecture.
 
@@ -281,11 +288,12 @@ This includes:
 
 | Request Type      | Agent                   | Skills Used                                      | When to Delegate                                |
 | ----------------- | ----------------------- | ------------------------------------------------ | ----------------------------------------------- |
-| Implement feature | `react-native-engineer` | All skills                                       | After SDD exists, implementing components/hooks |
-| Create component  | `react-native-engineer` | `react-native-best-practices`, `ux-ui-standards` | UI implementation                               |
-| Create hook       | `react-native-engineer` | `clean-code-rules`, `typescript-strict-rules`    | Business logic                                  |
-| Refactor code     | `react-native-engineer` | All applicable skills                            | Code improvements                               |
-| Add translation   | `react-native-engineer` | `translations`                                   | i18n updates                                    |
+| Implement feature | `react-native-engineer` | All skills                                                                 | After SDD exists, implementing components/hooks |
+| Create component  | `react-native-engineer` | `react-native-best-practices`, `ux-ui-standards`                           | UI implementation                               |
+| Create hook       | `react-native-engineer` | `clean-code-rules`, `typescript-strict-rules`                              | Business logic                                  |
+| Integrate API     | `react-native-engineer` | `api-integration-pattern`, `typescript-strict-rules`                       | Service/query layer, API calls                  |
+| Refactor code     | `react-native-engineer` | All applicable skills                                                      | Code improvements                               |
+| Add translation   | `react-native-engineer` | `translations`                                                             | i18n updates                                    |
 
 **Invocation:** Load `.ai/agents/react-native-engineer.md` and provide implementation context.
 
@@ -587,11 +595,13 @@ function classifyRequest(userInput: string): AgentType {
       'quality',
       'coupling',
       'performance',
+      'audit',
+      'scan',
     ])
   ) {
     if (userInput.includes('sonar')) return 'sonar-auto-fixer'
     if (userInput.includes('coupling')) return 'coupling-analyzer'
-    if (userInput.includes('performance')) return 'performance-auditor'
+    if (userInput.includes('performance') || userInput.includes('audit') || userInput.includes('scan')) return 'performance-auditor'
     return 'code-reviewer'
   }
 
@@ -621,6 +631,7 @@ function classifyRequest(userInput: string): AgentType {
 | `performance-auditor`   | ✅ Active | `.ai/agents/performance-auditor.md`   |
 | `sonar-auto-fixer`      | ✅ Active | `.ai/agents/sonar-auto-fixer.md`      |
 | `coupling-analyzer`     | ✅ Active | `.ai/agents/coupling-analyzer.md`     |
+| `pr-review-fixer`       | ✅ Active | `.ai/agents/pr-review-fixer.md`       |
 
 ### 📋 Planned Agents
 
@@ -959,9 +970,9 @@ Validating quality gates...
   ✅ Tests passed (coverage: 85%)
 
 Staged changes:
-  M src/screens/NotificationCenter/NotificationCenter.tsx
-  A src/hooks/useNotifications.ts
-  A src/services/notifications/notificationService.ts
+  M src/screens/main/notifications/notification-center/notification-center.screen.tsx
+  A src/screens/main/notifications/notification-center/notification-center.hook.ts
+  A src/services/notifications/notifications.service.ts
 
 Suggested commit message (Conventional Commit format):
   feat: add notification center with real-time updates

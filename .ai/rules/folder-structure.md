@@ -35,12 +35,13 @@ src/
 ├── components/       # Reusable UI components (buttons, inputs, typography, etc.)
 ├── constants/        # App-wide constants
 ├── hooks/            # Shared hooks (theme, location, logger, etc.)
-├── i18n/             # Internationalization (i18next)
+├── locales/          # Internationalization translation files (i18next — pt.json, en.json)
 ├── lib/              # Infrastructure (firebase, rest, storage, tanstack, validation)
 ├── models/           # Domain models (pure TypeScript, no framework imports)
 ├── providers/        # React context providers (SystemProvider, SessionManager, etc.)
 ├── screens/          # Feature screens organized by domain
 ├── services/         # API functions and React Query hooks
+├── storage/          # Local persistence helpers (AsyncStorage wrappers)
 ├── store/            # Zustand state (domains, flows, slices)
 ├── styles/           # theme.css (color tokens)
 ├── tools/            # Dev tools
