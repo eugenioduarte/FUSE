@@ -9,7 +9,7 @@ import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
-import TopicCard from './components/TopicCard/topic-card'
+import TopicCard from './components/topic-card/topic-card'
 import useTopicScreen from './hooks/use-topic-screen'
 import { SummaryProgressArcs } from './topic-details/components/topic-details-graph'
 

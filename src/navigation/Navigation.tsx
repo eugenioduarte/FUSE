@@ -28,7 +28,7 @@ import DashboardScreen from '../screens/main/dashboard/dashboard-screen'
 import TopicScreen from '../screens/main/topic/topic-screen'
 
 // Calendar
-import CalendarScreen from '../screens/CalendarScreen/calendar-screen'
+import CalendarScreen from '../screens/main/calendar/calendar-screen'
 import CalendarAddScreen from '../screens/main/calendar/calendar-add-screen'
 import CalendarDetailsScreen from '../screens/main/calendar/calendar-details-screen'
 import CalendarEditScreen from '../screens/main/calendar/calendar-edit-screen'

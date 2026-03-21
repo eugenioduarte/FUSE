@@ -9,7 +9,7 @@ import React from 'react'
 import { ScrollView, TouchableOpacity, View } from 'react-native'
 import CalendarGrid from './components/calendar-grid'
 import CalendarScheduleCard from './components/calendar-schedule-card'
-import createStyles from './createStyles'
+import createStyles from './create-styles'
 import useCalendarScreen from './hooks/use-calendar-screen'
 
 const CalendarScreen: React.FC = () => {

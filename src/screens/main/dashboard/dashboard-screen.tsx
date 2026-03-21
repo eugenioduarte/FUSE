@@ -9,7 +9,7 @@ import { useUpdateBackgroundColor } from '@/store/useUpdateBackgroundColor'
 import React from 'react'
 import { FlatList, StyleSheet } from 'react-native'
 import { navigatorManager } from '../../../navigation/navigatorManager'
-import TopicCard from '../topic/components/TopicCard/topic-card'
+import TopicCard from '../topic/components/topic-card/topic-card'
 import DashboardAgentDisplay from './components/dashboard-agent-display'
 import useDashboard from './hooks/use-dashboard'
 
