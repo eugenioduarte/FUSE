@@ -3,7 +3,8 @@ import { useThemeStore } from '@/store/useThemeStore'
 import { useTheme } from '@react-navigation/native'
 import React from 'react'
 import { TouchableOpacity, View } from 'react-native'
-import createStyles from '../createStyles'
+import createStyles from '../create-styles'
+
 const DayButton = ({
   label,
   selected,

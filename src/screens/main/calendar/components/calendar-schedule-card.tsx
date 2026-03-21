@@ -5,7 +5,7 @@ import { useThemeStore } from '@/store/useThemeStore'
 import type { CalendarCommitment } from '@/types/calendar.type'
 import React from 'react'
 import { TouchableOpacity, View } from 'react-native'
-import createStyles from '../createStyles'
+import createStyles from '../create-styles'
 
 type Props = {
   item: CalendarCommitment

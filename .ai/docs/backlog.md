@@ -6,15 +6,15 @@ Items flagged during development that need revisiting. Add here whenever somethi
 
 ## Tag Legend
 
-| Tag | Type |
-|-----|------|
-| 🔴 BUG | Broken behavior, wrong output |
-| 🟠 UI | Visual issue, layout, screen |
-| 🟡 UX | Flow, interaction, usability |
-| 🟢 FEAT | Missing feature, enhancement |
-| 🔵 AI | Agent, prompt, router, fine-tuning |
-| 🟣 REFACTOR | Code quality, structure, cleanup |
-| ⚪ DOCS | Documentation, .md files |
+| Tag         | Type                               |
+| ----------- | ---------------------------------- |
+| 🔴 BUG      | Broken behavior, wrong output      |
+| 🟠 UI       | Visual issue, layout, screen       |
+| 🟡 UX       | Flow, interaction, usability       |
+| 🟢 FEAT     | Missing feature, enhancement       |
+| 🔵 AI       | Agent, prompt, router, fine-tuning |
+| 🟣 REFACTOR | Code quality, structure, cleanup   |
+| ⚪ DOCS     | Documentation, .md files           |
 
 Format: `[tag] Screen/Area — description`
 
@@ -22,18 +22,19 @@ Format: `[tag] Screen/Area — description`
 
 ## Pending
 
-### [2026-03-21] 🟠 UI — Onboarding / Page Indicator — active dot needs review
-The current page marker (dot/indicator) on the onboarding screen needs to be revisited.
-Visual behavior of the active state is incorrect or inconsistent.
+### [2026-03-21] 🔵 AI — Agente autônomo de PR lifecycle
 
----
+Build an agent that handles the full PR lifecycle autonomously:
 
-### [2026-03-21] ⚪ DOCS — All `.ai/**/*.md` — English + PT intro block
-All `.md` files inside `.ai/` must be:
-1. Written entirely in English
-2. Have a brief Portuguese explanation block at the top
+1. Create PR
+2. Monitor pipeline — if it fails, read the errors (Sonar, lint, tests, etc.)
+3. Fix all QA issues found (Sonar violations, test failures, any other gate)
+4. Read PR review comments and address them
+5. Respond to comments explaining the changes made
+6. Commit, push and finalize the PR with merge
 
-**Scope:** 38 files across `.ai/agents/`, `.ai/rules/`, `.ai/skills/`, `.ai/security/`, `.ai/templates/`, `.ai/docs/`, `.ai/router/`, root `.ai/`.
+**Scope:** Claude Code Agent SDK + CI/CD integration (GitHub Actions / pipeline hooks).
+**Priority:** Near future — foundation requires stable PR workflow and QA gates in place.
 
 ---
 
