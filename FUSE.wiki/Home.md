@@ -1,6 +1,6 @@
-# Syntry Wiki
+# Fuse Wiki
 
-Welcome to the Syntry project wiki. Syntry is a collaborative learning app where people create Topics, generate AI-powered Summaries, challenge each other with learning Challenges, and collaborate in real-time via shared Topics, invitations, and a simple social graph.
+Welcome to the Fuse project wiki. Fuse is a collaborative learning app where people create Topics, generate AI-powered Summaries, challenge each other with learning Challenges, and collaborate in real-time via shared Topics, invitations, and a simple social graph.
 
 Use the sidebar to explore. Start with [[Getting Started]] and [[Project Structure]].
 

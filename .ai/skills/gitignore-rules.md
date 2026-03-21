@@ -195,10 +195,10 @@ tmp/
 # 📁 Legacy / Excluded Projects
 
 ```gitignore
-Syntry/
+Fuse/
 ```
 
-**Why:** `Syntry/` is a legacy project at the repo root kept for reference only — must not be tracked.
+**Why:** `Fuse/` is a legacy project at the repo root kept for reference only — must not be tracked.
 
 ---
 

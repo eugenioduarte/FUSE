@@ -1,6 +1,6 @@
 # Challenges
 
-Syntry includes several challenge types to reinforce learning:
+Fuse includes several challenge types to reinforce learning:
 
 - Quiz: multiple choice questions generated from a Summary; options are shuffled.
 - Matrix: word grid with target words derived from Summary content.

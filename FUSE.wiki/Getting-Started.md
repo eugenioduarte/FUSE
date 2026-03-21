@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide helps you set up Syntry locally.
+This guide helps you set up Fuse locally.
 
 ## Prerequisites
 
@@ -15,8 +15,8 @@ This guide helps you set up Syntry locally.
 
 ```bash
 # Clone the repo
-git clone https://github.com/eugenioduarte/Syntry
-cd Syntry
+git clone https://github.com/eugenioduarte/Fuse
+cd Fuse
 
 # Install dependencies
 yarn

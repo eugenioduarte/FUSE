@@ -358,7 +358,7 @@ Ensure all `.md` files are written in English, but include a brief comment at th
 
 - [ ] All files in `.ai/` directory
 - [ ] All files in `docs/` directory
-- [ ] Wiki files in `Syntry.wiki/`
+- [ ] Wiki files in `FUSE.wiki/`
 
 ### Benefits
 

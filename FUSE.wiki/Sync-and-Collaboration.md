@@ -1,6 +1,6 @@
 # Sync and Collaboration
 
-Syntry aims to be offline-first while supporting real-time collaboration.
+Fuse aims to be offline-first while supporting real-time collaboration.
 
 ## Overview
 

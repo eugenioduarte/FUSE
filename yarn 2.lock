@@ -3786,9 +3786,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"Syntry@workspace:.":
+"Fuse@workspace:.":
   version: 0.0.0-use.local
-  resolution: "Syntry@workspace:."
+  resolution: "Fuse@workspace:."
   dependencies:
     "@babel/core": 7.25.2
     "@commitlint/cli": ^19.8.1

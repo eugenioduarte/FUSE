@@ -1,10 +1,10 @@
-# Visão Geral do Projeto Syntry
+# Visão Geral do Projeto Fuse
 
-Este documento oferece um resumo de alto nível do projeto Syntry, sua arquitetura, principais pastas, dependências e comandos úteis para desenvolvimento e testes. O objetivo é ajudar novos contribuidores a entender rapidamente a estrutura do repositório e como executar o app localmente.
+Este documento oferece um resumo de alto nível do projeto Fuse, sua arquitetura, principais pastas, dependências e comandos úteis para desenvolvimento e testes. O objetivo é ajudar novos contribuidores a entender rapidamente a estrutura do repositório e como executar o app localmente.
 
 ## Objetivo
 
-Syntry é um aplicativo multiplataforma (mobile e web) baseado em React Native e Expo. Ele fornece funcionalidades relacionadas a desafios, calendários, perfil de usuário e sincronização com backend (Firebase é utilizado como dependência). O projeto segue boas práticas de organização em camadas e utiliza TypeScript em grande parte do código.
+Fuse é um aplicativo multiplataforma (mobile e web) baseado em React Native e Expo. Ele fornece funcionalidades relacionadas a desafios, calendários, perfil de usuário e sincronização com backend (Firebase é utilizado como dependência). O projeto segue boas práticas de organização em camadas e utiliza TypeScript em grande parte do código.
 
 ## Tecnologias principais
 
@@ -28,7 +28,7 @@ Syntry é um aplicativo multiplataforma (mobile e web) baseado em React Native e
   - `store/` — Stores e hooks de estado (Zustand, hooks personalizados).
   - `navigation/` — Configuração de navegação e rotas.
   - `assets/` — Ícones, imagens e fontes.
-- `Syntry.wiki/` — Documentação e guias do projeto.
+- `Fuse.wiki/` — Documentação e guias do projeto.
 - `ios/`, `android/` — Pastas nativas geradas/necessárias para builds nativos.
 
 ## Principais scripts (em `package.json`)
@@ -81,7 +81,7 @@ yarn ios
 
 ## Onde procurar mais informação
 
-- Documentos da wiki neste repositório: ver a pasta Syntry.wiki para guias específicos.
+- Documentos da wiki neste repositório: ver a pasta Fuse.wiki para guias específicos.
 - Arquivos de configuração: `package.json`, `eas.json`, `app.config.js`.
 - Código: comece por `src/navigation/` e `src/screens/` para entender o fluxo do app.
 

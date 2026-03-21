@@ -268,7 +268,7 @@ FIREBASE_API_KEY=your_key_here
 ├── __mocks__/                # Test mocks
 ├── .husky/                   # Git hooks
 ├── .maestro/                 # E2E test scenarios
-├── Syntry.wiki/              # Project wiki
+├── FUSE.wiki/              # Project wiki
 │
 ├── App.tsx                   # Application entry point
 ├── package.json              # Dependencies & scripts
@@ -561,13 +561,13 @@ eas submit --profile production --platform android
 
 ### Wiki
 
-Comprehensive guides in [Syntry.wiki/](Syntry.wiki/):
+Comprehensive guides in [FUSE.wiki/](FUSE.wiki/):
 
-- [Getting Started](Syntry.wiki/Getting-Started.md)
-- [Project Structure](Syntry.wiki/Project-Structure.md)
-- [Development Workflow](Syntry.wiki/Development-Workflow.md)
-- [Testing & Quality](Syntry.wiki/Testing-and-Quality.md)
-- [Release & Deployment](Syntry.wiki/Release-and-Deployment.md)
+- [Getting Started](FUSE.wiki/Getting-Started.md)
+- [Project Structure](FUSE.wiki/Project-Structure.md)
+- [Development Workflow](FUSE.wiki/Development-Workflow.md)
+- [Testing & Quality](FUSE.wiki/Testing-and-Quality.md)
+- [Release & Deployment](FUSE.wiki/Release-and-Deployment.md)
 
 ---
 
@@ -705,7 +705,7 @@ This project is proprietary and confidential.
 
 For questions, issues, or contributions:
 
-- **Documentation**: Check [Syntry.wiki/](Syntry.wiki/)
+- **Documentation**: Check [FUSE.wiki/](FUSE.wiki/)
 - **Agent Help**: Review [.ai/agents/README.md](.ai/agents/README.md)
 - **Issues**: Open a GitHub issue
 - **Discussions**: Use GitHub Discussions

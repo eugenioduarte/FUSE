@@ -1,6 +1,6 @@
 # Invites and Connections
 
-Syntry supports a lightweight social graph to collaborate within Topics.
+Fuse supports a lightweight social graph to collaborate within Topics.
 
 ## Connections
 

@@ -4,7 +4,7 @@ These pages live under `/wiki` in the repository. To publish them as the GitHub 
 
 ## Option A: GitHub Web UI (manual)
 
-1. Open https://github.com/eugenioduarte/Syntry/wiki
+1. Open https://github.com/eugenioduarte/Fuse/wiki
 2. Create pages with the same titles (e.g., `Home`, `Getting Started`, etc.).
 3. Copy markdown from the repository `/wiki/*.md` into the wiki pages.
 4. Use the side navigation and `[[Page Name]]` links to cross-link pages.
@@ -13,12 +13,12 @@ These pages live under `/wiki` in the repository. To publish them as the GitHub 
 
 ```bash
 # Clone the wiki repository (separate git repo)
-git clone https://github.com/eugenioduarte/Syntry.wiki.git
-cd Syntry.wiki
+git clone https://github.com/eugenioduarte/Fuse.wiki.git
+cd Fuse.wiki
 
 # Copy generated pages from the app repo
 # Adjust the path to your local checkout root
-cp -f ../Syntry/wiki/*.md .
+cp -f ../Fuse/wiki/*.md .
 
 # Commit and push
 git add -A
