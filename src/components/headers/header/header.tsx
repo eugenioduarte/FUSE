@@ -10,16 +10,16 @@ import Animated, {
   SlideInUp,
   SlideOutDown,
 } from 'react-native-reanimated'
-import HeaderAddTopic from '../header-add-topic/HeaderAddTopic'
-import HeaderCalendar from '../header-calendar/HeaderCalendar'
-import HeaderChallengeAdd from '../header-challenge-add/HeaderChallengeAdd'
-import HeaderChallengesList from '../header-challenges-list/HeaderChallengesList'
-import HeaderDashboard from '../header-dashboard/HeaderDashboard'
-import HeaderSummaryAdd from '../header-summary-add/HeaderSummaryAdd'
-import HeaderSummaryDetails from '../header-summary-details/HeaderSummaryDetails'
-import HeaderTopicChat from '../header-topic-chat/HeaderTopicChat'
-import HeaderTopicDetails from '../header-topic-details/HeaderTopicDetails'
-import HeaderTopicList from '../header-topic-list/HeaderTopicList'
+import HeaderAddTopic from '../header-add-topic/header-add-topic'
+import HeaderCalendar from '../header-calendar/header-calendar'
+import HeaderChallengeAdd from '../header-challenge-add/header-challenge-add'
+import HeaderChallengesList from '../header-challenges-list/header-challenges-list'
+import HeaderDashboard from '../header-dashboard/header-dashboard'
+import HeaderSummaryAdd from '../header-summary-add/header-summary-add'
+import HeaderSummaryDetails from '../header-summary-details/header-summary-details'
+import HeaderTopicChat from '../header-topic-chat/header-topic-chat'
+import HeaderTopicDetails from '../header-topic-details/header-topic-details'
+import HeaderTopicList from '../header-topic-list/header-topic-list'
 
 const DefaultHeader = ({ title }: { title: string }) => {
   const isReady = navigationRef.isReady()

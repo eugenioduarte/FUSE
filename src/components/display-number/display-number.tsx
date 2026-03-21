@@ -1,7 +1,7 @@
+import { Text } from '@/components/ui-text/ui-text'
 import { useTheme } from '@/hooks/use-theme'
 import React from 'react'
 import { View } from 'react-native'
-import { Text } from '@/components/ui-text/UiText'
 
 type DisplayNumberProps = {
   value: number | string | undefined

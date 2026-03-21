@@ -7,7 +7,7 @@ import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import React, { useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
-import IconButton from '../../buttons/icon-button/IconButton'
+import IconButton from '../../buttons/icon-button/icon-button'
 
 const HeaderCalendar = () => {
   const theme = useTheme()

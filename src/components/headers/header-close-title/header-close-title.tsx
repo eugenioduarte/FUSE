@@ -3,7 +3,7 @@ import { spacings } from '@/constants/theme'
 import { navigatorManager } from '@/navigation'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
-import CloseButton from '../../buttons/close-button/CloseButton'
+import CloseButton from '../../buttons/close-button/close-button'
 const HeaderCloseTitle = ({
   title,
   onPress,

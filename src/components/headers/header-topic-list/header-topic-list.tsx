@@ -6,7 +6,7 @@ import { useOverlay } from '@/store/useOverlay'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
-import IconButton from '../../buttons/icon-button/IconButton'
+import IconButton from '../../buttons/icon-button/icon-button'
 
 const HeaderTopicList = () => {
   const theme = useTheme()

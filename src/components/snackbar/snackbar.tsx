@@ -1,7 +1,7 @@
+import { Text } from '@/components/ui-text/ui-text'
 import { Colors } from '@/constants/theme'
 import React, { useEffect, useRef } from 'react'
 import { Animated, StyleSheet } from 'react-native'
-import { Text } from '@/components/ui-text/UiText'
 
 export enum SnackbarTypeEnum {
   INFO = 'info',

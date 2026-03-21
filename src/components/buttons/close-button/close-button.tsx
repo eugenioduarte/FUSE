@@ -1,7 +1,7 @@
 import { CloseIcon } from '@/assets/icons'
 import React from 'react'
 import { StyleProp, ViewStyle } from 'react-native'
-import IconButton from '../icon-button/IconButton'
+import IconButton from '../icon-button/icon-button'
 
 type Props = {
   onPress: () => void

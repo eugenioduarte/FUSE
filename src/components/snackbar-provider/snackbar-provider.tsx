@@ -1,5 +1,5 @@
+import { Snackbar, SnackbarType } from '@/components/snackbar/snackbar'
 import React, { createContext, useCallback, useContext, useState } from 'react'
-import { Snackbar, SnackbarType } from '@/components/snackbar/Snackbar'
 
 interface SnackbarContextProps {
   showSnackbar: (

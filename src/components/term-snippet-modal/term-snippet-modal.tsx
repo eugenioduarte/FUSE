@@ -1,14 +1,13 @@
 import { CloseIcon } from '@/assets/icons'
-import { Button, Text } from '@/components'
+import { Button, IconButton, Text } from '@/components'
 import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { useThemeStore } from '@/store/useThemeStore'
+import type { ExpandableTerm } from '@/types/domain'
 import { ThemeType } from '@/types/theme.type'
 import { DEFAULT_ICON_SIZE } from '@expo/vector-icons/build/createIconSet'
 import React from 'react'
 import { Modal, StyleSheet, View } from 'react-native'
-import type { ExpandableTerm } from '@/types/domain'
-import IconButton from '@/components/buttons/icon-button/IconButton'
 
 type Props = {
   visible: boolean
