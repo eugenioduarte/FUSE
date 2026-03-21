@@ -1,5 +1,5 @@
 import { Button, Container, Text, TextInput } from '@/components'
-import { useSnackbar } from '@/components/ui/SnackbarProvider'
+import { useSnackbar } from '@/components/snackbar-provider/SnackbarProvider'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { RecoverySchema, recoverySchema } from '@/schemas/authSchemas'

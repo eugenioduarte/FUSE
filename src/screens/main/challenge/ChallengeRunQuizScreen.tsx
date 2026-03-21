@@ -1,5 +1,5 @@
 import { Button, Container, Text } from '@/components'
-import EmptyContainer from '@/components/containers/EmptyContainer'
+import EmptyContainer from '@/components/containers/empty-container/EmptyContainer'
 import { useTheme } from '@/hooks/useTheme'
 import {
   RootStackParamList,

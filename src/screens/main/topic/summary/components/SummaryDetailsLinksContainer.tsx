@@ -1,5 +1,5 @@
 import { DeleteIcon, DownloadIcon, QuizIcon } from '@/assets/icons'
-import IconButton from '@/components/buttons/IconButton'
+import IconButton from '@/components/buttons/icon-button/IconButton'
 import { useTheme } from '@/hooks/useTheme'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { Summary } from '@/types/domain'

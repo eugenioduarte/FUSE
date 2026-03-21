@@ -1,5 +1,5 @@
 import { Button } from '@/components'
-import EmptyContainer from '@/components/containers/EmptyContainer'
+import EmptyContainer from '@/components/containers/empty-container/EmptyContainer'
 import { t } from '@/locales/translation'
 import {
   RootStackParamList,

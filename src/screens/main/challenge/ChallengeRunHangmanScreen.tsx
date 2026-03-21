@@ -1,7 +1,7 @@
 import { Button, Text } from '@/components'
-import EmptyContainer from '@/components/containers/EmptyContainer'
-import LoadingContainer from '@/components/containers/LoadingContainer'
-import StepDot from '@/components/stepDot/StepDot'
+import EmptyContainer from '@/components/containers/empty-container/EmptyContainer'
+import LoadingContainer from '@/components/containers/loading-container/LoadingContainer'
+import StepDot from '@/components/step-dot/StepDot'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import {

@@ -1,4 +1,4 @@
-import Button from '@/components/buttons/Button'
+import Button from '@/components/buttons/button/Button'
 import { useTheme } from '@/hooks/useTheme'
 import { ThemeType } from '@/types/theme.type'
 

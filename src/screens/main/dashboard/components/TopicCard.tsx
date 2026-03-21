@@ -1,4 +1,4 @@
-import DisplayNumber from '@/components/ui/DisplayNumber'
+import DisplayNumber from '@/components/display-number/DisplayNumber'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { ThemeType } from '@/types/theme.type'

@@ -1,6 +1,6 @@
 import { Button, Container, Text, TextInput } from '@/components'
-import SubContainer from '@/components/containers/SubContainer'
-import { useSnackbar } from '@/components/ui/SnackbarProvider'
+import SubContainer from '@/components/containers/sub-container/SubContainer'
+import { useSnackbar } from '@/components/snackbar-provider/SnackbarProvider'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'

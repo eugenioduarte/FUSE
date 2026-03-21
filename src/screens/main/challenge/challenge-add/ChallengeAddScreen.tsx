@@ -1,5 +1,5 @@
 import { Container } from '@/components'
-import SubContainer from '@/components/containers/SubContainer'
+import SubContainer from '@/components/containers/sub-container/SubContainer'
 import { useTheme } from '@/hooks/useTheme'
 import { t } from '@/locales/translation'
 import { RootStackParamList } from '@/navigation/navigatorManager'

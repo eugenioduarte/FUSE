@@ -1,4 +1,4 @@
-import { useSnackbar } from '@/components/ui/SnackbarProvider'
+import { useSnackbar } from '@/components/snackbar-provider/SnackbarProvider'
 import { t } from '@/locales/translation'
 import {
   changeEmail,
