@@ -4,7 +4,7 @@
 
 # SDD — Task #6: Agent Orchestration Diagram
 
-**Status:** Planned
+**Status:** Done
 **Priority:** Medium
 **Agent:** `frontend-architect` (documentation)
 
@@ -115,9 +115,9 @@ sequenceDiagram
 
 ## ✅ Definition of Done
 
-- [ ] `.ai/agents-orchestration.md` created
-- [ ] All 9 active agents represented in the routing diagram
-- [ ] Skills mapped to each agent
-- [ ] Standard feature development flow shown as sequence diagram
-- [ ] LLM routing table (local vs remote) included
-- [ ] Diagrams render correctly in GitHub Markdown preview
+- [x] `.ai/agents-orchestration.md` created
+- [x] All 9 active agents represented in the routing diagram
+- [x] Skills mapped to each agent
+- [x] Standard feature development flow shown as sequence diagram
+- [x] LLM routing table (local vs remote) included
+- [x] Diagrams render correctly in GitHub Markdown preview
