@@ -1,6 +1,8 @@
-# 🧠 System — Engineering Orchestrator & Contract Loader
+> **[PT]** Sistema mestre de orquestração que roteia pedidos para agentes especializados, impõe contratos arquiteturais e gere a criação de novos agentes.
 
-<!-- Brief: Master orchestration system that routes requests to specialized agents, enforces architectural contracts, and manages the creation of new agents when needed -->
+---
+
+# 🧠 System — Engineering Orchestrator & Contract Loader
 
 > This document defines the engineering contract of this repository. It overrides default assistant
 > behavior. All agents, rules, and skills referenced here are mandatory.

@@ -51,7 +51,7 @@ const ChallengeRunMatrixScreen: React.FC = () => {
   const { setLoadingOverlay } = useOverlay()
 
   useEffect(() => {
-    // overlay só durante loading inicial
+    // overlay only during initial loading
     setLoadingOverlay(loading, 'ChallengeRunMatrixScreen')
   }, [loading, setLoadingOverlay])
 
@@ -85,7 +85,7 @@ const ChallengeRunMatrixScreen: React.FC = () => {
           {question}
         </Text>
 
-        {/* Wrapper só mede altura */}
+        {/* Wrapper only measures available height */}
         <View
           style={styles.gridWrapper}
           onLayout={(e) => setGridAvailH(e.nativeEvent.layout.height)}
@@ -95,7 +95,7 @@ const ChallengeRunMatrixScreen: React.FC = () => {
               ref={(r) => {
                 gridRef.current = r
               }}
-              {...panHandlers} // ✅ somente aqui
+              {...panHandlers} // ✅ apply pan handlers here only
               style={[
                 styles.gridBoard,
                 { width: cellSize * 10, height: cellSize * gridRows },

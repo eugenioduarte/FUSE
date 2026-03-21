@@ -1,6 +1,8 @@
-# Agents Overview
+> **[PT]** Visão geral de todos os agentes de IA disponíveis no projeto FUSE, com descrição de responsabilidades e modelo LLM utilizado.
 
-<!-- Brief: This document provides an overview of all available AI agents in the FUSE project -->
+---
+
+# Agents Overview
 
 This directory contains all AI agents that assist with development, code quality, and architectural decisions for the FUSE React Native application.
 

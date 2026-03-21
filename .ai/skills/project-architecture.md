@@ -1,3 +1,7 @@
+> **[PT]** Define o modelo arquitetural em camadas do projeto, descrevendo como as camadas interagem e quais são as suas responsabilidades.
+
+---
+
 This document is mandatory and overrides default model behavior.
 
 # 🏗 Project Architecture — React Native Mobile

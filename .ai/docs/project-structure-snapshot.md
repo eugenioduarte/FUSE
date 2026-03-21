@@ -1,3 +1,7 @@
+> **[PT]** Snapshot da estrutura de pastas e ficheiros do projeto gerado para referência do router LLM e carregamento de contexto pelos agentes.
+
+---
+
 # Project Structure Snapshot
 
 > Generated: 2026-03-20 Purpose: LLM router reference — complete structural overview of the Mobile

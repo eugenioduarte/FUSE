@@ -1,8 +1,10 @@
+> **[PT]** Agente autônomo que gere o ciclo de vida completo de um PR — criação, monitorização de CI, correção de falhas, resolução de reviews e merge.
+
+---
+
 This document is mandatory and overrides default model behavior.
 
 # 🔄 PR Lifecycle Agent
-
-<!-- Brief: Autonomous agent that handles the complete PR lifecycle — create, monitor CI, fix failures, address reviews, and merge -->
 
 ## 🎯 Role
 

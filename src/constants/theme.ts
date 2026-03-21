@@ -1,29 +1,28 @@
 export const Colors = {
   light: {
-    // tom médio de vinho (secundário)
     // ---- Backgrounds ----
-    backgroundPrimary: '#FFFAF0', // fundo principal (mais claro)
-    backgroundSecondary: '#F7F0E0', // fundo de seções / cartões
-    backgroundTertiary: '#F7EFDF', // leve variação do fundo
+    backgroundPrimary: '#FFFAF0', // main background (lightest)
+    backgroundSecondary: '#F7F0E0', // section / card backgrounds
+    backgroundTertiary: '#F7EFDF', // slight background variation
 
-    // ---- Texto e bordas ----
-    textPrimary: '#06003aff', // cor principal do texto
-    textSecondary: '#5A2E3D', // opcional – tom mais suave derivado
-    borderColor: '#3A001D', // cor padrão de borda
-    textHighlight: '#F3D8B4', // para destaques / links
-    // ---- Cores de estado / ênfase ----
-    accentRed: '#EA3D5C', // destaque / erro / delete
-    accentRedDark: '#A01538', // tom escuro para hover/press
-    accentYellow: '#FCCB66', // aviso / destaque leve
-    accentBlue: '#AEE3F3', // info / foco
-    accentGreen: '#BCEBCB', // sucesso / confirmação
-    accentOrange: '#FBC19D', // ação / energia
-    accentPurple: '#CFBDDE', // elementos criativos / secundários
-    accentPink: '#F296B8', // feminino / lúdico / apoio visual
+    // ---- Text and borders ----
+    textPrimary: '#06003aff', // primary text colour
+    textSecondary: '#5A2E3D', // optional – softer derived tone
+    borderColor: '#3A001D', // default border colour
+    textHighlight: '#F3D8B4', // for highlights / links
+    // ---- State / emphasis colours ----
+    accentRed: '#EA3D5C', // highlight / error / delete
+    accentRedDark: '#A01538', // dark tone for hover/press
+    accentYellow: '#FCCB66', // warning / soft highlight
+    accentBlue: '#AEE3F3', // info / focus
+    accentGreen: '#BCEBCB', // success / confirmation
+    accentOrange: '#FBC19D', // action / energy
+    accentPurple: '#CFBDDE', // creative / secondary elements
+    accentPink: '#F296B8', // playful / visual support
 
-    // ---- Neutros ----
+    // ---- Neutrals ----
     white: '#FFFFFF',
-    black: '#111214', // reutilizado do texto primário (consistente)
+    black: '#111214', // reused from primary text (consistent)
     disabled: '#DEDEDEFF',
   },
 

@@ -1,3 +1,7 @@
+> **[PT]** Define as regras obrigatórias de design system para todo o código de UI, incluindo temas, tipografia, espaçamentos e acessibilidade.
+
+---
+
 This document is mandatory and overrides default model behavior.
 
 # 🎨 Design System Rules — React Native Mobile

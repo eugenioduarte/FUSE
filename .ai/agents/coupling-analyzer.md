@@ -1,8 +1,10 @@
+> **[PT]** Agente que analisa padrões de acoplamento no código e sugere refatorações para atingir acoplamento equilibrado com base em princípios arquiteturais.
+
+---
+
 This document is mandatory and overrides default model behavior.
 
 # 🔗 Coupling Analyzer Agent
-
-<!-- Brief: Analyzes code coupling patterns and suggests refactoring to achieve balanced coupling based on architectural principles -->
 
 ## 🎯 Role
 

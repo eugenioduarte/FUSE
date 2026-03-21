@@ -1,3 +1,7 @@
+> **[PT]** Agente de geração de testes unitários e de integração para hooks e screens React Native, seguindo templates determinísticos.
+
+---
+
 This document is mandatory and overrides default model behavior.
 
 # 🧪 Test Writer — React Native (Mobile)

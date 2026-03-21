@@ -1,54 +1,58 @@
+> **[PT]** Agente responsável por corrigir automaticamente comentários de revisão de PRs, incluindo issues do Sonar, lint e feedback de code reviewers.
+
+---
+
 # Agent: pr-review-fixer
 
-**Status:** TODO — implementar após Sonar e outros quality gates estarem no pipeline de CI
+**Status:** TODO — implement after Sonar and other quality gates are in the CI pipeline
 
 ---
 
-## Objetivo
+## Objective
 
-Agente que, após abrir um PR, vai buscar automaticamente todos os comentários de revisão (Sonar, linters de CI, code reviewers), corrige os problemas identificados e faz push das correcções para a mesma branch.
+Agent that, after a PR is opened, automatically fetches all review comments (Sonar, CI linters, code reviewers), fixes the identified issues, and pushes the corrections to the same branch.
 
 ---
 
-## Fluxo esperado
+## Expected Flow
 
-1. Recebe o número do PR como argumento (ex: `/fix-pr 42`)
-2. Obtém todos os comentários do PR via `gh pr view <number> --comments`
-3. Obtém o estado dos checks de CI via `gh pr checks <number>` (Sonar Quality Gate, ESLint CI, etc.)
-4. Para cada problema identificado:
-   - Lê o ficheiro afectado
-   - Aplica a correcção (lint, smell, code review feedback)
-   - Corre os testes localmente para garantir que não quebrou nada
-5. Cria um commit com as correcções e faz push para a branch do PR
-6. Adiciona um comentário no PR indicando o que foi corrigido
+1. Receives the PR number as an argument (e.g. `/fix-pr 42`)
+2. Fetches all PR comments via `gh pr view <number> --comments`
+3. Fetches the CI check status via `gh pr checks <number>` (Sonar Quality Gate, ESLint CI, etc.)
+4. For each identified issue:
+   - Reads the affected file
+   - Applies the fix (lint, smell, code review feedback)
+   - Runs tests locally to ensure nothing is broken
+5. Creates a commit with the fixes and pushes to the PR branch
+6. Adds a comment to the PR describing what was fixed
 
 ---
 
 ## Trigger
 
-- **Manual:** `/fix-pr <number>` — invoca o agente numa conversa Claude Code
-- **Automático (futuro):** hook `PostToolUse` após `gh pr create` que dispara o agente em background
+- **Manual:** `/fix-pr <number>` — invokes the agent in a Claude Code conversation
+- **Automatic (future):** `PostToolUse` hook after `gh pr create` that fires the agent in the background
 
 ---
 
-## Dependências necessárias
+## Required Dependencies
 
-- `gh` CLI autenticado com permissões de leitura/escrita no repo
-- Sonar configurado no pipeline (webhook ou API key para ler os issues)
-- O agente deve ter acesso às ferramentas: `Bash`, `Read`, `Edit`, `Grep`, `Glob`
-
----
-
-## Notas de implementação
-
-- Usar `gh api repos/{owner}/{repo}/pulls/{number}/comments` para comentários inline (anotações em linhas específicas)
-- Para issues do Sonar: usar a SonarQube/SonarCloud API para listar issues por branch
-- O agente deve fazer `pnpm typecheck && pnpm lint && pnpm test` antes de fazer push
-- Se os testes falharem após as correcções, o agente deve reportar e não fazer push
+- `gh` CLI authenticated with read/write permissions on the repo
+- Sonar configured in the pipeline (webhook or API key to read issues)
+- The agent must have access to the tools: `Bash`, `Read`, `Edit`, `Grep`, `Glob`
 
 ---
 
-## Referências
+## Implementation Notes
+
+- Use `gh api repos/{owner}/{repo}/pulls/{number}/comments` for inline comments (annotations on specific lines)
+- For Sonar issues: use the SonarQube/SonarCloud API to list issues by branch
+- The agent must run `pnpm typecheck && pnpm lint && pnpm test` before pushing
+- If tests fail after the fixes, the agent must report and not push
+
+---
+
+## References
 
 - `gh pr view --help`
 - `gh pr checks --help`

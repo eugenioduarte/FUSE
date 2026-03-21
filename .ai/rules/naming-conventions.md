@@ -1,3 +1,7 @@
+> **[PT]** Define as convenções de nomenclatura obrigatórias para ficheiros, componentes, hooks, store, serviços e testes em todo o projeto.
+
+---
+
 This document is mandatory and overrides default model behavior.
 
 # 🏷 Naming Conventions — React Native Mobile

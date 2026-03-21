@@ -90,12 +90,12 @@ export const aiService = {
 
   async miniExplain(term: string, context?: string): Promise<string> {
     if (!OPENAI_API_KEY) {
-      return `Breve descrição (mock) para "${term}".`
+      return `Brief description (mock) for "${term}".`
     }
     const system = MINI_EXPLAIN_SYSTEM
     const user =
-      `Explique em 1-2 frases o termo: "${term}".` +
-      (context ? `\nContexto: ${context.slice(0, 800)}` : '')
+      `Explain in 1-2 sentences the term: "${term}".` +
+      (context ? `\nContext: ${context.slice(0, 800)}` : '')
     const body = JSON.stringify({
       model: MODEL,
       messages: [
@@ -105,7 +105,7 @@ export const aiService = {
       temperature: 0.4,
     })
     const res = await doRequestWithRetry(body)
-    if (!res?.ok) return `Descrição breve de ${term}.`
+    if (!res?.ok) return `Brief description of ${term}.`
     const data = await res.json()
     const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
     return content
@@ -122,9 +122,9 @@ export const aiService = {
       const body = JSON.stringify({
         model: imageModel,
         prompt: [
-          'Fotografia ou ilustração com estilo coerente ao tema do resumo, nítida e atraente.',
-          'Evite texto, foco em elementos visuais representativos do assunto.',
-          `Tema: ${prompt}`,
+          'A photograph or illustration that visually represents the summary topic, clear and appealing.',
+          'Avoid text, focus on visual elements representative of the subject.',
+          `Topic: ${prompt}`,
         ].join('\n'),
         size: '1024x768',
         n: 1,
@@ -197,9 +197,9 @@ function mockSummary(prompt: string): AISummary {
   return {
     title: prompt.trim().slice(0, 60),
     content:
-      `Resumo gerado (mock) para: ${prompt}.\n\n` +
-      'Este é um conteúdo simulado. Configure EXPO_PUBLIC_OPENAI_API_KEY para usar o ChatGPT.',
-    keywords: ['introdução', 'contexto', 'principais eventos'],
+      `Summary generated (mock) for: ${prompt}.\n\n` +
+      'This is simulated content. Set EXPO_PUBLIC_OPENAI_API_KEY to use the real AI.',
+    keywords: ['introduction', 'context', 'main events'],
   }
 }
 
@@ -208,18 +208,18 @@ function mockKnowledgeSummary(prompt: string): AIKnowledgeSummary {
     ...mockSummary(prompt),
     expandableTerms: [
       {
-        term: 'Independência do Brasil',
-        mini: 'Processo de separação de Portugal em 1822.',
+        term: 'Independence of Brazil',
+        mini: 'Separation from Portugal in 1822.',
       },
       {
         term: 'Dom Pedro I',
-        mini: 'Primeiro imperador do Brasil após a independência.',
+        mini: 'First emperor of Brazil after independence.',
       },
     ],
     recommendations: [
-      'Constituição de 1824',
-      'Período Regencial',
-      'Revolução Pernambucana',
+      'Constitution of 1824',
+      'Regency Period',
+      'Pernambuco Revolution',
     ],
   }
 }
@@ -282,9 +282,9 @@ function handleErrorOrFallback(
     return {
       title: `${prompt}`.trim().slice(0, 60),
       content:
-        `Resumo gerado (mock - fallback 429) para: ${prompt}.\n\n` +
-        'Você atingiu o limite de requisições. Tente novamente mais tarde para um resumo real.',
-      keywords: ['conceitos', 'contexto', 'tópicos-chave'],
+        `Summary generated (mock - 429 fallback) for: ${prompt}.\n\n` +
+        'You have reached the request limit. Try again later for a real summary.',
+      keywords: ['concepts', 'context', 'key topics'],
     }
   }
   throw new Error('AI request failed')
@@ -315,7 +315,7 @@ async function parseKnowledgeResponse(
   const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
   const parsed = toJSONSafe(content)
   if (!parsed?.title || !parsed?.content) {
-    throw new Error('AI knowledge: formato inesperado')
+    throw new Error('AI knowledge: unexpected format')
   }
   const terms = Array.isArray(parsed.expandableTerms)
     ? parsed.expandableTerms
@@ -348,10 +348,10 @@ function handleKnowledgeErrorOrFallback(
   return {
     ...base,
     expandableTerms: [
-      { term: 'Contexto histórico', mini: 'Panorama geral do período.' },
-      { term: 'Personagens-chave', mini: 'Principais figuras envolvidas.' },
+      { term: 'Historical context', mini: 'General overview of the period.' },
+      { term: 'Key figures', mini: 'Main people involved.' },
     ],
-    recommendations: ['Linhas do tempo', 'Conflitos regionais'],
+    recommendations: ['Timelines', 'Regional conflicts'],
   }
 }
 

@@ -1,8 +1,10 @@
+> **[PT]** Agente que corrige automaticamente issues do SonarQube/SonarCloud identificados em PRs, criando commits de correção na mesma branch.
+
+---
+
 This document is mandatory and overrides default model behavior.
 
 # 🔧 Sonar Auto-Fixer Agent
-
-<!-- Brief: Automatically fixes SonarQube/SonarCloud issues identified in PRs and creates follow-up PRs with corrections -->
 
 ## 🎯 Role
 

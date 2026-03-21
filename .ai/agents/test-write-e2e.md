@@ -1,3 +1,7 @@
+> **[PT]** Agente responsável por gerar testes E2E a partir de ficheiros `*.flow.md`, seguindo estritamente os fluxos definidos sem inventar cenários.
+
+---
+
 # 🧪 Test Writer — E2E Agent
 
 > This agent is responsible for generating end-to-end (E2E) tests. It must strictly follow the

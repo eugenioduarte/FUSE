@@ -39,7 +39,7 @@ const CalendarScreen: React.FC = () => {
 
   return (
     <View style={styles.screen}>
-      {/* Header: 2025  < Maio > */}
+      {/* Month navigation header */}
       <View style={styles.monthHeader}>
         <Text variant="xLarge">{year}</Text>
         <View style={styles.monthNav}>
@@ -61,7 +61,7 @@ const CalendarScreen: React.FC = () => {
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Calendário */}
+        {/* Calendar grid */}
         <CalendarGrid
           currentDate={currentMonth}
           selectedDate={selectedDate}
@@ -69,7 +69,7 @@ const CalendarScreen: React.FC = () => {
           events={events}
         />
 
-        {/* Ações + Lista do dia */}
+        {/* Actions + Day appointment list */}
         {selectedDate ? (
           <View style={styles.actionsContainer}>
             <Button

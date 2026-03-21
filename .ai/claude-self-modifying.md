@@ -1,65 +1,69 @@
+> **[PT]** Registo vivo de padrões aprendidos, correções e decisões arquiteturais confirmadas em sessões anteriores — deve ser lido antes de qualquer implementação.
+
+---
+
 # 🧠 Claude Self-Modifying Learning Log
 
-> Este ficheiro é um registo vivo de padrões aprendidos, correções e decisões arquiteturais
-> confirmadas em sessões anteriores. **Deve ser lido antes de qualquer implementação.**
+> This file is a living record of learned patterns, corrections, and architectural decisions
+> confirmed in previous sessions. **It must be read before any implementation.**
 >
-> Formato de cada entrada:
-> - **Regra** — o que fazer / não fazer
-> - **Porquê** — contexto ou incidente que gerou a regra
-> - **Aplica-se a** — onde esta regra tem efeito
+> Format of each entry:
+> - **Rule** — what to do / not do
+> - **Why** — context or incident that generated the rule
+> - **Applies to** — where this rule has effect
 
 ---
 
-## 🔄 Loading Overlay — Centralizado no GlobalLoadingObserver
+## 🔄 Loading Overlay — Centralized in GlobalLoadingObserver
 
-**Regra:** Nunca chamar `overlayActions.open('loading')` ou `overlayActions.close()` diretamente
-em hooks ou screens para controlar o estado de loading de API calls.
+**Rule:** Never call `overlayActions.open('loading')` or `overlayActions.close()` directly
+in hooks or screens to control the loading state of API calls.
 
-**Porquê:** Foi criado o `GlobalLoadingObserver` (`src/providers/GlobalLoadingObserver.tsx`) que
-usa `useIsFetching()` e `useIsMutating()` do React Query para observar globalmente todas as
-chamadas de API e gerir o overlay de loading de forma centralizada e automática. Chamadas manuais
-criam inconsistências e duplicação.
+**Why:** The `GlobalLoadingObserver` (`src/providers/GlobalLoadingObserver.tsx`) was created, which
+uses `useIsFetching()` and `useIsMutating()` from React Query to globally observe all API calls
+and manage the loading overlay in a centralized and automatic way. Manual calls create
+inconsistencies and duplication.
 
-**Aplica-se a:** Todos os hooks em `src/services/query/`, todos os screen hooks, todos os
-componentes. A única exceção aceite é quando se abre um overlay de tipo **diferente** de
-`'loading'` (ex: `'chargerNotFound'`, `'chargingComplete'`).
-
----
-
-## 🚫 Git — Sem Co-Author nos Commits
-
-**Regra:** Nunca incluir linha `Co-Authored-By:` nos commits.
-
-**Porquê:** Política da empresa. Os commits devem ter apenas o nome do utilizador.
-
-**Aplica-se a:** Todos os commits neste repositório.
+**Applies to:** All hooks in `src/services/query/`, all screen hooks, all components. The only
+accepted exception is when opening an overlay of a **different** type than `'loading'`
+(e.g. `'chargerNotFound'`, `'chargingComplete'`).
 
 ---
 
-## 🏗 Arquitectura — Model → Service → Query → Hook → Screen
+## 🚫 Git — No Co-Author in Commits
 
-**Regra:** Respeitar estritamente a cadeia de responsabilidades. Sem atalhos entre camadas.
+**Rule:** Never include a `Co-Authored-By:` line in commits.
 
-**Porquê:** Definido no `system.md` e confirmado em múltiplas sessões. Quebrar a cadeia cria
-acoplamento e dificulta testes.
+**Why:** Company policy. Commits must only carry the user's name.
 
-**Aplica-se a:** Qualquer nova feature ou refactor.
+**Applies to:** All commits in this repository.
 
 ---
 
-## 🏪 Store — Flat `.store.ts` Files (Sem Slices/Domains/Flows)
+## 🏗 Architecture — Model → Service → Query → Hook → Screen
 
-**Regra:** A store usa ficheiros planos `{name}.store.ts` — sem separação em `slices/`, `domains/`,
-`flows/`. Cada ficheiro contém o `create()` do Zustand + estado + actions + hooks exportados.
+**Rule:** Strictly respect the responsibility chain. No shortcuts between layers.
 
-**Porquê:** Decisão arquitetural tomada em 2026-03-20 para simplificar o modelo. A separação em
-três ficheiros (`.slice.ts`, `.hooks.ts`, `.selectors.ts`) era over-engineering para o tamanho
-atual do projeto.
+**Why:** Defined in `system.md` and confirmed across multiple sessions. Breaking the chain creates
+coupling and makes testing harder.
 
-**Aplica-se a:** Qualquer nova store. Ficheiros existentes: `auth.store.ts`, `overlay.store.ts`,
+**Applies to:** Any new feature or refactor.
+
+---
+
+## 🏪 Store — Flat `.store.ts` Files (No Slices/Domains/Flows)
+
+**Rule:** The store uses flat `{name}.store.ts` files — no separation into `slices/`, `domains/`,
+`flows/`. Each file contains the Zustand `create()` + state + actions + exported hooks.
+
+**Why:** Architectural decision made on 2026-03-20 to simplify the model. Separating into
+three files (`.slice.ts`, `.hooks.ts`, `.selectors.ts`) was over-engineering for the current
+project size.
+
+**Applies to:** Any new store. Existing files: `auth.store.ts`, `overlay.store.ts`,
 `theme.store.ts`.
 
-Padrão correto:
+Correct pattern:
 
 ```ts
 export const useAuthStore = create<AuthState>()(persist(...))
@@ -69,18 +73,17 @@ export const useAuthActions = () => useAuthStore((s) => ({ login: s.login, logou
 
 ---
 
-## 🧭 Navegação — `useEffect` + `router.replace()` (Não `<Redirect>`)
+## 🧭 Navigation — `useEffect` + `router.replace()` (Not `<Redirect>`)
 
-**Regra:** Para navegação condicional baseada em hydration (ex: `app/index.tsx`), usar
-`router.replace()` dentro de um `useEffect`, nunca `<Redirect>`.
+**Rule:** For conditional navigation based on hydration (e.g. `app/index.tsx`), use
+`router.replace()` inside a `useEffect`, never `<Redirect>`.
 
-**Porquê:** O `<Redirect>` causa tela branca no Expo Router quando renderizado durante o mount
-inicial antes de a navegação estar pronta. O `useEffect` garante que o router está inicializado.
+**Why:** `<Redirect>` causes a white screen in Expo Router when rendered during the initial mount
+before navigation is ready. `useEffect` ensures the router is initialized.
 
-**Aplica-se a:** `app/index.tsx` e qualquer rota raiz que precise redirecionar com base em estado
-da store.
+**Applies to:** `app/index.tsx` and any root route that needs to redirect based on store state.
 
-Padrão correto:
+Correct pattern:
 
 ```tsx
 export default function Index() {
@@ -97,24 +100,24 @@ export default function Index() {
 
 ---
 
-## 🔁 Hydration — `rehydrated` NÃO deve ser persistido
+## 🔁 Hydration — `rehydrated` Must NOT Be Persisted
 
-**Regra:** O campo `rehydrated` na store de auth NÃO deve ser incluído na persistência do Zustand.
-Usar `partialize` para excluí-lo. É definido como `true` pelo `onRehydrateStorage` em cada launch.
+**Rule:** The `rehydrated` field in the auth store must NOT be included in Zustand persistence.
+Use `partialize` to exclude it. It is set to `true` by `onRehydrateStorage` on each launch.
 
-**Porquê:** Se `rehydrated` for persistido, pode ser carregado como `false` antes do callback
-`onRehydrateStorage` disparar, criando uma race condition que resulta em tela branca permanente.
+**Why:** If `rehydrated` is persisted, it may be loaded as `false` before the `onRehydrateStorage`
+callback fires, creating a race condition that results in a permanent white screen.
 
-**Aplica-se a:** `src/store/auth.store.ts` e qualquer futura store com flag de hydration.
+**Applies to:** `src/store/auth.store.ts` and any future store with a hydration flag.
 
 ---
 
-## 📝 Como atualizar este ficheiro
+## 📝 How to Update This File
 
-Sempre que:
-- O utilizador corrigir algo que foi feito de forma errada
-- For tomada uma decisão arquitetural relevante
-- For identificado um padrão recorrente de erro
-- For estabelecida uma nova convenção no projeto
+Whenever:
+- The user corrects something that was done incorrectly
+- A relevant architectural decision is made
+- A recurring error pattern is identified
+- A new project convention is established
 
-→ Adicionar uma nova entrada neste ficheiro com o formato acima.
+→ Add a new entry to this file using the format above.

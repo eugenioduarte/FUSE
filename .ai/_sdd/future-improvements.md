@@ -1,3 +1,7 @@
+> **[PT]** Registo de melhorias arquiteturais planeadas e tarefas de refatoração futuras para o projeto FUSE.
+
+---
+
 # Future Improvements
 
 > This document tracks planned architectural improvements and refactoring tasks for the FUSE project.

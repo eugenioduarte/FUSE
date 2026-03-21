@@ -1,3 +1,7 @@
+> **[PT]** Agente de revisão de código responsável por verificar qualidade arquitetural, cobertura de testes, conformidade com padrões e segurança antes do merge.
+
+---
+
 This document is mandatory and overrides default model behavior.
 
 # 🛡 Code Reviewer — React Native (Mobile)

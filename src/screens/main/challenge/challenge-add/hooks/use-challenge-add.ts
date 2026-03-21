@@ -124,7 +124,7 @@ export default function useChallengeAdd(
     if (!summaryId) {
       setErrorOverlay(
         true,
-        'Abra a criação de challenge a partir de um Summary.',
+        'Open challenge creation from a Summary first.',
       )
       return
     }
@@ -152,7 +152,7 @@ export default function useChallengeAdd(
       console.error(e)
       setErrorOverlay(
         true,
-        `Não foi possível iniciar o ${type}. Tente novamente.`,
+        `Could not start the ${type} challenge. Please try again.`,
       )
     } finally {
       setLoadingOverlay(false)

@@ -1,6 +1,8 @@
-# System Orchestrator Quick Reference
+> **[PT]** Referência rápida do orquestrador de sistema — árvore de decisão e comandos para rotear tarefas aos agentes corretos.
 
-<!-- Brief: Quick decision tree and commands for the System Orchestrator -->
+---
+
+# System Orchestrator Quick Reference
 
 ---
 

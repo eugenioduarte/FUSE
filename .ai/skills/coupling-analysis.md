@@ -1,4 +1,6 @@
-<!-- Brief: Analyzes and improves code coupling based on Balanced Coupling principles adapted for React Native -->
+> **[PT]** Skill para analisar e melhorar o acoplamento de código com base nos princípios de Balanced Coupling adaptados para React Native.
+
+---
 
 # 🔗 Coupling Analysis Skill
 

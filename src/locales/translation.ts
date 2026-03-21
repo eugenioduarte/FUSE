@@ -2,7 +2,7 @@ import * as Localization from 'expo-localization'
 import en from './en.json'
 import pt from './pt.json'
 
-const langCode = Localization.getLocales()?.[0]?.languageCode ?? 'pt'
+const langCode = Localization.getLocales()?.[0]?.languageCode ?? 'en'
 const dict: Record<string, string> = langCode === 'en' ? (en as Record<string, string>) : (pt as Record<string, string>)
 
 export function t(key: string, vars?: Record<string, any>): string {

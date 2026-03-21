@@ -13,7 +13,7 @@ import Animated, {
 type Props = {
   visible: boolean
   onClose: () => void
-  origin: { x: number; y: number } // posição do botão
+  origin: { x: number; y: number } // button position
 }
 
 export const HeaderDashboardMenuOverlay: React.FC<Props> = ({
@@ -55,10 +55,10 @@ export const HeaderDashboardMenuOverlay: React.FC<Props> = ({
         {/* Pressable to allow closing when tapping outside the menu */}
         <Pressable style={styles.menuContainer} onPress={onClose}>
           <Pressable style={styles.menuInner} onPress={() => {}}>
-            <Text style={styles.menuItem}>Perfil</Text>
-            <Text style={styles.menuItem}>Configurações</Text>
+            <Text style={styles.menuItem}>Profile</Text>
+            <Text style={styles.menuItem}>Settings</Text>
             <Text style={styles.menuItem} onPress={onClose}>
-              Fechar
+              Close
             </Text>
           </Pressable>
         </Pressable>

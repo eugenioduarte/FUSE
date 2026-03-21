@@ -12,10 +12,10 @@ const ComponentsScreen: React.FC = () => {
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <Text style={styles.title}>Components (Storybook)</Text>
       <Text style={styles.note}>
-        Este é um espaço para demonstrar e testar componentes UI. Adiciona aqui
-        os teus exemplos e variações.
+        This is a space to showcase and test UI components. Add your examples
+        and variations here.
       </Text>
-      <Button title="Exemplo de Botão" onPress={() => {}} />
+      <Button title="Button Example" onPress={() => {}} />
     </ScrollView>
   )
 }

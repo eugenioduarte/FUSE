@@ -1,3 +1,7 @@
+> **[PT]** Registo de itens pendentes, melhorias adiadas e bugs identificados durante o desenvolvimento — adicionar sempre que algo for marcado como "fazer depois".
+
+---
+
 # Backlog — Fine-tuning & Pending Items
 
 Items flagged during development that need revisiting. Add here whenever something is left pending, skipped, or marked as "do later".
