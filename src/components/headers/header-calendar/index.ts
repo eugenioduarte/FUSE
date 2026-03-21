@@ -1,1 +1,1 @@
-export { default } from './HeaderCalendar'
+export { default } from './header-calendar'

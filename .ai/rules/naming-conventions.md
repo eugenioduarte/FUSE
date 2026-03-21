@@ -57,14 +57,17 @@ Never use camelCase or PascalCase for file names.
 ## Component Naming
 
 - Use **PascalCase** for the exported component name
-- File name: kebab-case (applies to screen-specific sub-components)
-- Top-level reusable components in `src/components/` use PascalCase folder + PascalCase file
+- File name: **kebab-case** for all component files, everywhere
+- Folder name: **kebab-case**
 
 Example:
 
 ```tsx
-// src/components/buttons/Button.tsx
+// src/components/buttons/button/button.tsx
 export default function Button() {}
+
+// src/components/headers/header-dashboard/header-dashboard.tsx
+export default function HeaderDashboard() {}
 
 // screens/auth/login/components/header.tsx
 export function Header() {}
@@ -72,6 +75,7 @@ export function Header() {}
 
 Avoid:
 
+- PascalCase file names for any component file
 - Prefix duplication (no `LoginHeader` inside the login feature)
 
 ---
@@ -208,9 +212,9 @@ Never expose DTO types to the UI layer. Transform at service boundary.
 
 Each store is a single file containing state, actions, and hooks:
 
-| File              | Responsibility                                  |
-| ----------------- | ----------------------------------------------- |
-| `{name}.store.ts` | Zustand `create()` + state + actions + hooks    |
+| File              | Responsibility                               |
+| ----------------- | -------------------------------------------- |
+| `{name}.store.ts` | Zustand `create()` + state + actions + hooks |
 
 Examples:
 
@@ -230,8 +234,8 @@ useIsRehydrated()
 useHasShownOnboarding()
 
 // Action hooks — grouped into a single actions hook
-useAuthActions()        // returns { login, logout, updateUser, setHasShownOnboarding }
-useThemeActions()       // returns { setBackgroundColor, setLevelTenColor }
+useAuthActions() // returns { login, logout, updateUser, setHasShownOnboarding }
+useThemeActions() // returns { setBackgroundColor, setLevelTenColor }
 ```
 
 No separate `.hooks.ts`, `.selectors.ts`, or `index.ts` files. Everything lives in `{name}.store.ts`.

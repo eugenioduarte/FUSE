@@ -1,1 +1,1 @@
-export { default } from './UiText'
+export { default } from './ui-text'

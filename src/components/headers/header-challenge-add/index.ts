@@ -1,1 +1,1 @@
-export { default } from './HeaderChallengeAdd'
+export { default } from './header-challenge-add'

@@ -1,5 +1,5 @@
 import { Text } from '@/components/ui-text/UiText'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { ThemeType } from '@/types/theme.type'
 import React, { useState } from 'react'
 import { LayoutChangeEvent, StyleSheet, View } from 'react-native'

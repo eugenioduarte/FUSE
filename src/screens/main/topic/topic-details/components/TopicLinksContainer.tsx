@@ -6,7 +6,7 @@ import {
   ShareIcon,
 } from '@/assets/icons'
 import IconButton from '@/components/buttons/icon-button/IconButton'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { topicsRepository } from '@/services/repositories/topics.repository'

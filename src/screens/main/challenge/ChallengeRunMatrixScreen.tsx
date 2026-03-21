@@ -1,8 +1,8 @@
 import { Container, Text } from '@/components'
 import EmptyContainer from '@/components/containers/empty-container/EmptyContainer'
 import LoadingContainer from '@/components/containers/loading-container/LoadingContainer'
-import useChallengeMatrix from '@/hooks/useChallengeMatrix'
-import { useTheme } from '@/hooks/useTheme'
+import useChallengeMatrix from '@/hooks/use-challenge-matrix'
+import { useTheme } from '@/hooks/use-theme'
 import {
   RootStackParamList,
   navigatorManager,

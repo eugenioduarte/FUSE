@@ -1,4 +1,4 @@
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { useOverlay } from '@/store/useOverlay'
 import { useThemeStore } from '@/store/useThemeStore'
 import { Ionicons } from '@expo/vector-icons'

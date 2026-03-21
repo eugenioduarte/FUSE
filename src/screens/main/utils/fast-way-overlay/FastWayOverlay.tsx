@@ -1,7 +1,7 @@
 import { CloseIcon, HomeIcon } from '@/assets/icons'
 import { Text } from '@/components'
 import IconButton from '@/components/buttons/icon-button/IconButton'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { useThemeStore } from '@/store/useThemeStore'

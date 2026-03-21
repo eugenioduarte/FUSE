@@ -1,1 +1,1 @@
-export { default } from './HeaderTopicChat'
+export { default } from './header-topic-chat'

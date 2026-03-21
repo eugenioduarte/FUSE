@@ -1,1 +1,1 @@
-export { default } from './SubContainer'
+export { default } from './sub-container'

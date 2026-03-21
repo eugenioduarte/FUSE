@@ -1,1 +1,1 @@
-export { default } from './StepDot'
+export { default } from './step-dot'

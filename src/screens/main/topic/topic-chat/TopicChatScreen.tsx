@@ -1,5 +1,5 @@
 import { Text, TextInput } from '@/components'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { RootStackParamList } from '@/navigation/navigatorManager'
 import { getFirebaseAuth } from '@/services/firebase/authService'

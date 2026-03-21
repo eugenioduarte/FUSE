@@ -1,6 +1,6 @@
 import { Button, LinkButton, Text, TextInput } from '@/components'
 import Container from '@/components/containers/container/Container'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { loginSchema } from '@/schemas/authSchemas'
 import { firebaseLogin } from '@/services/firebase/authService'

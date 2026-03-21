@@ -1,6 +1,6 @@
 import { Button, Container, Text, TextInput } from '@/components'
 import { useSnackbar } from '@/components/snackbar-provider/SnackbarProvider'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { RecoverySchema, recoverySchema } from '@/schemas/authSchemas'
 import { ThemeType } from '@/types/theme.type'

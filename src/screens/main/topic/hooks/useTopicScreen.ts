@@ -1,4 +1,4 @@
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { topicsRepository } from '@/services/repositories/topics.repository'
 import { getDailyTotals } from '@/services/usage/usageTracker'
 import { Topic } from '@/types/domain'

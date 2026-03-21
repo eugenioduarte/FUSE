@@ -1,5 +1,5 @@
 import Button from '@/components/buttons/button/Button'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { ThemeType } from '@/types/theme.type'
 
 import React from 'react'

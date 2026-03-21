@@ -1,1 +1,1 @@
-export { default } from './TermSnippetModal'
+export { default } from './term-snippet-modal'

@@ -1,6 +1,6 @@
 import { Container } from '@/components'
 import SubContainer from '@/components/containers/sub-container/SubContainer'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { RootStackParamList } from '@/navigation/navigatorManager'
 import { useThemeStore } from '@/store/useThemeStore'

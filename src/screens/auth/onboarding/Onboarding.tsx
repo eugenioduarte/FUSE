@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons'
 
 import { Text } from '@/components'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { useAuthStore } from '@/store/useAuthStore'

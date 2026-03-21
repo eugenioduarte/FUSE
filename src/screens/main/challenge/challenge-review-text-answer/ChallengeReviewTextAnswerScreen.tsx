@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, View } from 'react-native'
 
 import { Text } from '@/components'
 import EmptyContainer from '@/components/containers/empty-container/EmptyContainer'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import ChallengeReviewHeader from '../components/ChallengeReviewHeader'

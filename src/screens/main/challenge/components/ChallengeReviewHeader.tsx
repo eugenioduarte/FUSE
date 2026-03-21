@@ -1,5 +1,5 @@
 import { Text } from '@/components'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { ThemeType } from '@/types/theme.type'
 import { format } from 'date-fns'

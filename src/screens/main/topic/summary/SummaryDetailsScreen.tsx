@@ -3,7 +3,7 @@ import EmptyContainer from '@/components/containers/empty-container/EmptyContain
 import SubContainer from '@/components/containers/sub-container/SubContainer'
 import TermSnippetModal from '@/components/term-snippet-modal/TermSnippetModal'
 import ExpandableText from '@/components/utils/expandable-text/ExpandableText'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import {
   navigatorManager,

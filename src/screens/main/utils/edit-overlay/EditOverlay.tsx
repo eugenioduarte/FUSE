@@ -1,5 +1,5 @@
 import { Button, Text, TextInput } from '@/components'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'

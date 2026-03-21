@@ -1,5 +1,5 @@
-import { useTheme } from '@/hooks/useTheme'
-import useTrackTopicSession from '@/hooks/useTrackTopicSession'
+import { useTheme } from '@/hooks/use-theme'
+import useTrackTopicSession from '@/hooks/use-track-topic-session'
 import { t } from '@/locales/translation'
 
 import { Text } from '@/components'

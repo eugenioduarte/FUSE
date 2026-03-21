@@ -1,6 +1,6 @@
 import { ChevronIcon } from '@/assets/icons'
 import { Text } from '@/components'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { navigatorManager } from '@/navigation'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'

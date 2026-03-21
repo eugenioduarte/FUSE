@@ -1,4 +1,4 @@
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { ThemeType } from '@/types/theme.type'
 import React, { useEffect, useState } from 'react'

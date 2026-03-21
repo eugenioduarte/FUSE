@@ -1,6 +1,6 @@
 import { Text } from '@/components'
 import PressableScale from '@/components/containers/pressable-scale/PressableScale'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { isDevUser } from '@/services/firebase/dev.service'

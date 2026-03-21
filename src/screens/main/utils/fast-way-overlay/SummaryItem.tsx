@@ -1,7 +1,7 @@
 import { ChevronIcon } from '@/assets/icons'
 import { Text } from '@/components'
 import { NAVIGATION_ICON_SIZE } from '@/constants/sizes'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'

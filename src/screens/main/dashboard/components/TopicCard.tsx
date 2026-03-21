@@ -1,5 +1,5 @@
 import DisplayNumber from '@/components/display-number/DisplayNumber'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'

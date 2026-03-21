@@ -1,1 +1,1 @@
-export { default } from './HeaderSummaryDetails'
+export { default } from './header-summary-details'

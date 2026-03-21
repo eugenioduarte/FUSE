@@ -1,4 +1,4 @@
-import useTrackTopicSession from '@/hooks/useTrackTopicSession'
+import useTrackTopicSession from '@/hooks/use-track-topic-session'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import {
   TEXT_EVALUATION_PROMPT,

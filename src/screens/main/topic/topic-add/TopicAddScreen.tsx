@@ -1,7 +1,7 @@
 import { Button, Container, Text, TextInput } from '@/components'
 import SubContainer from '@/components/containers/sub-container/SubContainer'
 import { useSnackbar } from '@/components/snackbar-provider/SnackbarProvider'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { topicSchema, TopicSchema } from '@/schemas/topicSchemas'

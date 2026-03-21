@@ -1,5 +1,5 @@
 import { Button, Container, Text, TextInput } from '@/components'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { registerSchema, RegisterSchema } from '@/schemas/authSchemas'
 import { ThemeType } from '@/types/theme.type'

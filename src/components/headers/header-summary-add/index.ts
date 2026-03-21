@@ -1,1 +1,1 @@
-export { default } from './HeaderSummaryAdd'
+export { default } from './header-summary-add'

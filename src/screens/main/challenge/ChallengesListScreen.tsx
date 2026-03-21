@@ -1,6 +1,6 @@
 import { PlusIcon } from '@/assets/icons'
 import { Container, Text } from '@/components'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import {
   RootStackParamList,
   navigatorManager,

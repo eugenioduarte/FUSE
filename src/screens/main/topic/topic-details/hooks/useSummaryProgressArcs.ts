@@ -1,4 +1,4 @@
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { useWindowDimensions } from 'react-native'
 
 type Item = { title: string; value: number; color: string }

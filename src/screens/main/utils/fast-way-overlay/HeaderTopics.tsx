@@ -1,6 +1,6 @@
 import { PlusIcon } from '@/assets/icons'
 import { Text } from '@/components'
-import { useTheme } from '@/hooks/useTheme'
+import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'

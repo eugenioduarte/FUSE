@@ -1,4 +1,4 @@
-import useTrackTopicSession from '@/hooks/useTrackTopicSession'
+import useTrackTopicSession from '@/hooks/use-track-topic-session'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { useOverlay } from '@/store/useOverlay'

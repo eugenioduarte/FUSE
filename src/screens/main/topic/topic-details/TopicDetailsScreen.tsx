@@ -1,7 +1,7 @@
 import { Button, Container, Text } from '@/components'
 import SubContainer from '@/components/containers/sub-container/SubContainer'
-import { useTheme } from '@/hooks/useTheme'
-import useTrackTopicSession from '@/hooks/useTrackTopicSession'
+import { useTheme } from '@/hooks/use-theme'
+import useTrackTopicSession from '@/hooks/use-track-topic-session'
 import { t } from '@/locales/translation'
 import {
   navigatorManager,

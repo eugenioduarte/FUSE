@@ -1,1 +1,1 @@
-export { default } from './HeaderCloseTitle'
+export { default } from './header-close-title'

@@ -1,4 +1,4 @@
-import useTrackTopicSession from '@/hooks/useTrackTopicSession'
+import useTrackTopicSession from '@/hooks/use-track-topic-session'
 import { useThemeStore } from '@/store/useThemeStore'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Dimensions, Easing } from 'react-native'
