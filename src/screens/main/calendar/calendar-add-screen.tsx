@@ -26,6 +26,7 @@ import { summariesRepository } from '../../../services/repositories/summaries.re
 import { topicsRepository } from '../../../services/repositories/topics.repository'
 import { useAuthStore } from '../../../store/useAuthStore'
 import { useCalendarStore } from '../../../store/useCalendarStore'
+import { t } from '@/locales/translation'
 import type { Summary, Topic } from '../../../types/domain'
 import ReactMemo = React.memo
 
@@ -99,7 +100,7 @@ const CalendarAddScreen: React.FC = () => {
     const t = normalizeTime(time)
     const ownerUid = me?.id || getCurrentUser()?.uid
     if (!ownerUid) {
-      setInviteError('Não autenticado. Tente entrar novamente.')
+      setInviteError(t('calendarAdd.not_authenticated'))
       return
     }
     setInviteBusy(true)
@@ -137,7 +138,7 @@ const CalendarAddScreen: React.FC = () => {
       setSelectedDate(date)
       navigatorManager.goBack()
     } catch (e: any) {
-      setInviteError(e?.message || 'Falha ao criar compromisso')
+      setInviteError(e?.message || t('calendarAdd.error'))
     } finally {
       setInviteBusy(false)
     }
@@ -168,33 +169,33 @@ const CalendarAddScreen: React.FC = () => {
 
   return (
     <View style={styles.screen}>
-      <Text style={styles.header}>Novo compromisso</Text>
+      <Text style={styles.header}>{t('calendarAdd.title')}</Text>
 
-      <Text style={styles.label}>Data</Text>
+      <Text style={styles.label}>{t('summary.date_label')}</Text>
       <View style={styles.readonlyBox}>
         <Text style={styles.readonlyText}>{date}</Text>
       </View>
 
-      <Text style={styles.label}>Título</Text>
+      <Text style={styles.label}>{t('topicAdd.title')}</Text>
       <TextInput
-        placeholder="Digite o título"
+        placeholder={t('calendarAdd.title_placeholder')}
         value={title}
         onChangeText={setTitle}
         style={styles.input}
       />
 
-      <Text style={styles.label}>Descrição</Text>
+      <Text style={styles.label}>{t('editOverlay.field.description')}</Text>
       <TextInput
-        placeholder="Opcional"
+        placeholder={t('calendarAdd.optional')}
         value={description}
         onChangeText={setDescription}
         style={[styles.input, { height: 80 }]}
         multiline
       />
 
-      <Text style={styles.label}>Hora (opcional)</Text>
+      <Text style={styles.label}>{t('calendarAdd.label.time')}</Text>
       <TextInput
-        placeholder="HH:mm (ex.: 08:30)"
+        placeholder={t('calendarAdd.time_placeholder')}
         value={time}
         onChangeText={setTime}
         keyboardType="numbers-and-punctuation"
@@ -202,7 +203,7 @@ const CalendarAddScreen: React.FC = () => {
         maxLength={5}
       />
 
-      <Text style={styles.label}>Tópico</Text>
+      <Text style={styles.label}>{t('calendar.topic')}</Text>
       <FlatList
         horizontal
         data={topics}
@@ -223,7 +224,7 @@ const CalendarAddScreen: React.FC = () => {
         }}
       />
 
-      <Text style={styles.label}>Resumo (opcional)</Text>
+      <Text style={styles.label}>{t('calendarAdd.label.summary')}</Text>
       <FlatList
         horizontal
         data={summaries}
@@ -245,16 +246,16 @@ const CalendarAddScreen: React.FC = () => {
         ListEmptyComponent={
           <EmptyListText
             text={
-              topicId ? 'Sem resumos para este tópico.' : 'Selecione um tópico.'
+              topicId ? t('calendarAdd.no_summaries') : t('calendarAdd.select_topic')
             }
           />
         }
       />
 
-      <Text style={styles.label}>Convidar (apenas conexões)</Text>
+      <Text style={styles.label}>{t('calendarAdd.label.invite')}</Text>
       {connections.length === 0 ? (
         <Text style={styles.helperText}>
-          Você ainda não tem conexões aceitas.
+          {t('calendarAdd.no_connections')}
         </Text>
       ) : (
         <FlatList
@@ -281,7 +282,7 @@ const CalendarAddScreen: React.FC = () => {
         onPress={onSave}
         disabled={inviteBusy}
       >
-        <Text style={styles.saveBtnText}>Salvar</Text>
+        <Text style={styles.saveBtnText}>{t('calendarAdd.save')}</Text>
       </TouchableOpacity>
     </View>
   )

@@ -6,6 +6,7 @@ import { ScrollView, StyleSheet, View } from 'react-native'
 import { Text } from '@/components'
 import EmptyContainer from '@/components/containers/empty-container/empty-container'
 import { useTheme } from '@/hooks/use-theme'
+import { t } from '@/locales/translation'
 import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
 import ChallengeReviewHeader from '../components/challenge-review-header'
@@ -40,27 +41,27 @@ const ChallengeReviewTextAnswerScreen: React.FC = () => {
         showsVerticalScrollIndicator={false}
       >
         {exercises.length === 0 ? (
-          <Text variant="large">Sem respostas registradas.</Text>
+          <Text variant="large">{t('challengeReviewText.no_answers')}</Text>
         ) : (
           exercises.map((it: any, idx: number) => (
             <View key={`ex-${idx}-${it.question}`} style={styles.itemContainer}>
               <Text
                 variant="large"
                 style={styles.title}
-              >{`Exercício ${idx + 1}`}</Text>
+              >{`${t('challengeReviewText.exercise')} ${idx + 1}`}</Text>
               <Text style={styles.questionText} variant="medium">
                 {it.question}
               </Text>
               <Text variant="large" style={styles.title}>
-                Sua resposta
+                {t('challengeReviewText.your_answer')}
               </Text>
               <Text style={styles.explanationText}>{it.userAnswer || '—'}</Text>
               <Text variant="large" style={styles.title}>
-                Resposta correta
+                {t('challengeReviewText.correct_answer')}
               </Text>
               <Text style={styles.explanationText}>{it.correctAnswer}</Text>
               <Text variant="large" style={styles.title}>
-                Nota: {it.score}/10
+                {t('challengeReviewText.score')} {it.score}/10
               </Text>
               {!!it.feedback && (
                 <Text style={styles.explanationText}>{it.feedback}</Text>

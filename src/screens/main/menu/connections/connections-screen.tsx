@@ -17,6 +17,7 @@ import {
   sendConnectionRequest,
   type PublicUser,
 } from '../../../../services/firebase/connections.service'
+import { t } from '@/locales/translation'
 import { useAuthStore } from '../../../../store/useAuthStore'
 
 const ConnectionsScreen: React.FC = () => {
@@ -86,7 +87,7 @@ const ConnectionsScreen: React.FC = () => {
         })
       }
     } catch (e: any) {
-      setError(e?.message || 'Erro ao procurar utilizador')
+      setError(e?.message || t('connections.search_error'))
     } finally {
       setLoading(false)
     }
@@ -99,7 +100,7 @@ const ConnectionsScreen: React.FC = () => {
     try {
       await sendConnectionRequest(user.uid)
     } catch (e: any) {
-      setError(e?.message || 'Erro ao enviar pedido')
+      setError(e?.message || t('connections.send_error'))
     } finally {
       setLoading(false)
     }
@@ -111,7 +112,7 @@ const ConnectionsScreen: React.FC = () => {
     if (error) return <Text style={styles.error}>{error}</Text>
     if (!user)
       return email.trim() ? (
-        <Text style={styles.muted}>Nenhum utilizador encontrado</Text>
+        <Text style={styles.muted}>{t('connections.user_not_found')}</Text>
       ) : null
 
     return (
@@ -139,7 +140,7 @@ const ConnectionsScreen: React.FC = () => {
 
         {canSend ? (
           <TouchableOpacity style={styles.button} onPress={send}>
-            <Text style={styles.buttonText}>Enviar pedido</Text>
+            <Text style={styles.buttonText}>{t('connections.send_request')}</Text>
           </TouchableOpacity>
         ) : null}
       </View>
@@ -149,7 +150,7 @@ const ConnectionsScreen: React.FC = () => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={{ padding: 16 }}>
-        <Text style={styles.title}>Adicionar conexão por e-mail</Text>
+        <Text style={styles.title}>{t('connections.add_title')}</Text>
         <View style={styles.row}>
           <TextInput
             placeholder="email@exemplo.com"
@@ -163,18 +164,18 @@ const ConnectionsScreen: React.FC = () => {
             onSubmitEditing={search}
           />
           <TouchableOpacity style={styles.searchBtn} onPress={search}>
-            <Text style={styles.buttonText}>Procurar</Text>
+            <Text style={styles.buttonText}>{t('connections.search')}</Text>
           </TouchableOpacity>
         </View>
 
         <View style={{ marginTop: 16 }}>{renderResult()}</View>
 
         <View style={{ height: 24 }} />
-        <Text style={styles.title}>As minhas conexões</Text>
+        <Text style={styles.title}>{t('connections.my_connections')}</Text>
         {loadingConnections ? (
           <ActivityIndicator color="#fff" style={{ marginTop: 8 }} />
         ) : myConnections.length === 0 ? (
-          <Text style={styles.muted}>Sem conexões.</Text>
+          <Text style={styles.muted}>{t('connections.no_connections')}</Text>
         ) : (
           <View style={{ marginTop: 8, gap: 8 }}>
             {myConnections.map((c) => (
@@ -216,11 +217,11 @@ const StatusPill: React.FC<{
   status: 'none' | 'pending' | 'accepted' | 'declined' | 'connected'
 }> = ({ status }) => {
   const map: Record<string, { label: string; bg: string; fg: string }> = {
-    none: { label: 'Disponível', bg: '#374151', fg: '#fff' },
-    pending: { label: 'Pendente', bg: '#fbbf24', fg: '#111' },
-    accepted: { label: 'Aceite', bg: '#10b981', fg: '#111' },
-    declined: { label: 'Recusado', bg: '#ef4444', fg: '#fff' },
-    connected: { label: 'Ligados', bg: '#10b981', fg: '#111' },
+    none: { label: t('connections.status.available'), bg: '#374151', fg: '#fff' },
+    pending: { label: t('connections.status.pending'), bg: '#fbbf24', fg: '#111' },
+    accepted: { label: t('connections.status.accepted'), bg: '#10b981', fg: '#111' },
+    declined: { label: t('connections.status.declined'), bg: '#ef4444', fg: '#fff' },
+    connected: { label: t('connections.status.connected'), bg: '#10b981', fg: '#111' },
   }
   const s = map[status]
   return (

@@ -1,4 +1,5 @@
 import { useTheme } from '@/hooks/use-theme'
+import { t } from '@/locales/translation'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { StyleSheet, Text, View } from 'react-native'
@@ -10,10 +11,10 @@ const TopicNotFounded = () => {
   return (
     <View style={styles.notFound}>
       <Text style={[styles.notFoundText, { color: theme.colors.textPrimary }]}>
-        Tópico não encontrado.
+        {t('topicDetails.not_found')}
       </Text>
       <Text style={[styles.notFoundText, { color: theme.colors.textPrimary }]}>
-        ID: {topicId}
+        {t('topicDetails.not_found_id', { id: topicId })}
       </Text>
     </View>
   )

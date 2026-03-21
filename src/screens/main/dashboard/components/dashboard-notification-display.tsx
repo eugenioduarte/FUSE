@@ -24,22 +24,22 @@ export default function DashboardNotificationDisplay() {
   const MOCK_NOTIFS: AppNotification[] = [
     {
       id: 'm1',
-      title: 'Bem-vindo ao Fuse!',
-      body: 'Veja seus tópicos e comece a estudar.',
+      title: t('dashboard.welcome.title'),
+      body: t('dashboard.welcome.subtitle'),
       status: 'pending',
       createdAt: Date.now(),
     },
     {
       id: 'm2',
-      title: 'Novo convite de calendário',
-      body: 'Você foi convidado para um estudo em grupo.',
+      title: t('dashboard.invite.calendar'),
+      body: t('dashboard.invite.calendar_body'),
       status: 'pending',
       createdAt: Date.now() - 1000 * 60 * 60,
     },
     {
       id: 'm3',
-      title: 'Resumo publicado',
-      body: 'Um novo resumo foi adicionado ao seu tópico favorito.',
+      title: t('dashboard.notification.new_summary'),
+      body: t('dashboard.notification.new_summary_body'),
       status: 'pending',
       createdAt: Date.now() - 1000 * 60 * 60 * 24,
     },

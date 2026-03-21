@@ -17,6 +17,7 @@ import {
   declineInvite,
   listenPendingInvites,
 } from '../../../services/firebase/invites.service'
+import { t } from '@/locales/translation'
 import { useAuthStore } from '../../../store/useAuthStore'
 import { NotificationInvite } from '../../../types/domain'
 
@@ -61,21 +62,21 @@ const NotificationsScreen: React.FC = () => {
 
   const renderItem = ({ item }: { item: InviteVM }) => (
     <View style={styles.card}>
-      <Text style={styles.title}>Convite para tópico</Text>
-      <Text style={styles.body}>De: {item.fromUser}</Text>
-      <Text style={styles.body}>Tópico: {item.topicId}</Text>
+      <Text style={styles.title}>{t('notifications.invite_topic')}</Text>
+      <Text style={styles.body}>{t('notifications.from')} {item.fromUser}</Text>
+      <Text style={styles.body}>{t('notifications.topic_label')} {item.topicId}</Text>
       <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
         <TouchableOpacity
           style={styles.button}
           onPress={() => acceptInvite(item.id)}
         >
-          <Text style={styles.buttonText}>Aceitar</Text>
+          <Text style={styles.buttonText}>{t('notifications.accept')}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, styles.secondary]}
           onPress={() => declineInvite(item.id)}
         >
-          <Text style={styles.buttonText}>Recusar</Text>
+          <Text style={styles.buttonText}>{t('notifications.decline')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -93,7 +94,7 @@ const NotificationsScreen: React.FC = () => {
         ItemSeparatorComponent={Separator}
         ListHeaderComponent={
           invites.length ? (
-            <Text style={[styles.title, { marginBottom: 8 }]}>Convites</Text>
+            <Text style={[styles.title, { marginBottom: 8 }]}>{t('notifications.invites_header')}</Text>
           ) : null
         }
         ListFooterComponent={<ConnectionsFooter connections={connections} />}
@@ -119,20 +120,20 @@ const ConnectionsFooter: React.FC<{ connections: ConnVM[] }> = ({
 )
 const ConnectionCard: React.FC<{ item: ConnVM }> = ({ item }) => (
   <View style={styles.card}>
-    <Text style={styles.title}>Pedido de conexão</Text>
-    <Text style={styles.body}>De: {item.fromName || item.fromUser}</Text>
+    <Text style={styles.title}>{t('notifications.connection_request')}</Text>
+    <Text style={styles.body}>{t('notifications.from')} {item.fromName || item.fromUser}</Text>
     <View style={{ flexDirection: 'row', gap: 12, marginTop: 8 }}>
       <TouchableOpacity
         style={styles.button}
         onPress={() => respondToConnectionRequest(item.id, 'accepted')}
       >
-        <Text style={styles.buttonText}>Aceitar</Text>
+        <Text style={styles.buttonText}>{t('notifications.accept')}</Text>
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.button, styles.secondary]}
         onPress={() => respondToConnectionRequest(item.id, 'declined')}
       >
-        <Text style={styles.buttonText}>Recusar</Text>
+        <Text style={styles.buttonText}>{t('notifications.decline')}</Text>
       </TouchableOpacity>
     </View>
   </View>

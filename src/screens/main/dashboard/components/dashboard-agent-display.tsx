@@ -34,16 +34,6 @@ function formatTime(dt: Date) {
   return `${hh}:${mm}`
 }
 
-const WEEKDAYS_PT = [
-  'domingo',
-  'segunda-feira',
-  'terça-feira',
-  'quarta-feira',
-  'quinta-feira',
-  'sexta-feira',
-  'sábado',
-]
-
 function formatWhenFriendly(dt: Date) {
   const now = new Date()
 
@@ -53,13 +43,16 @@ function formatWhenFriendly(dt: Date) {
     (tzDt.getTime() - tzNow.getTime()) / (1000 * 60 * 60 * 24),
   )
   const time = formatTime(dt)
-  if (dayDiff === 0) return `hoje às ${time}`
-  if (dayDiff === 1) return `amanhã às ${time}`
-  if (dayDiff > 1 && dayDiff <= 6)
-    return `na ${WEEKDAYS_PT[dt.getDay()]} às ${time}`
+  if (dayDiff === 0) return `${t('dashboard.agent.today')} ${time}`
+  if (dayDiff === 1) return `${t('dashboard.agent.tomorrow')} ${time}`
+  if (dayDiff > 1 && dayDiff <= 6) {
+    const locale = Localization.getLocales?.()[0]?.languageTag ?? 'pt-BR'
+    const weekday = new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(dt)
+    return `${t('dashboard.agent.on')} ${weekday} ${t('dashboard.agent.at')} ${time}`
+  }
   const dd = String(dt.getDate()).padStart(2, '0')
   const mm = String(dt.getMonth() + 1).padStart(2, '0')
-  return `em ${dd}/${mm} às ${time}`
+  return `${t('dashboard.agent.in')} ${dd}/${mm} ${t('dashboard.agent.at')} ${time}`
 }
 
 export default function DashboardAgentDisplay() {

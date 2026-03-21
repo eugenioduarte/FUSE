@@ -5,6 +5,7 @@ import {
   navigatorManager,
   RootStackParamList,
 } from '../../../../navigation/navigatorManager'
+import { t } from '@/locales/translation'
 import {
   getUserProfile,
   PublicUser,
@@ -127,13 +128,13 @@ const TopicRankingScreen: React.FC = () => {
         }}
       >
         <Text style={{ color: titleColor, fontSize: 18, fontWeight: '700' }}>
-          Ranking do Tópico
+          {t('ranking.title')}
         </Text>
         <Text
           onPress={() => navigatorManager.goBack()}
           style={{ color: '#3b82f6', fontWeight: '700' }}
         >
-          Fechar
+          {t('common.close')}
         </Text>
       </View>
 
@@ -145,7 +146,7 @@ const TopicRankingScreen: React.FC = () => {
         </View>
       ) : rows.length === 0 ? (
         <Text style={{ color: bgColor ? '#333' : '#9ca3af' }}>
-          Ainda não há pontuações para este tópico.
+          {t('ranking.empty')}
         </Text>
       ) : (
         <FlatList
