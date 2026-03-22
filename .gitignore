@@ -25,6 +25,15 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
+
+# lock files from other package managers
+package-lock.json
+yarn\ 2.lock
+
+# Yarn 2/3 Berry artifacts (project uses Yarn 1 classic)
+.yarn/cache
+.yarn/install-state.gz
 
 # macOS
 .DS_Store
