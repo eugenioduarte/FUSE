@@ -5,6 +5,7 @@ import {
   TEXT_EXERCISES_SYSTEM,
   buildTextExercisesPrompt,
 } from '@/services/prompts'
+import { callAI } from '@/services/ai/ai.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -304,51 +305,30 @@ export default function useChallengeRunTextAnswer(challengeId: string) {
 
 // ---------- AI helpers ----------
 export async function generateOpenQuestionSet(summary: string, total: number) {
-  try {
-    const body = JSON.stringify({
-      model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: TEXT_EXERCISES_SYSTEM },
-        { role: 'user', content: buildTextExercisesPrompt(summary, total) },
-      ],
-      temperature: 0.4,
-    })
-    const base =
-      process.env.EXPO_PUBLIC_OPENAI_BASE_URL || 'https://api.openai.com/v1'
-    const key = process.env.EXPO_PUBLIC_OPENAI_API_KEY
-    if (!key) return mockOpenQuestions(total)
-    const res = await fetch(`${base}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
-      },
-      body,
-    })
-    if (!res.ok) return mockOpenQuestions(total)
-    const data = await res.json()
-    const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
-    const json = toJSONSafe(content)
-    const arr = Array.isArray(json?.exercises) ? json.exercises : []
-    const parsed = arr
-      .map((x: any) => ({
-        question: String(x?.question || '').trim(),
-        correctAnswer: String(x?.correctAnswer || '').trim(),
-      }))
-      .filter((x: TAExercise) => x.question && x.correctAnswer)
-      .slice(0, total)
-    return parsed.length === total ? parsed : mockOpenQuestions(total)
-  } catch (e) {
-    console.error(e)
-    return mockOpenQuestions(total)
-  }
+  const content = await callAI(
+    [
+      { role: 'system', content: TEXT_EXERCISES_SYSTEM },
+      { role: 'user', content: buildTextExercisesPrompt(summary, total) },
+    ],
+    0.4,
+  )
+  const json = toJSONSafe(content)
+  const arr = Array.isArray(json?.exercises) ? json.exercises : []
+  const parsed: TAExercise[] = arr
+    .map((x: any) => ({
+      question: String(x?.question || '').trim(),
+      correctAnswer: String(x?.correctAnswer || '').trim(),
+    }))
+    .filter((x: TAExercise) => x.question && x.correctAnswer)
+    .slice(0, total)
+  if (parsed.length === 0) throw new Error('Text AI returned no valid exercises')
+  return parsed
 }
 
 async function evaluateOpenAnswer(ex: TAExercise, userAnswer: string) {
   try {
-    const body = JSON.stringify({
-      model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
-      messages: [
+    const content = await callAI(
+      [
         { role: 'system', content: TEXT_EVALUATION_PROMPT },
         {
           role: 'user',
@@ -363,23 +343,8 @@ async function evaluateOpenAnswer(ex: TAExercise, userAnswer: string) {
           ].join('\n'),
         },
       ],
-      temperature: 0.2,
-    })
-    const base =
-      process.env.EXPO_PUBLIC_OPENAI_BASE_URL || 'https://api.openai.com/v1'
-    const key = process.env.EXPO_PUBLIC_OPENAI_API_KEY
-    if (!key) return mockEvaluate(ex, userAnswer)
-    const res = await fetch(`${base}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
-      },
-      body,
-    })
-    if (!res.ok) return mockEvaluate(ex, userAnswer)
-    const data = await res.json()
-    const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
+      0.2,
+    )
     const json = toJSONSafe(content)
     const scoreNum = Math.max(0, Math.min(10, Number(json?.score ?? 0)))
     const feedback =
@@ -387,57 +352,18 @@ async function evaluateOpenAnswer(ex: TAExercise, userAnswer: string) {
     return { score: Math.round(scoreNum), feedback }
   } catch (e) {
     console.error(e)
-    return mockEvaluate(ex, userAnswer)
+    return { score: 0, feedback: 'Falha ao avaliar.' }
   }
 }
 
 function toJSONSafe(text: string): any {
   try {
-    const cleaned = text
-      .replace(/^```(json)?/i, '')
-      .replace(/```$/i, '')
-      .trim()
-    return JSON.parse(cleaned)
+    return JSON.parse(text)
   } catch {
+    const m = /\{[\s\S]*\}/.exec(text)
+    if (m) {
+      try { return JSON.parse(m[0]) } catch {}
+    }
     return null
   }
-}
-
-function mockOpenQuestions(total: number): TAExercise[] {
-  const base: TAExercise[] = [
-    {
-      question: 'Explique o objetivo principal do texto estudado.',
-      correctAnswer:
-        'O objetivo principal é apresentar e sintetizar os pontos-chave do tema.',
-    },
-    {
-      question: 'Descreva dois conceitos fundamentais abordados.',
-      correctAnswer:
-        'Dois conceitos essenciais são a contextualização e os tópicos-chave.',
-    },
-    {
-      question: 'Qual o impacto prático do conteúdo apresentado?',
-      correctAnswer:
-        'O impacto prático é orientar decisões e facilitar o entendimento aplicado.',
-    },
-    {
-      question: 'Compare duas ideias principais e suas diferenças.',
-      correctAnswer:
-        'As ideias diferem em escopo e foco: uma é introdutória e a outra é aplicada.',
-    },
-    {
-      question: 'Resuma a conclusão do material.',
-      correctAnswer:
-        'A conclusão reforça os aprendizados e sugere próximos passos.',
-    },
-  ]
-  return base.slice(0, total)
-}
-
-function mockEvaluate(_ex: TAExercise, userAnswer: string) {
-  const len = userAnswer.trim().length
-  if (len < 30) return { score: 0, feedback: 'Resposta muito curta.' }
-  if (len < 60)
-    return { score: 6, feedback: 'Boa tentativa, mas pode detalhar mais.' }
-  return { score: 8, feedback: 'Resposta coerente e adequada.' }
 }

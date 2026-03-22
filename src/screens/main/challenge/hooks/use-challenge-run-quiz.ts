@@ -1,4 +1,5 @@
 import { buildQuizPrompt, QUIZ_SYSTEM } from '@/services/prompts'
+import { callAI } from '@/services/ai/ai.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
@@ -25,7 +26,7 @@ type Attempt = {
   questions: AttemptQuestion[]
 }
 
-export const useChallengeRunQuiz = (challengeId: string, mock = false) => {
+export const useChallengeRunQuiz = (challengeId: string) => {
   const { setLoadingOverlay, setErrorOverlay } = useOverlay()
   const meId = useAuthStore((s) => s.user?.id)
 
@@ -79,7 +80,7 @@ export const useChallengeRunQuiz = (challengeId: string, mock = false) => {
               Math.floor(Math.random() * (10 - 5 + 1)) + 5,
           )
           const prompt = buildQuizPrompt(summary.content, total)
-          const quiz = mock ? mockQuiz() : await generateQuiz(prompt)
+          const quiz = await generateQuiz(prompt)
           quizQuestions = quiz.questions
         }
         if (!active) return
@@ -105,7 +106,7 @@ export const useChallengeRunQuiz = (challengeId: string, mock = false) => {
     return () => {
       active = false
     }
-  }, [challengeId, setErrorOverlay, setLoadingOverlay, mock])
+  }, [challengeId, setErrorOverlay, setLoadingOverlay])
 
   useFocusEffect(
     React.useCallback(() => {
@@ -273,53 +274,32 @@ function computeScore(
 // Prompt builder moved to src/services/prompts
 
 export async function generateQuiz(prompt: string): Promise<AIQuizResponse> {
-  try {
-    const body = JSON.stringify({
-      model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: QUIZ_SYSTEM },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.3,
-    })
-    const base =
-      process.env.EXPO_PUBLIC_OPENAI_BASE_URL || 'https://api.openai.com/v1'
-    const key = process.env.EXPO_PUBLIC_OPENAI_API_KEY
-    if (!key) return mockQuiz()
-    const res = await fetch(`${base}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
-      },
-      body,
-    })
-    if (!res.ok) return mockQuiz()
-    const data = await res.json()
-    const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
-    const json = toJSONSafe(content)
-    if (!json?.questions || !Array.isArray(json.questions)) return mockQuiz()
-    const parsed: AIQuizResponse = {
-      questions: json.questions
-        .slice(0, 50)
-        .map((q: any) => ({
-          question: String(q.question || ''),
-          options: Array.isArray(q.options)
-            ? q.options.slice(0, 5).map((o: any) => ({
-                text: String(o.text || ''),
-                correct: Boolean(o.correct),
-                explanation: String(o.explanation || ''),
-              }))
-            : [],
-        }))
-        .filter((q: AIQuizQuestion) => q.question && q.options.length === 5),
-    }
-    if (parsed.questions.length === 0) return mockQuiz()
-    return parsed
-  } catch (e) {
-    console.error(e)
-    return mockQuiz()
-  }
+  const content = await callAI(
+    [
+      { role: 'system', content: QUIZ_SYSTEM },
+      { role: 'user', content: prompt },
+    ],
+    0.3,
+  )
+  const json = toJSONSafe(content)
+  if (!json?.questions || !Array.isArray(json.questions))
+    throw new Error('Quiz AI returned unexpected format')
+  const questions: AIQuizQuestion[] = json.questions
+    .slice(0, 50)
+    .map((q: any) => ({
+      question: String(q.question || ''),
+      options: Array.isArray(q.options)
+        ? q.options.slice(0, 5).map((o: any) => ({
+            text: String(o.text || ''),
+            correct: Boolean(o.correct),
+            explanation: String(o.explanation || ''),
+          }))
+        : [],
+    }))
+    .filter((q: AIQuizQuestion) => q.question && q.options.length >= 4)
+  if (questions.length === 0)
+    throw new Error('Quiz AI returned no valid questions')
+  return { questions }
 }
 
 function shuffleArray<T>(arr: T[]): T[] {
@@ -333,82 +313,13 @@ function shuffleArray<T>(arr: T[]): T[] {
 
 function toJSONSafe(text: string): any {
   try {
-    const cleaned = text
-      .replace(/^```(json)?/i, '')
-      .replace(/```$/i, '')
-      .trim()
-    return JSON.parse(cleaned)
+    return JSON.parse(text)
   } catch {
+    const m = /\{[\s\S]*\}/.exec(text)
+    if (m) {
+      try { return JSON.parse(m[0]) } catch {}
+    }
     return null
-  }
-}
-
-function mockQuiz(): AIQuizResponse {
-  return {
-    questions: [
-      {
-        question: 'Qual é o objetivo principal do resumo?',
-        options: [
-          {
-            text: 'Introduzir o tema',
-            correct: true,
-            explanation: 'O resumo apresenta os pontos principais do tema.',
-          },
-          {
-            text: 'Detalhar todos os tópicos',
-            correct: false,
-            explanation: 'O resumo não entra em todos os detalhes.',
-          },
-          {
-            text: 'Apresentar dados brutos',
-            correct: false,
-            explanation:
-              'Dados brutos geralmente aparecem em anexos, não no resumo.',
-          },
-          {
-            text: 'Fornecer código-fonte',
-            correct: false,
-            explanation: 'Código-fonte não é o foco do resumo.',
-          },
-          {
-            text: 'Descrever autores',
-            correct: false,
-            explanation: 'A descrição de autores não é o objetivo principal.',
-          },
-        ],
-      },
-      {
-        question: 'Como o conteúdo está estruturado?',
-        options: [
-          {
-            text: 'Em seções lógicas',
-            correct: true,
-            explanation:
-              'O conteúdo é dividido em seções para facilitar a compreensão.',
-          },
-          {
-            text: 'De forma aleatória',
-            correct: false,
-            explanation: 'A estrutura não é aleatória.',
-          },
-          {
-            text: 'Sem títulos',
-            correct: false,
-            explanation: 'Há títulos para cada seção.',
-          },
-          {
-            text: 'Apenas com tabelas',
-            correct: false,
-            explanation: 'Tabelas não são a única forma de apresentação.',
-          },
-          {
-            text: 'Somente imagens',
-            correct: false,
-            explanation: 'Imagens complementam, mas não são o único recurso.',
-          },
-        ],
-      },
-    ],
   }
 }
 

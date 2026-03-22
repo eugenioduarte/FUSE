@@ -226,6 +226,23 @@ function mockKnowledgeSummary(prompt: string): AIKnowledgeSummary {
 
 // buildBody/buildKnowledgeBody removed — prompts centralized in services/prompts
 
+/**
+ * Shared helper: send a chat completion request via the configured provider
+ * (OpenRouter or OpenAI-compatible) with proper headers, retry, and timeout.
+ * Returns the raw content string from the first choice, or throws on failure.
+ */
+export async function callAI(
+  messages: { role: string; content: string }[],
+  temperature = 0.4,
+): Promise<string> {
+  if (!OPENAI_API_KEY) throw new Error('EXPO_PUBLIC_OPENAI_API_KEY not set')
+  const body = JSON.stringify({ model: MODEL, messages, temperature })
+  const res = await doRequestWithRetry(body)
+  if (!res?.ok) throw new Error(`AI request failed: ${res?.status ?? 'no response'}`)
+  const data = await res.json()
+  return data?.choices?.[0]?.message?.content?.trim?.() ?? ''
+}
+
 async function doRequestWithRetry(body: string): Promise<Response | null> {
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
   const maxAttempts = 3

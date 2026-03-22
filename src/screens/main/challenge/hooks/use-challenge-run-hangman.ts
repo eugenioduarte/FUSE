@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Dimensions, Easing } from 'react-native'
 // navigatorManager not required in hook
 import { buildHangmanPrompt, HANGMAN_SYSTEM } from '@/services/prompts'
+import { callAI } from '@/services/ai/ai.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
@@ -402,67 +403,34 @@ export type HangmanGen = { question: string; answer: string }
 // buildHangmanPrompt moved to src/services/prompts
 
 export async function generateHangmanRounds(prompt: string): Promise<HangmanGen[]> {
-  try {
-    const body = JSON.stringify({
-      model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: HANGMAN_SYSTEM },
-        { role: 'user', content: prompt },
-      ],
-      temperature: 0.4,
-    })
-    const base =
-      process.env.EXPO_PUBLIC_OPENAI_BASE_URL || 'https://api.openai.com/v1'
-    const key = process.env.EXPO_PUBLIC_OPENAI_API_KEY
-    if (!key) return mockHangmanRounds()
-    const res = await fetch(`${base}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
-      },
-      body,
-    })
-    if (!res.ok) return mockHangmanRounds()
-    const data = await res.json()
-    const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
-    const json = toJSONSafe(content)
-    const rounds = Array.isArray(json?.rounds) ? json.rounds : []
-    const parsed: HangmanGen[] = rounds
-      .slice(0, 5)
-      .map((r: any) => ({
-        question: String(r?.question || ''),
-        answer: String(r?.answer || ''),
-      }))
-      .filter((r: HangmanGen) => r.question && r.answer)
-    return parsed.length ? parsed : mockHangmanRounds()
-  } catch (e) {
-    console.error(e)
-    return mockHangmanRounds()
-  }
+  const content = await callAI(
+    [
+      { role: 'system', content: HANGMAN_SYSTEM },
+      { role: 'user', content: prompt },
+    ],
+    0.4,
+  )
+  const json = toJSONSafe(content)
+  const rounds = Array.isArray(json?.rounds) ? json.rounds : []
+  const parsed: HangmanGen[] = rounds
+    .slice(0, 5)
+    .map((r: any) => ({
+      question: String(r?.question || ''),
+      answer: String(r?.answer || ''),
+    }))
+    .filter((r: HangmanGen) => r.question && r.answer)
+  if (!parsed.length) throw new Error('Hangman AI returned no valid rounds')
+  return parsed
 }
 
 function toJSONSafe(text: string): any {
   try {
-    const cleaned = text
-      .replace(/^```(json)?/i, '')
-      .replace(/```$/i, '')
-      .trim()
-    return JSON.parse(cleaned)
+    return JSON.parse(text)
   } catch {
+    const m = /\{[\s\S]*\}/.exec(text)
+    if (m) {
+      try { return JSON.parse(m[0]) } catch {}
+    }
     return null
   }
-}
-
-function mockHangmanRounds(): HangmanGen[] {
-  return [
-    {
-      question: 'Tecnologia base usada para apps mobile com JS?',
-      answer: 'REACT',
-    },
-    {
-      question: 'O resumo estudado trata de qual atividade principal?',
-      answer: 'ESTUDO',
-    },
-  ]
 }

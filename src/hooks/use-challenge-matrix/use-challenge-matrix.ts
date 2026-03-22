@@ -21,6 +21,7 @@ import useTrackTopicSession from '@/hooks/use-track-topic-session'
  * Author: Eugenio Silva
  */
 import { MATRIX_SYSTEM, matrixUserPrompt } from '@/services/prompts'
+import { callAI } from '@/services/ai/ai.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -43,12 +44,12 @@ const TIMER_SECONDS = 60
 // to parse the payload, returning null on failure.
 function toJSONSafe(text: string): any {
   try {
-    const cleaned = text
-      .replace(/^```(json)?/i, '')
-      .replace(/```$/i, '')
-      .trim()
-    return JSON.parse(cleaned)
+    return JSON.parse(text)
   } catch {
+    const m = /\{[\s\S]*\}/.exec(text)
+    if (m) {
+      try { return JSON.parse(m[0]) } catch {}
+    }
     return null
   }
 }
@@ -61,57 +62,29 @@ function toJSONSafe(text: string): any {
 export async function generateMatrixQA(
   summary: string,
 ): Promise<{ question: string; words: string[] }> {
-  try {
-    const body = JSON.stringify({
-      model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',
-      messages: [
-        { role: 'system', content: MATRIX_SYSTEM },
-        { role: 'user', content: matrixUserPrompt(summary) },
-      ],
-      temperature: 0.4,
-    })
-    const base =
-      process.env.EXPO_PUBLIC_OPENAI_BASE_URL || 'https://api.openai.com/v1'
-    const key = process.env.EXPO_PUBLIC_OPENAI_API_KEY
-    if (!key) return mockQA()
-    const res = await fetch(`${base}/chat/completions`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${key}`,
-      },
-      body,
-    })
-    if (!res.ok) return mockQA()
-    const data = await res.json()
-    const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
-    const json = toJSONSafe(content)
-    const question = String(json?.question || '').trim()
-    const wordsRaw: string[] = Array.isArray(json?.words) ? json.words : []
-    const words = wordsRaw
-      .map((w) =>
-        String(w || '')
-          .toUpperCase()
-          .split(/[^A-ZÀ-Ý]/g)
-          .join('')
-          .slice(0, 10),
-      )
-      .filter((w) => w.length >= 3)
-      .slice(0, 5)
-    if (!question || words.length !== 5) return mockQA()
-    return { question, words }
-  } catch (e) {
-    console.error(e)
-    return mockQA()
-  }
-}
-
-// Local fallback used when LLM generation is not possible.
-function mockQA(): { question: string; words: string[] } {
-  return {
-    question: 'Cite 5 linguagens de programação.',
-    words: ['JAVASCRIPT', 'PYTHON', 'RUBY', 'JAVA', 'GO'],
-  }
+  const content = await callAI(
+    [
+      { role: 'system', content: MATRIX_SYSTEM },
+      { role: 'user', content: matrixUserPrompt(summary) },
+    ],
+    0.4,
+  )
+  const json = toJSONSafe(content)
+  const question = String(json?.question || '').trim()
+  const wordsRaw: string[] = Array.isArray(json?.words) ? json.words : []
+  const words = wordsRaw
+    .map((w) =>
+      String(w || '')
+        .toUpperCase()
+        .split(/[^A-ZÀ-Ý]/g)
+        .join('')
+        .slice(0, 10),
+    )
+    .filter((w) => w.length >= 3)
+    .slice(0, 5)
+  if (!question || words.length < 5)
+    throw new Error('Matrix AI returned invalid question/words')
+  return { question, words }
 }
 
 // Return a random uppercase letter used to fill empty grid cells.
