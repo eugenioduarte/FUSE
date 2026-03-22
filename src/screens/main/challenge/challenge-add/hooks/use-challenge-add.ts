@@ -1,10 +1,20 @@
 import { navigatorManager } from '@/navigation/navigatorManager'
+import { buildHangmanPrompt, buildQuizPrompt } from '@/services/prompts'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
 import { useOverlay } from '@/store/useOverlay'
 import { Challenge } from '@/types/domain'
 import { useEffect, useState } from 'react'
+import {
+  generateHangmanRounds,
+} from '../../hooks/use-challenge-run-hangman'
+import { generateQuiz } from '../../hooks/use-challenge-run-quiz'
+import { generateMatrixQA } from '@/hooks/use-challenge-matrix/use-challenge-matrix'
+import {
+  generateOpenQuestionSet,
+  TAExercise,
+} from '../../hooks/use-challenge-run-text-answer'
 
 type UseChallengeAddReturn = {
   topicColor: string | undefined
@@ -52,57 +62,7 @@ export default function useChallengeAdd(
         const filtered = summaryId
           ? all.filter((c) => c.summaryId === summaryId)
           : all
-
-        type Acc = { scoreSum: number; totalSum: number; count: number }
-        const accs: Record<string, Acc> = {}
-        const totalsCounter: Record<string, number> = {}
-
-        for (const c of filtered) {
-          const type = c.type
-          const acc = accs[type] ?? { scoreSum: 0, totalSum: 0, count: 0 }
-          const attempts: any[] = []
-          if (Array.isArray(c.payload?.attempts))
-            attempts.push(...c.payload.attempts)
-          if (c.payload?.lastAttempt) attempts.push(c.payload.lastAttempt)
-
-          // count total attempts per type
-          totalsCounter[type] = (totalsCounter[type] || 0) + attempts.length
-          if (
-            c.payload?.lastAttempt &&
-            (!Array.isArray(c.payload?.attempts) || !c.payload.attempts.length)
-          ) {
-            totalsCounter[type] = Math.max(totalsCounter[type], 1)
-          }
-
-          for (const a of attempts) {
-            const sc = Number(a?.score)
-            const tot = Number(a?.total)
-            if (!Number.isFinite(sc)) continue
-
-            // fallback totals for incomplete data
-            if (!Number.isFinite(tot) || tot === 0) {
-              acc.scoreSum += sc
-              acc.totalSum += type === 'text' ? 10 : 1
-              acc.count += 1
-              continue
-            }
-
-            acc.scoreSum += sc
-            acc.totalSum += tot
-            acc.count += 1
-          }
-
-          accs[type] = acc
-        }
-
-        const averages: Record<string, number> = {}
-        for (const k of Object.keys(accs)) {
-          const a = accs[k]
-          if (a.count > 0 && a.totalSum > 0) {
-            averages[k] = Math.round((a.scoreSum / a.totalSum) * 100)
-          }
-        }
-
+        const { averages, totalsCounter } = computeScoreStats(filtered)
         if (!active) return
         setAvgScores(averages)
         setTotals(totalsCounter)
@@ -115,79 +75,160 @@ export default function useChallengeAdd(
     }
   }, [summaryId])
 
-  // 🔹 Common helper for navigation + challenge creation
-  const createChallenge = async (
-    type: Challenge['type'],
-    payload: Record<string, any>,
+  // 🔹 Common helper: persist challenge + navigate
+  const saveAndNavigate = async (
+    challenge: Challenge,
     navigate: (id: string) => void,
   ) => {
+    await challengesRepository.upsert(challenge, '/sync/challenge', { summaryId })
+    navigate(challenge.id)
+  }
+
+  // 🔹 Quiz — generate questions via AI at creation time
+  const handleStartQuiz = async () => {
     if (!summaryId) {
-      setErrorOverlay(
-        true,
-        'Open challenge creation from a Summary first.',
-      )
+      setErrorOverlay(true, 'Open challenge creation from a Summary first.')
       return
     }
-
     try {
-      setLoadingOverlay(true, 'ChallengeAddScreen')
-      const now = Date.now()
-      const id = `${now}`
+      setLoadingOverlay(true, 'Gerando Quiz…')
+      const summary = await summariesRepository.getById(summaryId)
+      if (!summary) throw new Error('Summary not found')
 
+      const totalQuestions = Math.floor(Math.random() * (10 - 5 + 1)) + 5
+      const prompt = buildQuizPrompt(summary.content, totalQuestions)
+      const quiz = await generateQuiz(prompt)
+
+      const now = Date.now()
       const challenge: Challenge = {
-        id,
-        type,
-        title: type.charAt(0).toUpperCase() + type.slice(1),
+        id: `${now}`,
+        type: 'quiz',
+        title: 'Quiz',
         summaryId,
-        payload,
+        payload: { totalQuestions: quiz.questions.length, questions: quiz.questions },
         createdAt: now,
         updatedAt: now,
       }
-
-      await challengesRepository.upsert(challenge, '/sync/challenge', {
-        summaryId,
-      })
-      navigate(id)
+      await saveAndNavigate(challenge, (id) =>
+        navigatorManager.goToChallengeRunQuiz({ challengeId: id }),
+      )
     } catch (e) {
       console.error(e)
-      setErrorOverlay(
-        true,
-        `Could not start the ${type} challenge. Please try again.`,
-      )
+      setErrorOverlay(true, 'Could not create Quiz challenge. Please try again.')
     } finally {
       setLoadingOverlay(false)
     }
   }
 
-  // 🔹 Specific handlers
-  const handleStartQuiz = () =>
-    createChallenge(
-      'quiz',
-      { totalQuestions: Math.floor(Math.random() * (10 - 5 + 1)) + 5 },
-      (id) => navigatorManager.goToChallengeRunQuiz({ challengeId: id }),
-    )
+  // 🔹 Hangman — generate rounds via AI at creation time
+  const handleStartHangman = async () => {
+    if (!summaryId) {
+      setErrorOverlay(true, 'Open challenge creation from a Summary first.')
+      return
+    }
+    try {
+      setLoadingOverlay(true, 'Gerando Hangman…')
+      const summary = await summariesRepository.getById(summaryId)
+      if (!summary) throw new Error('Summary not found')
 
-  const handleStartHangman = () =>
-    createChallenge(
-      'hangman',
-      {
-        totalRounds: Math.floor(Math.random() * (5 - 2 + 1)) + 2,
-        maxErrorsPerRound: 3,
-      },
-      (id) => navigatorManager.goToChallengeRunHangman({ challengeId: id }),
-    )
+      const totalRounds = Math.floor(Math.random() * (5 - 2 + 1)) + 2
+      const maxErrorsPerRound = 3
+      const rounds = await generateHangmanRounds(
+        buildHangmanPrompt(summary.content, totalRounds),
+      )
 
-  const handleStartMatrix = () =>
-    createChallenge('matrix', { totalWords: 5, durationSec: 60 }, (id) =>
-      navigatorManager.goToChallengeRunMatrix({ challengeId: id }),
-    )
+      const now = Date.now()
+      const challenge: Challenge = {
+        id: `${now}`,
+        type: 'hangman',
+        title: 'Hangman',
+        summaryId,
+        payload: { totalRounds: rounds.length, maxErrorsPerRound, rounds },
+        createdAt: now,
+        updatedAt: now,
+      }
+      await saveAndNavigate(challenge, (id) =>
+        navigatorManager.goToChallengeRunHangman({ challengeId: id }),
+      )
+    } catch (e) {
+      console.error(e)
+      setErrorOverlay(true, 'Could not create Hangman challenge. Please try again.')
+    } finally {
+      setLoadingOverlay(false)
+    }
+  }
 
-  const handleStartText = () =>
-    createChallenge(
-      'text',
-      { totalExercises: 5, perExerciseSeconds: 0 },
-      (id) => navigatorManager.goToChallengeRunTextAnswer({ challengeId: id }),
-    )
+  // 🔹 Matrix — generate question + words via AI at creation time
+  const handleStartMatrix = async () => {
+    if (!summaryId) {
+      setErrorOverlay(true, 'Open challenge creation from a Summary first.')
+      return
+    }
+    try {
+      setLoadingOverlay(true, 'Gerando Matrix…')
+      const summary = await summariesRepository.getById(summaryId)
+      if (!summary) throw new Error('Summary not found')
+
+      const qa = await generateMatrixQA(summary.content)
+
+      const now = Date.now()
+      const challenge: Challenge = {
+        id: `${now}`,
+        type: 'matrix',
+        title: 'Matrix',
+        summaryId,
+        payload: { totalWords: qa.words.length, durationSec: 60, question: qa.question, words: qa.words },
+        createdAt: now,
+        updatedAt: now,
+      }
+      await saveAndNavigate(challenge, (id) =>
+        navigatorManager.goToChallengeRunMatrix({ challengeId: id }),
+      )
+    } catch (e) {
+      console.error(e)
+      setErrorOverlay(true, 'Could not create Matrix challenge. Please try again.')
+    } finally {
+      setLoadingOverlay(false)
+    }
+  }
+
+  // 🔹 Text Answer — generate exercises via AI at creation time
+  const handleStartText = async () => {
+    if (!summaryId) {
+      setErrorOverlay(true, 'Open challenge creation from a Summary first.')
+      return
+    }
+    try {
+      setLoadingOverlay(true, 'Gerando exercícios…')
+      const summary = await summariesRepository.getById(summaryId)
+      if (!summary) throw new Error('Summary not found')
+
+      const totalExercises = 5
+      const exercises: TAExercise[] = await generateOpenQuestionSet(
+        summary.content,
+        totalExercises,
+      )
+
+      const now = Date.now()
+      const challenge: Challenge = {
+        id: `${now}`,
+        type: 'text',
+        title: 'Text Answer',
+        summaryId,
+        payload: { totalExercises: exercises.length, perExerciseSeconds: 120, exercises },
+        createdAt: now,
+        updatedAt: now,
+      }
+      await saveAndNavigate(challenge, (id) =>
+        navigatorManager.goToChallengeRunTextAnswer({ challengeId: id }),
+      )
+    } catch (e) {
+      console.error(e)
+      setErrorOverlay(true, 'Could not create Text challenge. Please try again.')
+    } finally {
+      setLoadingOverlay(false)
+    }
+  }
 
   return {
     topicColor,
@@ -198,4 +239,55 @@ export default function useChallengeAdd(
     handleStartMatrix,
     handleStartText,
   }
+}
+
+// ─── helpers ─────────────────────────────────────────────────────────────────
+
+type Acc = { scoreSum: number; totalSum: number; count: number }
+
+function collectAttempts(challenge: Challenge): any[] {
+  const attempts: any[] = []
+  if (Array.isArray(challenge.payload?.attempts))
+    attempts.push(...challenge.payload.attempts)
+  if (challenge.payload?.lastAttempt) attempts.push(challenge.payload.lastAttempt)
+  return attempts
+}
+
+function accumulateAttempt(acc: Acc, score: number, total: number, type: string): Acc {
+  if (!Number.isFinite(total) || total === 0) {
+    return { ...acc, scoreSum: acc.scoreSum + score, totalSum: acc.totalSum + (type === 'text' ? 10 : 1), count: acc.count + 1 }
+  }
+  return { ...acc, scoreSum: acc.scoreSum + score, totalSum: acc.totalSum + total, count: acc.count + 1 }
+}
+
+function computeScoreStats(challenges: Challenge[]) {
+  const accs: Record<string, Acc> = {}
+  const totalsCounter: Record<string, number> = {}
+
+  for (const c of challenges) {
+    const { type } = c
+    const attempts = collectAttempts(c)
+
+    totalsCounter[type] = (totalsCounter[type] || 0) + attempts.length
+    if (c.payload?.lastAttempt && !attempts.length) {
+      totalsCounter[type] = Math.max(totalsCounter[type], 1)
+    }
+
+    let acc: Acc = accs[type] ?? { scoreSum: 0, totalSum: 0, count: 0 }
+    for (const a of attempts) {
+      const sc = Number(a?.score)
+      if (!Number.isFinite(sc)) continue
+      acc = accumulateAttempt(acc, sc, Number(a?.total), type)
+    }
+    accs[type] = acc
+  }
+
+  const averages: Record<string, number> = {}
+  for (const [k, a] of Object.entries(accs)) {
+    if (a.count > 0 && a.totalSum > 0) {
+      averages[k] = Math.round((a.scoreSum / a.totalSum) * 100)
+    }
+  }
+
+  return { averages, totalsCounter }
 }

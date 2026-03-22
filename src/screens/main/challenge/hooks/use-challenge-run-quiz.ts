@@ -64,22 +64,33 @@ export const useChallengeRunQuiz = (challengeId: string, mock = false) => {
           if (active) setTopicColor(topic?.backgroundColor || undefined)
         } catch {}
 
-        const total = Number(
-          ch.payload?.totalQuestions ||
-            Math.floor(Math.random() * (10 - 5 + 1)) + 5,
-        )
-        const prompt = buildQuizPrompt(summary.content, total)
-        // If mock flag is true, use the local mockQuiz instead of calling the AI
-        const quiz = mock ? mockQuiz() : await generateQuiz(prompt)
+        // Use pre-generated questions if available (stored at challenge creation time)
+        const preGenQuestions: AIQuizQuestion[] | undefined =
+          Array.isArray(ch.payload?.questions) && ch.payload.questions.length > 0
+            ? (ch.payload.questions as AIQuizQuestion[])
+            : undefined
+
+        let quizQuestions: AIQuizQuestion[]
+        if (preGenQuestions) {
+          quizQuestions = preGenQuestions
+        } else {
+          const total = Number(
+            ch.payload?.totalQuestions ||
+              Math.floor(Math.random() * (10 - 5 + 1)) + 5,
+          )
+          const prompt = buildQuizPrompt(summary.content, total)
+          const quiz = mock ? mockQuiz() : await generateQuiz(prompt)
+          quizQuestions = quiz.questions
+        }
         if (!active) return
-        const shuffled = quiz.questions.map((q) => ({
+        const shuffled = quizQuestions.map((q) => ({
           ...q,
           options: shuffleArray(q.options),
         }))
         setQuestions(shuffled)
 
         const init: Record<number, number | null> = {}
-        for (let i = 0; i < quiz.questions.length; i++) init[i] = null
+        for (let i = 0; i < quizQuestions.length; i++) init[i] = null
         setFirstChoiceByIndex(init)
         setCurrentChoice(null)
         setLoading(false)
@@ -256,7 +267,7 @@ function computeScore(
 
 // Prompt builder moved to src/services/prompts
 
-async function generateQuiz(prompt: string): Promise<AIQuizResponse> {
+export async function generateQuiz(prompt: string): Promise<AIQuizResponse> {
   try {
     const body = JSON.stringify({
       model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',

@@ -142,14 +142,26 @@ export default function useChallengeRunHangman(
           if (active) setTopicColor(topic?.backgroundColor || undefined)
         } catch {}
 
-        // Build rounds (question + answer) from summary content
+        // Use pre-generated rounds if available (stored at challenge creation time)
+        const preGenRounds: HangmanGen[] | undefined =
+          Array.isArray(ch.payload?.rounds) && ch.payload.rounds.length > 0
+            ? (ch.payload.rounds as HangmanGen[])
+            : undefined
+
         const totalRounds = Number(
           ch.payload?.totalRounds ||
             Math.floor(Math.random() * (5 - 2 + 1)) + 2,
         )
-        let roundsGen = await generateHangmanRounds(
-          buildHangmanPrompt(summary.content, totalRounds),
-        )
+
+        let roundsGen: HangmanGen[]
+        if (preGenRounds) {
+          roundsGen = preGenRounds
+        } else {
+          roundsGen = await generateHangmanRounds(
+            buildHangmanPrompt(summary.content, totalRounds),
+          )
+        }
+
         // sanitize and clamp
         let roundsLocal: Round[] = roundsGen
           .map((r) => ({
@@ -385,11 +397,11 @@ function pickWordsFromText(text: string, total: number): string[] {
   return uniq.slice(0, Math.max(2, Math.min(5, total)))
 }
 
-type HangmanGen = { question: string; answer: string }
+export type HangmanGen = { question: string; answer: string }
 
 // buildHangmanPrompt moved to src/services/prompts
 
-async function generateHangmanRounds(prompt: string): Promise<HangmanGen[]> {
+export async function generateHangmanRounds(prompt: string): Promise<HangmanGen[]> {
   try {
     const body = JSON.stringify({
       model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',

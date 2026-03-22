@@ -1,11 +1,15 @@
 import * as SQLite from 'expo-sqlite'
 import { runMigrations } from './migrations'
 
-let _db: SQLite.SQLiteDatabase | null = null
+// Promise-based singleton: set synchronously before any await so concurrent
+// callers all await the same promise and migrations run exactly once.
+let _dbPromise: Promise<SQLite.SQLiteDatabase> | null = null
 
-export async function getDb(): Promise<SQLite.SQLiteDatabase> {
-  if (_db) return _db
-  _db = await SQLite.openDatabaseAsync('fuse.db')
-  await runMigrations(_db)
-  return _db
+export function getDb(): Promise<SQLite.SQLiteDatabase> {
+  _dbPromise ??= (async () => {
+    const db = await SQLite.openDatabaseAsync('fuse.db')
+    await runMigrations(db)
+    return db
+  })()
+  return _dbPromise
 }

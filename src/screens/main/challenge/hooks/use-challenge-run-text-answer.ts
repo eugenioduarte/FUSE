@@ -83,7 +83,13 @@ export default function useChallengeRunTextAnswer(challengeId: string) {
         )
         setTimer(perSecRaw > 0 ? perSecRaw : null)
 
-        const setQ = await generateOpenQuestionSet(summary.content, tExercises)
+        // Use pre-generated exercises if available (stored at challenge creation time)
+        const preGenExercises: TAExercise[] | undefined =
+          Array.isArray(ch.payload?.exercises) && ch.payload.exercises.length > 0
+            ? (ch.payload.exercises as TAExercise[])
+            : undefined
+
+        const setQ = preGenExercises ?? await generateOpenQuestionSet(summary.content, tExercises)
         if (!active) return
         setExercises(setQ)
         setLoading(false)
@@ -297,7 +303,7 @@ export default function useChallengeRunTextAnswer(challengeId: string) {
 }
 
 // ---------- AI helpers ----------
-async function generateOpenQuestionSet(summary: string, total: number) {
+export async function generateOpenQuestionSet(summary: string, total: number) {
   try {
     const body = JSON.stringify({
       model: process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini',

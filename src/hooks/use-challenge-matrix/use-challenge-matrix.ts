@@ -58,7 +58,7 @@ function toJSONSafe(text: string): any {
 // and expects a JSON response with { question, words } or falls
 // back to a mockQA when the model is unavailable or the response
 // is malformed.
-async function generateMatrixQA(
+export async function generateMatrixQA(
   summary: string,
 ): Promise<{ question: string; words: string[] }> {
   try {
@@ -299,8 +299,21 @@ export default function useChallengeMatrix(
         if (!summary) throw new Error('Summary not found')
         if (active) setTopicId(summary.topicId)
 
-        // Generate question + words (LLM or fallback)
-        const qa = await generateMatrixQA(summary.content)
+        // Use pre-generated content if available (stored at challenge creation time)
+        const preGenQ: string | undefined =
+          typeof ch.payload?.question === 'string' && ch.payload.question
+            ? ch.payload.question
+            : undefined
+        const preGenWords: string[] | undefined =
+          Array.isArray(ch.payload?.words) && ch.payload.words.length >= 5
+            ? (ch.payload.words as string[])
+            : undefined
+
+        const qa =
+          preGenQ && preGenWords
+            ? { question: preGenQ, words: preGenWords }
+            : await generateMatrixQA(summary.content)
+
         setQuestion(qa.question)
         setWords(qa.words)
 
