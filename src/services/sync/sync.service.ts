@@ -2,8 +2,6 @@ import { offlineQueue } from '../../storage/offlineQueue'
 import { useNetworkStore } from '../../store/useNetworkStore'
 import { useSyncStatusStore } from '../../store/useSyncStatusStore'
 
-const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-
 export async function processOfflineQueue() {
   const online = useNetworkStore.getState().online
 
@@ -22,6 +20,11 @@ export async function processOfflineQueue() {
 
   let hasError = false
   for (const item of items) {
+    // Discard items with relative URLs — no backend is configured, they will never succeed
+    if (!item.url.startsWith('http')) {
+      await offlineQueue.remove(item.id)
+      continue
+    }
     try {
       const res = await fetch(item.url, {
         method: item.method,
@@ -35,9 +38,6 @@ export async function processOfflineQueue() {
     } catch {
       hasError = true
       await offlineQueue.bumpTries(item.id)
-      const tries = (item.tries || 0) + 1
-      const backoff = Math.min(30_000, 1000 * Math.pow(2, tries))
-      await sleep(backoff)
     }
   }
 

@@ -86,7 +86,8 @@ export default function useDashboard() {
           const { processOfflineQueue } = await import(
             '@/services/sync/sync.service'
           )
-          await processOfflineQueue()
+          // Fire-and-forget — never block dashboard loading
+          processOfflineQueue().catch(() => {})
         } catch {}
         try {
           const { flushLocalCollaborativeChanges } = await import(

@@ -176,19 +176,24 @@ export const useChallengeRunQuiz = (challengeId: string, mock = false) => {
         lastAttempt: { score, total: questions.length, at: now },
       },
     }
-    await challengesRepository.upsert(updated, '/sync/challenge', {
-      summaryId: challenge.summaryId,
-    })
-    setChallenge(updated)
-    setFinished({ score, total: questions.length })
     try {
+      await challengesRepository.upsert(updated, '/sync/challenge', {
+        summaryId: challenge.summaryId,
+      })
+      setChallenge(updated)
+      setFinished({ score, total: questions.length })
       setLoadingOverlay(true, 'Sincronizando…')
       const { immediateCollaborativeFlush } = await import(
         '@/services/firebase/immediateFlush'
       )
       await immediateCollaborativeFlush(1500)
-    } catch {}
-    setLoadingOverlay(false)
+    } catch (e) {
+      console.error(e)
+      setChallenge(updated)
+      setFinished({ score, total: questions.length })
+    } finally {
+      setLoadingOverlay(false)
+    }
   }
 
   const forceFinish = async () => {
