@@ -19,7 +19,7 @@ export const AVATAR_STYLES: AvatarStyle[] = [
 ]
 
 export function randomSeed() {
-  return Math.random().toString(36).substring(2, 10)
+  return crypto.randomUUID().replace(/-/g, '').substring(0, 8)
 }
 
 export function generateAvatarUrl(style: AvatarStyle, seed?: string) {

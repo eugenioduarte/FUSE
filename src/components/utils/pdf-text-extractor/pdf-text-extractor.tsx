@@ -79,7 +79,7 @@ export default function PdfTextExtractor({
   return (
     <View style={{ width: 1, height: 1, opacity: 0 }}>
       <WebView
-        originWhitelist={['*']}
+        originWhitelist={['about:*', 'data:*']}
         source={{ html }}
         onMessage={onMessage}
         injectedJavaScript={injected}

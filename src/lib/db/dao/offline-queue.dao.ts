@@ -28,7 +28,7 @@ export const offlineQueueDao = {
     db: SQLiteDatabase,
     item: Omit<QueueItem, 'id' | 'createdAt' | 'tries'>,
   ): Promise<QueueItem> {
-    const id = `${Date.now()}-${Math.random().toString(36).slice(2)}`
+    const id = `${Date.now()}-${crypto.randomUUID()}`
     const createdAt = Date.now()
     await db.runAsync(
       `INSERT INTO offline_queue
