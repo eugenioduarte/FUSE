@@ -2,6 +2,8 @@
 
 <!-- Brief: AI-powered learning app built with React Native (Expo) — topics, summaries, AI-generated challenges, offline-first SQLite persistence, and a full AI-assisted engineering system. -->
 
+<img src=".ai/docs/screenshots/01_presentation.png" width="100%" />
+
 <div align="center">
 
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
@@ -14,40 +16,20 @@
 
 ---
 
-## 📸 Screenshots
-
-<div align="center">
-
-| Dashboard | Topic Details | Challenge |
-|:---:|:---:|:---:|
-| _(screenshot coming soon)_ | _(screenshot coming soon)_ | _(screenshot coming soon)_ |
-| [`dashboard.png`](docs/screenshots/dashboard.png) | [`topic-details.png`](docs/screenshots/topic-details.png) | [`challenge-quiz.png`](docs/screenshots/challenge-quiz.png) |
-
-| Calendar | Summary | Profile |
-|:---:|:---:|:---:|
-| _(screenshot coming soon)_ | _(screenshot coming soon)_ | _(screenshot coming soon)_ |
-| [`calendar.png`](docs/screenshots/calendar.png) | [`summary.png`](docs/screenshots/summary.png) | [`profile.png`](docs/screenshots/profile.png) |
-
-> Screenshots live in [`docs/screenshots/`](docs/screenshots/). See the [guide](docs/screenshots/README.md) for capture instructions.
-
-</div>
-
----
-
 ## 📋 Table of Contents
 
 - [Overview](#-overview)
-- [Key Features](#-key-features)
 - [AI-Assisted Engineering System](#-ai-assisted-engineering-system)
+- [Agent Deep Dive](#-agent-deep-dive)
+- [Development Workflow](#-development-workflow)
+- [Quality Gates](#-quality-gates)
+- [Key Features](#-key-features)
 - [Tech Stack](#️-tech-stack)
 - [Architecture](#-architecture)
 - [Getting Started](#-getting-started)
 - [Project Structure](#-project-structure)
-- [Agent Orchestration](#-agent-orchestration)
-- [Development Workflow](#-development-workflow)
 - [Testing](#-testing)
 - [CI/CD](#-cicd)
-- [Contributing](#-contributing)
 
 ---
 
@@ -55,42 +37,19 @@
 
 FUSE is an **AI-powered mobile learning application** built with React Native (Expo). Users create topics, generate AI-written summaries, and practice with automatically generated challenges — quizzes, hangman, matrix, and text-answer games.
 
-The project also serves as a reference implementation of a **full AI-assisted engineering system**: every part of the development lifecycle (architecture, implementation, testing, code review, performance, documentation) is handled by specialized AI agents.
+The project also serves as a **reference implementation of a full AI-assisted engineering system**: every part of the development lifecycle is handled by specialized AI agents — from writing code and tests, to managing commits, creating PRs, monitoring CI, fixing Sonar issues, addressing code reviews, and merging.
 
 ### What Makes FUSE Different
 
 | Capability | Description |
 |---|---|
 | 🧠 **AI-generated content** | Summaries and challenges created by AI from user topics |
-| 📴 **Offline-first** | SQLite is the single source of truth — the app works with no network |
-| 🤖 **Agent system** | 10 specialized AI agents covering the full engineering lifecycle |
+| 📴 **Offline-first** | SQLite is the single source of truth — works with no network |
+| 🤖 **11 specialized agents** | Full engineering lifecycle covered end-to-end |
+| 🔄 **Autonomous PR lifecycle** | Agent creates PR, monitors CI, fixes failures, resolves reviews, merges |
+| 🔧 **Sonar auto-fixer** | Quality gate failures resolved automatically without human intervention |
 | 🏗️ **Strict architecture** | Enforced layer separation: Screen → Hook → Repository → DAO → SQLite |
-| 🔀 **Hybrid LLM routing** | Local Ollama for mechanical tasks, Claude for architectural decisions |
 | 📊 **Living documentation** | README auto-updates on every push via the doc-designer agent |
-
----
-
-## ✨ Key Features
-
-### For Users
-
-- 📚 **Topics & Summaries** — Create learning topics; AI generates structured summaries with expandable terms
-- 🎮 **Challenges** — Practice with 4 game types: Quiz, Hangman, Matrix, Text Answer
-- 📅 **Calendar** — Schedule and track study sessions
-- 📴 **Offline-First** — Full app functionality without a network connection (SQLite + background sync)
-- 🔄 **Auto-Sync** — Background sync indicator shows live state: syncing / error / offline
-- 🌍 **Multi-language** — Full internationalization (EN + PT)
-- 🎨 **Theming** — Dynamic color theming per topic; dark/light mode support
-- 👤 **Profiles** — Avatar generation, connections, payment screens
-
-### For Developers
-
-- 🤖 **10 Specialized AI Agents** — Architecture, engineering, testing, review, auditing, docs, PR lifecycle
-- 📝 **SDD-driven development** — Every feature starts with a Software Design Document
-- 🗄️ **SQLite + DAO pattern** — Typed data access objects, versioned migrations, ACID offline queue
-- 🛠️ **Hybrid LLM** — Local model (Ollama) for speed; Claude for reasoning
-- 🔧 **Git quality gates** — TypeScript, ESLint, Jest, token tracking, README auto-update on pre-push
-- 📊 **Token tracking** — Daily AI cost monitoring across Claude and Ollama
 
 ---
 
@@ -102,16 +61,17 @@ Every development task is routed to a specialized agent. No shortcuts.
 
 | Agent | Responsibility | Model | Trigger |
 |---|---|---|---|
-| **frontend-architect** | Define architecture, write SDDs, structural decisions | Claude Sonnet (always) | Feature planning, refactoring |
-| **react-native-engineer** | Implement screens, hooks, components, services | Local → Claude (escalation) | Feature implementation |
-| **test-writer** | Unit tests (≥80% coverage) | Local (always) | After implementation |
-| **test-write-e2e** | Maestro E2E scenarios | Local (always) | Complete user flows |
-| **code-reviewer** | Quality gates, architectural compliance | Claude Sonnet (always) | PR review, pre-merge |
-| **performance-auditor** | Profiling, re-render analysis, optimization | Claude Sonnet (always) | Performance issues |
-| **sonar-auto-fixer** | Auto-fix SonarQube quality gate failures | Local → Claude | Sonar gate failure |
-| **coupling-analyzer** | Dependency graph analysis, architectural violations | Claude Sonnet (always) | Architecture reviews |
-| **pr-lifecycle** | Autonomous PR: create → CI monitor → fix → review → merge | Claude Sonnet (always) | `/pr-lifecycle [PR]` |
-| **doc-designer** | Keep README.md accurate and beautiful on every push | Claude Haiku (always) | Auto: pre-push hook |
+| **frontend-architect** | Define architecture, write SDDs, structural decisions | Claude Sonnet | Feature planning, refactoring |
+| **react-native-engineer** | Implement screens, hooks, components, services | Local → Claude | Feature implementation |
+| **test-writer** | Unit tests (≥80% coverage) | Local (Ollama) | After implementation |
+| **test-write-e2e** | Maestro E2E scenarios | Local (Ollama) | Complete user flows |
+| **code-reviewer** | Quality gates, architectural compliance | Claude Sonnet | PR review, pre-merge |
+| **performance-auditor** | Profiling, re-render analysis, optimization | Claude Sonnet | Performance issues |
+| **sonar-auto-fixer** | Auto-fix SonarCloud quality gate failures | Local → Claude | Sonar gate failure |
+| **coupling-analyzer** | Dependency graph analysis, architectural violations | Claude Sonnet | Architecture reviews |
+| **pr-lifecycle** | Full PR: create → CI → fix → reviews → merge | Claude Sonnet | `/pr-lifecycle [PR]` |
+| **pr-review-fixer** | Fix review comments on existing PRs | Local → Claude | PR review received |
+| **doc-designer** | README auto-update on every push | Claude Haiku | Auto: pre-push hook |
 
 ### Standard Feature Flow
 
@@ -133,7 +93,226 @@ doc-designer  →  Updates README if needed  (automatic, pre-push)
 pr-lifecycle  →  Creates PR, monitors CI, addresses reviews, merges
 ```
 
-See [Agent Documentation](.ai/agents/README.md) for full agent specifications.
+---
+
+## 🔍 Agent Deep Dive
+
+### 🔄 PR Lifecycle Agent
+
+The most powerful agent in the system. Invoked with `/pr-lifecycle` (or `/pr-lifecycle 123` to resume an existing PR), it handles the **complete pull request lifecycle with no human intervention**:
+
+**Phase 1 — Create PR**
+- Reads the commit history from the current branch
+- Derives a meaningful PR title and writes a structured body (summary + test plan)
+- Pushes the branch and creates the PR via `gh pr create`
+
+**Phase 2 — Monitor CI and Fix Failures**
+- Watches the GitHub Actions pipeline (`gh pr checks --watch`)
+- On failure, fetches the full run logs (`gh run view --log-failed`)
+- Identifies the failure type and applies the correct fix strategy:
+
+| Failure | Detection | Fix |
+|---|---|---|
+| ESLint violation | `yarn lint` output | Reads file → fixes violation → verifies |
+| Test failure | Jest output | Reads test + source → fixes code → re-runs |
+| TypeScript error | `tsc` errors | Reads file → fixes type → re-runs lint |
+| Sonar quality gate | SonarCloud API | Delegates to sonar-auto-fixer strategies |
+
+- After fixing, commits and pushes (`fix: <description>`) then re-polls CI
+- Max 3 fix attempts per unique failure before stopping and reporting
+
+**Phase 3 — Address Review Comments**
+- Fetches all review comments via `gh api` and `gh pr view`
+- For each unresolved comment: reads the referenced file and line, applies the change, commits
+- Replies to each comment with the commit SHA and explanation
+- Creates a single focused commit per review round
+
+**Phase 4 — Merge**
+- Waits for `reviewDecision === "APPROVED"` and all checks green
+- Squash-merges and deletes the branch (`gh pr merge --squash --delete-branch`)
+- Confirms final state (`gh pr view --json state`)
+
+**Safety rules:** Never force-pushes. Never modifies `services/firebase/` or auth/payment flows without explicit confirmation. Always creates new commits — never amends published ones.
+
+---
+
+### 🔧 Sonar Auto-Fixer Agent
+
+Invoked with `/fix-sonar <PR_NUMBER>` when a SonarCloud quality gate fails. Also called internally by pr-lifecycle when it detects Sonar gate failures.
+
+**What it does:**
+1. Fetches all open Sonar issues via the SonarCloud API for the PR branch
+2. Categorizes each issue into **auto-fixable** vs. **manual review required**
+3. Applies fixes for auto-fixable issues:
+   - Unused imports and variables
+   - Cognitive complexity (extracts nested logic into functions)
+   - Code duplication (extracts shared code)
+   - Magic numbers (extracts named constants)
+   - Missing TypeScript types
+   - Empty functions, formatting issues
+4. Validates all fixes pass `typecheck + lint + tests` before committing
+5. Creates a dedicated fix branch (`fix/sonar-pr-<NUMBER>`) and PR
+6. Comments on the original PR with a summary: what was fixed, what needs manual review, quality score before/after
+
+**What it never auto-fixes:** Security vulnerabilities, authentication/authorization logic, cryptographic operations, anything in `services/firebase/`.
+
+**Model routing:** Local Ollama (`qwen2.5-coder:14b`) for mechanical fixes. Escalates to Claude Sonnet for complex refactoring or architectural smells.
+
+---
+
+### 📝 Doc-Designer Agent
+
+Runs automatically on every `git push` via the pre-push hook (`.husky/pre-push` → `.ai/scripts/update-readme.sh`). Skips automatically if only lock files, test files, or non-source files changed.
+
+**What it updates:**
+- Agent table when new agents are added or updated
+- Feature descriptions when new features ship
+- Tech Stack section when new packages are added to `package.json`
+- Architecture diagram when layer boundaries change
+- Presentation image and screenshots when new assets are added
+
+**What it never does:** Removes existing sections. Mentions AsyncStorage as the persistence layer (it's SQLite). Runs on test-only commits.
+
+---
+
+### 🏗️ Frontend Architect Agent
+
+Invoked before any non-trivial feature. Produces a **Software Design Document (SDD)** in `.ai/_sdd/` before a single line of code is written.
+
+**SDD structure:**
+- Problem statement and context
+- Proposed architecture with layer diagram
+- Critical file list (new + modified)
+- Data models and TypeScript interfaces
+- Migration strategy (if existing code changes)
+- Verification checklist
+
+Every feature implementation must reference its SDD. The react-native-engineer agent reads the SDD before writing any code.
+
+---
+
+### 🔍 Code Reviewer Agent
+
+Validates every feature before it merges. Checks:
+- Architecture compliance (no screen touching SQLite, no business logic in screens)
+- TypeScript strict mode compliance
+- Test coverage thresholds (≥80%)
+- Naming conventions (kebab-case files, no PascalCase filenames)
+- Import path discipline (`@/` aliases, no `../../` relative paths)
+- No direct AsyncStorage calls in repositories (SQLite only)
+
+---
+
+### 📊 Coupling Analyzer Agent
+
+Runs on demand or weekly. Uses [Madge](https://github.com/pahen/madge) to generate the full dependency graph, then analyzes:
+
+| Metric | Target |
+|---|---|
+| Fan-Out (deps per file) | < 7 |
+| Fan-In (dependents per file) | < 15 |
+| Instability | 0.3 – 0.7 |
+| Circular dependencies | 0 |
+| Architectural violations | 0 |
+
+Generates a full coupling report in `.ai/analysis/coupling-report-<date>.md` with a prioritized refactoring roadmap.
+
+---
+
+## 🔄 Development Workflow
+
+### Standard Feature Development
+
+```bash
+# 1. Create feature branch
+git checkout -b feature/notification-center
+
+# 2. Architecture (invokes frontend-architect)
+# → "Create SDD for notification center"
+
+# 3. Implementation (invokes react-native-engineer)
+# → "Implement notification center following SDD"
+
+# 4. Tests (invokes test-writer)
+# → "Add unit tests for notification hooks"
+
+# 5. Review (invokes code-reviewer)
+# → "Review notification feature code"
+
+# 6. Commit + push + PR (fully autonomous from here)
+# → "commit, push, pr"
+# Claude handles the commit message, pre-push gates run,
+# doc-designer updates the README if needed,
+# then pr-lifecycle creates and manages the full PR lifecycle
+```
+
+### Viewing System Stats
+
+```bash
+# Agent usage statistics (last 7 days)
+.ai/scripts/show-orchestration-stats.sh 7
+
+# Token usage totals (Claude + Ollama)
+.ai/router/update-token-totals.sh
+
+# Coupling analysis (full codebase)
+.ai/scripts/analyze-coupling.sh full
+
+# PR lifecycle status check
+.ai/scripts/pr-lifecycle.sh 123
+```
+
+---
+
+## 🛡️ Quality Gates
+
+### Pre-commit (`.husky/pre-commit`)
+
+- ESLint + Prettier on staged files
+- TypeScript compilation check
+- Jest tests for staged files only
+
+### Pre-push (`.husky/pre-push`)
+
+1. TypeScript check (full project)
+2. ESLint (full project)
+3. Jest tests + coverage report
+4. Token usage report (daily AI cost monitoring)
+5. **doc-designer** — README auto-update if source files changed
+
+### CI/CD (GitHub Actions — every PR and push to `main`)
+
+1. ESLint + TypeScript check
+2. Jest tests + coverage
+3. **SonarCloud analysis** — quality gate must pass
+4. Build validation
+5. E2E tests (Maestro)
+
+If SonarCloud fails on a PR, the sonar-auto-fixer agent is triggered to create a fix PR automatically.
+
+---
+
+## ✨ Key Features
+
+### For Users
+
+- 📚 **Topics & Summaries** — Create learning topics; AI generates structured summaries with expandable terms
+- 🎮 **Challenges** — Practice with 4 game types: Quiz, Hangman, Matrix, Text Answer
+- 📅 **Calendar** — Schedule and track study sessions
+- 📴 **Offline-First** — Full app functionality without a network connection (SQLite + background sync)
+- 🔄 **Auto-Sync** — Background sync indicator shows live state: syncing / error / offline
+- 🌍 **Multi-language** — Full internationalization (EN + PT)
+- 🎨 **Theming** — Dynamic color theming per topic; dark/light mode support
+- 👤 **Profiles** — Avatar, connections, payment screens
+
+### For Developers
+
+- 🤖 **11 Specialized AI Agents** — Architecture, engineering, testing, review, auditing, docs, PR lifecycle
+- 📝 **SDD-driven development** — Every feature starts with a Software Design Document
+- 🗄️ **SQLite + DAO pattern** — Typed data access objects, versioned migrations, ACID offline queue
+- 🛠️ **Hybrid LLM** — Local model (Ollama) for speed; Claude for reasoning
+- 🔧 **Full CI automation** — TypeScript, ESLint, Jest, Sonar, token tracking, README auto-update
+- 📊 **Token tracking** — Daily AI cost monitoring across Claude and Ollama
 
 ---
 
@@ -175,9 +354,9 @@ See [Agent Documentation](.ai/agents/README.md) for full agent specifications.
 
 ### AI
 
-- **Claude Sonnet 4.6** (Anthropic) — Architectural reasoning, code review
+- **Claude Sonnet 4.6** (Anthropic) — Architectural reasoning, code review, PR lifecycle
 - **Claude Haiku 4.5** (Anthropic) — Documentation updates (doc-designer)
-- **Ollama** (`qwen2.5-coder:14b`) — Local mechanical tasks (tests, boilerplate)
+- **Ollama** (`qwen2.5-coder:14b`) — Local mechanical tasks (tests, boilerplate, Sonar fixes)
 
 ---
 
@@ -295,8 +474,8 @@ yarn android
 cp .env.example .env
 
 # Required variables
-API_BASE_URL=https://your-api.com
-FIREBASE_API_KEY=your_key_here
+EXPO_PUBLIC_ANTHROPIC_API_KEY=your_key_here
+EXPO_PUBLIC_FIREBASE_API_KEY=your_key_here
 # See .env.example for the full list
 ```
 
@@ -307,7 +486,7 @@ FIREBASE_API_KEY=your_key_here
 ```
 FUSE/
 ├── .ai/                      # AI Engineering System
-│   ├── agents/               # 10 specialized AI agents
+│   ├── agents/               # 11 specialized AI agents
 │   ├── skills/               # Reusable agent skills
 │   ├── rules/                # Naming, git, folder conventions
 │   ├── router/               # LLM routing + token-usage.csv
@@ -316,8 +495,6 @@ FUSE/
 │   └── system.md             # Master orchestration document
 │
 ├── src/                      # Application source code
-├── docs/
-│   └── screenshots/          # App screenshots for README
 ├── assets/                   # Static assets (icons, images, fonts)
 ├── __mocks__/                # Centralized Jest mocks
 ├── .husky/                   # Git hooks (pre-commit, pre-push)
@@ -330,87 +507,6 @@ FUSE/
 ├── jest.config.js
 └── README.md                 # Auto-maintained by doc-designer agent
 ```
-
----
-
-## 🎭 Agent Orchestration
-
-### LLM Routing Strategy
-
-```
-Request arrives
-     ↓
-Is it architecture / structural / cross-cutting?
-     → YES → Claude Sonnet (remote)
-     → NO  →
-          Is it mechanical? (tests, boilerplate, simple fixes)
-               → YES → Ollama local (qwen2.5-coder:14b)
-               → NO  → Claude Sonnet (remote)
-```
-
-### View System Stats
-
-```bash
-# Agent usage statistics (last 7 days)
-.ai/scripts/show-orchestration-stats.sh 7
-
-# Token usage totals
-.ai/router/update-token-totals.sh
-
-# Coupling analysis (full codebase)
-.ai/scripts/analyze-coupling.sh full
-
-# Future improvements progress
-.ai/scripts/count-improvements-progress.sh
-```
-
----
-
-## 🔄 Development Workflow
-
-### Standard Feature Development
-
-```bash
-# 1. Create feature branch
-git checkout -b feature/notification-center
-
-# 2. Architecture (invokes frontend-architect)
-# → "Create SDD for notification center"
-
-# 3. Implementation (invokes react-native-engineer)
-# → "Implement notification center following SDD"
-
-# 4. Tests (invokes test-writer)
-# → "Add unit tests for notification hooks"
-
-# 5. Review (invokes code-reviewer)
-# → "Review notification feature code"
-
-# 6. Commit + push + PR
-# → "commit, push, pr"
-# Claude handles commit message, pre-push gates run, doc-designer checks README,
-# then pr-lifecycle creates and manages the PR autonomously
-```
-
-### Quality Gates
-
-**Pre-commit** (`.husky/pre-commit`):
-- ESLint + Prettier
-- TypeScript compilation
-- Staged file tests
-
-**Pre-push** (`.husky/pre-push`):
-1. TypeScript check (full)
-2. ESLint (full)
-3. Tests + coverage
-4. Token usage report
-5. **doc-designer** — README auto-update if code changed
-
-**CI/CD** (GitHub Actions):
-- All pre-push checks
-- SonarCloud quality gate
-- Build validation
-- E2E tests
 
 ---
 
@@ -455,7 +551,7 @@ yarn e2e
 3. Tests + coverage
 4. SonarCloud analysis
 
-**Release Pipeline** — manual trigger:
+**Release Pipeline** — automatic (configuration in progress):
 1. EAS Build (development / preview / production)
 2. Submit to App Store Connect + Google Play
 
@@ -467,31 +563,6 @@ yarn e2e
 | `EXPO_TOKEN` | EAS Build |
 | `APPLE_ID` / `APPLE_TEAM_ID` | iOS submission |
 | `GOOGLE_SERVICE_ACCOUNT_KEY` | Android submission |
-
----
-
-## 🤝 Contributing
-
-### Adding a New Agent
-
-1. Create `/.ai/agents/<name>.md` following the standard structure
-2. Add routing logic to `.ai/router/router.md`
-3. Register in `.ai/agents/README.md`
-4. Add a row to the agent table in this README (or let doc-designer handle it on next push)
-5. Document in `.ai/_sdd/future-improvements.md`
-
-### Adding Screenshots
-
-1. Capture on iPhone 15 Pro simulator (PNG, max 800px wide)
-2. Drop into `docs/screenshots/` with the correct filename (see [guide](docs/screenshots/README.md))
-3. The screenshot grid in this README will auto-render — no manual edit needed
-
-### Code Style
-
-- Follow `.ai/rules/naming-conventions.md` — kebab-case files, no PascalCase filenames
-- All new screens require: `*.screen.tsx`, `*.hook.ts`, `__tests__/`
-- Repository interface: `list()`, `getById()`, `upsert()`, `deleteById()`, `onChange()`
-- No business logic in screens. No direct SQLite access outside DAOs.
 
 ---
 
