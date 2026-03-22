@@ -25,15 +25,19 @@ export function getFirebaseAuth(): ReturnType<typeof getAuth> {
   if (authInstance) return authInstance
 
   const app = getFirebaseApp()
-  // In React Native, we must explicitly initialize Auth with AsyncStorage persistence
-  // to ensure sessions persist across app reloads. Fallback to getAuth if already initialized.
+  // In React Native, we initialize Auth with expo-secure-store for encrypted persistence
+  // (MASVS-STORAGE-1: tokens stored in encrypted storage, not plaintext AsyncStorage).
+  // expo-secure-store uses iOS Keychain and Android Keystore under the hood.
   try {
-    const { initializeAuth } = require('firebase/auth')
-    const { getReactNativePersistence } = require('firebase/auth')
-    const AsyncStorage =
-      require('@react-native-async-storage/async-storage').default
+    const { initializeAuth, getReactNativePersistence } = require('firebase/auth')
+    const SecureStore = require('expo-secure-store')
+    const secureStoreAdapter = {
+      getItem: (key: string) => SecureStore.getItemAsync(key),
+      setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
+      removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+    }
     authInstance = initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
+      persistence: getReactNativePersistence(secureStoreAdapter),
     })
   } catch {
     // If Auth was already initialized for this app, get the existing instance
