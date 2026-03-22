@@ -9,11 +9,13 @@ This folder is the entry point for converting business requirements into product
 ```
 inbox/feature-name.summary.md
         ↓  /business-to-sdd
-.ai/_sdd/feature-name.sdd.md   (summary deleted)
+.ai/_sdd/00-feature-name.sdd.md      (summary deleted)
         ↓  /implement-logic feature-name
-src/screens/feature-name/      (logic + functional UI, no styling)
+src/screens/feature-name/            (logic + functional UI, no styling)
         ↓  /ui-polish feature-name
-src/screens/feature-name/      (design system applied, UI complete)
+src/screens/feature-name/            (design system applied, UI complete)
+        ↓  rename
+.ai/_sdd/00-feature-name.sdd.done.md (archived)
 ```
 
 ---
@@ -25,6 +27,25 @@ src/screens/feature-name/      (design system applied, UI complete)
 **Then run:** `/business-to-sdd`
 
 The business-analyst agent reads all summaries in `inbox/`, converts each to a full SDD at `.ai/_sdd/`, and deletes the summary file.
+
+### SDD Naming Convention
+
+SDDs are numbered sequentially so the implementation order is explicit at a glance:
+
+```
+.ai/_sdd/00-web-demonstration.sdd.md   ← pending / in progress
+.ai/_sdd/00-web-demonstration.sdd.done.md  ← all 3 stages complete
+```
+
+When creating a new SDD, use the next available number:
+
+```
+00-first-feature.sdd.md
+01-second-feature.sdd.md
+02-third-feature.sdd.md
+```
+
+When all 3 stages are done, rename the file by replacing `.sdd.md` with `.sdd.done.md`.
 
 ### Summary file format (`inbox/feature-name.summary.md`)
 
@@ -95,3 +116,5 @@ What gets applied:
 - **One feature at a time** — finish all 3 stages before starting the next feature
 - **Summary files are disposable** — they are deleted after SDD generation; the SDD is the source of truth
 - **SDD is immutable during implementation** — if requirements change, update the SDD first, then re-run the affected stages
+- **SDDs are numbered** — use the next available `NN-` prefix; never reuse a number
+- **Done means done** — only rename to `.sdd.done.md` when all 3 stages are merged to `main`
