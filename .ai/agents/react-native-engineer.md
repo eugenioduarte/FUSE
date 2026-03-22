@@ -71,15 +71,20 @@ No business logic inside screen. No API calls inside screen.
 
 Always follow:
 
-Model → DTO → Service → Query → Hook → Screen
+Model → DTO → Service → Repository → DAO → SQLite ← Hook ← Screen
+                                  ↑
+                             API (background sync)
 
 Rules:
 
 - DTO never reaches UI
 - Transform API response inside service or adapter
-- Query layer handles caching
-- Hook exposes domain-safe data
+- Repository is the single access point for data — reads from SQLite, syncs with API in background
+- DAO (`src/lib/db/dao/`) owns raw SQL; never call `expo-sqlite` directly from repositories
+- Hook reads from repository (which reads SQLite — always available offline)
 - Screen consumes hook only
+
+**Offline-first rule:** every data hook must work with no network. Background sync updates SQLite, then triggers re-render. On API failure, show last cached SQLite data.
 
 No shortcuts.
 

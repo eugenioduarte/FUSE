@@ -4,7 +4,7 @@
 
 # SDD — Task #3: Offline-First Architecture with SQLite
 
-**Status:** Planned
+**Status:** Done
 **Priority:** High
 **Agent:** `frontend-architect` (design) + `react-native-engineer` (implementation)
 

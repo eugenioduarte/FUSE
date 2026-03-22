@@ -1,4 +1,5 @@
-import AsyncStorage from '@react-native-async-storage/async-storage'
+import { getDb } from '../lib/db/db'
+import { offlineQueueDao } from '../lib/db/dao/offline-queue.dao'
 
 export type QueueItem = {
   id: string
@@ -10,45 +11,24 @@ export type QueueItem = {
   tries: number
 }
 
-const KEY = 'offline:queue'
-
-async function readQueue(): Promise<QueueItem[]> {
-  const raw = await AsyncStorage.getItem(KEY)
-  return raw ? (JSON.parse(raw) as QueueItem[]) : []
-}
-
-async function writeQueue(items: QueueItem[]) {
-  await AsyncStorage.setItem(KEY, JSON.stringify(items))
-}
-
 export const offlineQueue = {
   async enqueue(item: Omit<QueueItem, 'id' | 'createdAt' | 'tries'>) {
-    const list = await readQueue()
-    const newItem: QueueItem = {
-      ...item,
-      id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
-      createdAt: Date.now(),
-      tries: 0,
-    }
-    list.push(newItem)
-    await writeQueue(list)
-    return newItem
+    const db = await getDb()
+    return offlineQueueDao.enqueue(db, item)
   },
 
-  async peekAll() {
-    return readQueue()
+  async peekAll(): Promise<QueueItem[]> {
+    const db = await getDb()
+    return offlineQueueDao.peekAll(db)
   },
 
   async remove(id: string) {
-    const list = await readQueue()
-    const next = list.filter((q) => q.id !== id)
-    await writeQueue(next)
+    const db = await getDb()
+    return offlineQueueDao.remove(db, id)
   },
 
   async bumpTries(id: string) {
-    const list = await readQueue()
-    const item = list.find((q) => q.id === id)
-    if (item) item.tries += 1
-    await writeQueue(list)
+    const db = await getDb()
+    return offlineQueueDao.bumpTries(db, id)
   },
 }

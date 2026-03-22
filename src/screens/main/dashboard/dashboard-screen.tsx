@@ -8,6 +8,7 @@ import { useThemeStore } from '@/store/useThemeStore'
 import { useUpdateBackgroundColor } from '@/store/useUpdateBackgroundColor'
 import React from 'react'
 import { FlatList, StyleSheet } from 'react-native'
+import SyncIndicator from '@/components/sync-indicator/sync-indicator'
 import { navigatorManager } from '../../../navigation/navigatorManager'
 import TopicCard from '../topic/components/topic-card/topic-card'
 import DashboardAgentDisplay from './components/dashboard-agent-display'
@@ -27,6 +28,7 @@ export default function DashboardScreen() {
 
   return (
     <Container style={styles.container}>
+      <SyncIndicator />
       <SubContainer>
         <FlatList
           data={items}

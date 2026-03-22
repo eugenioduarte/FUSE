@@ -27,6 +27,7 @@ function expoConfig({ config }) {
       'expo-font',
       'expo-localization',
       'expo-secure-store',
+      'expo-sqlite',
       'expo-web-browser',
     ],
     extra: existingExtra ? { ...existingExtra, firebase } : { firebase },

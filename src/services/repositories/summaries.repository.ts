@@ -1,26 +1,25 @@
-import { localCache } from '../../storage/localCache'
+import { getDb } from '../../lib/db/db'
+import { summariesDao } from '../../lib/db/dao/summaries.dao'
 import { offlineQueue } from '../../storage/offlineQueue'
 import { ExpandableTerm, Summary } from '../../types/domain'
 import { aiService } from '../ai/ai.service'
 import { challengesRepository } from './challenges.repository'
 import { topicsRepository } from './topics.repository'
 
-const listKey = (topicId: string) => `summaries:list:${topicId}`
-const LIST_ALL_KEY = 'summaries:list'
-
 export const summariesRepository = {
   async listAll(): Promise<Summary[]> {
-    const cached = await localCache.get<Summary[]>(LIST_ALL_KEY)
-    return cached?.data ?? []
+    const db = await getDb()
+    return summariesDao.getAll(db)
   },
+
   async list(topicId: string): Promise<Summary[]> {
-    const cached = await localCache.get<Summary[]>(listKey(topicId))
-    return cached?.data ?? []
+    const db = await getDb()
+    return summariesDao.getByTopicId(db, topicId)
   },
 
   async getById(id: string): Promise<Summary | null> {
-    const all = await this.listAll()
-    return all.find((s) => s.id === id) ?? null
+    const db = await getDb()
+    return summariesDao.getById(db, id)
   },
 
   async upsert(
@@ -28,19 +27,8 @@ export const summariesRepository = {
     syncUrl: string,
     opts?: { fromSync?: boolean },
   ) {
-    const key = listKey(summary.topicId)
-    const current = (await localCache.get<Summary[]>(key))?.data ?? []
-    const idx = current.findIndex((s) => s.id === summary.id)
-    if (idx >= 0) current[idx] = summary
-    else current.unshift(summary)
-    await localCache.set(key, current, summary.updatedAt)
-
-    // Maintain global list as well
-    const all = (await localCache.get<Summary[]>(LIST_ALL_KEY))?.data ?? []
-    const idxAll = all.findIndex((s) => s.id === summary.id)
-    if (idxAll >= 0) all[idxAll] = summary
-    else all.unshift(summary)
-    await localCache.set(LIST_ALL_KEY, all, summary.updatedAt)
+    const db = await getDb()
+    await summariesDao.upsert(db, summary)
 
     if (!opts?.fromSync) {
       await offlineQueue.enqueue({ url: syncUrl, method: 'PUT', body: summary })
@@ -56,7 +44,6 @@ export const summariesRepository = {
   ) {
     const now = Date.now()
     const id = opts?.idFactory ? opts.idFactory() : `${now}`
-    // Prefer enriched knowledge summary
     const gen = await aiService.generateKnowledgeSummary(prompt)
     const topic = await topicsRepository.getById(topicId)
     const summary: Summary = {
@@ -73,7 +60,6 @@ export const summariesRepository = {
       updatedAt: now,
     }
     await this.upsert(summary, opts?.syncUrl || '/sync/summary')
-    // Immediately flush so collaborators on shared topics see the new summary
     try {
       const { processOfflineQueue } = await import('../sync/sync.service')
       await processOfflineQueue()
@@ -92,10 +78,9 @@ export const summariesRepository = {
     term: string,
     opts?: { idFactory?: () => string; syncUrl?: string },
   ) {
-    const prompt = term
     const now = Date.now()
     const id = opts?.idFactory ? opts.idFactory() : `${now}`
-    const gen = await aiService.generateKnowledgeSummary(prompt)
+    const gen = await aiService.generateKnowledgeSummary(term)
     const summary: Summary = {
       id,
       topicId: parent.topicId,
@@ -111,7 +96,6 @@ export const summariesRepository = {
       updatedAt: now,
     }
     await this.upsert(summary, opts?.syncUrl || '/sync/summary')
-    // Immediately flush so collaborators on shared topics see the new summary
     try {
       const { processOfflineQueue } = await import('../sync/sync.service')
       await processOfflineQueue()
@@ -126,46 +110,33 @@ export const summariesRepository = {
   },
 
   async listChildren(parentSummaryId: string): Promise<Summary[]> {
-    const all = await this.listAll()
-    return all.filter((s) => s.parentSummaryId === parentSummaryId)
+    const db = await getDb()
+    return summariesDao.getChildren(db, parentSummaryId)
   },
 
   async deleteById(
     id: string,
     opts?: { syncUrl?: string; alsoClearWhiteboard?: boolean },
   ) {
-    const all = await this.listAll()
-    const target = all.find((s) => s.id === id)
+    const db = await getDb()
+    const target = await summariesDao.getById(db, id)
     if (!target) return
 
     // Recursively delete children first
-    const children = all.filter((s) => s.parentSummaryId === id)
+    const children = await summariesDao.getChildren(db, id)
     for (const child of children) {
       await this.deleteById(child.id, opts)
     }
 
-    // Delete related challenges
     await challengesRepository.deleteBySummaryId(id)
+    await summariesDao.deleteById(db, id)
 
-    // Update topic-specific cache
-    const key = listKey(target.topicId)
-    const curTopicList = (await localCache.get<Summary[]>(key))?.data ?? []
-    const nextTopicList = curTopicList.filter((s) => s.id !== id)
-    await localCache.set(key, nextTopicList)
-
-    // Update global list
-    const curAll = (await localCache.get<Summary[]>(LIST_ALL_KEY))?.data ?? []
-    const nextAll = curAll.filter((s) => s.id !== id)
-    await localCache.set(LIST_ALL_KEY, nextAll)
-
-    // Enqueue delete for server sync
     await offlineQueue.enqueue({
       url: opts?.syncUrl || '/sync/summary',
       method: 'DELETE',
       body: { id },
     })
 
-    // Remove from Firestore as well
     try {
       const { deleteGroupSummary } = await import(
         '../firebase/collabData.service'
@@ -179,8 +150,6 @@ export const summariesRepository = {
     for (const s of list) {
       await this.deleteById(s.id, opts)
     }
-    // Clear the topic cache key
-    await localCache.remove(listKey(topicId))
   },
 
   async setBackgroundColorByTopic(
@@ -188,35 +157,21 @@ export const summariesRepository = {
     color?: string,
     opts?: { syncUrl?: string; fromSync?: boolean },
   ) {
-    const key = listKey(topicId)
-    const list = (await localCache.get<Summary[]>(key))?.data ?? []
+    const db = await getDb()
+    const list = await summariesDao.getByTopicId(db, topicId)
     if (!list.length) return
+
     const updatedAt = Date.now()
-    const nextList = list.map((s) => ({
-      ...s,
-      backgroundColor: color || undefined,
-      updatedAt,
-    }))
-    await localCache.set(key, nextList, updatedAt)
+    for (const s of list) {
+      const updated: Summary = { ...s, backgroundColor: color || undefined, updatedAt }
+      await summariesDao.upsert(db, updated)
 
-    // Update global list entries
-    const all = (await localCache.get<Summary[]>(LIST_ALL_KEY))?.data ?? []
-    const nextAll = all.map((s) =>
-      s.topicId === topicId
-        ? { ...s, backgroundColor: color || undefined, updatedAt }
-        : s,
-    )
-    await localCache.set(LIST_ALL_KEY, nextAll, updatedAt)
-
-    // Enqueue individual updates for sync (keeps server consistent)
-    if (!opts?.fromSync) {
-      for (const s of nextList) {
+      if (!opts?.fromSync) {
         await offlineQueue.enqueue({
           url: opts?.syncUrl || '/sync/summary',
           method: 'PUT',
-          body: s,
+          body: updated,
         })
-        // No immediate Firestore mirror here; flushed on Dashboard focus.
       }
     }
   },

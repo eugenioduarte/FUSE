@@ -61,14 +61,26 @@ No cross-feature coupling. No business logic inside UI components.
 
 ## 3️⃣ Separation of Responsibilities
 
-| Layer   | Responsibility              |
-| ------- | --------------------------- |
-| Model   | App domain representation   |
-| DTO     | API contract representation |
-| Service | HTTP communication          |
-| Query   | React Query orchestration   |
-| Hook    | Business logic              |
-| Screen  | Presentation only           |
+| Layer      | Responsibility                                      |
+| ---------- | --------------------------------------------------- |
+| Model      | App domain representation                           |
+| DTO        | API contract representation                         |
+| Service    | HTTP communication                                  |
+| Repository | Offline-first data access — reads SQLite, writes both SQLite and API |
+| DAO        | Raw SQL queries per entity (`src/lib/db/dao/`)      |
+| SQLite     | Single source of truth (`expo-sqlite`, `fuse.db`)   |
+| Query      | React Query orchestration (server-state layer)      |
+| Hook       | Business logic                                      |
+| Screen     | Presentation only                                   |
+
+**Offline-first pattern (mandatory for all data features):**
+```
+Screen entry → Repository.list() reads SQLite (instant, works offline)
+                         ↓ parallel background fetch
+             API success → Repository.upsert() writes SQLite → UI refreshes
+             API failure → app shows last SQLite state + SyncIndicator error dot
+```
+No screen may access SQLite directly. All DB access goes through Repositories.
 
 ---
 

@@ -19,13 +19,13 @@
 
 ### Quick Status
 
-- [ ] **Task #1:** Internationalization - Move all free text to translation files — [SDD](./_sdd/task-01-internationalization.md)
+- [x] **Task #1:** Internationalization - Move all free text to translation files — [SDD](./_sdd/task-01-internationalization.md)
 - [ ] **Task #2:** Migrate to Tailwind CSS (Uniwind) — [SDD](./_sdd/task-02-tailwind-migration.md)
-- [ ] **Task #3:** Offline-First Architecture with SQLite — [SDD](./_sdd/task-03-offline-first-sqlite.md)
+- [x] **Task #3:** Offline-First Architecture with SQLite — [SDD](./_sdd/task-03-offline-first-sqlite.md)
 - [x] **Task #4:** Update system.md with Complete Agent Orchestration ✅
-- [ ] **Task #5:** Code Cleanup and Refactoring — [SDD](./_sdd/task-05-code-cleanup.md)
-- [ ] **Task #6:** Agent Orchestration Diagram — [SDD](./_sdd/task-06-orchestration-diagram.md)
-- [ ] **Task #7:** English Documentation with Portuguese Headers — [SDD](./_sdd/task-07-english-docs.md)
+- [x] **Task #5:** Code Cleanup and Refactoring — [SDD](./_sdd/task-05-code-cleanup.md)
+- [x] **Task #6:** Agent Orchestration Diagram — [SDD](./_sdd/task-06-orchestration-diagram.md)
+- [x] **Task #7:** English Documentation with Portuguese Headers — [SDD](./_sdd/task-07-english-docs.md)
 - [x] **Task #8:** Pre-Push Token Usage Tracking ✅
 - [x] **Task #9:** Sonar Auto-Fix Agent ✅
 - [x] **Task #10:** Coupling Analysis Agent ✅
