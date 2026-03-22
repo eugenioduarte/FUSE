@@ -1,0 +1,26 @@
+name: Dashboard Preview
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: dashboard-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  generate:
+    name: Generate dashboard artifact
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate dashboard
+        run: bash .ai/scripts/generate-dashboard.sh
+
+      - name: Upload dashboard artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dashboard-preview
+          path: docs/demonstration-orchestration.html
+          retention-days: 7
