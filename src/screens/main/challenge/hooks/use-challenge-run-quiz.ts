@@ -1,5 +1,5 @@
 import { buildQuizPrompt, QUIZ_SYSTEM } from '@/services/prompts'
-import { callAI } from '@/services/ai/ai.service'
+import { callAI, toJSONSafe } from '@/services/ai/ai.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
@@ -181,63 +181,55 @@ export const useChallengeRunQuiz = (challengeId: string) => {
       await challengesRepository.upsert(updated, '/sync/challenge', {
         summaryId: challenge.summaryId,
       })
-      setChallenge(updated)
-      setFinished({ score, total: questions.length })
-      setLoadingOverlay(true, 'Sincronizando…')
-      const { immediateCollaborativeFlush } = await import(
-        '@/services/firebase/immediateFlush'
-      )
-      await immediateCollaborativeFlush(1500)
     } catch (e) {
       console.error(e)
-      setChallenge(updated)
-      setFinished({ score, total: questions.length })
-    } finally {
-      setLoadingOverlay(false)
     }
+    setChallenge(updated)
+    setFinished({ score, total: questions.length })
+    // fire-and-forget — never block navigation
+    import('@/services/firebase/immediateFlush')
+      .then(({ immediateCollaborativeFlush }) => immediateCollaborativeFlush(1500))
+      .catch(() => {})
   }
 
   const forceFinish = async () => {
     if (!challenge) return
+    const score = computeScore(questions, firstChoiceByIndex)
+    const now = Date.now()
+    const attempt: Attempt & { userId?: string } = {
+      at: now,
+      score,
+      total: questions.length,
+      userId: meId || undefined,
+      questions: questions.map((q, i) => ({
+        ...q,
+        choice: firstChoiceByIndex[i] ?? null,
+      })),
+    }
+    const updated: Challenge = {
+      ...challenge,
+      updatedAt: now,
+      payload: {
+        ...challenge.payload,
+        attempts: [...(challenge.payload?.attempts ?? []), attempt],
+        lastAttempt: { score, total: questions.length, at: now },
+      },
+    }
     try {
       setLoadingOverlay(true, 'ChallengeRunQuizScreen')
-      const score = computeScore(questions, firstChoiceByIndex)
-      const now = Date.now()
-      const attempt: Attempt & { userId?: string } = {
-        at: now,
-        score,
-        total: questions.length,
-        userId: meId || undefined,
-        questions: questions.map((q, i) => ({
-          ...q,
-          choice: firstChoiceByIndex[i] ?? null,
-        })),
-      }
-      const updated: Challenge = {
-        ...challenge,
-        updatedAt: now,
-        payload: {
-          ...challenge.payload,
-          attempts: [...(challenge.payload?.attempts ?? []), attempt],
-          lastAttempt: { score, total: questions.length, at: now },
-        },
-      }
       await challengesRepository.upsert(updated, '/sync/challenge', {
         summaryId: challenge.summaryId,
       })
-      setChallenge(updated)
-      setFinished({ score, total: questions.length })
-      try {
-        const { immediateCollaborativeFlush } = await import(
-          '@/services/firebase/immediateFlush'
-        )
-        await immediateCollaborativeFlush(1500)
-      } catch {}
     } catch (e) {
       console.error(e)
     } finally {
       setLoadingOverlay(false)
     }
+    setChallenge(updated)
+    setFinished({ score, total: questions.length })
+    import('@/services/firebase/immediateFlush')
+      .then(({ immediateCollaborativeFlush }) => immediateCollaborativeFlush(1500))
+      .catch(() => {})
   }
 
   return {
@@ -311,16 +303,5 @@ function shuffleArray<T>(arr: T[]): T[] {
   return a
 }
 
-function toJSONSafe(text: string): any {
-  try {
-    return JSON.parse(text)
-  } catch {
-    const m = /\{[\s\S]*\}/.exec(text)
-    if (m) {
-      try { return JSON.parse(m[0]) } catch {}
-    }
-    return null
-  }
-}
 
 export default useChallengeRunQuiz

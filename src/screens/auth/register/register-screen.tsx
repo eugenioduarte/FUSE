@@ -131,16 +131,16 @@ export default function RegisterScreen() {
                   onPress={handleGoBack}
                   disabled={isSubmitting}
                   style={styles.button}
-                  background={theme.colors.accentRed}
-                  textColor={theme.colors.backgroundPrimary}
+                  background={theme.colors.accentYellow}
+                  textColor={theme.colors.black}
                 />
                 <Button
                   title={translations.registerButton}
                   onPress={handleSubmit(onSubmit)}
                   disabled={!isValid || isSubmitting}
                   style={styles.button}
-                  background={theme.colors.accentRed}
-                  textColor={theme.colors.backgroundPrimary}
+                  background={theme.colors.accentYellow}
+                  textColor={theme.colors.black}
                 />
               </View>
             </Animated.View>

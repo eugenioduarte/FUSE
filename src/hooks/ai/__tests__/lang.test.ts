@@ -1,29 +1,29 @@
 import { getPreferredLanguage } from '../lang'
 
-jest.mock('expo-localization', () => ({
-  getLocales: jest.fn(),
+jest.mock('@/locales', () => ({
+  getCurrentLocale: jest.fn(),
 }))
 
-const { getLocales } = require('expo-localization')
+const { getCurrentLocale } = require('@/locales')
 
 describe('getPreferredLanguage', () => {
-  it('returns pt-BR when no locales are available', () => {
-    getLocales.mockReturnValue([])
+  it('returns en when no locale is available', () => {
+    getCurrentLocale.mockReturnValue(null)
+    expect(getPreferredLanguage()).toBe('en')
+  })
+
+  it('returns the current locale when set', () => {
+    getCurrentLocale.mockReturnValue('pt-BR')
     expect(getPreferredLanguage()).toBe('pt-BR')
   })
 
-  it('returns pt-BR for Portuguese locale', () => {
-    getLocales.mockReturnValue([{ languageCode: 'pt', languageTag: 'pt-BR' }])
-    expect(getPreferredLanguage()).toBe('pt-BR')
+  it('returns en for English locale', () => {
+    getCurrentLocale.mockReturnValue('en')
+    expect(getPreferredLanguage()).toBe('en')
   })
 
-  it('returns the language tag for non-Portuguese locales', () => {
-    getLocales.mockReturnValue([{ languageCode: 'en', languageTag: 'en-US' }])
-    expect(getPreferredLanguage()).toBe('en-US')
-  })
-
-  it('falls back to languageCode when languageTag is missing', () => {
-    getLocales.mockReturnValue([{ languageCode: 'es', languageTag: '' }])
+  it('returns es for Spanish locale', () => {
+    getCurrentLocale.mockReturnValue('es')
     expect(getPreferredLanguage()).toBe('es')
   })
 })

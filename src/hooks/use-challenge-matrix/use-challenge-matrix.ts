@@ -21,7 +21,7 @@ import useTrackTopicSession from '@/hooks/use-track-topic-session'
  * Author: Eugenio Silva
  */
 import { MATRIX_SYSTEM, matrixUserPrompt } from '@/services/prompts'
-import { callAI } from '@/services/ai/ai.service'
+import { callAI, toJSONSafe } from '@/services/ai/ai.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -42,17 +42,7 @@ const TIMER_SECONDS = 60
 // The LLM sometimes returns JSON wrapped in markdown fences or with
 // minor formatting issues; this helper strips fences and attempts
 // to parse the payload, returning null on failure.
-function toJSONSafe(text: string): any {
-  try {
-    return JSON.parse(text)
-  } catch {
-    const m = /\{[\s\S]*\}/.exec(text)
-    if (m) {
-      try { return JSON.parse(m[0]) } catch {}
-    }
-    return null
-  }
-}
+
 
 // Generate question + target words for the Matrix challenge.
 // This function calls an LLM service (if an API key is configured)

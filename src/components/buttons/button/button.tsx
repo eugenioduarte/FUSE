@@ -147,7 +147,7 @@ const Button: React.FC<ButtonProps> = ({
         {leftIcon ? <View style={styles.iconLeft}>{leftIcon}</View> : null}
         <View pointerEvents="none" style={styles.labelWrap}>
           <Text
-            weight="bold"
+            weight="semiBold"
             style={styles.label}
             numberOfLines={1}
             ellipsizeMode="tail"

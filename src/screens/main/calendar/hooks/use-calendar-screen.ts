@@ -86,18 +86,18 @@ export const useCalendarScreen = () => {
 
   // Month header helpers
   const monthNames = [
-    'Janeiro',
-    'Fevereiro',
-    'Março',
-    'Abril',
-    'Maio',
-    'Junho',
-    'Julho',
-    'Agosto',
-    'Setembro',
-    'Outubro',
-    'Novembro',
-    'Dezembro',
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ]
   // Prefer the day from the currently selected date (YYYY-MM-DD) so the big day
   // shown in the header updates whenever the user picks a different day.
