@@ -1,12 +1,16 @@
 # Token Usage
 
-> Last updated: 2026-03-22 22:58
+> Last updated: 2026-03-22 22:59
 
 
 ## Summary
 
-_No data yet._
+| Provider | Model | Input | Output | Cache Read | Total |
+|----------|-------|------:|-------:|-----------:|------:|
+| — | — | — | — | — | — |
 
 ## Log
 
-_No sessions logged yet._
+| Date | Session | Provider | Model | Input | Output | Cache Read | Total |
+|------|---------|----------|-------|------:|-------:|-----------:|------:|
+| — | — | — | — | — | — | — | — |

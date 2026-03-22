@@ -60,11 +60,10 @@ lines_out.append("")
 
 # --- Summary ---
 lines_out.append("## Summary\n")
+lines_out.append("| Provider | Model | Input | Output | Cache Read | Total |")
+lines_out.append("|----------|-------|------:|-------:|-----------:|------:|")
 if by_provider:
-    lines_out.append("| Provider | Model | Input | Output | Cache | Total |")
-    lines_out.append("|----------|-------|------:|-------:|------:|------:|")
     for provider, stats in sorted(by_provider.items()):
-        # find most-used model for this provider
         model_counts = defaultdict(int)
         for r in rows:
             if r['provider'] == provider:
@@ -77,22 +76,22 @@ if by_provider:
         f"| **TOTAL** | | {fmt(grand['input'])} | {fmt(grand['output'])} | {fmt(grand['cache'])} | **{fmt(grand['total'])}** |"
     )
 else:
-    lines_out.append("_No data yet._")
+    lines_out.append("| — | — | — | — | — | — |")
 
 lines_out.append("")
 
 # --- Log ---
 lines_out.append("## Log\n")
+lines_out.append("| Date | Session | Provider | Model | Input | Output | Cache Read | Total |")
+lines_out.append("|------|---------|----------|-------|------:|-------:|-----------:|------:|")
 if rows:
-    lines_out.append("| Date | Session | Provider | Model | Input | Output | Cache | Total |")
-    lines_out.append("|------|---------|----------|-------|------:|-------:|------:|------:|")
     for r in reversed(rows):  # most recent first
         lines_out.append(
             f"| {r['date']} | `{r['session']}` | {r['provider']} | {r['model']} "
             f"| {fmt(r['input'])} | {fmt(r['output'])} | {fmt(r['cache'])} | {fmt(r['total'])} |"
         )
 else:
-    lines_out.append("_No sessions logged yet._")
+    lines_out.append("| — | — | — | — | — | — | — | — |")
 
 with open(md_path, 'w') as f:
     f.write('\n'.join(lines_out) + '\n')
