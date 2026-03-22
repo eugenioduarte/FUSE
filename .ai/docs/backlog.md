@@ -28,6 +28,27 @@ Format: `[tag] Screen/Area — description`
 
 ---
 
+### [2026-03-22] 🟢 FEAT — i18n Dinâmico: tradução sob demanda para qualquer idioma
+
+O utilizador pode selecionar qualquer idioma na app. A tradução é gerada a partir do `en.json` via AI e persistida no device para uso offline.
+
+**Escopo:**
+- UI de seleção de idioma (lista ou search de locales)
+- Chamar o modelo de tradução (AI ou API externa) com o `en.json` como source
+- Persistir o JSON traduzido no device (SQLite ou AsyncStorage)
+- Carregar o locale traduzido no i18next em runtime
+- Cache: só traduzir novamente se `en.json` mudar (hash/version check)
+
+**A investigar depois:**
+- Idiomas RTL (árabe, hebraico, persa) — React Native tem suporte parcial via `I18nManager.forceRTL`, mas layout e componentes precisam de revisão para não quebrar; avaliar impacto por tela
+- Qualidade das traduções para idiomas de baixo recurso
+- Tamanho do JSON traduzido vs. quotas de armazenamento
+
+**Após implementar:**
+- Atualizar `README.md` — adicionar entrada em `### What Makes FUSE Different` destacando suporte dinâmico a qualquer idioma via tradução AI sob demanda
+
+---
+
 ## Done
 
 ### [2026-03-21] 🔵 AI — Agente autônomo de PR lifecycle ✅

@@ -124,15 +124,15 @@ const LoginScreen: React.FC = () => {
                   onPress={() => navigatorManager.goToRegister()}
                   disabled={isSubmitting}
                   style={styles.button}
-                  background={theme.colors.accentRed}
-                  textColor={theme.colors.backgroundPrimary}
+                  background={theme.colors.accentYellow}
+                  textColor={theme.colors.black}
                 />
                 <Button
                   title={t('login.button')}
                   onPress={handleSubmit(onSubmit)}
                   style={styles.button}
-                  background={theme.colors.accentRed}
-                  textColor={theme.colors.backgroundPrimary}
+                  background={theme.colors.accentYellow}
+                  textColor={theme.colors.black}
                   disabled={isSubmitting}
                 />
               </View>

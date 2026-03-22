@@ -1,4 +1,4 @@
-/* Simple AI service to generate summaries. In production, prefer a secure server-side proxy. */
+/* Simple AI service — Anthropic Claude API. In production, prefer a secure server-side proxy. */
 
 import {
   KNOWLEDGE_SYSTEM,
@@ -7,6 +7,7 @@ import {
   SUMMARY_SYSTEM,
   summaryUserPrompt,
 } from '@/services/prompts'
+import { getCurrentLocale } from '@/locales'
 
 type AISummary = {
   title: string
@@ -24,246 +25,74 @@ export type AIKnowledgeSummary = AISummary & {
   recommendations?: string[]
 }
 
-const OPENAI_API_KEY = process.env.EXPO_PUBLIC_OPENAI_API_KEY
-const OPENAI_BASE_URL =
-  process.env.EXPO_PUBLIC_OPENAI_BASE_URL || 'https://api.openai.com/v1'
-const MODEL = process.env.EXPO_PUBLIC_OPENAI_MODEL || 'gpt-4o-mini'
-const FALLBACK_ON_429 =
-  (process.env.EXPO_PUBLIC_OPENAI_FALLBACK_ON_429 ?? 'true').toLowerCase() !==
-  'false'
-const IS_OPENROUTER = (process.env.EXPO_PUBLIC_OPENAI_BASE_URL || '').includes(
-  'openrouter.ai',
-)
-const APP_URL = process.env.EXPO_PUBLIC_APP_URL || 'http://localhost'
-const APP_NAME = process.env.EXPO_PUBLIC_APP_NAME || 'Fuse Dev'
+const ANTHROPIC_API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY
+const ANTHROPIC_BASE_URL = 'https://api.anthropic.com/v1'
+const ANTHROPIC_VERSION = '2023-06-01'
+const MODEL =
+  process.env.EXPO_PUBLIC_ANTHROPIC_MODEL || 'claude-haiku-4-5'
+const MAX_TOKENS = 4096
 
-function toJSONSafe(str: string) {
-  try {
-    return JSON.parse(str)
-  } catch {
-    // attempt to extract first JSON-like block
-    const re = /\{[\s\S]*\}/
-    const m = re.exec(str)
-    if (m) {
-      try {
-        return JSON.parse(m[0])
-      } catch {}
-    }
-    return null
-  }
-}
-
-export const aiService = {
-  async generateSummary(prompt: string): Promise<AISummary> {
-    if (!OPENAI_API_KEY) return mockSummary(prompt)
-    const body = JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: SUMMARY_SYSTEM },
-        { role: 'user', content: summaryUserPrompt(prompt) },
-      ],
-      temperature: 0.5,
-      max_tokens: 1400,
-    })
-    const res = await doRequestWithRetry(body)
-    if (!res?.ok) return handleErrorOrFallback(res, prompt)
-    const parsed = await parseAIResponse(res)
-    return parsed
-  },
-
-  async generateKnowledgeSummary(prompt: string): Promise<AIKnowledgeSummary> {
-    if (!OPENAI_API_KEY) return mockKnowledgeSummary(prompt)
-    const body = JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: KNOWLEDGE_SYSTEM },
-        { role: 'user', content: knowledgeUserPrompt(prompt) },
-      ],
-      temperature: 0.5,
-      max_tokens: 1600,
-    })
-    const res = await doRequestWithRetry(body)
-    if (!res?.ok) return handleKnowledgeErrorOrFallback(res, prompt)
-    const parsed = await parseKnowledgeResponse(res)
-    return parsed
-  },
-
-  async miniExplain(term: string, context?: string): Promise<string> {
-    if (!OPENAI_API_KEY) {
-      return `Brief description (mock) for "${term}".`
-    }
-    const system = MINI_EXPLAIN_SYSTEM
-    const user =
-      `Explain in 1-2 sentences the term: "${term}".` +
-      (context ? `\nContext: ${context.slice(0, 800)}` : '')
-    const body = JSON.stringify({
-      model: MODEL,
-      messages: [
-        { role: 'system', content: system },
-        { role: 'user', content: user },
-      ],
-      temperature: 0.4,
-    })
-    const res = await doRequestWithRetry(body)
-    if (!res?.ok) return `Brief description of ${term}.`
-    const data = await res.json()
-    const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
-    return content
-  },
-
-  async generateSummaryImage(prompt: string): Promise<string> {
-    try {
-      if (!OPENAI_API_KEY) {
-        // Fallback: placeholder image
-        return 'https://picsum.photos/1024/768'
-      }
-      const imageModel =
-        process.env.EXPO_PUBLIC_OPENAI_IMAGE_MODEL || 'gpt-image-1'
-      const body = JSON.stringify({
-        model: imageModel,
-        prompt: [
-          'A photograph or illustration that visually represents the summary topic, clear and appealing.',
-          'Avoid text, focus on visual elements representative of the subject.',
-          `Topic: ${prompt}`,
-        ].join('\n'),
-        size: '1024x768',
-        n: 1,
-      })
-      const res = await fetch(`${OPENAI_BASE_URL}/images/generations`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-        body,
-      })
-      if (!res.ok) return 'https://picsum.photos/1024/768'
-      const data = await res.json()
-      const url: string = data?.data?.[0]?.url
-      return url || 'https://picsum.photos/1024/768'
-    } catch {
-      return 'https://picsum.photos/1024/768'
-    }
-  },
-
-  async ttsToBase64(
-    text: string,
-    format: 'mp3' | 'wav' = 'mp3',
-  ): Promise<string | null> {
-    try {
-      if (!OPENAI_API_KEY) return null
-      const ttsModel =
-        process.env.EXPO_PUBLIC_OPENAI_TTS_MODEL || 'gpt-4o-mini-tts'
-      const body = JSON.stringify({
-        model: ttsModel,
-        input: text,
-        voice: 'alloy',
-        format,
-      })
-      const res = await fetch(`${OPENAI_BASE_URL}/audio/speech`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-        },
-        body,
-      })
-      if (!res.ok) return null
-      // OpenAI returns binary; some gateways return JSON with base64. Try both.
-      const contentType = res.headers.get('content-type') || ''
-      if (contentType.includes('application/json')) {
-        const data = await res.json()
-        const b64 = data?.audio || data?.data || null
-        return typeof b64 === 'string' ? b64 : null
-      }
-      const arrayBuffer = await res.arrayBuffer()
-      // Convert to base64
-      let binary = ''
-      const bytes = new Uint8Array(arrayBuffer)
-      const len = bytes.byteLength
-      for (let i = 0; i < len; i++) binary += String.fromCodePoint(bytes[i])
-      // Prefer runtime-safe branch ordering to satisfy lints
-      if (typeof btoa === 'undefined') {
-        return Buffer.from(binary, 'binary').toString('base64')
-      }
-      return btoa(binary)
-    } catch {
-      return null
-    }
-  },
-}
-
-function mockSummary(prompt: string): AISummary {
-  return {
-    title: prompt.trim().slice(0, 60),
-    content:
-      `Summary generated (mock) for: ${prompt}.\n\n` +
-      'This is simulated content. Set EXPO_PUBLIC_OPENAI_API_KEY to use the real AI.',
-    keywords: ['introduction', 'context', 'main events'],
-  }
-}
-
-function mockKnowledgeSummary(prompt: string): AIKnowledgeSummary {
-  return {
-    ...mockSummary(prompt),
-    expandableTerms: [
-      {
-        term: 'Independence of Brazil',
-        mini: 'Separation from Portugal in 1822.',
-      },
-      {
-        term: 'Dom Pedro I',
-        mini: 'First emperor of Brazil after independence.',
-      },
-    ],
-    recommendations: [
-      'Constitution of 1824',
-      'Regency Period',
-      'Pernambuco Revolution',
-    ],
-  }
-}
-
-// buildBody/buildKnowledgeBody removed — prompts centralized in services/prompts
+// ── Helpers ──────────────────────────────────────────────────────────────────
 
 /**
- * Shared helper: send a chat completion request via the configured provider
- * (OpenRouter or OpenAI-compatible) with proper headers, retry, and timeout.
- * Returns the raw content string from the first choice, or throws on failure.
+ * Safely parse a JSON string returned by the AI.
+ * Handles: plain JSON, markdown code blocks (```json ... ```), and
+ * prose-wrapped JSON (extracts the first { ... } block).
  */
-export async function callAI(
-  messages: { role: string; content: string }[],
-  temperature = 0.4,
-): Promise<string> {
-  if (!OPENAI_API_KEY) throw new Error('EXPO_PUBLIC_OPENAI_API_KEY not set')
-  const body = JSON.stringify({ model: MODEL, messages, temperature })
-  const res = await doRequestWithRetry(body)
-  if (!res?.ok) throw new Error(`AI request failed: ${res?.status ?? 'no response'}`)
-  const data = await res.json()
-  return data?.choices?.[0]?.message?.content?.trim?.() ?? ''
+export function toJSONSafe(str: string): any {
+  if (!str) return null
+  // 1. Try direct parse
+  try { return JSON.parse(str) } catch {}
+  // 2. Strip markdown code block (```json ... ``` or ``` ... ```)
+  const codeBlock = /```(?:json)?\s*([\s\S]*?)```/.exec(str)
+  if (codeBlock) {
+    try { return JSON.parse(codeBlock[1].trim()) } catch {}
+  }
+  // 3. Extract first { ... } block
+  const obj = /\{[\s\S]*\}/.exec(str)
+  if (obj) {
+    try { return JSON.parse(obj[0]) } catch {}
+  }
+  return null
 }
 
-async function doRequestWithRetry(body: string): Promise<Response | null> {
+/**
+ * Split a messages array (OpenAI-style) into system + user/assistant messages
+ * so they can be sent to the Anthropic API format.
+ */
+function splitMessages(messages: { role: string; content: string }[]) {
+  const systemParts = messages
+    .filter((m) => m.role === 'system')
+    .map((m) => m.content)
+  const chatMessages = messages.filter((m) => m.role !== 'system')
+  return {
+    system: systemParts.join('\n') || undefined,
+    messages: chatMessages,
+  }
+}
+
+// ── Core request function ─────────────────────────────────────────────────────
+
+async function doRequestWithRetry(
+  body: string,
+): Promise<Response | null> {
+  if (!ANTHROPIC_API_KEY) return null
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
   const maxAttempts = 3
   let attempt = 0
   let last: Response | null = null
+
   while (attempt < maxAttempts) {
     attempt++
     try {
-      // Add per-request timeout to avoid hanging fetches. AbortController is
-      // supported in React Native and modern runtimes.
-      const timeoutMs = 30000
       const controller = new AbortController()
-      const timeoutHandle = setTimeout(() => controller.abort(), timeoutMs)
-      const res = await fetch(`${OPENAI_BASE_URL}/chat/completions`, {
+      const timeoutHandle = setTimeout(() => controller.abort(), 30000)
+      const res = await fetch(`${ANTHROPIC_BASE_URL}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${OPENAI_API_KEY}`,
-          ...(IS_OPENROUTER
-            ? { 'HTTP-Referer': APP_URL, 'X-Title': APP_NAME }
-            : {}),
+          'x-api-key': ANTHROPIC_API_KEY,
+          'anthropic-version': ANTHROPIC_VERSION,
         },
         body,
         signal: controller.signal,
@@ -284,37 +113,117 @@ async function doRequestWithRetry(body: string): Promise<Response | null> {
       }
       return res
     } catch {
-      // If the fetch was aborted or errored, wait then retry.
       await sleep(300 * attempt)
     }
   }
   return last
 }
 
-function handleErrorOrFallback(
-  res: Response | null,
-  prompt: string,
-): AISummary {
-  if (res?.status === 429 && FALLBACK_ON_429) {
-    return {
-      title: `${prompt}`.trim().slice(0, 60),
-      content:
-        `Summary generated (mock - 429 fallback) for: ${prompt}.\n\n` +
-        'You have reached the request limit. Try again later for a real summary.',
-      keywords: ['concepts', 'context', 'key topics'],
-    }
+/**
+ * Shared helper used by all challenge generators.
+ * Accepts an OpenAI-style messages array (system + user/assistant) and
+ * returns the raw text content from Claude.
+ */
+export async function callAI(
+  messages: { role: string; content: string }[],
+  temperature = 0.4,
+): Promise<string> {
+  if (!ANTHROPIC_API_KEY) throw new Error('EXPO_PUBLIC_ANTHROPIC_API_KEY not set')
+  const locale = getCurrentLocale()
+  const langNames: Record<string, string> = {
+    pt: 'Portuguese',
+    en: 'English',
+    es: 'Spanish',
+    fr: 'French',
+    de: 'German',
+    it: 'Italian',
+    ja: 'Japanese',
+    zh: 'Chinese',
   }
-  throw new Error('AI request failed')
+  const language = langNames[locale] ?? locale
+  const { system, messages: chatMessages } = splitMessages(messages)
+  const systemWithLang = [
+    `Always respond in ${language}.`,
+    system,
+  ].filter(Boolean).join('\n')
+  const body = JSON.stringify({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
+    temperature,
+    ...(systemWithLang ? { system: systemWithLang } : {}),
+    messages: chatMessages,
+  })
+  const res = await doRequestWithRetry(body)
+  if (!res?.ok) throw new Error(`AI request failed: ${res?.status ?? 'no response'}`)
+  const data = await res.json()
+  return data?.content?.[0]?.text?.trim?.() ?? ''
 }
 
-async function parseAIResponse(res: Response): Promise<AISummary> {
-  const data = await res.json()
-  const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
-  const parsed = toJSONSafe(content)
-  if (!parsed?.title || !parsed?.content) {
-    throw new Error(
-      'AI returned unexpected format. Enable mock or adjust prompt.',
+// ── aiService (summary / knowledge / mini-explain / image / tts) ─────────────
+
+export const aiService = {
+  async generateSummary(prompt: string): Promise<AISummary> {
+    if (!ANTHROPIC_API_KEY) return mockSummary(prompt)
+    const text = await callAI(
+      [
+        { role: 'system', content: SUMMARY_SYSTEM },
+        { role: 'user', content: summaryUserPrompt(prompt) },
+      ],
+      0.5,
     )
+    return parseSummary(text, prompt)
+  },
+
+  async generateKnowledgeSummary(prompt: string): Promise<AIKnowledgeSummary> {
+    if (!ANTHROPIC_API_KEY) return mockKnowledgeSummary(prompt)
+    const text = await callAI(
+      [
+        { role: 'system', content: KNOWLEDGE_SYSTEM },
+        { role: 'user', content: knowledgeUserPrompt(prompt) },
+      ],
+      0.5,
+    )
+    return parseKnowledgeSummary(text, prompt)
+  },
+
+  async miniExplain(term: string, context?: string): Promise<string> {
+    if (!ANTHROPIC_API_KEY) return `Brief description (mock) for "${term}".`
+    try {
+      const user =
+        `Explain in 1-2 sentences the term: "${term}".` +
+        (context ? `\nContext: ${context.slice(0, 800)}` : '')
+      return await callAI(
+        [
+          { role: 'system', content: MINI_EXPLAIN_SYSTEM },
+          { role: 'user', content: user },
+        ],
+        0.4,
+      )
+    } catch {
+      return `Brief description of ${term}.`
+    }
+  },
+
+  async generateSummaryImage(_prompt: string): Promise<string> {
+    // Anthropic does not have an image generation API — return placeholder
+    return 'https://picsum.photos/1024/768'
+  },
+
+  async ttsToBase64(
+    _text: string,
+    _format: 'mp3' | 'wav' = 'mp3',
+  ): Promise<string | null> {
+    // Anthropic does not have a TTS API
+    return null
+  },
+}
+
+// ── Parsers ───────────────────────────────────────────────────────────────────
+
+function parseSummary(text: string, _fallbackPrompt: string): AISummary {
+  const parsed = toJSONSafe(text)
+  if (!parsed?.title || !parsed?.content) {
+    throw new Error('AI returned unexpected format.')
   }
   return {
     title: String(parsed.title),
@@ -325,12 +234,11 @@ async function parseAIResponse(res: Response): Promise<AISummary> {
   }
 }
 
-async function parseKnowledgeResponse(
-  res: Response,
-): Promise<AIKnowledgeSummary> {
-  const data = await res.json()
-  const content = data?.choices?.[0]?.message?.content?.trim?.() ?? ''
-  const parsed = toJSONSafe(content)
+function parseKnowledgeSummary(
+  text: string,
+  _fallbackPrompt: string,
+): AIKnowledgeSummary {
+  const parsed = toJSONSafe(text)
   if (!parsed?.title || !parsed?.content) {
     throw new Error('AI knowledge: unexpected format')
   }
@@ -357,20 +265,27 @@ async function parseKnowledgeResponse(
   }
 }
 
-function handleKnowledgeErrorOrFallback(
-  res: Response | null,
-  prompt: string,
-): AIKnowledgeSummary {
-  const base = handleErrorOrFallback(res, prompt)
+// ── Mocks ─────────────────────────────────────────────────────────────────────
+
+function mockSummary(prompt: string): AISummary {
   return {
-    ...base,
+    title: prompt.trim().slice(0, 60),
+    content:
+      `Summary generated (mock) for: ${prompt}.\n\n` +
+      'This is simulated content. Set EXPO_PUBLIC_ANTHROPIC_API_KEY to use the real AI.',
+    keywords: ['introduction', 'context', 'main events'],
+  }
+}
+
+function mockKnowledgeSummary(prompt: string): AIKnowledgeSummary {
+  return {
+    ...mockSummary(prompt),
     expandableTerms: [
-      { term: 'Historical context', mini: 'General overview of the period.' },
-      { term: 'Key figures', mini: 'Main people involved.' },
+      { term: 'Independence of Brazil', mini: 'Separation from Portugal in 1822.' },
+      { term: 'Dom Pedro I', mini: 'First emperor of Brazil after independence.' },
     ],
-    recommendations: ['Timelines', 'Regional conflicts'],
+    recommendations: ['Constitution of 1824', 'Regency Period', 'Pernambuco Revolution'],
   }
 }
 
 export type { AISummary }
-// already exported above

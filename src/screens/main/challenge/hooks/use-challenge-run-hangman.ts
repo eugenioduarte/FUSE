@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Dimensions, Easing } from 'react-native'
 // navigatorManager not required in hook
 import { buildHangmanPrompt, HANGMAN_SYSTEM } from '@/services/prompts'
-import { callAI } from '@/services/ai/ai.service'
+import { callAI, toJSONSafe } from '@/services/ai/ai.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
@@ -423,14 +423,3 @@ export async function generateHangmanRounds(prompt: string): Promise<HangmanGen[
   return parsed
 }
 
-function toJSONSafe(text: string): any {
-  try {
-    return JSON.parse(text)
-  } catch {
-    const m = /\{[\s\S]*\}/.exec(text)
-    if (m) {
-      try { return JSON.parse(m[0]) } catch {}
-    }
-    return null
-  }
-}
