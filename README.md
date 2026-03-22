@@ -1,11 +1,36 @@
-# FUSE - React Native Mobile Application
+# FUSE — React Native Mobile Application
 
-<!-- Brief: Professional React Native (Expo) mobile application featuring an innovative AI-assisted engineering system with specialized agents for development, testing, and quality assurance -->
+<!-- Brief: AI-powered learning app built with React Native (Expo) — topics, summaries, AI-generated challenges, offline-first SQLite persistence, and a full AI-assisted engineering system. -->
+
+<div align="center">
 
 ![React Native](https://img.shields.io/badge/React_Native-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Expo](https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white)
 ![Jest](https://img.shields.io/badge/Jest-C21325?style=for-the-badge&logo=jest&logoColor=white)
+
+</div>
+
+---
+
+## 📸 Screenshots
+
+<div align="center">
+
+| Dashboard | Topic Details | Challenge |
+|:---:|:---:|:---:|
+| _(screenshot coming soon)_ | _(screenshot coming soon)_ | _(screenshot coming soon)_ |
+| [`dashboard.png`](docs/screenshots/dashboard.png) | [`topic-details.png`](docs/screenshots/topic-details.png) | [`challenge-quiz.png`](docs/screenshots/challenge-quiz.png) |
+
+| Calendar | Summary | Profile |
+|:---:|:---:|:---:|
+| _(screenshot coming soon)_ | _(screenshot coming soon)_ | _(screenshot coming soon)_ |
+| [`calendar.png`](docs/screenshots/calendar.png) | [`summary.png`](docs/screenshots/summary.png) | [`profile.png`](docs/screenshots/profile.png) |
+
+> Screenshots live in [`docs/screenshots/`](docs/screenshots/). See the [guide](docs/screenshots/README.md) for capture instructions.
+
+</div>
 
 ---
 
@@ -14,7 +39,7 @@
 - [Overview](#-overview)
 - [Key Features](#-key-features)
 - [AI-Assisted Engineering System](#-ai-assisted-engineering-system)
-- [Tech Stack](#-tech-stack)
+- [Tech Stack](#️-tech-stack)
 - [Architecture](#-architecture)
 - [Getting Started](#-getting-started)
 - [Project Structure](#-project-structure)
@@ -22,27 +47,26 @@
 - [Development Workflow](#-development-workflow)
 - [Testing](#-testing)
 - [CI/CD](#-cicd)
-- [Documentation](#-documentation)
 - [Contributing](#-contributing)
 
 ---
 
 ## 🎯 Overview
 
-FUSE is a **production-ready React Native (Expo) mobile application** that showcases modern software engineering practices with an innovative twist: a comprehensive **AI-assisted engineering system** powered by specialized agents.
+FUSE is an **AI-powered mobile learning application** built with React Native (Expo). Users create topics, generate AI-written summaries, and practice with automatically generated challenges — quizzes, hangman, matrix, and text-answer games.
 
-The project demonstrates how AI agents can be systematically integrated into the development lifecycle to handle architecture, implementation, testing, code review, performance auditing, and more—while maintaining strict architectural boundaries and quality standards.
+The project also serves as a reference implementation of a **full AI-assisted engineering system**: every part of the development lifecycle (architecture, implementation, testing, code review, performance, documentation) is handled by specialized AI agents.
 
-### What Makes This Project Different
+### What Makes FUSE Different
 
-- ✨ **Agent Orchestration System** - Intelligent routing to specialized AI agents
-- 🏗️ **Strict Architecture** - Enforced layer separation (Model → Service → Query → Hook → Screen)
-- 🔒 **Type Safety** - Strict TypeScript with runtime validation
-- 🎨 **Design System** - Consistent UI patterns and components
-- 🧪 **High Test Coverage** - ≥80% coverage requirement
-- 📊 **Automated Quality Gates** - Pre-commit and pre-push validations
-- 🔄 **Hybrid LLM Routing** - Local (Ollama) for mechanical tasks, Claude for architectural decisions
-- 📈 **Token Usage Tracking** - Monitor AI usage and cost optimization
+| Capability | Description |
+|---|---|
+| 🧠 **AI-generated content** | Summaries and challenges created by AI from user topics |
+| 📴 **Offline-first** | SQLite is the single source of truth — the app works with no network |
+| 🤖 **Agent system** | 10 specialized AI agents covering the full engineering lifecycle |
+| 🏗️ **Strict architecture** | Enforced layer separation: Screen → Hook → Repository → DAO → SQLite |
+| 🔀 **Hybrid LLM routing** | Local Ollama for mechanical tasks, Claude for architectural decisions |
+| 📊 **Living documentation** | README auto-updates on every push via the doc-designer agent |
 
 ---
 
@@ -50,154 +74,183 @@ The project demonstrates how AI agents can be systematically integrated into the
 
 ### For Users
 
-- 📱 **Cross-Platform** - iOS, Android, and Web support via Expo
-- 🎨 **Modern UI** - Smooth animations with React Native Reanimated
-- 📅 **Calendar & Challenges** - Interactive features with real-time updates
-- 👤 **User Profiles** - Avatar generation, customization, authentication
-- 🔄 **Offline Support** - AsyncStorage for local data persistence
-- 🌍 **Internationalization** - Multi-language support (EN, PT)
+- 📚 **Topics & Summaries** — Create learning topics; AI generates structured summaries with expandable terms
+- 🎮 **Challenges** — Practice with 4 game types: Quiz, Hangman, Matrix, Text Answer
+- 📅 **Calendar** — Schedule and track study sessions
+- 📴 **Offline-First** — Full app functionality without a network connection (SQLite + background sync)
+- 🔄 **Auto-Sync** — Background sync indicator shows live state: syncing / error / offline
+- 🌍 **Multi-language** — Full internationalization (EN + PT)
+- 🎨 **Theming** — Dynamic color theming per topic; dark/light mode support
+- 👤 **Profiles** — Avatar generation, connections, payment screens
 
 ### For Developers
 
-- 🤖 **8 Specialized AI Agents** - Architecture, engineering, testing, review, auditing, auto-fixing
-- 📝 **Comprehensive Documentation** - System contracts, skills, rules, and guides
-- 🛠️ **Developer Tools** - Scripts for coupling analysis, token tracking, orchestration stats
-- 🔧 **Git Workflow** - Conventional commits, Husky hooks, automated quality gates
-- 📊 **Metrics & Analytics** - Track coupling, token usage, orchestration patterns
+- 🤖 **10 Specialized AI Agents** — Architecture, engineering, testing, review, auditing, docs, PR lifecycle
+- 📝 **SDD-driven development** — Every feature starts with a Software Design Document
+- 🗄️ **SQLite + DAO pattern** — Typed data access objects, versioned migrations, ACID offline queue
+- 🛠️ **Hybrid LLM** — Local model (Ollama) for speed; Claude for reasoning
+- 🔧 **Git quality gates** — TypeScript, ESLint, Jest, token tracking, README auto-update on pre-push
+- 📊 **Token tracking** — Daily AI cost monitoring across Claude and Ollama
 
 ---
 
 ## 🤖 AI-Assisted Engineering System
 
-This project features a **unique AI orchestration system** that delegates tasks to specialized agents:
+Every development task is routed to a specialized agent. No shortcuts.
 
-### Available Agents
+### Agent Roster
 
-| Agent                     | Purpose                                                | LLM             | Trigger                        |
-| ------------------------- | ------------------------------------------------------ | --------------- | ------------------------------ |
-| **frontend-architect**    | Define architecture, create SDDs, structural decisions | Claude (always) | Feature planning, refactoring  |
-| **react-native-engineer** | Implement features following patterns                  | Local/Claude    | Component/hook/screen creation |
-| **test-writer**           | Generate unit tests with high coverage                 | Local (always)  | After implementation           |
-| **test-write-e2e**        | Create E2E tests with Maestro                          | Local (always)  | Complete user flows            |
-| **code-reviewer**         | Enforce quality gates, detect violations               | Claude (always) | PR review, pre-merge           |
-| **performance-auditor**   | Profile and optimize performance                       | Claude (always) | Performance issues             |
-| **sonar-auto-fixer**      | Auto-fix SonarQube issues                              | Local/Claude    | Quality gate failures          |
-| **coupling-analyzer**     | Analyze and improve code coupling                      | Claude (always) | Architecture reviews           |
+| Agent | Responsibility | Model | Trigger |
+|---|---|---|---|
+| **frontend-architect** | Define architecture, write SDDs, structural decisions | Claude Sonnet (always) | Feature planning, refactoring |
+| **react-native-engineer** | Implement screens, hooks, components, services | Local → Claude (escalation) | Feature implementation |
+| **test-writer** | Unit tests (≥80% coverage) | Local (always) | After implementation |
+| **test-write-e2e** | Maestro E2E scenarios | Local (always) | Complete user flows |
+| **code-reviewer** | Quality gates, architectural compliance | Claude Sonnet (always) | PR review, pre-merge |
+| **performance-auditor** | Profiling, re-render analysis, optimization | Claude Sonnet (always) | Performance issues |
+| **sonar-auto-fixer** | Auto-fix SonarQube quality gate failures | Local → Claude | Sonar gate failure |
+| **coupling-analyzer** | Dependency graph analysis, architectural violations | Claude Sonnet (always) | Architecture reviews |
+| **pr-lifecycle** | Autonomous PR: create → CI monitor → fix → review → merge | Claude Sonnet (always) | `/pr-lifecycle [PR]` |
+| **doc-designer** | Keep README.md accurate and beautiful on every push | Claude Haiku (always) | Auto: pre-push hook |
 
-### Agent Orchestration Flow
+### Standard Feature Flow
 
 ```
 User Request
      ↓
-System Orchestrator (analyzes & routes)
+frontend-architect  →  Creates SDD (.ai/_sdd/)
      ↓
-┌────────────────────────────────────────┐
-│  1. frontend-architect → Creates SDD   │
-│  2. react-native-engineer → Implements │
-│  3. test-writer → Adds tests           │
-│  4. code-reviewer → Validates          │
-│  5. User confirms → Commit             │
-└────────────────────────────────────────┘
+react-native-engineer  →  Implements feature
+     ↓
+test-writer  →  Adds unit tests
+     ↓
+code-reviewer  →  Validates quality gates
+     ↓
+commit + push
+     ↓
+doc-designer  →  Updates README if needed  (automatic, pre-push)
+     ↓
+pr-lifecycle  →  Creates PR, monitors CI, addresses reviews, merges
 ```
 
-**Key Principle:** The system orchestrator routes requests to appropriate agents, validates results against rules, and ensures quality gates pass before any commit.
-
-See [Agent Documentation](.ai/agents/README.md) for details.
+See [Agent Documentation](.ai/agents/README.md) for full agent specifications.
 
 ---
 
-## 🛠 Tech Stack
+## 🛠️ Tech Stack
 
 ### Core
 
-- **React Native** 0.81+ - Mobile framework
-- **Expo** ~54 - Development platform
-- **TypeScript** - Type safety
-- **Zustand** - State management
-- **React Navigation** 7 - Navigation
-- **React Query** (@tanstack) - Server state
+| Library | Version | Purpose |
+|---|---|---|
+| React Native | 0.81+ | Mobile framework |
+| Expo | ~54 | Development platform + native modules |
+| TypeScript | 5+ | Type safety |
+| Zustand | 5+ | Client state management |
+| React Navigation | 7 | Navigation |
+| React Query (@tanstack) | 5+ | Server state + background sync |
+
+### Persistence
+
+| Library | Purpose |
+|---|---|
+| **expo-sqlite** (v2) | Primary DB — offline-first single source of truth |
+| AsyncStorage | Zustand `persist` middleware only (auth, theme, small UI state) |
 
 ### UI & Animations
 
-- **React Native Reanimated** - Performant animations
-- **React Native Skia** - 2D graphics
-- **Expo Blur** - Native blur effects
-- **Victory Native** - Data visualization
+- **React Native Reanimated** — Performant animations
+- **React Native Skia** — 2D graphics and arcs
+- **Expo Blur** — Native blur effects
+- **Victory Native** — Charts and data visualization
 
 ### Development Tools
 
-- **Jest** + **Testing Library** - Unit testing
-- **Maestro** - E2E testing
-- **ESLint** + **Prettier** - Code quality
-- **Husky** + **lint-staged** - Git hooks
-- **SonarCloud** - Code analysis
+- **Jest** + **Testing Library** — Unit and integration tests
+- **Maestro** — E2E testing
+- **ESLint** + **Prettier** — Code quality
+- **Husky** + **lint-staged** — Git hooks
+- **SonarCloud** — Static analysis and quality gates
+- **Madge** — Dependency graph analysis
 
-### AI Integration
+### AI
 
-- **Claude Sonnet 4.6** (Anthropic) - Architectural reasoning
-- **Ollama** (qwen2.5-coder:14b) - Local mechanical tasks
-- **Madge** - Dependency analysis
-- **Custom Scripts** - Token tracking, coupling analysis
+- **Claude Sonnet 4.6** (Anthropic) — Architectural reasoning, code review
+- **Claude Haiku 4.5** (Anthropic) — Documentation updates (doc-designer)
+- **Ollama** (`qwen2.5-coder:14b`) — Local mechanical tasks (tests, boilerplate)
 
 ---
 
 ## 🏗 Architecture
 
-### Layer Separation
+### Layer Model
 
 ```
-┌─────────────────────────────────────────┐
-│ Screen Layer (UI + Navigation)          │
-│  - Pure presentation                    │
-│  - No business logic                    │
-└──────────────┬──────────────────────────┘
-               ↓
-┌─────────────────────────────────────────┐
-│ Hook Layer (Business Logic)             │
-│  - Orchestrates queries/mutations       │
-│  - Transforms data for UI               │
-└──────────────┬──────────────────────────┘
-               ↓
-┌─────────────────────────────────────────┐
-│ Query Layer (Async Orchestration)       │
-│  - React Query hooks                    │
-│  - Cache management                     │
-└──────────────┬──────────────────────────┘
-               ↓
-┌─────────────────────────────────────────┐
-│ Service Layer (Data Transformation)     │
-│  - API calls                            │
-│  - DTO → Model transformation           │
-└──────────────┬──────────────────────────┘
-               ↓
-┌─────────────────────────────────────────┐
-│ Model Layer (Domain Logic)              │
-│  - Pure TypeScript types                │
-│  - Business domain models               │
-└─────────────────────────────────────────┘
+┌─────────────────────────────────────────────┐
+│  Screen Layer                               │
+│  Pure presentation. No business logic.      │
+└──────────────────────┬──────────────────────┘
+                       ↓
+┌─────────────────────────────────────────────┐
+│  Hook Layer                                 │
+│  Business logic. Calls repositories.        │
+└──────────────────────┬──────────────────────┘
+                       ↓
+┌─────────────────────────────────────────────┐
+│  Repository Layer                           │
+│  Reads from SQLite. Syncs with API in bg.   │
+│  Enqueues mutations to offline queue.       │
+└──────────────────────┬──────────────────────┘
+                       ↓
+┌─────────────────────────────────────────────┐
+│  DAO Layer  (src/lib/db/dao/)               │
+│  Typed SQL wrappers per entity.             │
+│  JSON column serialisation / deserialisation│
+└──────────────────────┬──────────────────────┘
+                       ↓
+┌─────────────────────────────────────────────┐
+│  SQLite  (fuse.db — expo-sqlite v2)         │
+│  Single source of truth.                    │
+│  Tables: topics · summaries · challenges    │
+│          calendar_events · offline_queue    │
+└─────────────────────────────────────────────┘
 ```
 
-**Rule:** No layer can skip or import from layers above it.
+### Offline-First Pattern
+
+```
+Screen Entry
+     ↓
+Repository.list()  →  reads SQLite instantly (works offline)
+     ↓ (parallel background task)
+API fetch success  →  Repository.upsert()  →  writes SQLite  →  UI refreshes
+API fetch failure  →  app shows last SQLite state + SyncIndicator (red dot)
+```
+
+**Rule:** No layer imports from a layer above it. No screen touches SQLite directly.
 
 ### Folder Structure
 
 ```
 src/
-├── screens/          # UI screens (by feature)
+├── screens/          # Feature screens (one folder per screen)
 ├── components/       # Reusable UI components
-├── hooks/            # Business logic hooks
-├── services/         # API integration & data services
+├── hooks/            # Shared business logic hooks
+├── services/
+│   ├── repositories/ # Data access (reads SQLite, syncs API)
 │   ├── firebase/     # Firebase integration
-│   ├── repositories/ # Data repositories
-│   ├── ai/           # AI service integration
-│   └── sync/         # Sync mechanisms
-├── store/            # Zustand stores
-├── navigation/       # Navigation configuration
-├── constants/        # App constants (theme, routes)
-├── locales/          # i18n translations
-├── types/            # TypeScript types
-├── utils/            # Pure utility functions
-└── assets/           # Static assets (icons, images)
+│   ├── ai/           # AI content generation
+│   └── sync/         # Offline queue processor
+├── lib/
+│   └── db/
+│       ├── db.ts         # SQLite singleton + migration runner
+│       ├── migrations.ts # Versioned schema migrations
+│       └── dao/          # One DAO file per entity
+├── store/            # Zustand stores (UI state, sync status)
+├── navigation/       # Navigation configuration + manager
+├── locales/          # i18n translation files (EN, PT)
+├── types/            # TypeScript domain models
+└── storage/          # offlineQueue.ts (SQLite-backed)
 ```
 
 ---
@@ -207,44 +260,44 @@ src/
 ### Prerequisites
 
 - **Node.js** 18+ (use [nvm](https://github.com/nvm-sh/nvm))
-- **Yarn** 1.22+ or npm 8+
-- **Expo CLI** (optional, included with npx)
-- **Xcode** (for iOS) + CocoaPods
+- **Yarn** 4+ (corepack enabled)
+- **Xcode** 15+ (for iOS) + CocoaPods
 - **Android Studio** (for Android)
+- **Expo CLI** (`npx expo`)
 
 ### Installation
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/fuse.git
-cd fuse
+git clone https://github.com/eugenioduarte/FUSE.git
+cd FUSE
 
 # Install dependencies
 yarn install
 
+# Install iOS pods
+cd ios && pod install && cd ..
+
 # Start Expo development server
 yarn start
 
-# Run on iOS/Android
+# Run on iOS simulator
 yarn ios
-yarn android
 
-# Run on Web
-yarn web
+# Run on Android emulator
+yarn android
 ```
 
 ### Environment Variables
 
-Create `.env` file:
-
 ```bash
-# Copy example
+# Copy example config
 cp .env.example .env
 
-# Configure required variables
+# Required variables
 API_BASE_URL=https://your-api.com
 FIREBASE_API_KEY=your_key_here
-# ... see .env.example for all variables
+# See .env.example for the full list
 ```
 
 ---
@@ -252,118 +305,62 @@ FIREBASE_API_KEY=your_key_here
 ## 📁 Project Structure
 
 ```
-.
-├── .ai/                      # AI-Assisted Engineering System
-│   ├── agents/               # Specialized AI agents
+FUSE/
+├── .ai/                      # AI Engineering System
+│   ├── agents/               # 10 specialized AI agents
 │   ├── skills/               # Reusable agent skills
-│   ├── rules/                # Enforcement rules
-│   ├── router/               # LLM routing & metrics
+│   ├── rules/                # Naming, git, folder conventions
+│   ├── router/               # LLM routing + token-usage.csv
 │   ├── scripts/              # Automation scripts
-│   ├── docs/                 # System documentation
 │   ├── _sdd/                 # Software Design Documents
-│   └── system.md             # Master orchestrator
+│   └── system.md             # Master orchestration document
 │
 ├── src/                      # Application source code
-├── assets/                   # Static assets
-├── __mocks__/                # Test mocks
-├── .husky/                   # Git hooks
+├── docs/
+│   └── screenshots/          # App screenshots for README
+├── assets/                   # Static assets (icons, images, fonts)
+├── __mocks__/                # Centralized Jest mocks
+├── .husky/                   # Git hooks (pre-commit, pre-push)
 ├── .maestro/                 # E2E test scenarios
-├── FUSE.wiki/              # Project wiki
 │
 ├── App.tsx                   # Application entry point
-├── package.json              # Dependencies & scripts
-├── tsconfig.json             # TypeScript configuration
-├── jest.config.js            # Jest configuration
-├── eas.json                  # Expo build configuration
-└── README.md                 # This file
+├── app.config.js             # Expo config (dynamic)
+├── package.json
+├── tsconfig.json
+├── jest.config.js
+└── README.md                 # Auto-maintained by doc-designer agent
 ```
-
-### AI System Files
-
-- **`.ai/system.md`** - Master orchestration system, routing matrix
-- **`.ai/agents/`** - Agent specifications and workflows
-- **`.ai/skills/`** - Reusable patterns (clean code, architecture, React Native best practices)
-- **`.ai/rules/`** - Enforcement rules (folder structure, naming conventions, git workflow)
-- **`.ai/router/router.md`** - LLM routing strategy (local vs remote)
-- **`.ai/router/token-usage.csv`** - Token consumption tracking
 
 ---
 
 ## 🎭 Agent Orchestration
 
-### How It Works
-
-The **System Orchestrator** (`.ai/system.md`) analyzes requests and routes to appropriate agents:
-
-```typescript
-// Conceptual flow
-function handleRequest(userInput: string) {
-  const requestType = classifyRequest(userInput)
-
-  if (requestType === 'feature_implementation') {
-    // Multi-agent workflow
-    await runAgent('frontend-architect') // Create SDD
-    await runAgent('react-native-engineer') // Implement
-    await runAgent('test-writer') // Add tests
-    await runAgent('code-reviewer') // Validate
-    await requestUserCommitConfirmation()
-  }
-
-  if (requestType === 'git_operation') {
-    // System handles directly (never delegated)
-    await validateQualityGates()
-    await requestUserConfirmation()
-    await executeCommit() // Never auto-push
-  }
-}
-```
-
-### Request Classification
-
-| Request Keywords                | Routed To               | Example                         |
-| ------------------------------- | ----------------------- | ------------------------------- |
-| "create feature", "implement"   | `react-native-engineer` | "Create login screen"           |
-| "architecture", "sdd", "design" | `frontend-architect`    | "Design notification system"    |
-| "test", "coverage"              | `test-writer`           | "Add tests for auth hook"       |
-| "review", "validate"            | `code-reviewer`         | "Review this PR"                |
-| "sonar", "code smell"           | `sonar-auto-fixer`      | "Fix sonar issues in PR #42"    |
-| "coupling", "dependencies"      | `coupling-analyzer`     | "Analyze auth feature coupling" |
-| "performance", "slow"           | `performance-auditor`   | "Profile feed screen"           |
-| "commit", "push", "pr"          | `SYSTEM_DIRECT`         | "Commit changes"                |
-
-### Dynamic Agent Creation
-
-If no agent exists for a request pattern, the system **automatically creates** a new agent:
+### LLM Routing Strategy
 
 ```
-User: "Generate security audit report"
-  ↓
-System: No agent found for "security audit"
-  ↓
-System: Creates security-auditor agent
-  ↓
-System: Creates security-patterns skill
-  ↓
-System: Updates routing matrix
-  ↓
-System: Executes new agent
-  ↓
-User: "New agent 'security-auditor' created and executed"
+Request arrives
+     ↓
+Is it architecture / structural / cross-cutting?
+     → YES → Claude Sonnet (remote)
+     → NO  →
+          Is it mechanical? (tests, boilerplate, simple fixes)
+               → YES → Ollama local (qwen2.5-coder:14b)
+               → NO  → Claude Sonnet (remote)
 ```
 
-### View Orchestration Stats
+### View System Stats
 
 ```bash
-# View agent usage statistics
-.ai/scripts/show-orchestration-stats.sh 7  # Last 7 days
+# Agent usage statistics (last 7 days)
+.ai/scripts/show-orchestration-stats.sh 7
 
-# View token usage
+# Token usage totals
 .ai/router/update-token-totals.sh
 
-# View coupling analysis
+# Coupling analysis (full codebase)
 .ai/scripts/analyze-coupling.sh full
 
-# View future improvements progress
+# Future improvements progress
 .ai/scripts/count-improvements-progress.sh
 ```
 
@@ -375,67 +372,62 @@ User: "New agent 'security-auditor' created and executed"
 
 ```bash
 # 1. Create feature branch
-git checkout -b feature/user-notifications
+git checkout -b feature/notification-center
 
-# 2. Request architecture (invokes frontend-architect)
-# "Create SDD for notification center feature"
+# 2. Architecture (invokes frontend-architect)
+# → "Create SDD for notification center"
 
-# 3. Implement (invokes react-native-engineer)
-# "Implement notification center following SDD"
+# 3. Implementation (invokes react-native-engineer)
+# → "Implement notification center following SDD"
 
-# 4. Add tests (invokes test-writer)
-# "Add unit tests for notification hooks"
+# 4. Tests (invokes test-writer)
+# → "Add unit tests for notification hooks"
 
 # 5. Review (invokes code-reviewer)
-# "Review notification feature code"
+# → "Review notification feature code"
 
-# 6. Commit (System handles directly)
-# "commit these changes"
-# System validates quality gates → requests confirmation → commits
-
-# 7. Push and create PR
-git push origin feature/user-notifications
-gh pr create --title "feat: add notification center"
+# 6. Commit + push + PR
+# → "commit, push, pr"
+# Claude handles commit message, pre-push gates run, doc-designer checks README,
+# then pr-lifecycle creates and manages the PR autonomously
 ```
 
-### Quality Gates (Automated)
+### Quality Gates
 
 **Pre-commit** (`.husky/pre-commit`):
-
-- ESLint
-- Prettier
+- ESLint + Prettier
 - TypeScript compilation
 - Staged file tests
 
 **Pre-push** (`.husky/pre-push`):
-
-- Full TypeScript check
-- Full ESLint run
-- Complete test suite with coverage
-- Token usage report (displays daily totals)
+1. TypeScript check (full)
+2. ESLint (full)
+3. Tests + coverage
+4. Token usage report
+5. **doc-designer** — README auto-update if code changed
 
 **CI/CD** (GitHub Actions):
-
 - All pre-push checks
-- SonarCloud analysis
+- SonarCloud quality gate
 - Build validation
-- E2E tests (if configured)
+- E2E tests
 
 ---
 
 ## 🧪 Testing
 
-### Test Strategy
+### Strategy
 
-- **Unit Tests** - Jest + Testing Library (≥80% coverage required)
-- **Integration Tests** - Testing complex hooks and services
-- **E2E Tests** - Maestro for critical user flows
-- **Snapshot Tests** - Component rendering validation
+| Level | Tool | Target |
+|---|---|---|
+| Unit | Jest + Testing Library | ≥80% coverage |
+| Integration | Jest (real repositories) | Service + hook boundaries |
+| E2E | Maestro | Critical user flows |
 
 ### Running Tests
 
 ```bash
-# Run all tests
+# All tests
 yarn test
 
 # Watch mode
@@ -444,296 +436,67 @@ yarn test:watch
 # Coverage report
 yarn test:coverage
 
-# Run specific test file
-yarn test src/hooks/useAuth.test.ts
+# Single file
+yarn test src/services/repositories/topics.repository.test.ts
 
-# Run E2E tests
+# E2E
 yarn e2e
-
-# Open Maestro studio
-yarn e2e:open
-```
-
-### Test Structure
-
-```typescript
-// Example: Hook test with test-writer agent patterns
-describe('useAuth', () => {
-  it('should handle login successfully', async () => {
-    const { result } = renderHook(() => useAuth())
-
-    await act(async () => {
-      await result.current.login('user@example.com', 'password')
-    })
-
-    expect(result.current.isAuthenticated).toBe(true)
-    expect(result.current.user).toBeDefined()
-  })
-
-  it('should handle login error', async () => {
-    mockAuthService.login.mockRejectedValue(new Error('Invalid credentials'))
-
-    const { result } = renderHook(() => useAuth())
-
-    await act(async () => {
-      await result.current.login('wrong@example.com', 'wrong')
-    })
-
-    expect(result.current.error).toBe('Invalid credentials')
-    expect(result.current.isAuthenticated).toBe(false)
-  })
-})
 ```
 
 ---
 
 ## 🚀 CI/CD
 
-### GitHub Actions Workflows
+### GitHub Actions
 
-**CI Pipeline** (`.github/workflows/ci.yml`):
+**CI Pipeline** — triggers on PR and push to `main`:
+1. Lint
+2. TypeScript check
+3. Tests + coverage
+4. SonarCloud analysis
 
-- Triggers on PR and push to `main`
-- Runs lint, tests, and SonarCloud analysis
-- Validates build integrity
-
-**Release Pipeline** (`.github/workflows/release.yml`):
-
-- Manual trigger for builds
-- Uses EAS Build for production
-- Submits to App Store Connect and Google Play
-- Supports development, preview, and production profiles
-
-### EAS Build Profiles
-
-```json
-{
-  "development": { "developmentClient": true },
-  "preview": { "distribution": "internal" },
-  "production": { "autoIncrement": true }
-}
-```
+**Release Pipeline** — manual trigger:
+1. EAS Build (development / preview / production)
+2. Submit to App Store Connect + Google Play
 
 ### Required Secrets
 
-Configure in GitHub Settings > Secrets:
-
-- **SonarCloud**: `SONAR_TOKEN`
-- **Expo/EAS**: `EXPO_TOKEN`
-- **Apple** (iOS submit): `APPLE_ID`, `APPLE_TEAM_ID`, `APPLE_APP_SPECIFIC_PASSWORD`
-- **Android** (submit): `GOOGLE_SERVICE_ACCOUNT_KEY`
-
-### Deployment
-
-```bash
-# Build for development
-eas build --profile development --platform all
-
-# Build for production
-eas build --profile production --platform all
-
-# Submit to stores
-eas submit --profile production --platform ios
-eas submit --profile production --platform android
-```
-
----
-
-## 📚 Documentation
-
-### Primary Documentation
-
-- **[Agent System](.ai/agents/README.md)** - Complete agent overview and usage
-- **[System Orchestrator](.ai/system.md)** - Master orchestration system
-- **[Quick Reference](.ai/docs/orchestrator-quick-reference.md)** - Decision tree and commands
-- **[Router Strategy](.ai/router/router.md)** - LLM routing logic (local vs remote)
-- **[Future Improvements](.ai/_sdd/future-improvements.md)** - Roadmap with progress tracking
-
-### Skills & Rules
-
-- **[Project Architecture](.ai/skills/project-architecture.md)** - Layer separation and boundaries
-- **[Clean Code Rules](.ai/skills/clean-code-rules.md)** - Code quality standards
-- **[React Native Best Practices](.ai/skills/react-native-best-practices.md)** - Mobile-specific patterns
-- **[Coupling Analysis](.ai/skills/coupling-analysis.md)** - Coupling principles for React Native
-- **[Naming Conventions](.ai/rules/naming-conventions.md)** - Consistent naming patterns
-- **[Folder Structure](.ai/rules/folder-structure.md)** - Project organization rules
-- **[Git Workflow](.ai/rules/git-workflow.md)** - Commit and branch standards
-
-### Wiki
-
-Comprehensive guides in [FUSE.wiki/](FUSE.wiki/):
-
-- [Getting Started](FUSE.wiki/Getting-Started.md)
-- [Project Structure](FUSE.wiki/Project-Structure.md)
-- [Development Workflow](FUSE.wiki/Development-Workflow.md)
-- [Testing & Quality](FUSE.wiki/Testing-and-Quality.md)
-- [Release & Deployment](FUSE.wiki/Release-and-Deployment.md)
+| Secret | Purpose |
+|---|---|
+| `SONAR_TOKEN` | SonarCloud analysis |
+| `EXPO_TOKEN` | EAS Build |
+| `APPLE_ID` / `APPLE_TEAM_ID` | iOS submission |
+| `GOOGLE_SERVICE_ACCOUNT_KEY` | Android submission |
 
 ---
 
 ## 🤝 Contributing
 
-### Before Contributing
+### Adding a New Agent
 
-1. **Read the documentation** - Familiarize yourself with the agent system
-2. **Understand the architecture** - Review layer separation rules
-3. **Check existing agents** - See if your task maps to an existing agent
-4. **Follow conventions** - Respect naming, folder structure, and git workflow
+1. Create `/.ai/agents/<name>.md` following the standard structure
+2. Add routing logic to `.ai/router/router.md`
+3. Register in `.ai/agents/README.md`
+4. Add a row to the agent table in this README (or let doc-designer handle it on next push)
+5. Document in `.ai/_sdd/future-improvements.md`
 
-### Contribution Workflow
+### Adding Screenshots
 
-```bash
-# 1. Create feature branch
-git checkout -b feature/your-feature
+1. Capture on iPhone 15 Pro simulator (PNG, max 800px wide)
+2. Drop into `docs/screenshots/` with the correct filename (see [guide](docs/screenshots/README.md))
+3. The screenshot grid in this README will auto-render — no manual edit needed
 
-# 2. Make changes (agents assist as needed)
-# 3. Ensure tests pass
-yarn test
+### Code Style
 
-# 4. Ensure quality gates pass
-yarn lint && yarn format
-
-# 5. Commit with conventional commits
-git commit -m "feat: add your feature description"
-
-# 6. Push and create PR
-git push origin feature/your-feature
-gh pr create
-
-# 7. Request code review (code-reviewer agent assists)
-```
-
-### Commit Message Format
-
-Follow [Conventional Commits](https://www.conventionalcommits.org/):
-
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-**Types:**
-
-- `feat:` New feature
-- `fix:` Bug fix
-- `docs:` Documentation
-- `style:` Formatting
-- `refactor:` Code restructuring
-- `test:` Tests
-- `chore:` Maintenance
+- Follow `.ai/rules/naming-conventions.md` — kebab-case files, no PascalCase filenames
+- All new screens require: `*.screen.tsx`, `*.hook.ts`, `__tests__/`
+- Repository interface: `list()`, `getById()`, `upsert()`, `deleteById()`, `onChange()`
+- No business logic in screens. No direct SQLite access outside DAOs.
 
 ---
 
-## 🎓 Learning Resources
+<div align="center">
 
-### For Understanding the Codebase
+**README auto-maintained by the [doc-designer](.ai/agents/doc-designer.md) agent on every push.**
 
-1. Start with [.ai/system.md](.ai/system.md) - Understand the orchestration system
-2. Review [.ai/agents/README.md](.ai/agents/README.md) - Learn about available agents
-3. Explore [src/navigation/](src/navigation/) - Understand app navigation
-4. Check [src/screens/](src/screens/) - See screen implementations
-
-### For AI-Assisted Development
-
-1. [Agent Orchestrator Quick Reference](.ai/docs/orchestrator-quick-reference.md) - Fast lookup
-2. [Router Strategy](.ai/router/router.md) - When tasks use local vs remote LLMs
-3. [Coupling Analysis](.ai/skills/coupling-analysis.md) - Code quality principles
-4. Run `.ai/scripts/` tools to see metrics and progress
-
-### For Architecture Decisions
-
-1. [Project Architecture Skill](.ai/skills/project-architecture.md)
-2. [frontend-architect agent](.ai/agents/frontend-architect.md)
-3. [Software Design Documents](.ai/_sdd/)
-
----
-
-## 📊 Metrics & Tracking
-
-### View Project Health
-
-```bash
-# Token usage (AI costs)
-.ai/router/update-token-totals.sh
-
-# Output:
-📊 Token Usage for 2026-03-21
-CLAUDE:  Input: 1,500 | Output: 800 | Total: 2,600
-OLLAMA:  Input: 5,000 | Output: 3,000 | Total: 8,000
-OVERALL TOTAL: 10,600 tokens
-
-# Coupling analysis (code health)
-.ai/scripts/analyze-coupling.sh full
-
-# Output:
-Coupling Analysis Report
-Health Score: 85/100 ✅
-Circular Dependencies: 0
-Violations: 2
-
-# Agent orchestration stats
-.ai/scripts/show-orchestration-stats.sh 7
-
-# Output:
-Agent Usage (Last 7 days)
-react-native-engineer: 18 (40%)
-code-reviewer: 12 (26%)
-test-writer: 10 (22%)
-
-# Future improvements progress
-.ai/scripts/count-improvements-progress.sh
-
-# Output:
-Total Tasks: 10
-Completed: 4 ✅
-Pending: 6 📋
-Completion: 40%
-```
-
----
-
-## 🔒 License
-
-This project is proprietary and confidential.
-
----
-
-## 🙋 Support
-
-For questions, issues, or contributions:
-
-- **Documentation**: Check [FUSE.wiki/](FUSE.wiki/)
-- **Agent Help**: Review [.ai/agents/README.md](.ai/agents/README.md)
-- **Issues**: Open a GitHub issue
-- **Discussions**: Use GitHub Discussions
-
----
-
-## 🎯 Roadmap
-
-See [Future Improvements](.ai/_sdd/future-improvements.md) for planned enhancements:
-
-- [ ] Internationalization - Move all text to translation files
-- [ ] Tailwind CSS Migration - Convert to Tailwind styling
-- [ ] Offline-First with SQLite - Local-first architecture
-- [x] Agent Orchestration System - ✅ Complete
-- [x] Token Usage Tracking - ✅ Complete
-- [x] Sonar Auto-Fixer Agent - ✅ Complete
-- [x] Coupling Analysis Agent - ✅ Complete
-
-Track progress: `.ai/scripts/count-improvements-progress.sh`
-
----
-
-**Built with ❤️ using React Native, Expo, and AI-Assisted Engineering**
-
-_This project demonstrates the future of software development: human expertise augmented by specialized AI agents working in harmony._
-
-Notas técnicas:
-
-- Autenticação e perfil via Firebase Auth (updateProfile, updateEmail, updatePassword, reauthenticate).
-- Estado do utilizador persistido com Zustand + AsyncStorage (`src/store/useAuthStore.ts`).
-- Serviço de avatares em `src/services/profile/avatar.service.ts` (DiceBear, PNG).
+</div>

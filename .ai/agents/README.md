@@ -145,6 +145,30 @@ This directory contains all AI agents that assist with development, code quality
 
 ---
 
+### 📝 Documentation
+
+#### **doc-designer**
+
+- **Role:** Keep README.md accurate, beautiful, and up to date after every push
+- **Model:** Claude Haiku (always — fast and cheap for writing tasks)
+- **When to use:** Runs automatically via `.husky/pre-push` → `.ai/scripts/update-readme.sh`
+- **Triggers:** Automatic on `git push`; manual via `bash .ai/scripts/update-readme.sh`
+- **Documentation:** [doc-designer.md](./doc-designer.md)
+
+**What it updates:**
+- Agent table when new agents are added
+- Feature descriptions when new features ship
+- Tech Stack when new packages are added
+- Architecture diagram when layers change
+- Screenshots section when new images are added to `docs/screenshots/`
+
+**What it never does:**
+- Remove sections
+- Mention AsyncStorage as persistence layer (it's SQLite)
+- Skip if only lock files or test files changed
+
+---
+
 ### 🔄 PR Management
 
 #### **pr-lifecycle** ⭐ NEW
@@ -401,5 +425,5 @@ When adding a new agent:
 
 ---
 
-**Last Updated:** 2026-03-21 (pr-lifecycle agent added)
+**Last Updated:** 2026-03-22 (doc-designer agent added)
 **Maintained by:** Engineering Team

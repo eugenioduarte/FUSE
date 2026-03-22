@@ -31,4 +31,9 @@ if [ -f ".ai/router/update-token-totals.sh" ]; then
   .ai/router/update-token-totals.sh
 fi
 
+# doc-designer: update README.md if meaningful code changes were made
+if [ -f ".ai/scripts/update-readme.sh" ]; then
+  bash .ai/scripts/update-readme.sh
+fi
+
 echo "✅ All checks passed. Pushing..."
