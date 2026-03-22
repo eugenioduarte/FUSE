@@ -31,10 +31,15 @@ export function getFirebaseAuth(): ReturnType<typeof getAuth> {
   try {
     const { initializeAuth, getReactNativePersistence } = require('firebase/auth')
     const SecureStore = require('expo-secure-store')
+    // expo-secure-store only allows [A-Za-z0-9._-] in keys.
+    // Firebase uses colons in its keys (e.g. 'firebase:authUser:apiKey:appId'),
+    // so we sanitize before every call to avoid silent failures.
+    const sanitizeKey = (key: string) => key.replace(/[^A-Za-z0-9._-]/g, '_')
     const secureStoreAdapter = {
-      getItem: (key: string) => SecureStore.getItemAsync(key),
-      setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
-      removeItem: (key: string) => SecureStore.deleteItemAsync(key),
+      getItem: (key: string) => SecureStore.getItemAsync(sanitizeKey(key)),
+      setItem: (key: string, value: string) =>
+        SecureStore.setItemAsync(sanitizeKey(key), value),
+      removeItem: (key: string) => SecureStore.deleteItemAsync(sanitizeKey(key)),
     }
     authInstance = initializeAuth(app, {
       persistence: getReactNativePersistence(secureStoreAdapter),
