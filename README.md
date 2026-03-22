@@ -1,5 +1,5 @@
 ## FUSE — React Native Mobile Application 
-### STATUS - 🚧 In Progress
+### STATUS - Ongoing Evolution
 <!-- Brief: AI-powered learning app built with React Native (Expo) — topics, summaries, AI-generated challenges, offline-first SQLite persistence, and a full AI-assisted engineering system. -->
 
 <img src=".ai/docs/screenshots/01_presentation.png" width="100%" />
