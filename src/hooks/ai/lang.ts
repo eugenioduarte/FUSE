@@ -1,13 +1,8 @@
-import * as Localization from 'expo-localization'
+import { getCurrentLocale } from '@/locales'
 
-// Resolve a BCP-47 language tag for AI output (e.g., 'pt-BR', 'en')
+// Resolve a BCP-47 language tag for AI output (e.g., 'en', 'pt-BR')
 export function getPreferredLanguage(): string {
-  const locales = Localization.getLocales()
-  const first = locales[0]
-  if (!first) return 'pt-BR'
-  // Prefer full tag if available (language + region)
-  const tag = first.languageTag || first.languageCode || 'pt-BR'
-  // For now, default to Portuguese unless explicitly another
-  if ((first.languageCode || '').toLowerCase().startsWith('pt')) return 'pt-BR'
-  return tag
+  const locale = getCurrentLocale()
+  if (!locale) return 'en'
+  return locale
 }

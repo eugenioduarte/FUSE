@@ -23,7 +23,7 @@ export function useSummaryQuery(
   return useQuery({
     queryKey: ['ai', 'summary', { prompt: params.prompt, lang }],
     queryFn: () =>
-      aiService.generateSummary(`${params.prompt}\n\nIdioma alvo: ${lang}`),
+      aiService.generateSummary(params.prompt ?? ''),
     staleTime: STALE_TIME,
     gcTime: CACHE_TIME,
     enabled,
@@ -45,9 +45,7 @@ export function useKnowledgeSummaryQuery(
   return useQuery({
     queryKey: ['ai', 'knowledge', { prompt: params.prompt, lang }],
     queryFn: () =>
-      aiService.generateKnowledgeSummary(
-        `${params.prompt}\n\nIdioma alvo: ${lang}`,
-      ),
+      aiService.generateKnowledgeSummary(params.prompt ?? ''),
     staleTime: STALE_TIME,
     gcTime: CACHE_TIME,
     enabled,
@@ -65,10 +63,7 @@ export function useMiniExplainQuery(
   return useQuery({
     queryKey: ['ai', 'mini', { term: params.term, lang, ctx: keyContext }],
     queryFn: () =>
-      aiService.miniExplain(
-        `${params.term} (responder em ${lang})`,
-        params.context,
-      ),
+      aiService.miniExplain(params.term ?? '', params.context),
     staleTime: STALE_TIME,
     gcTime: CACHE_TIME,
     enabled,
@@ -86,9 +81,8 @@ export function useGenerateSummaryMutation(
 ) {
   return useMutation({
     mutationKey: ['ai', 'summary:mutate'],
-    mutationFn: ({ prompt, lang }) => {
-      const target = lang || getPreferredLanguage()
-      return aiService.generateSummary(`${prompt}\n\nIdioma alvo: ${target}`)
+    mutationFn: ({ prompt }) => {
+      return aiService.generateSummary(prompt)
     },
     ...options,
   })
@@ -103,11 +97,8 @@ export function useGenerateKnowledgeSummaryMutation(
 ) {
   return useMutation({
     mutationKey: ['ai', 'knowledge:mutate'],
-    mutationFn: ({ prompt, lang }) => {
-      const target = lang || getPreferredLanguage()
-      return aiService.generateKnowledgeSummary(
-        `${prompt}\n\nIdioma alvo: ${target}`,
-      )
+    mutationFn: ({ prompt }) => {
+      return aiService.generateKnowledgeSummary(prompt)
     },
     ...options,
   })
@@ -122,9 +113,8 @@ export function useMiniExplainMutation(
 ) {
   return useMutation({
     mutationKey: ['ai', 'mini:mutate'],
-    mutationFn: ({ term, context, lang }) => {
-      const target = lang || getPreferredLanguage()
-      return aiService.miniExplain(`${term} (responder em ${target})`, context)
+    mutationFn: ({ term, context }) => {
+      return aiService.miniExplain(term, context)
     },
     ...options,
   })

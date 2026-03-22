@@ -301,5 +301,18 @@
   "dashboard.agent.tomorrow": "amanhã às",
   "dashboard.agent.on": "na",
   "dashboard.agent.at": "às",
-  "dashboard.agent.in": "em"
+  "dashboard.agent.in": "em",
+  "dashboard.agent.greet_name": "Olá, {name}! ",
+  "dashboard.agent.greet": "Olá! ",
+  "dashboard.agent.greet_combined_name": "Olá, {name}, ",
+  "dashboard.agent.greet_combined": "Olá, ",
+  "dashboard.agent.msg.invite": "Você recebeu um convite para \"{title}\" {when}.",
+  "dashboard.agent.msg.notifs_with_latest": "Você tem {count} novas notificações. A mais recente: \"{title}\".",
+  "dashboard.agent.msg.notifs": "Você tem {count} novas notificações.",
+  "dashboard.agent.msg.event_reminder": "Não esqueça: \"{title}\" {when}.",
+  "dashboard.agent.msg.ranking_update": "Há novidades no ranking do seu tópico — confira para ver sua posição.",
+  "dashboard.agent.msg.no_updates": "Sem novidades urgentes — que tal revisar um resumo rápido hoje?",
+  "dashboard.agent.msg.a_new_notification": "uma nova notificação",
+  "dashboard.agent.msg.an_appointment": "um compromisso",
+  "dashboard.agent.msg.combined": "existe uma nova mensagem nas notificações: \"{label}\" e {when} temos um compromisso \"{title}\". Não se esqueça."
 }

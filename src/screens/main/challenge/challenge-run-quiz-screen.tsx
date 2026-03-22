@@ -70,7 +70,7 @@ const ChallengeRunQuizScreen: React.FC = () => {
     onSelect,
     onContinue,
     forceFinish,
-  } = useChallengeRunQuiz(challengeId, true)
+  } = useChallengeRunQuiz(challengeId)
 
   const setBackgroundColor = useThemeStore((state) => state.setBackgroundColor)
   useEffect(() => {
@@ -82,6 +82,7 @@ const ChallengeRunQuizScreen: React.FC = () => {
     navigatorManager.goToChallengeFinishedScore({
       score: finished.score,
       total: finished.total,
+      summaryId: challenge?.summaryId,
     })
   }, [finished])
 

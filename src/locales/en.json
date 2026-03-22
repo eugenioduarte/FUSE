@@ -281,5 +281,18 @@
   "dashboard.agent.tomorrow": "tomorrow at",
   "dashboard.agent.on": "on",
   "dashboard.agent.at": "at",
-  "dashboard.agent.in": "in"
+  "dashboard.agent.in": "in",
+  "dashboard.agent.greet_name": "Hello, {name}! ",
+  "dashboard.agent.greet": "Hello! ",
+  "dashboard.agent.greet_combined_name": "Hello, {name}, ",
+  "dashboard.agent.greet_combined": "Hello, ",
+  "dashboard.agent.msg.invite": "You received an invite to \"{title}\" {when}.",
+  "dashboard.agent.msg.notifs_with_latest": "You have {count} new notifications. Latest: \"{title}\".",
+  "dashboard.agent.msg.notifs": "You have {count} new notifications.",
+  "dashboard.agent.msg.event_reminder": "Don't forget: \"{title}\" {when}.",
+  "dashboard.agent.msg.ranking_update": "There are updates in your topic ranking — check your position.",
+  "dashboard.agent.msg.no_updates": "No urgent updates — how about reviewing a quick summary today?",
+  "dashboard.agent.msg.a_new_notification": "a new notification",
+  "dashboard.agent.msg.an_appointment": "an appointment",
+  "dashboard.agent.msg.combined": "there is a new message in notifications: \"{label}\" and {when} you have an appointment \"{title}\". Don't forget."
 }

@@ -5,7 +5,7 @@ import {
   TEXT_EXERCISES_SYSTEM,
   buildTextExercisesPrompt,
 } from '@/services/prompts'
-import { callAI } from '@/services/ai/ai.service'
+import { callAI, toJSONSafe } from '@/services/ai/ai.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { useAuthStore } from '@/store/useAuthStore'
@@ -200,7 +200,7 @@ export default function useChallengeRunTextAnswer(challengeId: string) {
     })
     setChallenge(updated)
     // navigate to finished screen with score
-    navigatorManager.goToChallengeFinishedScore({ score: final, total: 10 })
+    navigatorManager.goToChallengeFinishedScore({ score: final, total: 10, summaryId: challenge.summaryId })
     try {
       setLoadingOverlay(true, 'Sincronizando…')
       const { immediateCollaborativeFlush } = await import(
@@ -265,7 +265,7 @@ export default function useChallengeRunTextAnswer(challengeId: string) {
       })
       setChallenge(updated)
       // navigate to finished screen with score
-      navigatorManager.goToChallengeFinishedScore({ score: final, total: 10 })
+      navigatorManager.goToChallengeFinishedScore({ score: final, total: 10, summaryId: challenge.summaryId })
       try {
         setLoadingOverlay(true, 'Sincronizando…')
         const { immediateCollaborativeFlush } = await import(
@@ -356,14 +356,4 @@ async function evaluateOpenAnswer(ex: TAExercise, userAnswer: string) {
   }
 }
 
-function toJSONSafe(text: string): any {
-  try {
-    return JSON.parse(text)
-  } catch {
-    const m = /\{[\s\S]*\}/.exec(text)
-    if (m) {
-      try { return JSON.parse(m[0]) } catch {}
-    }
-    return null
-  }
-}
+

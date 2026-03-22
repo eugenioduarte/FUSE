@@ -11,16 +11,13 @@ import { useCalendarStore } from '@/store/useCalendarStore'
 import { useOverlay } from '@/store/useOverlay'
 import { useThemeStore } from '@/store/useThemeStore'
 import { ThemeType } from '@/types/theme.type'
-import * as Localization from 'expo-localization'
+import { getCurrentLocale } from '@/locales'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 
 function buildHeaderDay(): string {
   const now = new Date()
-  const locale =
-    Localization.getLocales?.()[0]?.languageTag ||
-    Localization.getLocales?.()[0]?.languageCode ||
-    'pt-BR'
+  const locale = getCurrentLocale() || 'en'
   const monthShort = new Intl.DateTimeFormat(locale, { month: 'short' })
     .format(now)
     .replace('.', '')
@@ -46,7 +43,7 @@ function formatWhenFriendly(dt: Date) {
   if (dayDiff === 0) return `${t('dashboard.agent.today')} ${time}`
   if (dayDiff === 1) return `${t('dashboard.agent.tomorrow')} ${time}`
   if (dayDiff > 1 && dayDiff <= 6) {
-    const locale = Localization.getLocales?.()[0]?.languageTag ?? 'pt-BR'
+    const locale = getCurrentLocale() || 'en'
     const weekday = new Intl.DateTimeFormat(locale, { weekday: 'long' }).format(dt)
     return `${t('dashboard.agent.on')} ${weekday} ${t('dashboard.agent.at')} ${time}`
   }
@@ -121,28 +118,30 @@ export default function DashboardAgentDisplay() {
 
   const agentMessage = (() => {
     const firstName = (user?.name || '').split(' ').find(Boolean)
-    const greet = firstName ? `Olá, ${firstName}! ` : 'Olá! '
+    const greet = firstName
+      ? t('dashboard.agent.greet_name', { name: firstName })
+      : t('dashboard.agent.greet')
 
     const n = getNotificationsMessage()
     if (n) {
       if ((n as any).kind === 'invite')
-        return `${greet}Você recebeu um convite para “${(n as any).title}” ${(n as any).when}.`
+        return greet + t('dashboard.agent.msg.invite', { title: (n as any).title, when: (n as any).when })
       if ((n as any).kind === 'note')
-        return `${greet}Você tem ${(n as any).count} novas notificações. A mais recente: “${(n as any).title}”.`
+        return greet + t('dashboard.agent.msg.notifs_with_latest', { count: (n as any).count, title: (n as any).title })
       if ((n as any).kind === 'count')
-        return `${greet}Você tem ${(n as any).count} novas notificações.`
+        return greet + t('dashboard.agent.msg.notifs', { count: (n as any).count })
     }
 
     const next = getNextEventDetails()
     if (next) {
       const when = formatWhenFriendly(next.dt)
-      return `${greet}Não esqueça: “${next.ev.title}” ${when}.`
+      return greet + t('dashboard.agent.msg.event_reminder', { title: next.ev.title, when })
     }
 
     if (rankingOverlay?.topicId)
-      return `${greet}Há novidades no ranking do seu tópico — confira para ver sua posição.`
+      return greet + t('dashboard.agent.msg.ranking_update')
 
-    return `${greet}Sem novidades urgentes — que tal revisar um resumo rápido hoje?`
+    return greet + t('dashboard.agent.msg.no_updates')
   })()
 
   function buildCombinedMessage(
@@ -150,27 +149,22 @@ export default function DashboardAgentDisplay() {
     nextEvent: { ev: any; dt: Date } | null,
   ) {
     const firstName = (user?.name || '').split(' ').find(Boolean)
-    const greet = firstName ? `Olá, ${firstName}, ` : 'Olá, '
+    const greet = firstName
+      ? t('dashboard.agent.greet_combined_name', { name: firstName })
+      : t('dashboard.agent.greet_combined')
     const notifLabel = latestNotif
       ? latestNotif.event?.title ||
         latestNotif.title ||
         latestNotif.body ||
-        'uma nova notificação'
+        t('dashboard.agent.msg.a_new_notification')
       : null
     const when = nextEvent ? formatWhenFriendly(nextEvent.dt) : null
-    const evTitle = nextEvent ? nextEvent.ev?.title || 'um compromisso' : null
+    const evTitle = nextEvent
+      ? nextEvent.ev?.title || t('dashboard.agent.msg.an_appointment')
+      : null
 
     if (notifLabel && when && evTitle) {
-      return (
-        greet +
-        'existe uma nova mensagem nas notificações' +
-        (notifLabel ? ': "' + notifLabel + '"' : '') +
-        ' e ' +
-        when +
-        ' temos um compromisso "' +
-        evTitle +
-        '". Não se esqueça.'
-      )
+      return greet + t('dashboard.agent.msg.combined', { label: notifLabel, when, title: evTitle })
     }
 
     return agentMessage
@@ -191,17 +185,17 @@ export default function DashboardAgentDisplay() {
       if (latestNotif.event) {
         const ev = latestNotif.event
         parts.push(
-          `Notificação: convite '${ev.title || title}' em ${ev.date}${ev.time ? ' às ' + ev.time : ''}.`,
+          `Notification: invite '${ev.title || title}' on ${ev.date}${ev.time ? ' at ' + ev.time : ''}.`,
         )
       } else {
-        parts.push(`Notificação: ${title}${body ? ' - ' + body : ''}.`)
+        parts.push(`Notification: ${title}${body ? ' - ' + body : ''}.`)
       }
     }
     if (next) {
-      parts.push(`Próximo compromisso: '${next.ev.title}' ${whenFriendly}.`)
+      parts.push(`Next appointment: '${next.ev.title}' ${whenFriendly}.`)
     }
 
-    prompt = `Você é uma secretária objetiva. Gere UMA única frase curta e direta em PT-BR (máx. 25 palavras). Sem opiniões, sem sugestões, sem parágrafos. Comece com uma saudação curta 'Olá${name ? ', ' + name : ''}' e relate apenas os fatos: ${parts.join(' ')}.`
+    prompt = `You are a concise assistant. Generate ONE single short and direct sentence (max 25 words). No opinions, no suggestions, no paragraphs. Start with a short greeting 'Hello${name ? ', ' + name : ''}' and state only the facts: ${parts.join(' ')}.`
     promptHash = JSON.stringify([parts, user?.name || ''])
   }
 

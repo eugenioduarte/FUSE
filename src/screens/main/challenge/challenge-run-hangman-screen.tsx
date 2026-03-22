@@ -55,6 +55,7 @@ const ChallengeRunHangmanScreen: React.FC = () => {
     navigatorManager.goToChallengeFinishedScore({
       score: finished.score,
       total: finished.total,
+      summaryId: challenge?.summaryId,
     })
   }, [finished])
 
