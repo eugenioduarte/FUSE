@@ -188,10 +188,11 @@ All agents log to `.ai/router/`:
 
 | File | Contents |
 |---|---|
-| `token-usage.csv` | Daily token consumption (Claude + Ollama) |
+| `token-usage.md` | Token consumption table — updated automatically on every `git push` |
+| `token-usage.csv` | Raw token log (Claude + Ollama) — source for the MD table |
 | `sonar-fixes.csv` | Auto-fix history & success rate |
 | `pr-lifecycle.csv` | PR processing metrics |
 | `orchestration.csv` | Agent invocation patterns |
 | `coupling-history.csv` | Coupling metrics trend over time |
 
-Run `.ai/router/update-token-totals.sh` for a daily summary.
+**Token tracking flow:** `log-claude-tokens.sh` / `log-ollama-tokens.sh` → `token-usage.csv` → `generate-token-md.sh` (runs on pre-push) → `token-usage.md` committed automatically.

@@ -16,6 +16,13 @@
 
 ---
 
+## 🤖 AI Agents Dashboard
+
+Live orchestration dashboard — agents, token usage, routing strategy:
+👉 https://eugenioduarte.github.io/FUSE/demonstration-orchestration.html
+
+---
+
 ## 📋 Table of Contents
 
 - [Overview](#-overview)

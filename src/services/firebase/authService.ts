@@ -35,11 +35,68 @@ export function getFirebaseAuth(): ReturnType<typeof getAuth> {
     // Firebase uses colons in its keys (e.g. 'firebase:authUser:apiKey:appId'),
     // so we sanitize before every call to avoid silent failures.
     const sanitizeKey = (key: string) => key.replace(/[^A-Za-z0-9._-]/g, '_')
+    // expo-secure-store has a 2048 byte limit per entry. Firebase auth tokens can
+    // exceed this, so we chunk large values across multiple keys.
+    const CHUNK_SIZE = 1800
     const secureStoreAdapter = {
-      getItem: (key: string) => SecureStore.getItemAsync(sanitizeKey(key)),
-      setItem: (key: string, value: string) =>
-        SecureStore.setItemAsync(sanitizeKey(key), value),
-      removeItem: (key: string) => SecureStore.deleteItemAsync(sanitizeKey(key)),
+      getItem: async (key: string) => {
+        const k = sanitizeKey(key)
+        const countStr = await SecureStore.getItemAsync(`${k}__chunks`)
+        if (countStr) {
+          const count = parseInt(countStr, 10)
+          const parts = await Promise.all(
+            Array.from({ length: count }, (_, i) =>
+              SecureStore.getItemAsync(`${k}__chunk_${i}`),
+            ),
+          )
+          if (parts.some((p) => p === null)) return null
+          return parts.join('')
+        }
+        return SecureStore.getItemAsync(k)
+      },
+      setItem: async (key: string, value: string) => {
+        const k = sanitizeKey(key)
+        if (value.length <= CHUNK_SIZE) {
+          // Clean up any leftover chunks from a previous large value
+          const oldCount = await SecureStore.getItemAsync(`${k}__chunks`)
+          if (oldCount) {
+            const n = parseInt(oldCount, 10)
+            await Promise.all([
+              SecureStore.deleteItemAsync(`${k}__chunks`),
+              ...Array.from({ length: n }, (_, i) =>
+                SecureStore.deleteItemAsync(`${k}__chunk_${i}`),
+              ),
+            ])
+          }
+          return SecureStore.setItemAsync(k, value)
+        }
+        // Split into fixed-size chunks
+        const chunks: string[] = []
+        for (let i = 0; i < value.length; i += CHUNK_SIZE) {
+          chunks.push(value.slice(i, i + CHUNK_SIZE))
+        }
+        await SecureStore.deleteItemAsync(k).catch(() => undefined)
+        await Promise.all([
+          SecureStore.setItemAsync(`${k}__chunks`, String(chunks.length)),
+          ...chunks.map((chunk, i) =>
+            SecureStore.setItemAsync(`${k}__chunk_${i}`, chunk),
+          ),
+        ])
+      },
+      removeItem: async (key: string) => {
+        const k = sanitizeKey(key)
+        const countStr = await SecureStore.getItemAsync(`${k}__chunks`)
+        if (countStr) {
+          const n = parseInt(countStr, 10)
+          await Promise.all([
+            SecureStore.deleteItemAsync(`${k}__chunks`),
+            ...Array.from({ length: n }, (_, i) =>
+              SecureStore.deleteItemAsync(`${k}__chunk_${i}`),
+            ),
+          ])
+        }
+        return SecureStore.deleteItemAsync(k)
+      },
     }
     authInstance = initializeAuth(app, {
       persistence: getReactNativePersistence(secureStoreAdapter),

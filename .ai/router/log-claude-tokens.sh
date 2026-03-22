@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Hook: Stop — loga tokens do Claude (remoto) no token-usage.csv
-# Recebe JSON via stdin com campo "usage"
+# Lê transcript_path do payload e soma tokens de todas as mensagens da sessão
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CSV="$SCRIPT_DIR/token-usage.csv"
@@ -8,16 +8,48 @@ CSV="$SCRIPT_DIR/token-usage.csv"
 INPUT=$(cat)
 
 SESSION_ID=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('session_id','unknown'))" 2>/dev/null || echo "unknown")
-INPUT_TOKENS=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('usage',{}).get('input_tokens',0))" 2>/dev/null || echo "0")
-OUTPUT_TOKENS=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('usage',{}).get('output_tokens',0))" 2>/dev/null || echo "0")
-CACHE_READ=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('usage',{}).get('cache_read_input_tokens',0))" 2>/dev/null || echo "0")
+TRANSCRIPT=$(echo "$INPUT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('transcript_path',''))" 2>/dev/null || echo "")
 
-# Só loga se tiver tokens reais
-if [ "$INPUT_TOKENS" = "0" ] && [ "$OUTPUT_TOKENS" = "0" ]; then
+if [ -z "$TRANSCRIPT" ] || [ ! -f "$TRANSCRIPT" ]; then
   exit 0
 fi
 
-TOTAL=$((INPUT_TOKENS + OUTPUT_TOKENS))
-DATE=$(date +"%Y-%m-%d %H:%M:%S")
+RESULT=$(python3 - "$TRANSCRIPT" << 'PYEOF'
+import sys, json
 
-echo "$DATE,$SESSION_ID,claude,claude-sonnet-4-6,$INPUT_TOKENS,$OUTPUT_TOKENS,$CACHE_READ,$TOTAL" >> "$CSV"
+transcript_path = sys.argv[1]
+totals = {'input': 0, 'output': 0, 'cache_read': 0}
+
+try:
+    with open(transcript_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entry = json.loads(line)
+                msg = entry.get('message', {})
+                if msg.get('role') == 'assistant' and 'usage' in msg:
+                    usage = msg['usage']
+                    totals['input'] += usage.get('input_tokens', 0)
+                    totals['output'] += usage.get('output_tokens', 0)
+                    totals['cache_read'] += usage.get('cache_read_input_tokens', 0)
+            except Exception:
+                pass
+except Exception:
+    sys.exit(0)
+
+if totals['output'] == 0:
+    sys.exit(0)
+
+total = totals['input'] + totals['output']
+print(f"{totals['input']},{totals['output']},{totals['cache_read']},{total}")
+PYEOF
+)
+
+if [ -z "$RESULT" ]; then
+  exit 0
+fi
+
+DATE=$(date +"%Y-%m-%d %H:%M:%S")
+echo "$DATE,$SESSION_ID,claude,claude-sonnet-4-6,$RESULT" >> "$CSV"
