@@ -118,10 +118,10 @@
   "generatedAt": "2026-03-23 12:14",
   "kpis": {
     "cacheHitRate": 100.0,
-    "cacheSavingsUsd": 339.7158,
-    "localRate": 23.2,
-    "totalCostUsd": 50.8661,
-    "claudeTokens": 918873,
+    "cacheSavingsUsd": 434.1378,
+    "localRate": 20.3,
+    "totalCostUsd": 63.8836,
+    "claudeTokens": 1092815,
     "ollamaTokens": 278000
   },
   "costSeries": [
@@ -155,21 +155,21 @@
     },
     {
       "date": "2026-03-23",
-      "cost": 28.1132
+      "cost": 41.1307
     }
   ],
   "agentCosts": [
+    {
+      "agent": "unknown",
+      "tokens": 282183,
+      "cost": 19.4157,
+      "taskType": "other"
+    },
     {
       "agent": "code-reviewer",
       "tokens": 354991,
       "cost": 15.444,
       "taskType": "review"
-    },
-    {
-      "agent": "unknown",
-      "tokens": 108241,
-      "cost": 6.3982,
-      "taskType": "other"
     },
     {
       "agent": "frontend-architect",
@@ -289,9 +289,9 @@
     },
     {
       "task": "other",
-      "input": 8940,
-      "output": 122020,
-      "cache": 17696332
+      "input": 15854,
+      "output": 289048,
+      "cache": 52667452
     }
   ],
   "prCosts": [
@@ -475,9 +475,9 @@
     },
     {
       "date": "2026-03-23",
-      "costUsd": 50.866,
+      "costUsd": 63.8835,
       "savedUsd": 480.0,
-      "netSavingUsd": 429.13
+      "netSavingUsd": 416.12
     }
   ],
   "hasOrch": true,
@@ -585,13 +585,7 @@
       cls: 'kpi-good',
       tip: 'Higher = less input cost. Target > 60%.'
     },
-    {
-      label: 'Cache Savings',
-      value: '$' + d.kpis.cacheSavingsUsd.toFixed(3),
-      sub: 'USD saved vs full input price',
-      cls: 'kpi-good',
-      tip: 'Savings from $3/1M → $0.30/1M cache rate.'
-    },
+    // { label: 'Cache Savings', value: '$' + d.kpis.cacheSavingsUsd.toFixed(3), sub: 'USD saved vs full input price', cls: 'kpi-good' },
     {
       label: 'Local (Ollama) Share',
       value: d.kpis.localRate + '%',
@@ -599,13 +593,7 @@
       cls: 'kpi-purple',
       tip: 'More local = lower bill. Ollama runs at $0.'
     },
-    {
-      label: 'Total Claude Cost',
-      value: '$' + d.kpis.totalCostUsd.toFixed(3),
-      sub: 'USD spent since start',
-      cls: 'kpi-cost',
-      tip: 'Input $3/1M · Output $15/1M · Cache $0.30/1M'
-    },
+    // { label: 'Total Claude Cost', value: '$' + d.kpis.totalCostUsd.toFixed(3), sub: 'USD spent since start', cls: 'kpi-cost' },
     {
       label: 'Claude Tokens',
       value: fmtNum(d.kpis.claudeTokens),

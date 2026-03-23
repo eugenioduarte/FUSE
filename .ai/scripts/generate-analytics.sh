@@ -456,13 +456,7 @@ html = f'''<!DOCTYPE html>
       cls: 'kpi-good',
       tip: 'Higher = less input cost. Target > 60%.'
     }},
-    {{
-      label: 'Cache Savings',
-      value: '$' + d.kpis.cacheSavingsUsd.toFixed(3),
-      sub: 'USD saved vs full input price',
-      cls: 'kpi-good',
-      tip: 'Savings from $3/1M → $0.30/1M cache rate.'
-    }},
+    // {{ label: 'Cache Savings', value: '$' + d.kpis.cacheSavingsUsd.toFixed(3), sub: 'USD saved vs full input price', cls: 'kpi-good' }},
     {{
       label: 'Local (Ollama) Share',
       value: d.kpis.localRate + '%',
@@ -470,13 +464,7 @@ html = f'''<!DOCTYPE html>
       cls: 'kpi-purple',
       tip: 'More local = lower bill. Ollama runs at $0.'
     }},
-    {{
-      label: 'Total Claude Cost',
-      value: '$' + d.kpis.totalCostUsd.toFixed(3),
-      sub: 'USD spent since start',
-      cls: 'kpi-cost',
-      tip: 'Input $3/1M · Output $15/1M · Cache $0.30/1M'
-    }},
+    // {{ label: 'Total Claude Cost', value: '$' + d.kpis.totalCostUsd.toFixed(3), sub: 'USD spent since start', cls: 'kpi-cost' }},
     {{
       label: 'Claude Tokens',
       value: fmtNum(d.kpis.claudeTokens),
