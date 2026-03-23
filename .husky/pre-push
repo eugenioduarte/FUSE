@@ -9,18 +9,18 @@
 # ─────────────────────────────────────────────────────────────
 
 echo "🔍 TypeScript check..."
-pnpm typecheck || { echo "❌ TypeScript errors found. Push blocked."; exit 1; }
+yarn typecheck || { echo "❌ TypeScript errors found. Push blocked."; exit 1; }
 
 if [ -f "node_modules/.bin/eslint" ]; then
   echo "🔍 ESLint..."
-  pnpm lint || { echo "❌ Lint errors found. Push blocked."; exit 1; }
+  yarn lint || { echo "❌ Lint errors found. Push blocked."; exit 1; }
 else
   echo "⚠️  ESLint not installed — skipping"
 fi
 
 if [ -f "node_modules/.bin/jest" ]; then
   echo "🧪 Tests + coverage..."
-  pnpm test || { echo "❌ Tests failed. Push blocked."; exit 1; }
+  yarn test || { echo "❌ Tests failed. Push blocked."; exit 1; }
 else
   echo "⚠️  Jest not installed — skipping"
 fi
