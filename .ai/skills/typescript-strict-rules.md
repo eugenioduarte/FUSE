@@ -1,3 +1,11 @@
+---
+name: typescript-strict-rules
+version: 1.0.0
+author: Eugénio Silva
+created: 2026-03-01
+updated: 2026-03-23
+---
+
 > **[PT]** Este ficheiro define as regras estritas de TypeScript do projeto, estabelecendo type safety como uma restrição arquitetural não negociável, cobrindo desde o modo strict até à validação de dados externos.
 
 ---

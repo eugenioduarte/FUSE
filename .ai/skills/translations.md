@@ -1,3 +1,11 @@
+---
+name: translations
+version: 1.0.0
+author: Eugénio Silva
+created: 2026-03-01
+updated: 2026-03-23
+---
+
 > **[PT]** Este ficheiro define o padrão de internacionalização (i18n) do projeto, descrevendo como extrair strings hardcoded dos componentes e movê-las para os ficheiros de tradução, garantindo zero strings visíveis ao utilizador no código.
 
 ---
@@ -37,11 +45,11 @@ Both files must always be kept in sync. Every key added to one must be added to 
 
 Format: `domain.section.key` — all `snake_case`, dot-separated.
 
-| Segment  | Rule                                              | Example            |
-| -------- | ------------------------------------------------- | ------------------ |
-| `domain` | Screen or feature name (camelCase or snake_case)  | `chargeHeader`     |
-| `section`| Sub-section if needed (optional)                  | `form`, `buttons`  |
-| `key`    | Short descriptor of the string                    | `title`, `subtitle`|
+| Segment   | Rule                                             | Example             |
+| --------- | ------------------------------------------------ | ------------------- |
+| `domain`  | Screen or feature name (camelCase or snake_case) | `chargeHeader`      |
+| `section` | Sub-section if needed (optional)                 | `form`, `buttons`   |
+| `key`     | Short descriptor of the string                   | `title`, `subtitle` |
 
 **Examples:**
 
@@ -66,6 +74,7 @@ When asked to apply translations to a file or component, follow these exact step
 ## 1️⃣ Read the target file
 
 Read the component file completely. Identify every user-visible string, including:
+
 - JSX text content: `<Text>Hello world</Text>`
 - Prop values: `label="Name"`, `placeholder="Write here"`, `title="Confirm"`
 - String variables used in rendered output
@@ -76,6 +85,7 @@ Ignore: log messages, test strings, internal identifiers, URLs, numeric values.
 
 Use the component's screen or feature context as the top-level domain.
 Examples:
+
 - `ChargeHeader.tsx` → domain: `chargeHeader`
 - `FastPlugScreen.tsx` → domain: `fastPlug`
 - A shared button → `common`
@@ -83,6 +93,7 @@ Examples:
 ## 3️⃣ Define keys for each string
 
 For each identified string, choose a key:
+
 - Keep it short and descriptive
 - Use `snake_case`
 - Nest if there are multiple related strings (e.g. `chargeHeader.title`, `chargeHeader.subtitle`)
@@ -117,6 +128,7 @@ Insert the same keys in `pt.json` with Portuguese translations.
 Replace every hardcoded string with the corresponding `t()` call.
 
 **Before:**
+
 ```tsx
 <Text variant="semibold/body-lg">
   Unlock Charger
@@ -128,6 +140,7 @@ Replace every hardcoded string with the corresponding `t()` call.
 ```
 
 **After:**
+
 ```tsx
 <Text variant="semibold/body-lg">
   {t('chargeHeader.title')}
@@ -141,13 +154,18 @@ Replace every hardcoded string with the corresponding `t()` call.
 For props:
 
 **Before:**
+
 ```tsx
 <TextInput label="Email" placeholder="Write your email" />
 ```
 
 **After:**
+
 ```tsx
-<TextInput label={t('login.email_label')} placeholder={t('login.email_placeholder')} />
+<TextInput
+  label={t('login.email_label')}
+  placeholder={t('login.email_placeholder')}
+/>
 ```
 
 ## 7️⃣ Add `useTranslation` if missing
@@ -155,11 +173,13 @@ For props:
 If the component does not already import and use `useTranslation`:
 
 Add the import at the top of the file:
+
 ```tsx
 import { useTranslation } from 'react-i18next'
 ```
 
 Add the hook inside the component function body, before the return:
+
 ```tsx
 const { t } = useTranslation()
 ```
@@ -168,14 +188,14 @@ const { t } = useTranslation()
 
 # ✅ Rules Summary
 
-| Rule                                                        | Enforced |
-| ----------------------------------------------------------- | -------- |
-| No hardcoded user-visible strings in JSX or props           | ✅       |
-| Every key exists in both `en.json` and `pt.json`            | ✅       |
-| Keys use `snake_case` and dot-notation hierarchy            | ✅       |
-| `useTranslation` imported from `'react-i18next'`            | ✅       |
-| `const { t } = useTranslation()` declared in the component  | ✅       |
-| New domains created only when no existing domain fits       | ✅       |
+| Rule                                                       | Enforced |
+| ---------------------------------------------------------- | -------- |
+| No hardcoded user-visible strings in JSX or props          | ✅       |
+| Every key exists in both `en.json` and `pt.json`           | ✅       |
+| Keys use `snake_case` and dot-notation hierarchy           | ✅       |
+| `useTranslation` imported from `'react-i18next'`           | ✅       |
+| `const { t } = useTranslation()` declared in the component | ✅       |
+| New domains created only when no existing domain fits      | ✅       |
 
 ---
 

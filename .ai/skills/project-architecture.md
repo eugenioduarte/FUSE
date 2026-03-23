@@ -1,3 +1,11 @@
+---
+name: project-architecture
+version: 1.0.0
+author: Eugénio Silva
+created: 2026-03-01
+updated: 2026-03-23
+---
+
 > **[PT]** Define o modelo arquitetural em camadas do projeto, descrevendo como as camadas interagem e quais são as suas responsabilidades.
 
 ---
@@ -229,7 +237,8 @@ Example:
 ```tsx
 // login.screen.tsx
 export default function LoginScreen() {
-  const { email, setEmail, isSubmitting, handleLogin, isEmailValid } = useLoginScreen()
+  const { email, setEmail, isSubmitting, handleLogin, isEmailValid } =
+    useLoginScreen()
 
   return (
     <WrapperSafeArea>
@@ -315,12 +324,12 @@ One direction. No circular dependency.
 
 # 🏪 State Architecture
 
-| State type     | Solution                              |
-| -------------- | ------------------------------------- |
-| Local UI state | `useState` inside hook                |
-| Screen state   | Screen hook                           |
-| Cross-screen   | Zustand store (`src/store/*.store.ts`)|
-| Server state   | TanStack Query (services/query layer) |
+| State type     | Solution                               |
+| -------------- | -------------------------------------- |
+| Local UI state | `useState` inside hook                 |
+| Screen state   | Screen hook                            |
+| Cross-screen   | Zustand store (`src/store/*.store.ts`) |
+| Server state   | TanStack Query (services/query layer)  |
 
 Global context must not manage high-frequency state.
 

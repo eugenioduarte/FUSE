@@ -1,3 +1,11 @@
+---
+name: ux-ui-standards
+version: 1.0.0
+author: Eugénio Silva
+created: 2026-03-01
+updated: 2026-03-23
+---
+
 > **[PT]** Define as regras obrigatórias de design system para todo o código de UI, incluindo temas, tipografia, espaçamentos e acessibilidade.
 
 ---
@@ -154,11 +162,7 @@ Use `SafeAreaView` or equivalent from `react-native-safe-area-context`:
 import { SafeAreaView } from 'react-native-safe-area-context'
 
 export function MyScreen() {
-  return (
-    <SafeAreaView style={{ flex: 1 }}>
-      {/* screen content */}
-    </SafeAreaView>
-  )
+  return <SafeAreaView style={{ flex: 1 }}>{/* screen content */}</SafeAreaView>
 }
 ```
 

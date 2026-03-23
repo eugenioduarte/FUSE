@@ -1,3 +1,11 @@
+---
+name: clean-code-rules
+version: 1.0.0
+author: Eugénio Silva
+created: 2026-03-01
+updated: 2026-03-23
+---
+
 > **[PT]** Este ficheiro define os padrões de qualidade de código interno do projeto, complementando as regras de arquitetura e convenções de nomes, com foco em legibilidade, manutenção e prevenção de complexidade desnecessária.
 
 ---

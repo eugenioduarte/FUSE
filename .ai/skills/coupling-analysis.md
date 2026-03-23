@@ -1,3 +1,11 @@
+---
+name: coupling-analysis
+version: 1.0.0
+author: Eugénio Silva
+created: 2026-03-01
+updated: 2026-03-23
+---
+
 > **[PT]** Skill para analisar e melhorar o acoplamento de código com base nos princípios de Balanced Coupling adaptados para React Native.
 
 ---

@@ -1,3 +1,11 @@
+---
+name: api-integration-pattern
+version: 1.0.0
+author: Eugénio Silva
+created: 2026-03-01
+updated: 2026-03-23
+---
+
 > **[PT]** Este ficheiro define o padrão obrigatório de integração de APIs backend na aplicação, descrevendo o fluxo completo desde o modelo de domínio até ao ecrã, com exemplos de código e regras de cada camada.
 
 ---
@@ -69,11 +77,11 @@ Location: `src/services/api/<domain>/`
 
 Files:
 
-| File                | Responsibility                        |
-| ------------------- | ------------------------------------- |
-| `{domain}.ts`       | Pure async functions (HTTP calls)     |
-| `{domain}.types.ts` | DTO types for request/response        |
-| `index.ts`          | Re-exports as `{Domain}Api`           |
+| File                | Responsibility                    |
+| ------------------- | --------------------------------- |
+| `{domain}.ts`       | Pure async functions (HTTP calls) |
+| `{domain}.types.ts` | DTO types for request/response    |
+| `index.ts`          | Re-exports as `{Domain}Api`       |
 
 ### DTO types (`auth.types.ts`):
 
@@ -101,7 +109,10 @@ import type { AuthLoginResponseDto, PkceLoginVariablesDto } from './auth.types'
 export async function loginWithPKCE(
   variables: PkceLoginVariablesDto,
 ): Promise<AuthLoginResponseDto> {
-  const response = await httpClient.post<AuthLoginResponseDto>('/auth/pkce', variables)
+  const response = await httpClient.post<AuthLoginResponseDto>(
+    '/auth/pkce',
+    variables,
+  )
   return response.data
 }
 ```
@@ -122,11 +133,11 @@ Location: `src/services/query/<domain>/`
 
 Files:
 
-| File                        | Naming pattern                     |
-| --------------------------- | ---------------------------------- |
-| `use{Action}Mutation.ts`    | Write operations (POST/PUT/DELETE) |
-| `use{Resource}Query.ts`     | Read operations (GET)              |
-| `index.ts`                  | Re-exports                         |
+| File                     | Naming pattern                     |
+| ------------------------ | ---------------------------------- |
+| `use{Action}Mutation.ts` | Write operations (POST/PUT/DELETE) |
+| `use{Resource}Query.ts`  | Read operations (GET)              |
+| `index.ts`               | Re-exports                         |
 
 ### Mutation hook:
 
@@ -219,21 +230,23 @@ import { useLoginWithPkceMutation } from '@/src/services/query'
 
 Each layer is tested independently:
 
-| Layer   | How to test                                     |
-| ------- | ----------------------------------------------- |
-| Service | Mock `httpClient`, assert request and response  |
-| Query   | Wrap in `QueryClientProvider`, mock service     |
+| Layer   | How to test                                      |
+| ------- | ------------------------------------------------ |
+| Service | Mock `httpClient`, assert request and response   |
+| Query   | Wrap in `QueryClientProvider`, mock service      |
 | Hook    | Mock query hooks and store hooks via `jest.mock` |
-| Screen  | Mock the screen hook entirely                   |
+| Screen  | Mock the screen hook entirely                    |
 
 Example: mocking query hook in hook tests
 
 ```ts
 jest.mock('@/src/services/query', () => ({
   useLoginWithPkceMutation: () => ({
-    mutateAsync: jest
-      .fn()
-      .mockResolvedValue({ uid: 'uid', access_token: 'token', refresh_token: 'rft' }),
+    mutateAsync: jest.fn().mockResolvedValue({
+      uid: 'uid',
+      access_token: 'token',
+      refresh_token: 'rft',
+    }),
   }),
 }))
 ```
@@ -242,14 +255,14 @@ jest.mock('@/src/services/query', () => ({
 
 # 🔒 Rules Summary
 
-| Rule                                        | Enforced |
-| ------------------------------------------- | -------- |
-| DTO types never reach UI layer              | ✅       |
-| Service functions are pure async            | ✅       |
-| Query hooks use TanStack (no raw fetch)     | ✅       |
-| Screen hook consumes query, not service     | ✅       |
-| Store mutations go through store hooks      | ✅       |
-| No cross-layer direct imports               | ✅       |
+| Rule                                    | Enforced |
+| --------------------------------------- | -------- |
+| DTO types never reach UI layer          | ✅       |
+| Service functions are pure async        | ✅       |
+| Query hooks use TanStack (no raw fetch) | ✅       |
+| Screen hook consumes query, not service | ✅       |
+| Store mutations go through store hooks  | ✅       |
+| No cross-layer direct imports           | ✅       |
 
 ---
 

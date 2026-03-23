@@ -4,7 +4,7 @@
 
 # System Orchestrator Quick Reference
 
----
+## 📖 **Para diagramas completos da arquitetura, ver [architecture.md](architecture.md)**
 
 ## 🚦 Fast Decision Tree
 
@@ -284,9 +284,13 @@ date,request_type,agent_used,created_new_agent,success,duration_ms,complexity
 
 - **Agent Matrix:** `.ai/system.md` (this file)
 - **All Agents:** `.ai/agents/README.md`
-- **All Skills:** `.ai/skills/`
+- **Agent Changelog:** `.ai/agents/CHANGELOG.md` ⭐
+- **All Skills:** `.ai/skills/` (all with YAML version headers)
 - **All Rules:** `.ai/rules/`
 - **Routing Logic:** `.ai/router/router.md`
+- **Token Economics:** `.ai/router/token-analysis.md` ⭐
+- **Architecture Diagrams:** `.ai/docs/architecture.md` ⭐
+- **Project Structure:** `.ai/docs/project-structure-snapshot.md`
 - **Orchestration Stats:** Run `.ai/scripts/show-orchestration-stats.sh`
 
 ---
@@ -300,6 +304,84 @@ date,request_type,agent_used,created_new_agent,success,duration_ms,complexity
 5. **Create agent after 3+ similar requests without agent**
 6. **Agent authority > System override** (trust agent decisions)
 7. **User confirmation required** for all commits and destructive operations
+
+---
+
+## 📚 Version Control
+
+### Consulting Agent Versions
+
+**Agent CHANGELOG:** [`.ai/agents/CHANGELOG.md`](../agents/CHANGELOG.md)
+
+All 14 agents are versioned using semantic versioning (MAJOR.MINOR.PATCH):
+
+- **MAJOR**: Breaking changes (role change, skill removal)
+- **MINOR**: New features backwards-compatible
+- **PATCH**: Bug fixes and documentation
+
+**Current Version (all agents):** v1.0.0 (as of 2026-03-23)
+
+### Consulting Skills Versions
+
+**Skills Location:** `.ai/skills/*.md`
+
+All 9 skills now have YAML metadata headers:
+
+```yaml
+---
+name: project-architecture
+version: 1.0.0
+author: Eugénio Silva
+created: 2026-03-01
+updated: 2026-03-23
+---
+```
+
+**To check skill version programmatically:**
+
+```bash
+head -n 7 .ai/skills/project-architecture.md | grep -E "^(name|version):"
+```
+
+### Token Economics
+
+**Analysis Location:** [`.ai/router/token-analysis.md`](../router/token-analysis.md)
+
+**Key Metrics (16-23 March 2026):**
+
+- **65%** of requests to local LLM (Ollama)
+- **35%** cost savings vs Claude-only setup
+- **173x** cache efficiency multiplier
+- **< 1 month** ROI break-even
+
+**To view real-time token usage:**
+
+```bash
+cat .ai/router/token-usage.md
+```
+
+### Architecture Diagrams
+
+**Location:** [`.ai/docs/architecture.md`](architecture.md)
+
+**10 Mermaid diagrams covering:**
+
+1. System Overview (layers)
+2. Request Routing Flow
+3. LLM Router Decision Tree
+4. Agent-Skills Map
+5. Standard Feature Flow
+6. Inter-Agent Coordination
+7. Security Audit Pipeline
+8. Data Flow Architecture
+9. Token Economics Flow
+10. CI/CD Integration
+
+**Use cases:**
+
+- **Onboarding**: Start with diagram 1 (System Overview)
+- **Debugging**: Check diagram 2 (Request Routing) and 3 (LLM Router)
+- **Optimization**: Refer to diagram 9 (Token Economics)
 
 ---
 

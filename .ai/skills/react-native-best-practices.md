@@ -1,3 +1,11 @@
+---
+name: react-native-best-practices
+version: 1.0.0
+author: Eugénio Silva
+created: 2026-03-01
+updated: 2026-03-23
+---
+
 > **[PT]** Este ficheiro define as boas práticas técnicas específicas para React Native, cobrindo o modelo de threads, virtualização de listas, gestão de memória, performance e considerações da Nova Arquitetura.
 
 ---
