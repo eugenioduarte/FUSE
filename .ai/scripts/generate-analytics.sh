@@ -84,16 +84,6 @@ except Exception as e:
 all_dates = sorted(daily_cost.keys())
 cost_series = [{'date': d, 'cost': round(daily_cost[d], 4)} for d in all_dates[-30:]]
 
-# Heatmap — last 52 weeks
-heatmap = []
-today = date.today()
-start = today - timedelta(weeks=52)
-cur = start
-while cur <= today:
-    ds = cur.strftime('%Y-%m-%d')
-    heatmap.append({'date': ds, 'value': daily_total[ds]['claude'] + daily_total[ds]['ollama']})
-    cur += timedelta(days=1)
-
 # KPIs — token-saving metrics
 c = totals['claude']
 o = totals['ollama']
@@ -273,6 +263,17 @@ network_edges = [
 
 agent_network = {'nodes': network_nodes, 'edges': network_edges}
 
+# ── Agent documentation ────────────────────────────────────────────────────────
+agents_dir = os.path.abspath(os.path.join(os.path.dirname(csv_tokens), '..', 'agents'))
+agent_docs = {}
+for agent_name in AGENT_NODE_TYPES.keys():
+    md_path = os.path.join(agents_dir, f'{agent_name}.md')
+    try:
+        with open(md_path, 'r') as f:
+            agent_docs[agent_name] = f.read()
+    except FileNotFoundError:
+        agent_docs[agent_name] = f'# {agent_name}\n\nNo documentation found.'
+
 # ── ROI ───────────────────────────────────────────────────────────────────────
 
 roi_series = []
@@ -298,7 +299,6 @@ payload = json.dumps({
     'kpis':         kpis,
     'costSeries':   cost_series,
     'modelDist':    model_dist,
-    'heatmap':      heatmap,
     'agentCosts':   agent_cost_list,
     'taskTokens':   task_token_list,
     'prCosts':      pr_costs,
@@ -308,6 +308,7 @@ payload = json.dumps({
     'hasPR':        has_pr,
     'hourlyRate':   HOURLY_RATE,
     'agentNetwork': agent_network,
+    'agentDocs':    agent_docs,
 }, ensure_ascii=False, indent=2)
 
 # ── HTML ─────────────────────────────────────────────────────────────────────
@@ -323,6 +324,7 @@ html = f'''<!DOCTYPE html>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
   <style>
     :root {{
       --bg:           #FFFAF0;
@@ -429,7 +431,7 @@ html = f'''<!DOCTYPE html>
     .net-popover {{
       position: fixed; background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 10px 16px; font-size: 0.82rem;
-      pointer-events: none; display: none; z-index: 50; color: var(--text);
+      pointer-events: auto; display: none; z-index: 50; color: var(--text);
       box-shadow: 0 4px 16px rgba(58,0,29,0.18); min-width: 180px;
     }}
     .net-popover strong {{ display: block; font-size: 0.9rem; margin-bottom: 4px; }}
@@ -440,15 +442,67 @@ html = f'''<!DOCTYPE html>
       font-size: 0.75rem; color: var(--text-soft); }}
     .net-legend-dot {{ width: 12px; height: 12px; border-radius: 50%;
       border: 1px solid var(--border); flex-shrink: 0; }}
-
-    /* Heatmap */
-    #heatmap-container {{ overflow-x: auto; }}
-    .heatmap-cell {{ rx: 3; ry: 3; cursor: default; }}
-    .heatmap-tooltip {{
-      position: fixed; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 8px; padding: 6px 12px; font-size: 0.78rem; pointer-events: none;
-      display: none; z-index: 50; color: var(--text);
+    .net-pop-link {{
+      display: inline-block; margin-top: 8px; font-size: 0.78rem; font-weight: 600;
+      color: var(--text-soft); text-decoration: underline; cursor: pointer;
+      padding: 2px 0;
     }}
+    .net-pop-link:hover {{ color: var(--text); }}
+
+    /* Modal */
+    .modal-backdrop {{
+      display: none; position: fixed; inset: 0;
+      background: rgba(58,0,29,0.45); z-index: 100; backdrop-filter: blur(4px);
+    }}
+    .modal-backdrop.open {{ display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; }}
+    .modal {{
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); width: 100%; max-width: 780px;
+      max-height: 85vh; display: flex; flex-direction: column; overflow: hidden;
+    }}
+    .modal-header {{
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 22px; border-bottom: 1px solid var(--border);
+      flex-shrink: 0; gap: 12px; background: var(--surface-alt);
+    }}
+    .modal-header-left {{ display: flex; align-items: center; gap: 10px; min-width: 0; }}
+    .modal-title {{ font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }}
+    .modal-close {{
+      flex-shrink: 0; background: var(--bg); border: 1px solid var(--border);
+      color: var(--text-soft); font-size: 1.1rem; cursor: pointer; line-height: 1;
+      padding: 2px 8px; border-radius: var(--radius-pill); transition: background 0.12s;
+    }}
+    .modal-close:hover {{ background: var(--accent-pink); color: var(--text); }}
+    .modal-body {{ overflow-y: auto; padding: 28px 32px; flex: 1; background: var(--bg); }}
+    .md-content h1, .md-content h2, .md-content h3, .md-content h4 {{
+      margin: 1.3em 0 0.45em; font-weight: 600; line-height: 1.3; color: var(--text);
+    }}
+    .md-content h1 {{ font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }}
+    .md-content h2 {{ font-size: 1.1rem; }}
+    .md-content h3 {{ font-size: 0.95rem; color: var(--text-soft); }}
+    .md-content p  {{ margin: 0.55em 0; font-size: 0.9rem; color: var(--text); }}
+    .md-content ul, .md-content ol {{ padding-left: 1.4em; margin: 0.4em 0; }}
+    .md-content li {{ font-size: 0.9rem; color: var(--text); margin: 2px 0; }}
+    .md-content code {{
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1px 6px; font-size: 0.83em; color: var(--text-soft);
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }}
+    .md-content pre {{
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 14px; overflow-x: auto; margin: 0.7em 0;
+    }}
+    .md-content pre code {{ background: none; border: none; padding: 0; color: var(--text); font-size: 0.82rem; }}
+    .md-content table {{ width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0.7em 0; }}
+    .md-content th, .md-content td {{ padding: 7px 12px; border: 1px solid var(--border); text-align: left; }}
+    .md-content th {{ background: var(--surface); color: var(--text-soft); font-weight: 600; }}
+    .md-content blockquote {{
+      border-left: 3px solid var(--border); margin: 0.5em 0;
+      padding: 3px 14px; color: var(--text-soft); font-size: 0.88rem;
+      background: var(--surface); border-radius: 0 8px 8px 0;
+    }}
+    .md-content hr {{ border: none; border-top: 1px solid var(--border); margin: 1em 0; }}
+    .md-content a {{ color: var(--text-soft); }}
 
     footer {{
       text-align: center; padding: 32px 16px;
@@ -463,8 +517,6 @@ html = f'''<!DOCTYPE html>
 {payload}
 </script>
 
-<div class="heatmap-tooltip" id="hm-tip"></div>
-
 <header>
   <div class="header-title">
     <img src="logo.png" alt="FUSE logo" class="header-logo" />
@@ -472,10 +524,9 @@ html = f'''<!DOCTYPE html>
     <span class="badge">Token Intelligence</span>
   </div>
   <nav>
-    <a href="#savings">Token Savings</a>
     <a href="#network">Network</a>
+    <a href="#savings">Token Savings</a>
     <a href="#cost">Cost Analysis</a>
-    <a href="#heatmap">Heatmap</a>
     <a href="#agents">Agents</a>
     <a href="#pr">PR Costs</a>
     <a href="#roi">ROI</a>
@@ -483,13 +534,22 @@ html = f'''<!DOCTYPE html>
   </nav>
 </header>
 
-<main>
+<!-- Modal -->
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <span class="modal-title" id="modal-title"></span>
+      </div>
+      <button class="modal-close" id="modal-close" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="md-content" id="modal-content"></div>
+    </div>
+  </div>
+</div>
 
-  <!-- ── Token Savings KPIs ───────────────────────────────────────────── -->
-  <section id="savings">
-    <div class="section-title">Token Saving Strategies</div>
-    <div class="kpi-grid" id="kpi-grid"></div>
-  </section>
+<main>
 
   <!-- ── Agent Network Graph ─────────────────────────────────────────── -->
   <section id="network">
@@ -499,6 +559,12 @@ html = f'''<!DOCTYPE html>
       <div id="network-graph"></div>
       <div class="net-legend" id="net-legend"></div>
     </div>
+  </section>
+
+  <!-- ── Token Savings KPIs ───────────────────────────────────────────── -->
+  <section id="savings">
+    <div class="section-title">Token Saving Strategies</div>
+    <div class="kpi-grid" id="kpi-grid"></div>
   </section>
 
   <!-- ── Cost Analysis ────────────────────────────────────────────────── -->
@@ -517,14 +583,6 @@ html = f'''<!DOCTYPE html>
         <div class="chart-label">Cost per Agent</div>
         <canvas id="chartAgentCost"></canvas>
       </div>
-    </div>
-  </section>
-
-  <!-- ── Usage Heatmap ────────────────────────────────────────────────── -->
-  <section id="heatmap">
-    <div class="section-title">Usage Heatmap · Last 52 Weeks</div>
-    <div class="chart-wrap">
-      <div id="heatmap-container"></div>
     </div>
   </section>
 
@@ -887,6 +945,23 @@ html = f'''<!DOCTYPE html>
       '<div class="empty-state">No data for ROI calculation yet.</div>';
   }}
 
+  // ── Modal ─────────────────────────────────────────────────────────────
+  const backdrop    = document.getElementById('modal-backdrop');
+  const modalTitle  = document.getElementById('modal-title');
+  const modalContent = document.getElementById('modal-content');
+  function openAgentModal(agentId) {{
+    const label = agentId.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+    const markdown = d.agentDocs && d.agentDocs[agentId];
+    modalTitle.textContent = label;
+    modalContent.innerHTML = markdown ? marked.parse(markdown) : '<p>No documentation found.</p>';
+    backdrop.classList.add('open');
+    backdrop.querySelector('.modal-body').scrollTop = 0;
+  }}
+  function closeModal() {{ backdrop.classList.remove('open'); }}
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  backdrop.addEventListener('click', e => {{ if (e.target === backdrop) closeModal(); }});
+  document.addEventListener('keydown', e => {{ if (e.key === 'Escape') closeModal(); }});
+
   // ── Agent Network Graph (D3 force-directed) ───────────────────────────
   (function renderNetwork() {{
     const net = d.agentNetwork;
@@ -1026,6 +1101,8 @@ html = f'''<!DOCTYPE html>
     const popover = document.createElement('div');
     popover.className = 'net-popover';
     document.body.appendChild(popover);
+    // Prevent popover clicks from bubbling to SVG (which would deselect)
+    popover.addEventListener('click', e => e.stopPropagation());
 
     let selected = null;
 
@@ -1049,12 +1126,15 @@ html = f'''<!DOCTYPE html>
         return (src === n.id || tgt === n.id) ? 1 : 0.06;
       }});
 
+      const hasDoc = d.agentDocs && d.agentDocs[n.id];
       popover.innerHTML = `
         <strong>${{n.label}}</strong>
         <div class="net-pop-row"><span>Type</span><span>${{n.type}}</span></div>
         <div class="net-pop-row"><span>Tokens</span><span>${{fmtNum(n.tokens)}}</span></div>
         <div class="net-pop-row"><span>Cost</span><span>$${{n.cost.toFixed(3)}}</span></div>
-        <div class="net-pop-row"><span>Connections</span><span>${{connected.size}}</span></div>`;
+        <div class="net-pop-row"><span>Connections</span><span>${{connected.size}}</span></div>
+        ${{hasDoc ? `<span class="net-pop-link" data-agent="${{n.id}}">View agent docs →</span>` : ''}}`;
+      popover.querySelector('.net-pop-link')?.addEventListener('click', () => openAgentModal(n.id));
       popover.style.display = 'block';
       popover.style.left = (event.clientX + 14) + 'px';
       popover.style.top  = (event.clientY - 10) + 'px';
@@ -1075,73 +1155,6 @@ html = f'''<!DOCTYPE html>
     }});
   }})();
 
-  // ── Heatmap (D3) ──────────────────────────────────────────────────────
-  (function renderHeatmap() {{
-    const container = document.getElementById('heatmap-container');
-    const tip = document.getElementById('hm-tip');
-    const data = d.heatmap;
-    if (!data || data.length === 0) {{
-      container.innerHTML = '<div class="empty-state">No heatmap data yet.</div>';
-      return;
-    }}
-
-    const maxVal = Math.max(...data.map(x => x.value), 1);
-    const CELL = 14, GAP = 2, WEEKS = 53;
-    const W = WEEKS * (CELL + GAP);
-    const H = 7 * (CELL + GAP) + 30;
-
-    const colorScale = d3.scaleSequential()
-      .domain([0, maxVal])
-      .interpolator(t => t === 0 ? '#F7F0E0' : d3.interpolate('#BCEBCB', '#06003a')(t));
-
-    const svg = d3.select(container).append('svg')
-      .attr('width', W).attr('height', H);
-
-    // Day labels
-    ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach((label, i) => {{
-      svg.append('text').attr('x', 0).attr('y', i * (CELL + GAP) + CELL)
-        .attr('font-family', 'Fredoka').attr('font-size', 10).attr('fill', '#5A2E3D')
-        .text(i % 2 === 1 ? label : '');
-    }});
-
-    const startX = 28;
-    const byDate = Object.fromEntries(data.map(x => [x.date, x.value]));
-
-    // build week columns
-    const start = new Date(data[0].date);
-    const end   = new Date(data[data.length - 1].date);
-
-    let cur = new Date(start);
-    // rewind to Sunday
-    cur.setDate(cur.getDate() - cur.getDay());
-    let col = 0;
-
-    while (cur <= end) {{
-      const row = cur.getDay();
-      const ds  = cur.toISOString().slice(0, 10);
-      const val = byDate[ds] || 0;
-
-      const rect = svg.append('rect')
-        .attr('class', 'heatmap-cell')
-        .attr('x', startX + col * (CELL + GAP))
-        .attr('y', row * (CELL + GAP) + 16)
-        .attr('width', CELL).attr('height', CELL)
-        .attr('fill', colorScale(val))
-        .attr('stroke', '#3A001D').attr('stroke-width', 0.5);
-
-      rect.on('mousemove', function(event) {{
-        tip.style.display = 'block';
-        tip.style.left = (event.clientX + 12) + 'px';
-        tip.style.top  = (event.clientY - 28) + 'px';
-        tip.textContent = ds + ' · ' + (val > 0 ? fmtNum(val) + ' tokens' : 'no activity');
-      }}).on('mouseleave', function() {{
-        tip.style.display = 'none';
-      }});
-
-      if (row === 6) col++;
-      cur.setDate(cur.getDate() + 1);
-    }}
-  }})();
 }})();
 </script>
 </body>
