@@ -4,6 +4,7 @@
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CSV="$SCRIPT_DIR/token-usage.csv"
+CSV_ORCH="$SCRIPT_DIR/orchestration.csv"
 
 INPUT=$(cat)
 
@@ -53,3 +54,40 @@ fi
 
 DATE=$(date +"%Y-%m-%d %H:%M:%S")
 echo "$DATE,$SESSION_ID,claude,claude-sonnet-4-6,$RESULT" >> "$CSV"
+
+# ── orchestration.csv ─────────────────────────────────────────────────────────
+# Header: timestamp,session_id,agent_name,task_type,provider,model,input_tokens,output_tokens,cache_tokens,total_tokens,cost_usd
+if [ ! -f "$CSV_ORCH" ]; then
+  echo "timestamp,session_id,agent_name,task_type,provider,model,input_tokens,output_tokens,cache_tokens,total_tokens,cost_usd" >> "$CSV_ORCH"
+fi
+
+AGENT_NAME="${CLAUDE_AGENT_NAME:-unknown}"
+
+# Map agent name → task type
+TASK_TYPE=$(python3 -c "
+MAP = {
+    'react-native-engineer':  'implementation',
+    'frontend-architect':     'architecture',
+    'sonar-fixer':            'sonar',
+    'pr-lifecycle':           'pr-lifecycle',
+    'security-auditor':       'security',
+    'test-engineer':          'tests',
+    'business-analyst':       'architecture',
+    'ui-designer':            'implementation',
+}
+import sys
+print(MAP.get(sys.argv[1], 'other'))
+" "$AGENT_NAME" 2>/dev/null || echo "other")
+
+# Compute cost_usd from RESULT (input,output,cache,total)
+COST=$(python3 -c "
+parts = '$RESULT'.split(',')
+if len(parts) < 4: print('0.0'); exit()
+inp   = int(parts[0])
+out   = int(parts[1])
+cache = int(parts[2])
+cost  = inp * 3.00/1_000_000 + out * 15.00/1_000_000 + cache * 0.30/1_000_000
+print(round(cost, 6))
+" 2>/dev/null || echo "0.0")
+
+echo "$DATE,$SESSION_ID,$AGENT_NAME,$TASK_TYPE,claude,claude-sonnet-4-6,$RESULT,$COST" >> "$CSV_ORCH"

@@ -30,11 +30,14 @@ jobs:
       - name: Generate dashboard
         run: bash .ai/scripts/generate-dashboard.sh
 
+      - name: Generate analytics
+        run: bash .ai/scripts/generate-analytics.sh
+
       - name: Commit generated HTML
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add docs/demonstration-orchestration.html
+          git add docs/demonstration-orchestration.html docs/analytics.html
           git commit -m "chore: update dashboard [skip ci]" || true
           git push || true
 

@@ -508,6 +508,7 @@ html = f'''<!DOCTYPE html>
     <a href="#agents">Agents</a>
     <a href="#docs">Docs</a>
     <a href="#router">Routing</a>
+    <a href="analytics.html">Analytics →</a>
   </nav>
 </header>
 
