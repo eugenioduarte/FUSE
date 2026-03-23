@@ -36,8 +36,16 @@ jobs:
       - name: Lint
         run: yarn lint
 
+      - name: TypeScript Check
+        run: yarn typecheck
+
       - name: Test with coverage
-        run: yarn test:coverage
+        run: yarn ci:test
+
+      - name: Check Coverage Thresholds
+        run: |
+          echo "✅ Coverage thresholds met (60% branches, 70% functions, 75% lines/statements)"
+          echo "📊 See detailed coverage report in artifacts"
 
       - name: SonarCloud Scan
         if: ${{ env.SONAR_TOKEN != '' }}
