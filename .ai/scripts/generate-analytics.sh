@@ -385,7 +385,7 @@ html = f'''<!DOCTYPE html>
     <div class="section-title">Usage by Agent</div>
     <div class="chart-wrap chart-full" id="agent-tokens-wrap">
       <div class="chart-label">Tokens per Agent</div>
-      <canvas id="chartAgentTokens"></canvas>
+      <canvas id="chartAgentTokens" style="min-height:320px"></canvas>
     </div>
   </section>
 
@@ -480,7 +480,9 @@ html = f'''<!DOCTYPE html>
 
   // ── Tokens per Agent ──────────────────────────────────────────────────
   if (d.hasOrch && d.agentCosts.length > 0) {{
-    new Chart(document.getElementById('chartAgentTokens'), {{
+    const agentCanvas = document.getElementById('chartAgentTokens');
+    agentCanvas.style.height = Math.max(320, d.agentCosts.length * 36) + 'px';
+    new Chart(agentCanvas, {{
       type: 'bar',
       data: {{
         labels: d.agentCosts.map(x => x.agent),
@@ -492,13 +494,13 @@ html = f'''<!DOCTYPE html>
         }}]
       }},
       options: {{
-        indexAxis: 'y', responsive: true, maintainAspectRatio: true,
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
         plugins: {{ legend: {{ display: false }},
           tooltip: {{ callbacks: {{ label: ctx => fmtNum(ctx.parsed.x) + ' tokens' }} }}
         }},
         scales: {{
           x: {{ ticks: {{ callback: fmtNum }}, grid: {{ color: 'rgba(58,0,29,0.08)' }} }},
-          y: {{ grid: {{ display: false }} }}
+          y: {{ ticks: {{ autoSkip: false }}, grid: {{ display: false }} }}
         }}
       }}
     }});

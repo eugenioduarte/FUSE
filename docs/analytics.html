@@ -115,13 +115,13 @@
 
 <script id="analytics-data" type="application/json">
 {
-  "generatedAt": "2026-03-23 12:19",
+  "generatedAt": "2026-03-23 12:26",
   "kpis": {
     "cacheHitRate": 100.0,
-    "cacheSavingsUsd": 632.7657,
-    "localRate": 16.1,
-    "totalCostUsd": 91.0604,
-    "claudeTokens": 1444381,
+    "cacheSavingsUsd": 739.5146,
+    "localRate": 14.6,
+    "totalCostUsd": 105.5961,
+    "claudeTokens": 1628261,
     "ollamaTokens": 278000
   },
   "costSeries": [
@@ -155,14 +155,14 @@
     },
     {
       "date": "2026-03-23",
-      "cost": 68.3076
+      "cost": 82.8432
     }
   ],
   "agentCosts": [
     {
       "agent": "unknown",
-      "tokens": 633749,
-      "cost": 46.5926,
+      "tokens": 817629,
+      "cost": 61.1282,
       "taskType": "other"
     },
     {
@@ -289,9 +289,9 @@
     },
     {
       "task": "other",
-      "input": 29722,
-      "output": 626746,
-      "cache": 126233342
+      "input": 36682,
+      "output": 803666,
+      "cache": 165769968
     }
   ],
   "prCosts": [
@@ -475,9 +475,9 @@
     },
     {
       "date": "2026-03-23",
-      "costUsd": 91.0604,
+      "costUsd": 105.596,
       "savedUsd": 480.0,
-      "netSavingUsd": 388.94
+      "netSavingUsd": 374.4
     }
   ],
   "hasOrch": true,
@@ -514,7 +514,7 @@
     <div class="section-title">Usage by Agent</div>
     <div class="chart-wrap chart-full" id="agent-tokens-wrap">
       <div class="chart-label">Tokens per Agent</div>
-      <canvas id="chartAgentTokens"></canvas>
+      <canvas id="chartAgentTokens" style="min-height:320px"></canvas>
     </div>
   </section>
 
@@ -551,7 +551,7 @@
 </main>
 
 <footer>
-  Generated: 2026-03-23 12:19 · <a href="https://eugenioduarte.github.io/FUSE/" target="_blank">eugenioduarte.github.io/FUSE</a>
+  Generated: 2026-03-23 12:26 · <a href="https://eugenioduarte.github.io/FUSE/" target="_blank">eugenioduarte.github.io/FUSE</a>
 </footer>
 
 <script>
@@ -609,7 +609,9 @@
 
   // ── Tokens per Agent ──────────────────────────────────────────────────
   if (d.hasOrch && d.agentCosts.length > 0) {
-    new Chart(document.getElementById('chartAgentTokens'), {
+    const agentCanvas = document.getElementById('chartAgentTokens');
+    agentCanvas.style.height = Math.max(320, d.agentCosts.length * 36) + 'px';
+    new Chart(agentCanvas, {
       type: 'bar',
       data: {
         labels: d.agentCosts.map(x => x.agent),
@@ -621,13 +623,13 @@
         }]
       },
       options: {
-        indexAxis: 'y', responsive: true, maintainAspectRatio: true,
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
         plugins: { legend: { display: false },
           tooltip: { callbacks: { label: ctx => fmtNum(ctx.parsed.x) + ' tokens' } }
         },
         scales: {
           x: { ticks: { callback: fmtNum }, grid: { color: 'rgba(58,0,29,0.08)' } },
-          y: { grid: { display: false } }
+          y: { ticks: { autoSkip: false }, grid: { display: false } }
         }
       }
     });
