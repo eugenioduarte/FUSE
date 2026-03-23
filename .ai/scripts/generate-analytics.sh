@@ -365,10 +365,9 @@ html = f'''<!DOCTYPE html>
   </div>
   <nav>
     <a href="#savings">Token Savings</a>
-    <a href="#cost">Cost Analysis</a>
-    <a href="#agents">Agents</a>
-    <a href="#pr">PR Costs</a>
-    <a href="#roi">ROI</a>
+    <a href="#usage">Usage by Agent</a>
+    <a href="#agents">Efficiency</a>
+    <a href="#pr">PR Analysis</a>
     <a href="demonstration-orchestration.html">← Dashboard</a>
   </nav>
 </header>
@@ -381,18 +380,12 @@ html = f'''<!DOCTYPE html>
     <div class="kpi-grid" id="kpi-grid"></div>
   </section>
 
-  <!-- ── Cost Analysis ────────────────────────────────────────────────── -->
-  <section id="cost">
-    <div class="section-title">Cost Analysis</div>
-    <div class="charts-grid">
-      <div class="chart-wrap chart-full">
-        <div class="chart-label">Cost Over Time (last 30 days) · USD</div>
-        <canvas id="chartCostTime"></canvas>
-      </div>
-      <div class="chart-wrap chart-full" id="agent-cost-wrap">
-        <div class="chart-label">Cost per Agent</div>
-        <canvas id="chartAgentCost"></canvas>
-      </div>
+  <!-- ── Usage by Agent ───────────────────────────────────────────────── -->
+  <section id="usage">
+    <div class="section-title">Usage by Agent</div>
+    <div class="chart-wrap chart-full" id="agent-tokens-wrap">
+      <div class="chart-label">Tokens per Agent</div>
+      <canvas id="chartAgentTokens"></canvas>
     </div>
   </section>
 
@@ -411,26 +404,18 @@ html = f'''<!DOCTYPE html>
     </div>
   </section>
 
-  <!-- ── PR Costs & Failures ──────────────────────────────────────────── -->
+  <!-- ── PR & Error Analysis ──────────────────────────────────────────── -->
   <section id="pr">
-    <div class="section-title">Failure Analysis · PR Costs</div>
+    <div class="section-title">PR &amp; Error Analysis</div>
     <div class="charts-grid">
-      <div class="chart-wrap chart-half" id="pr-cost-wrap">
-        <div class="chart-label">Cost per PR</div>
-        <canvas id="chartPRCost"></canvas>
+      <div class="chart-wrap chart-half" id="pr-retries-wrap">
+        <div class="chart-label">Retries per PR</div>
+        <canvas id="chartPRRetries"></canvas>
       </div>
-      <div class="chart-wrap chart-half" id="error-cost-wrap">
-        <div class="chart-label">Cost per Error Type</div>
-        <canvas id="chartErrorCost"></canvas>
+      <div class="chart-wrap chart-half" id="error-freq-wrap">
+        <div class="chart-label">Error Type Frequency</div>
+        <canvas id="chartErrorFreq"></canvas>
       </div>
-    </div>
-  </section>
-
-  <!-- ── ROI ──────────────────────────────────────────────────────────── -->
-  <section id="roi">
-    <div class="section-title">ROI — Cost Avoided vs LLM Spend (cumulative · USD)</div>
-    <div class="chart-wrap">
-      <canvas id="chartROI"></canvas>
     </div>
   </section>
 
@@ -493,64 +478,33 @@ html = f'''<!DOCTYPE html>
     return String(n);
   }}
 
-  // ── Cost Over Time ────────────────────────────────────────────────────
-  if (d.costSeries.length > 0) {{
-    new Chart(document.getElementById('chartCostTime'), {{
-      type: 'bar',
-      data: {{
-        labels: d.costSeries.map(x => x.date),
-        datasets: [{{
-          label: 'Daily Cost (USD)',
-          data: d.costSeries.map(x => x.cost),
-          backgroundColor: 'rgba(174,227,243,0.8)',
-          borderColor: '#3A001D',
-          borderWidth: 1,
-          borderRadius: 4,
-        }}]
-      }},
-      options: {{
-        responsive: true, maintainAspectRatio: true,
-        plugins: {{ legend: {{ display: false }}, tooltip: {{ callbacks: {{
-          label: ctx => '$' + ctx.parsed.y.toFixed(4)
-        }}}} }},
-        scales: {{
-          y: {{ ticks: {{ callback: v => '$' + v.toFixed(3) }}, grid: {{ color: 'rgba(58,0,29,0.08)' }} }},
-          x: {{ grid: {{ display: false }}, ticks: {{ maxTicksLimit: 10 }} }}
-        }}
-      }}
-    }});
-  }} else {{
-    document.getElementById('chartCostTime').closest('.chart-wrap').innerHTML =
-      '<div class="chart-label">Cost Over Time (last 30 days) · USD</div>' +
-      '<div class="empty-state">No data yet.<br>Token usage will appear here once sessions are logged in <code>.ai/router/token-usage.csv</code></div>';
-  }}
-
-  // ── Agent Cost (orchestration.csv) ────────────────────────────────────
-  const agentWrap = document.getElementById('agent-cost-wrap');
+  // ── Tokens per Agent ──────────────────────────────────────────────────
   if (d.hasOrch && d.agentCosts.length > 0) {{
-    new Chart(document.getElementById('chartAgentCost'), {{
+    new Chart(document.getElementById('chartAgentTokens'), {{
       type: 'bar',
       data: {{
         labels: d.agentCosts.map(x => x.agent),
         datasets: [{{
-          label: 'Cost (USD)',
-          data: d.agentCosts.map(x => x.cost),
+          label: 'Tokens',
+          data: d.agentCosts.map(x => x.tokens),
           backgroundColor: 'rgba(207,189,222,0.85)',
           borderColor: '#3A001D', borderWidth: 1, borderRadius: 4,
         }}]
       }},
       options: {{
         indexAxis: 'y', responsive: true, maintainAspectRatio: true,
-        plugins: {{ legend: {{ display: false }} }},
+        plugins: {{ legend: {{ display: false }},
+          tooltip: {{ callbacks: {{ label: ctx => fmtNum(ctx.parsed.x) + ' tokens' }} }}
+        }},
         scales: {{
-          x: {{ ticks: {{ callback: v => '$'+v.toFixed(3) }}, grid: {{ color: 'rgba(58,0,29,0.08)' }} }},
+          x: {{ ticks: {{ callback: fmtNum }}, grid: {{ color: 'rgba(58,0,29,0.08)' }} }},
           y: {{ grid: {{ display: false }} }}
         }}
       }}
     }});
   }} else {{
-    document.getElementById('chartAgentCost').closest('.chart-wrap').innerHTML =
-      '<div class="chart-label">Cost per Agent</div>' +
+    document.getElementById('agent-tokens-wrap').innerHTML =
+      '<div class="chart-label">Tokens per Agent</div>' +
       '<div class="empty-state">Waiting for agent data.<br>Set <code>CLAUDE_AGENT_NAME</code> in your hook to start tracking.</div>';
   }}
 
@@ -610,16 +564,16 @@ html = f'''<!DOCTYPE html>
       '<div class="empty-state">Waiting for orchestration data.<br><code>.ai/router/orchestration.csv</code> is populated by the stop hook.</div>';
   }}
 
-  // ── PR Cost (pr-costs.csv) ────────────────────────────────────────────
+  // ── Retries per PR ────────────────────────────────────────────────────
   if (d.hasPR && d.prCosts.length > 0) {{
     const top = d.prCosts.slice(0, 15);
-    new Chart(document.getElementById('chartPRCost'), {{
+    new Chart(document.getElementById('chartPRRetries'), {{
       type: 'bar',
       data: {{
         labels: top.map(x => '#' + x.id),
         datasets: [{{
-          label: 'Cost (USD)',
-          data: top.map(x => x.cost),
+          label: 'Retries',
+          data: top.map(x => x.retries),
           backgroundColor: top.map(x => x.status === 'failed' ? 'rgba(242,150,184,0.8)' : 'rgba(188,235,203,0.8)'),
           borderColor: '#3A001D', borderWidth: 1, borderRadius: 4,
         }}]
@@ -629,91 +583,49 @@ html = f'''<!DOCTYPE html>
         plugins: {{ legend: {{ display: false }},
           tooltip: {{ callbacks: {{
             title: ctx => '#'+top[ctx[0].dataIndex].id+' '+top[ctx[0].dataIndex].title.substring(0,40),
-            label: ctx => '$' + ctx.parsed.y.toFixed(4) + ' · retries: ' + top[ctx[0].dataIndex].retries
+            label: ctx => ctx.parsed.y + ' retries · ' + top[ctx[0].dataIndex].status
           }}}}
         }},
         scales: {{
-          y: {{ ticks: {{ callback: v => '$'+v.toFixed(3) }}, grid: {{ color: 'rgba(58,0,29,0.08)' }} }},
+          y: {{ ticks: {{ stepSize: 1 }}, grid: {{ color: 'rgba(58,0,29,0.08)' }} }},
           x: {{ grid: {{ display: false }} }}
         }}
       }}
     }});
   }} else {{
-    document.getElementById('chartPRCost').closest('.chart-wrap').innerHTML =
-      '<div class="chart-label">Cost per PR</div>' +
-      '<div class="empty-state">Waiting for PR data.<br><code>.ai/router/pr-costs.csv</code> is populated by <code>collect-pr-costs.sh</code> on merge.</div>';
+    document.getElementById('pr-retries-wrap').innerHTML =
+      '<div class="chart-label">Retries per PR</div>' +
+      '<div class="empty-state">No PR data yet.</div>';
   }}
 
-  // ── Error Cost (pr-costs.csv) ─────────────────────────────────────────
+  // ── Error Type Frequency ──────────────────────────────────────────────
   if (d.hasPR && d.errorCosts.length > 0) {{
-    new Chart(document.getElementById('chartErrorCost'), {{
+    new Chart(document.getElementById('chartErrorFreq'), {{
       type: 'bar',
       data: {{
         labels: d.errorCosts.map(x => x.type),
         datasets: [{{
-          label: 'Cost (USD)',
-          data: d.errorCosts.map(x => x.cost),
+          label: 'Occurrences',
+          data: d.errorCosts.map(x => x.occurrences),
           backgroundColor: 'rgba(242,150,184,0.8)',
           borderColor: '#3A001D', borderWidth: 1, borderRadius: 4,
         }}]
       }},
       options: {{
         responsive: true, maintainAspectRatio: true,
-        plugins: {{ legend: {{ display: false }} }},
+        plugins: {{ legend: {{ display: false }},
+          tooltip: {{ callbacks: {{ label: ctx => ctx.parsed.y + ' occurrences' }} }}
+        }},
         scales: {{
-          y: {{ ticks: {{ callback: v => '$'+v.toFixed(3) }}, grid: {{ color: 'rgba(58,0,29,0.08)' }} }},
+          y: {{ ticks: {{ stepSize: 1 }}, grid: {{ color: 'rgba(58,0,29,0.08)' }} }},
           x: {{ grid: {{ display: false }} }}
         }}
       }}
     }});
   }} else {{
-    document.getElementById('chartErrorCost').closest('.chart-wrap').innerHTML =
-      '<div class="chart-label">Cost per Error Type</div>' +
+    document.getElementById('error-freq-wrap').innerHTML =
+      '<div class="chart-label">Error Type Frequency</div>' +
       '<div class="empty-state">No error data yet.</div>';
-  }}
-
-  // ── ROI ────────────────────────────────────────────────────────────────
-  if (d.roi.length > 0) {{
-    new Chart(document.getElementById('chartROI'), {{
-      type: 'line',
-      data: {{
-        labels: d.roi.map(x => x.date),
-        datasets: [
-          {{
-            label: 'Estimated Human Cost Avoided',
-            data: d.roi.map(x => x.savedUsd),
-            borderColor: '#BCEBCB', backgroundColor: 'rgba(188,235,203,0.15)',
-            borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3,
-          }},
-          {{
-            label: 'LLM Spend (Cumulative)',
-            data: d.roi.map(x => x.costUsd),
-            borderColor: '#F296B8', backgroundColor: 'rgba(242,150,184,0.1)',
-            borderWidth: 2, pointRadius: 0, fill: true, tension: 0.3,
-          }},
-          {{
-            label: 'Net Saving',
-            data: d.roi.map(x => x.netSavingUsd),
-            borderColor: '#AEE3F3', backgroundColor: 'transparent',
-            borderWidth: 2, borderDash: [5,4], pointRadius: 0, tension: 0.3,
-          }},
-        ]
-      }},
-      options: {{
-        responsive: true, maintainAspectRatio: true,
-        plugins: {{
-          legend: {{ position: 'bottom', labels: {{ font: {{ family: FONT }}, padding: 12 }} }},
-          tooltip: {{ callbacks: {{ label: ctx => ctx.dataset.label + ': $' + ctx.parsed.y.toFixed(2) }} }}
-        }},
-        scales: {{
-          y: {{ ticks: {{ callback: v => '$'+v.toFixed(0) }}, grid: {{ color: 'rgba(58,0,29,0.08)' }} }},
-          x: {{ grid: {{ display: false }}, ticks: {{ maxTicksLimit: 8 }} }}
-        }}
-      }}
-    }});
-  }} else {{
-    document.getElementById('chartROI').closest('.chart-wrap').innerHTML =
-      '<div class="empty-state">No data for ROI calculation yet.</div>';
   }}
 
 }})();
