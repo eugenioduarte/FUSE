@@ -440,13 +440,13 @@
 </main>
 
 <footer>
-  Generated: 2026-03-23 23:08 &nbsp;·&nbsp;
+  Generated: 2026-03-23 23:41 &nbsp;·&nbsp;
   <a href="https://github.com/eugenioduarte/FUSE">eugenioduarte/FUSE</a>
 </footer>
 
 <script id="dashboard-data" type="application/json">
 {
-  "generatedAt": "2026-03-23 23:08",
+  "generatedAt": "2026-03-23 23:41",
   "agents": [
     {
       "name": "frontend-architect",
@@ -928,6 +928,62 @@
         "type": "automation",
         "tokens": 90680,
         "cost": 0.0
+      },
+      {
+        "id": "security-orchestrator",
+        "label": "Security Orchestrator",
+        "type": "security",
+        "tokens": 0,
+        "cost": 0.0
+      },
+      {
+        "id": "sa1-storage",
+        "label": "Sa1 Storage",
+        "type": "security",
+        "tokens": 0,
+        "cost": 0.0
+      },
+      {
+        "id": "sa2-crypto",
+        "label": "Sa2 Crypto",
+        "type": "security",
+        "tokens": 0,
+        "cost": 0.0
+      },
+      {
+        "id": "sa3-network",
+        "label": "Sa3 Network",
+        "type": "security",
+        "tokens": 0,
+        "cost": 0.0
+      },
+      {
+        "id": "sa4-auth",
+        "label": "Sa4 Auth",
+        "type": "security",
+        "tokens": 0,
+        "cost": 0.0
+      },
+      {
+        "id": "sa5-platform",
+        "label": "Sa5 Platform",
+        "type": "security",
+        "tokens": 0,
+        "cost": 0.0
+      },
+      {
+        "id": "sa6-code",
+        "label": "Sa6 Code",
+        "type": "security",
+        "tokens": 0,
+        "cost": 0.0
+      },
+      {
+        "id": "sa7-resilience",
+        "label": "Sa7 Resilience",
+        "type": "security",
+        "tokens": 0,
+        "cost": 0.0
       }
     ],
     "edges": [
@@ -1025,6 +1081,81 @@
         "source": "doc-designer",
         "target": "pr-lifecycle",
         "edgeType": "flow"
+      },
+      {
+        "source": "performance-auditor",
+        "target": "security-orchestrator",
+        "edgeType": "flow"
+      },
+      {
+        "source": "security-orchestrator",
+        "target": "sa1-storage",
+        "edgeType": "flow"
+      },
+      {
+        "source": "security-orchestrator",
+        "target": "sa2-crypto",
+        "edgeType": "flow"
+      },
+      {
+        "source": "security-orchestrator",
+        "target": "sa3-network",
+        "edgeType": "flow"
+      },
+      {
+        "source": "security-orchestrator",
+        "target": "sa4-auth",
+        "edgeType": "flow"
+      },
+      {
+        "source": "security-orchestrator",
+        "target": "sa5-platform",
+        "edgeType": "flow"
+      },
+      {
+        "source": "security-orchestrator",
+        "target": "sa6-code",
+        "edgeType": "flow"
+      },
+      {
+        "source": "security-orchestrator",
+        "target": "sa7-resilience",
+        "edgeType": "flow"
+      },
+      {
+        "source": "sa1-storage",
+        "target": "security-orchestrator",
+        "edgeType": "dependency"
+      },
+      {
+        "source": "sa2-crypto",
+        "target": "security-orchestrator",
+        "edgeType": "dependency"
+      },
+      {
+        "source": "sa3-network",
+        "target": "security-orchestrator",
+        "edgeType": "dependency"
+      },
+      {
+        "source": "sa4-auth",
+        "target": "security-orchestrator",
+        "edgeType": "dependency"
+      },
+      {
+        "source": "sa5-platform",
+        "target": "security-orchestrator",
+        "edgeType": "dependency"
+      },
+      {
+        "source": "sa6-code",
+        "target": "security-orchestrator",
+        "edgeType": "dependency"
+      },
+      {
+        "source": "sa7-resilience",
+        "target": "security-orchestrator",
+        "edgeType": "dependency"
       }
     ]
   }
@@ -1372,7 +1503,6 @@
         <strong>${n.label}</strong>
         <div class="net-pop-row"><span>Type</span><span>${n.type}</span></div>
         <div class="net-pop-row"><span>Tokens</span><span>${fmtNum(n.tokens || 0)}</span></div>
-        <div class="net-pop-row"><span>Cost</span><span>$${(n.cost || 0).toFixed(3)}</span></div>
         <div class="net-pop-row"><span>Connections</span><span>${connected.size}</span></div>
         ${ag ? `<span class="net-pop-link">View agent docs →</span>` : ''}`;
 

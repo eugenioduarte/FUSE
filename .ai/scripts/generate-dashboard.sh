@@ -201,6 +201,22 @@ AGENT_EDGES = [
     ('test-writer',          'react-native-engineer', 'dependency'),
     ('test-write-e2e',       'pr-lifecycle',          'dependency'),
     ('doc-designer',         'pr-lifecycle',          'flow'),
+    # Security agents
+    ('performance-auditor',  'security-orchestrator', 'flow'),
+    ('security-orchestrator','sa1-storage',           'flow'),
+    ('security-orchestrator','sa2-crypto',            'flow'),
+    ('security-orchestrator','sa3-network',           'flow'),
+    ('security-orchestrator','sa4-auth',              'flow'),
+    ('security-orchestrator','sa5-platform',          'flow'),
+    ('security-orchestrator','sa6-code',              'flow'),
+    ('security-orchestrator','sa7-resilience',        'flow'),
+    ('sa1-storage',          'security-orchestrator', 'dependency'),
+    ('sa2-crypto',           'security-orchestrator', 'dependency'),
+    ('sa3-network',          'security-orchestrator', 'dependency'),
+    ('sa4-auth',             'security-orchestrator', 'dependency'),
+    ('sa5-platform',         'security-orchestrator', 'dependency'),
+    ('sa6-code',             'security-orchestrator', 'dependency'),
+    ('sa7-resilience',       'security-orchestrator', 'dependency'),
 ]
 
 AGENT_NODE_TYPES = {
@@ -218,6 +234,15 @@ AGENT_NODE_TYPES = {
     'sonar-auto-fixer':      'automation',
     'doc-designer':          'automation',
     'pr-review-fixer':       'automation',
+    # Security agents
+    'security-orchestrator': 'security',
+    'sa1-storage':           'security',
+    'sa2-crypto':            'security',
+    'sa3-network':           'security',
+    'sa4-auth':              'security',
+    'sa5-platform':          'security',
+    'sa6-code':              'security',
+    'sa7-resilience':        'security',
 }
 
 # Read orchestration.csv for per-agent token/cost data (same as analytics)
@@ -1056,7 +1081,6 @@ html = f'''<!DOCTYPE html>
         <strong>${{n.label}}</strong>
         <div class="net-pop-row"><span>Type</span><span>${{n.type}}</span></div>
         <div class="net-pop-row"><span>Tokens</span><span>${{fmtNum(n.tokens || 0)}}</span></div>
-        <div class="net-pop-row"><span>Cost</span><span>$${{(n.cost || 0).toFixed(3)}}</span></div>
         <div class="net-pop-row"><span>Connections</span><span>${{connected.size}}</span></div>
         ${{ag ? `<span class="net-pop-link">View agent docs →</span>` : ''}}`;
 
