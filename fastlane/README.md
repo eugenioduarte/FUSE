@@ -2,7 +2,7 @@
 
 ## 🚀 Overview
 
-This directory contains Fastlane configuration for automating iOS and Android builds and deployments.
+This directory contains Fastlane configuration for automating iOS and Android builds and deployments. 
 
 **⚠️ Important:** This is a **simulated setup** for portfolio demonstration. The lanes echo commands and simulate deployment processes without making actual API calls to App Store Connect or Google Play Console.
 
@@ -11,7 +11,6 @@ This directory contains Fastlane configuration for automating iOS and Android bu
 ### iOS Lanes
 
 #### Development
-
 ```bash
 # Build development version
 bundle exec fastlane ios build_development_simulated
@@ -21,7 +20,6 @@ bundle exec fastlane ios deploy_testflight_simulated
 ```
 
 #### Production
-
 ```bash
 # Build production version
 bundle exec fastlane ios build_production_simulated
@@ -36,7 +34,6 @@ bundle exec fastlane ios screenshots_simulated
 ### Android Lanes
 
 #### Development
-
 ```bash
 # Build development APK
 bundle exec fastlane android build_development_simulated
@@ -46,7 +43,6 @@ bundle exec fastlane android deploy_internal_simulated
 ```
 
 #### Production
-
 ```bash
 # Build production AAB
 bundle exec fastlane android build_production_simulated
@@ -76,27 +72,24 @@ bundle exec fastlane clean
 ### Prerequisites
 
 1. **Ruby** - Fastlane runs on Ruby
-
    ```bash
    ruby --version
    # Should be 2.5 or higher
    ```
 
 2. **Bundler** - Ruby dependency manager
-
    ```bash
    gem install bundler
    ```
 
 3. **Install Fastlane**
-
    ```bash
    # Create Gemfile if not exists
    bundle init
-
+   
    # Add to Gemfile:
    # gem "fastlane"
-
+   
    # Install
    bundle install
    ```
@@ -129,19 +122,16 @@ To use real (non-simulated) deployment:
 ### iOS Real Setup
 
 1. **Install Xcode Command Line Tools**
-
    ```bash
    xcode-select --install
    ```
 
 2. **Configure Match (Certificate Management)**
-
    ```bash
    bundle exec fastlane match init
    ```
 
 3. **Update Fastfile** - Replace simulated lanes:
-
    ```ruby
    lane :build_production do
      gym(
@@ -150,7 +140,7 @@ To use real (non-simulated) deployment:
        output_directory: "./build"
      )
    end
-
+   
    lane :deploy_appstore do
      deliver(
        skip_metadata: false,
@@ -181,7 +171,6 @@ To use real (non-simulated) deployment:
    - Store keystore securely
 
 3. **Update Fastfile** - Replace simulated lanes:
-
    ```ruby
    lane :build_production do
      gradle(
@@ -189,7 +178,7 @@ To use real (non-simulated) deployment:
        build_type: "Release"
      )
    end
-
+   
    lane :deploy_production do
      supply(
        track: "production",
@@ -225,7 +214,6 @@ gem "cocoapods", "~> 1.15.0"
 ```
 
 Then run:
-
 ```bash
 cd fastlane
 bundle install
@@ -234,7 +222,6 @@ bundle install
 ## 🔐 Security Best Practices
 
 1. **Never commit credentials**
-
    ```bash
    # Add to .gitignore
    fastlane/report.xml
@@ -265,7 +252,6 @@ bundle install
 ### Common Issues
 
 **"Command not found: fastlane"**
-
 ```bash
 # Install via bundler
 bundle exec fastlane ...
@@ -275,7 +261,6 @@ gem install fastlane
 ```
 
 **"Could not find Xcode"**
-
 ```bash
 # Check Xcode installation
 xcode-select -p
@@ -285,7 +270,6 @@ sudo xcode-select --reset
 ```
 
 **"Gradle task failed"**
-
 ```bash
 # Clean Android build
 cd android
