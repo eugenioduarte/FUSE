@@ -50,7 +50,8 @@
       top: 0;
       z-index: 10;
     }
-    .header-title { display: flex; align-items: center; gap: 12px; }
+    .header-title { display: flex; align-items: center; gap: 10px; }
+    .header-logo { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
     .header-title h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.01em; }
     .header-title .badge {
       background: var(--accent-orange);
@@ -253,7 +254,8 @@
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }
-    .chart-full { grid-column: 1 / -1; }
+    .chart-full  { grid-column: 1 / -1; }
+    .chart-half  { grid-column: span 1; }
     .chart-wrap {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -269,6 +271,7 @@
       margin-bottom: 16px;
     }
     .chart-wrap canvas { max-height: 260px; }
+    #chartPie { max-height: 320px; }
     .empty-state {
       text-align: center; color: var(--text-soft);
       padding: 40px; font-size: 0.9rem;
@@ -305,13 +308,14 @@
 
 <header>
   <div class="header-title">
+    <img src="logo.png" alt="FUSE" class="header-logo" />
     <h1>FUSE — AI Engineering Dashboard</h1>
     <span class="badge">LIVE</span>
   </div>
   <nav>
+    <a href="#tokens">Tokens</a>
     <a href="#agents">Agents</a>
     <a href="#docs">Docs</a>
-    <a href="#tokens">Tokens</a>
     <a href="#router">Routing</a>
   </nav>
 </header>
@@ -334,6 +338,32 @@
 
 <main>
 
+  <section id="tokens">
+    <div class="section-title">Token Usage</div>
+    <div class="charts-grid">
+      <!-- Row 1: Daily bar chart full width -->
+      <div class="chart-wrap chart-full">
+        <div class="chart-label">Daily Usage — Last 7 Days (total tokens)</div>
+        <canvas id="chartDaily"></canvas>
+        <div class="empty-state" id="token-empty" style="display:none">No token data yet.</div>
+      </div>
+      <!-- Row 2: Pie full width -->
+      <div class="chart-wrap chart-full">
+        <div class="chart-label">Remote vs Local Share</div>
+        <canvas id="chartPie"></canvas>
+      </div>
+      <!-- Row 3: Remote + Local side by side -->
+      <div class="chart-wrap chart-half">
+        <div class="chart-label">Remote LLM (Claude) — Breakdown</div>
+        <canvas id="chartRemote"></canvas>
+      </div>
+      <div class="chart-wrap chart-half">
+        <div class="chart-label">Local LLM (Ollama) — Breakdown</div>
+        <canvas id="chartLocal"></canvas>
+      </div>
+    </div>
+  </section>
+
   <section id="agents">
     <div class="section-title">AI Agents</div>
     <div class="card-grid" id="agent-grid">
@@ -344,29 +374,6 @@
   <section id="docs">
     <div class="section-title">Documentation</div>
     <div id="doc-groups"></div>
-  </section>
-
-  <section id="tokens">
-    <div class="section-title">Token Usage</div>
-    <div class="charts-grid">
-      <div class="chart-wrap chart-full">
-        <div class="chart-label">Daily Usage — Last 7 Days (total tokens)</div>
-        <canvas id="chartDaily"></canvas>
-        <div class="empty-state" id="token-empty" style="display:none">No token data yet.</div>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-label">Remote vs Local Share</div>
-        <canvas id="chartPie"></canvas>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-label">Remote LLM (Claude) — Breakdown</div>
-        <canvas id="chartRemote"></canvas>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-label">Local LLM (Ollama) — Breakdown</div>
-        <canvas id="chartLocal"></canvas>
-      </div>
-    </div>
   </section>
 
   <section id="router">
@@ -393,13 +400,13 @@
 </main>
 
 <footer>
-  Generated: 2026-03-23 10:35 &nbsp;·&nbsp;
+  Generated: 2026-03-23 10:46 &nbsp;·&nbsp;
   <a href="https://github.com/eugenioduarte/FUSE">eugenioduarte/FUSE</a>
 </footer>
 
 <script id="dashboard-data" type="application/json">
 {
-  "generatedAt": "2026-03-23 10:35",
+  "generatedAt": "2026-03-23 10:46",
   "agents": [
     {
       "name": "frontend-architect",
@@ -751,16 +758,16 @@
     },
     {
       "date": "2026-03-23",
-      "claude": 119343,
+      "claude": 197397,
       "ollama": 0
     }
   ],
   "tokenTotals": {
     "claude": {
-      "input": 53895,
-      "output": 507274,
-      "cache": 72576157,
-      "total": 561169
+      "input": 54192,
+      "output": 585031,
+      "cache": 83280035,
+      "total": 639223
     },
     "ollama": {
       "input": 191800,
