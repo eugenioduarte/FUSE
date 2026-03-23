@@ -153,9 +153,21 @@ except FileNotFoundError:
 except Exception as e:
     print(f'⚠️  orchestration.csv error: {e}', file=sys.stderr)
 
+ALL_AGENTS = [
+    'business-analyst', 'frontend-architect', 'coupling-analyzer',
+    'logic-engineer', 'react-native-engineer', 'ui-designer',
+    'code-reviewer', 'test-writer', 'test-write-e2e',
+    'pr-lifecycle', 'sonar-auto-fixer', 'doc-designer',
+    'pr-review-fixer', 'performance-auditor',
+]
+# Seed any agents not yet in orchestration.csv with zero values
+for ag in ALL_AGENTS:
+    if ag not in agent_costs:
+        agent_costs[ag] = {'tokens': 0, 'cost': 0.0, 'task_type': 'other'}
+
 agent_cost_list = [
     {'agent': a, 'tokens': v['tokens'], 'cost': round(v['cost'], 4), 'taskType': v['task_type']}
-    for a, v in sorted(agent_costs.items(), key=lambda x: -x[1]['cost'])
+    for a, v in sorted(agent_costs.items(), key=lambda x: -x[1]['tokens'])
 ]
 task_token_list = [
     {'task': t, 'input': v['input'], 'output': v['output'], 'cache': v['cache']}
