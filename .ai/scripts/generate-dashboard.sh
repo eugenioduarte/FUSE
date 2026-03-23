@@ -136,7 +136,11 @@ for key, label, subpath, skip in DOC_GROUPS:
 
 # ── Token parsing ────────────────────────────────────────────────────────────
 
-daily = defaultdict(lambda: {'claude': 0, 'ollama': 0, 'total': 0})
+daily   = defaultdict(lambda: {'claude': 0, 'ollama': 0})
+totals  = {
+    'claude': {'input': 0, 'output': 0, 'cache': 0, 'total': 0},
+    'ollama': {'input': 0, 'output': 0, 'cache': 0, 'total': 0},
+}
 try:
     with open(csv_path, 'r') as f:
         for line in f.readlines()[1:]:
@@ -147,21 +151,27 @@ try:
             if len(parts) < 8:
                 continue
             date     = parts[0][:10]
-            provider = parts[2].lower()
+            provider = 'claude' if parts[2].lower() == 'claude' else 'ollama'
+            inp      = int(parts[4])
+            out      = int(parts[5])
+            cache    = int(parts[6])
             total    = int(parts[7])
-            if provider == 'claude':
-                daily[date]['claude'] += total
-            else:
-                daily[date]['ollama'] += total
-            daily[date]['total'] += total
+            daily[date][provider] += total
+            totals[provider]['input']  += inp
+            totals[provider]['output'] += out
+            totals[provider]['cache']  += cache
+            totals[provider]['total']  += total
 except FileNotFoundError:
     pass
 except Exception as e:
     print(f'⚠️  CSV error: {e}', file=sys.stderr)
 
+# last 7 days only for bar chart
+all_dates = sorted(daily.keys())
+last7     = all_dates[-7:]
 token_data = [
-    {'date': d, 'claude': v['claude'], 'ollama': v['ollama'], 'total': v['total']}
-    for d, v in sorted(daily.items())
+    {'date': d, 'claude': daily[d]['claude'], 'ollama': daily[d]['ollama']}
+    for d in last7
 ]
 
 # ── JSON payload ─────────────────────────────────────────────────────────────
@@ -171,6 +181,7 @@ payload = json.dumps({
     'agents': agents,
     'docGroups': doc_groups,
     'tokenUsage': token_data,
+    'tokenTotals': totals,
 }, ensure_ascii=False, indent=2)
 
 # ── HTML ─────────────────────────────────────────────────────────────────────
@@ -181,37 +192,43 @@ html = f'''<!DOCTYPE html>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FUSE — AI Engineering Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
   <style>
     :root {{
-      --bg: #0d1117;
-      --surface: #161b22;
-      --border: #30363d;
-      --text: #e6edf3;
-      --muted: #8b949e;
-      --blue: #388bfd;
-      --green: #3fb950;
-      --yellow: #d29922;
-      --purple: #bc8cff;
-      --orange: #f0883e;
-      --radius: 8px;
+      --bg:           #FFFAF0;
+      --surface:      #F7F0E0;
+      --surface-alt:  #F7EFDF;
+      --border:       #3A001D;
+      --text:         #06003a;
+      --text-soft:    #5A2E3D;
+      --accent-blue:  #AEE3F3;
+      --accent-green: #BCEBCB;
+      --accent-yellow:#FCCB66;
+      --accent-orange:#FBC19D;
+      --accent-purple:#CFBDDE;
+      --accent-pink:  #F296B8;
+      --radius:       12px;
+      --radius-pill:  999px;
     }}
     * {{ box-sizing: border-box; margin: 0; padding: 0; }}
     body {{
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      font-family: 'Fredoka', sans-serif;
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.55;
     }}
-    a {{ color: var(--blue); text-decoration: none; }}
-    a:hover {{ text-decoration: underline; }}
+    a {{ color: var(--text-soft); text-decoration: underline; }}
+    a:hover {{ color: var(--text); }}
 
     /* Header */
     header {{
       background: var(--surface);
       border-bottom: 1px solid var(--border);
-      padding: 16px 32px;
+      padding: 14px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -222,15 +239,28 @@ html = f'''<!DOCTYPE html>
       z-index: 10;
     }}
     .header-title {{ display: flex; align-items: center; gap: 12px; }}
-    .header-title h1 {{ font-size: 1.1rem; font-weight: 600; }}
+    .header-title h1 {{ font-size: 1.2rem; font-weight: 600; letter-spacing: 0.01em; }}
     .header-title .badge {{
-      background: var(--blue); color: #fff;
-      font-size: 0.7rem; padding: 2px 8px;
-      border-radius: 12px; font-weight: 600;
+      background: var(--accent-orange);
+      color: var(--text);
+      border: 1px solid var(--border);
+      font-size: 0.72rem; padding: 2px 10px;
+      border-radius: var(--radius-pill);
+      font-weight: 600;
     }}
-    nav {{ display: flex; gap: 20px; font-size: 0.9rem; flex-wrap: wrap; }}
-    nav a {{ color: var(--muted); }}
-    nav a:hover {{ color: var(--text); text-decoration: none; }}
+    nav {{ display: flex; gap: 10px; flex-wrap: wrap; }}
+    nav a {{
+      color: var(--text-soft);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      border: 1px solid var(--border);
+      background: var(--bg);
+      transition: background 0.15s;
+    }}
+    nav a:hover {{ background: var(--accent-yellow); color: var(--text); }}
 
     /* Layout */
     main {{ max-width: 1100px; margin: 0 auto; padding: 40px 24px; }}
@@ -240,18 +270,18 @@ html = f'''<!DOCTYPE html>
       margin-bottom: 20px;
       padding-bottom: 8px;
       border-bottom: 1px solid var(--border);
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      font-size: 0.8rem;
-    }}
-    .subsection-label {{
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: var(--muted);
+      color: var(--text-soft);
       text-transform: uppercase;
       letter-spacing: 0.06em;
-      margin: 24px 0 10px;
+      font-size: 0.82rem;
+    }}
+    .subsection-label {{
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin: 28px 0 10px;
     }}
     .subsection-label:first-child {{ margin-top: 0; }}
 
@@ -262,7 +292,7 @@ html = f'''<!DOCTYPE html>
       gap: 12px;
     }}
 
-    /* Agent card */
+    /* Cards */
     .agent-card, .doc-card {{
       background: var(--surface);
       border: 1px solid var(--border);
@@ -272,39 +302,50 @@ html = f'''<!DOCTYPE html>
       flex-direction: column;
       gap: 6px;
       cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
+      transition: transform 0.12s ease, background 0.12s;
     }}
     .agent-card:hover, .doc-card:hover {{
-      border-color: var(--blue);
-      background: #1c2230;
+      background: var(--surface-alt);
+      transform: scale(0.98);
+    }}
+    .agent-card:active, .doc-card:active {{
+      transform: scale(0.97);
     }}
     .card-header {{ display: flex; align-items: center; justify-content: space-between; gap: 8px; }}
-    .card-name {{ font-weight: 600; font-size: 0.9rem; font-family: monospace; word-break: break-all; }}
+    .card-name {{ font-weight: 600; font-size: 0.95rem; word-break: break-all; color: var(--text); }}
     .routing-badge {{
       flex-shrink: 0;
-      font-size: 0.65rem;
-      padding: 2px 7px;
-      border-radius: 12px;
+      font-size: 0.68rem;
+      padding: 2px 9px;
+      border-radius: var(--radius-pill);
       font-weight: 600;
+      border: 1px solid var(--border);
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      color: var(--text);
     }}
-    .routing-remote      {{ background: rgba(56,139,253,0.2);  color: var(--blue);   }}
-    .routing-local       {{ background: rgba(63,185,80,0.2);   color: var(--green);  }}
-    .routing-conditional {{ background: rgba(210,153,34,0.2);  color: var(--yellow); }}
-    .card-desc  {{ font-size: 0.83rem; color: var(--muted); }}
-    .card-model {{ font-size: 0.72rem; color: var(--purple); font-family: monospace; }}
-    .card-hint  {{ font-size: 0.7rem; color: #444d56; margin-top: 2px; }}
+    .routing-remote      {{ background: var(--accent-blue);   }}
+    .routing-local       {{ background: var(--accent-green);  }}
+    .routing-conditional {{ background: var(--accent-yellow); }}
+    .card-desc  {{ font-size: 0.85rem; color: var(--text-soft); }}
+    .card-model {{
+      font-size: 0.73rem; color: var(--text-soft);
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1px 7px; display: inline-block; width: fit-content;
+    }}
+    .card-hint {{ font-size: 0.7rem; color: var(--text-soft); opacity: 0.6; margin-top: 2px; }}
 
     /* Doc folder badge */
     .folder-badge {{
       flex-shrink: 0;
-      font-size: 0.65rem;
-      padding: 2px 7px;
-      border-radius: 12px;
+      font-size: 0.68rem;
+      padding: 2px 9px;
+      border-radius: var(--radius-pill);
       font-weight: 600;
-      background: rgba(240,136,62,0.15);
-      color: var(--orange);
+      border: 1px solid var(--border);
+      background: var(--accent-orange);
+      color: var(--text);
     }}
 
     /* Modal */
@@ -312,15 +353,15 @@ html = f'''<!DOCTYPE html>
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
+      background: rgba(58,0,29,0.45);
       z-index: 100;
-      backdrop-filter: blur(3px);
+      backdrop-filter: blur(4px);
     }}
     .modal-backdrop.open {{ display: flex; align-items: flex-start; justify-content: center; padding: 40px 16px; }}
     .modal {{
       background: var(--surface);
       border: 1px solid var(--border);
-      border-radius: 12px;
+      border-radius: var(--radius);
       width: 100%;
       max-width: 780px;
       max-height: 85vh;
@@ -336,89 +377,114 @@ html = f'''<!DOCTYPE html>
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
       gap: 12px;
+      background: var(--surface-alt);
     }}
     .modal-header-left {{ display: flex; align-items: center; gap: 10px; min-width: 0; }}
-    .modal-title {{ font-weight: 600; font-family: monospace; font-size: 0.95rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }}
+    .modal-title {{ font-weight: 600; font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }}
     .modal-close {{
       flex-shrink: 0;
-      background: none; border: none;
-      color: var(--muted); font-size: 1.3rem;
-      cursor: pointer; line-height: 1; padding: 0 2px;
+      background: var(--bg); border: 1px solid var(--border);
+      color: var(--text-soft); font-size: 1.1rem;
+      cursor: pointer; line-height: 1; padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      transition: background 0.12s;
     }}
-    .modal-close:hover {{ color: var(--text); }}
-    .modal-body {{ overflow-y: auto; padding: 28px 32px; flex: 1; }}
+    .modal-close:hover {{ background: var(--accent-pink); color: var(--text); }}
+    .modal-body {{ overflow-y: auto; padding: 28px 32px; flex: 1; background: var(--bg); }}
 
     /* Markdown styles */
     .md-content h1, .md-content h2, .md-content h3, .md-content h4 {{
       margin: 1.3em 0 0.45em; font-weight: 600; line-height: 1.3;
+      color: var(--text);
     }}
-    .md-content h1 {{ font-size: 1.3rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }}
-    .md-content h2 {{ font-size: 1.05rem; border: none; text-transform: none; letter-spacing: 0; padding: 0; color: var(--text); }}
-    .md-content h3 {{ font-size: 0.92rem; color: var(--muted); }}
-    .md-content h4 {{ font-size: 0.85rem; color: var(--muted); }}
-    .md-content p  {{ margin: 0.55em 0; font-size: 0.88rem; color: #cdd5df; }}
+    .md-content h1 {{ font-size: 1.4rem; border-bottom: 1px solid var(--border); padding-bottom: 8px; }}
+    .md-content h2 {{ font-size: 1.1rem; }}
+    .md-content h3 {{ font-size: 0.95rem; color: var(--text-soft); }}
+    .md-content h4 {{ font-size: 0.88rem; color: var(--text-soft); }}
+    .md-content p  {{ margin: 0.55em 0; font-size: 0.9rem; color: var(--text); }}
     .md-content ul, .md-content ol {{ padding-left: 1.4em; margin: 0.4em 0; }}
-    .md-content li {{ font-size: 0.88rem; color: #cdd5df; margin: 2px 0; }}
+    .md-content li {{ font-size: 0.9rem; color: var(--text); margin: 2px 0; }}
     .md-content code {{
-      background: #0d1117; border: 1px solid var(--border);
-      border-radius: 4px; padding: 1px 6px;
-      font-size: 0.83em; color: var(--purple);
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1px 6px;
+      font-size: 0.83em; color: var(--text-soft);
       font-family: 'SFMono-Regular', Consolas, monospace;
     }}
     .md-content pre {{
-      background: #0d1117; border: 1px solid var(--border);
+      background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius); padding: 14px;
       overflow-x: auto; margin: 0.7em 0;
     }}
     .md-content pre code {{
       background: none; border: none; padding: 0;
-      color: #e6edf3; font-size: 0.82rem;
+      color: var(--text); font-size: 0.82rem;
     }}
     .md-content table {{
       width: 100%; border-collapse: collapse;
-      font-size: 0.83rem; margin: 0.7em 0;
+      font-size: 0.85rem; margin: 0.7em 0;
     }}
     .md-content th, .md-content td {{
-      padding: 7px 11px; border: 1px solid var(--border); text-align: left;
+      padding: 7px 12px; border: 1px solid var(--border); text-align: left;
     }}
-    .md-content th {{ background: #0d1117; color: var(--muted); font-weight: 600; }}
+    .md-content th {{ background: var(--surface); color: var(--text-soft); font-weight: 600; }}
     .md-content blockquote {{
       border-left: 3px solid var(--border); margin: 0.5em 0;
-      padding: 3px 14px; color: var(--muted); font-size: 0.86rem;
+      padding: 3px 14px; color: var(--text-soft); font-size: 0.88rem;
+      background: var(--surface); border-radius: 0 8px 8px 0;
     }}
     .md-content hr {{ border: none; border-top: 1px solid var(--border); margin: 1em 0; }}
-    .md-content a {{ color: var(--blue); }}
+    .md-content a {{ color: var(--text-soft); }}
 
-    /* Chart */
+    /* Charts */
+    .charts-grid {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }}
+    .chart-full {{ grid-column: 1 / -1; }}
     .chart-wrap {{
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 20px 24px;
     }}
-    .chart-wrap canvas {{ max-height: 300px; }}
+    .chart-label {{
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-soft);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+    }}
+    .chart-wrap canvas {{ max-height: 260px; }}
     .empty-state {{
-      text-align: center; color: var(--muted);
+      text-align: center; color: var(--text-soft);
       padding: 40px; font-size: 0.9rem;
     }}
 
     /* Router table */
-    .router-table {{ width: 100%; border-collapse: collapse; font-size: 0.88rem; }}
+    .router-table {{ width: 100%; border-collapse: collapse; font-size: 0.9rem; }}
     .router-table th, .router-table td {{
       text-align: left; padding: 10px 14px;
       border-bottom: 1px solid var(--border);
     }}
     .router-table th {{
-      color: var(--muted); font-weight: 600;
-      text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.04em;
+      color: var(--text-soft); font-weight: 600;
+      text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em;
+      background: var(--surface);
     }}
     .router-table tr:last-child td {{ border-bottom: none; }}
-    .router-table tr:hover td {{ background: rgba(255,255,255,0.02); }}
+    .router-table tr:hover td {{ background: var(--surface); }}
+    .router-table code {{
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 6px; padding: 1px 7px; font-size: 0.82em;
+      font-family: 'SFMono-Regular', Consolas, monospace;
+    }}
 
     /* Footer */
     footer {{
-      text-align: center; color: var(--muted);
-      font-size: 0.8rem; padding: 32px 24px;
+      text-align: center; color: var(--text-soft);
+      font-size: 0.82rem; padding: 32px 24px;
       border-top: 1px solid var(--border);
     }}
   </style>
@@ -470,10 +536,23 @@ html = f'''<!DOCTYPE html>
 
   <section id="tokens">
     <div class="section-title">Token Usage</div>
-    <div class="chart-wrap">
-      <canvas id="tokenChart"></canvas>
-      <div class="empty-state" id="token-empty" style="display:none">
-        No token data yet. Usage will appear after the first Claude session.
+    <div class="charts-grid">
+      <div class="chart-wrap chart-full">
+        <div class="chart-label">Daily Usage — Last 7 Days (total tokens)</div>
+        <canvas id="chartDaily"></canvas>
+        <div class="empty-state" id="token-empty" style="display:none">No token data yet.</div>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-label">Remote vs Local Share</div>
+        <canvas id="chartPie"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-label">Remote LLM (Claude) — Breakdown</div>
+        <canvas id="chartRemote"></canvas>
+      </div>
+      <div class="chart-wrap">
+        <div class="chart-label">Local LLM (Ollama) — Breakdown</div>
+        <canvas id="chartLocal"></canvas>
       </div>
     </div>
   </section>
@@ -605,34 +684,101 @@ html = f'''<!DOCTYPE html>
     }});
   }}
 
-  // ── Token chart ──────────────────────────────────────────────────────────
-  const tokenData = data.tokenUsage || [];
+  // ── Token charts ─────────────────────────────────────────────────────────
+  const tokenData   = data.tokenUsage  || [];
+  const tokenTotals = data.tokenTotals || {{ claude: {{}}, ollama: {{}} }};
+  const chartFont   = {{ family: 'Fredoka', size: 13 }};
+  const axisColor   = '#5A2E3D';
+  const gridColor   = 'rgba(58,0,29,0.08)';
+  const fmt         = n => (n || 0).toLocaleString();
+
+  // 1 — Daily bar chart (last 7 days)
   if (tokenData.length === 0) {{
-    document.getElementById('tokenChart').style.display = 'none';
+    document.getElementById('chartDaily').style.display = 'none';
     document.getElementById('token-empty').style.display = 'block';
   }} else {{
-    new Chart(document.getElementById('tokenChart'), {{
+    new Chart(document.getElementById('chartDaily'), {{
       type: 'bar',
       data: {{
         labels: tokenData.map(d => d.date),
         datasets: [
-          {{ label: 'Claude (remote)', data: tokenData.map(d => d.claude), backgroundColor: 'rgba(56,139,253,0.7)', borderRadius: 4 }},
-          {{ label: 'Ollama (local)',  data: tokenData.map(d => d.ollama), backgroundColor: 'rgba(63,185,80,0.7)',  borderRadius: 4 }},
+          {{ label: 'Remote (Claude)', data: tokenData.map(d => d.claude), backgroundColor: 'rgba(174,227,243,0.85)', borderColor: '#3A001D', borderWidth: 1, borderRadius: 6 }},
+          {{ label: 'Local (Ollama)',  data: tokenData.map(d => d.ollama), backgroundColor: 'rgba(188,235,203,0.85)', borderColor: '#3A001D', borderWidth: 1, borderRadius: 6 }},
         ],
       }},
       options: {{
         responsive: true,
         plugins: {{
-          legend: {{ labels: {{ color: '#8b949e' }} }},
-          tooltip: {{ callbacks: {{ label: ctx => ` ${{ctx.dataset.label}}: ${{ctx.parsed.y.toLocaleString()}} tokens` }} }},
+          legend: {{ labels: {{ color: axisColor, font: chartFont }} }},
+          tooltip: {{ callbacks: {{ label: ctx => ` ${{ctx.dataset.label}}: ${{fmt(ctx.parsed.y)}} tokens` }} }},
         }},
         scales: {{
-          x: {{ stacked: true, ticks: {{ color: '#8b949e' }}, grid: {{ color: '#21262d' }} }},
-          y: {{ stacked: true, ticks: {{ color: '#8b949e' }}, grid: {{ color: '#21262d' }} }},
+          x: {{ stacked: true, ticks: {{ color: axisColor, font: chartFont }}, grid: {{ color: gridColor }} }},
+          y: {{ stacked: true, ticks: {{ color: axisColor, font: chartFont }}, grid: {{ color: gridColor }} }},
         }},
       }},
     }});
   }}
+
+  // 2 — Pie chart (remote vs local share)
+  const totalClaude = tokenTotals.claude.total || 0;
+  const totalOllama = tokenTotals.ollama.total || 0;
+  if (totalClaude + totalOllama > 0) {{
+    new Chart(document.getElementById('chartPie'), {{
+      type: 'doughnut',
+      data: {{
+        labels: ['Remote (Claude)', 'Local (Ollama)'],
+        datasets: [{{
+          data: [totalClaude, totalOllama],
+          backgroundColor: ['rgba(174,227,243,0.9)', 'rgba(188,235,203,0.9)'],
+          borderColor: '#3A001D',
+          borderWidth: 1,
+        }}],
+      }},
+      options: {{
+        responsive: true,
+        plugins: {{
+          legend: {{ labels: {{ color: axisColor, font: chartFont }} }},
+          tooltip: {{ callbacks: {{ label: ctx => ` ${{ctx.label}}: ${{fmt(ctx.parsed)}} tokens` }} }},
+        }},
+      }},
+    }});
+  }}
+
+  // helper: breakdown bar chart (input / output / cache / total)
+  function makeBreakdownChart(canvasId, t, color) {{
+    if (!t || !t.total) return;
+    new Chart(document.getElementById(canvasId), {{
+      type: 'bar',
+      data: {{
+        labels: ['Input', 'Output', 'Cache Read', 'Total'],
+        datasets: [{{
+          label: 'Tokens',
+          data: [t.input || 0, t.output || 0, t.cache || 0, t.total || 0],
+          backgroundColor: color,
+          borderColor: '#3A001D',
+          borderWidth: 1,
+          borderRadius: 6,
+        }}],
+      }},
+      options: {{
+        responsive: true,
+        plugins: {{
+          legend: {{ display: false }},
+          tooltip: {{ callbacks: {{ label: ctx => ` ${{fmt(ctx.parsed.y)}} tokens` }} }},
+        }},
+        scales: {{
+          x: {{ ticks: {{ color: axisColor, font: chartFont }}, grid: {{ color: gridColor }} }},
+          y: {{ ticks: {{ color: axisColor, font: chartFont }}, grid: {{ color: gridColor }} }},
+        }},
+      }},
+    }});
+  }}
+
+  // 3 — Remote breakdown
+  makeBreakdownChart('chartRemote', tokenTotals.claude, 'rgba(174,227,243,0.85)');
+  // 4 — Local breakdown
+  makeBreakdownChart('chartLocal',  tokenTotals.ollama, 'rgba(188,235,203,0.85)');
 }})();
 </script>
 
