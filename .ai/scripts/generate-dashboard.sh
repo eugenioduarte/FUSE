@@ -179,12 +179,88 @@ token_data = [
 
 # ── JSON payload ─────────────────────────────────────────────────────────────
 
+# ── Agent network graph ───────────────────────────────────────────────────────
+
+AGENT_EDGES = [
+    ('business-analyst',     'frontend-architect',    'flow'),
+    ('frontend-architect',   'logic-engineer',        'flow'),
+    ('frontend-architect',   'react-native-engineer', 'flow'),
+    ('frontend-architect',   'code-reviewer',         'flow'),
+    ('logic-engineer',       'ui-designer',           'flow'),
+    ('ui-designer',          'react-native-engineer', 'flow'),
+    ('react-native-engineer','code-reviewer',         'flow'),
+    ('react-native-engineer','frontend-architect',    'retry'),
+    ('logic-engineer',       'frontend-architect',    'retry'),
+    ('sonar-auto-fixer',     'frontend-architect',    'retry'),
+    ('code-reviewer',        'frontend-architect',    'dependency'),
+    ('pr-lifecycle',         'sonar-auto-fixer',      'flow'),
+    ('pr-lifecycle',         'code-reviewer',         'dependency'),
+    ('coupling-analyzer',    'frontend-architect',    'flow'),
+    ('coupling-analyzer',    'code-reviewer',         'flow'),
+    ('performance-auditor',  'frontend-architect',    'flow'),
+    ('test-writer',          'react-native-engineer', 'dependency'),
+    ('test-write-e2e',       'pr-lifecycle',          'dependency'),
+    ('doc-designer',         'pr-lifecycle',          'flow'),
+]
+
+AGENT_NODE_TYPES = {
+    'business-analyst':      'architecture',
+    'frontend-architect':    'architecture',
+    'coupling-analyzer':     'architecture',
+    'performance-auditor':   'architecture',
+    'logic-engineer':        'implementation',
+    'react-native-engineer': 'implementation',
+    'ui-designer':           'implementation',
+    'code-reviewer':         'qa',
+    'test-writer':           'qa',
+    'test-write-e2e':        'qa',
+    'pr-lifecycle':          'automation',
+    'sonar-auto-fixer':      'automation',
+    'doc-designer':          'automation',
+    'pr-review-fixer':       'automation',
+}
+
+# Read orchestration.csv for per-agent token/cost data (same as analytics)
+csv_orch = os.path.join(os.path.dirname(csv_path), 'orchestration.csv')
+orch_tokens = defaultdict(int)
+orch_cost   = defaultdict(float)
+try:
+    with open(csv_orch, 'r') as f:
+        for line in f.readlines()[1:]:
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split(',')
+            if len(parts) < 11:
+                continue
+            agent = parts[2]
+            orch_tokens[agent] += int(parts[9])
+            orch_cost[agent]   += float(parts[10])
+except FileNotFoundError:
+    pass
+
+network_nodes = [
+    {
+        'id':     name,
+        'label':  ' '.join(w.capitalize() for w in name.split('-')),
+        'type':   ntype,
+        'tokens': orch_tokens.get(name, 0),
+        'cost':   round(orch_cost.get(name, 0.0), 4),
+    }
+    for name, ntype in AGENT_NODE_TYPES.items()
+]
+network_edges = [{'source': s, 'target': t, 'edgeType': e} for s, t, e in AGENT_EDGES]
+agent_network = {'nodes': network_nodes, 'edges': network_edges}
+
+# ── JSON payload ─────────────────────────────────────────────────────────────
+
 payload = json.dumps({
     'generatedAt': now,
     'agents': agents,
     'docGroups': doc_groups,
     'tokenUsage': token_data,
     'tokenTotals': totals,
+    'agentNetwork': agent_network,
 }, ensure_ascii=False, indent=2)
 
 # ── HTML ─────────────────────────────────────────────────────────────────────
@@ -200,6 +276,7 @@ html = f'''<!DOCTYPE html>
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/marked@9/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/d3@7/dist/d3.min.js"></script>
   <style>
     :root {{
       --bg:           #FFFAF0;
@@ -468,6 +545,33 @@ html = f'''<!DOCTYPE html>
       padding: 40px; font-size: 0.9rem;
     }}
 
+    /* Network graph */
+    #network-graph {{ width: 100%; overflow: hidden; cursor: default; }}
+    #network-graph svg {{ display: block; }}
+    .net-node {{ cursor: pointer; transition: opacity 0.2s; }}
+    .net-node:hover circle {{ stroke-width: 2.5; }}
+    .net-label {{ pointer-events: none; user-select: none; }}
+    .net-link {{ transition: opacity 0.2s; }}
+    .net-popover {{
+      position: fixed; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 10px 16px; font-size: 0.82rem;
+      pointer-events: auto; display: none; z-index: 50; color: var(--text);
+      box-shadow: 0 4px 16px rgba(58,0,29,0.18); min-width: 180px;
+    }}
+    .net-popover strong {{ display: block; font-size: 0.9rem; margin-bottom: 4px; }}
+    .net-pop-row {{ display: flex; justify-content: space-between; gap: 16px;
+      font-size: 0.78rem; color: var(--text-soft); margin-top: 2px; }}
+    .net-pop-link {{
+      display: inline-block; margin-top: 8px; font-size: 0.78rem; font-weight: 600;
+      color: var(--text-soft); text-decoration: underline; cursor: pointer; padding: 2px 0;
+    }}
+    .net-pop-link:hover {{ color: var(--text); }}
+    .net-legend {{ display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }}
+    .net-legend-item {{ display: flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; color: var(--text-soft); }}
+    .net-legend-dot {{ width: 12px; height: 12px; border-radius: 50%;
+      border: 1px solid var(--border); flex-shrink: 0; }}
+
     /* Router table */
     .router-table {{ width: 100%; border-collapse: collapse; font-size: 0.9rem; }}
     .router-table th, .router-table td {{
@@ -504,6 +608,7 @@ html = f'''<!DOCTYPE html>
     <span class="badge">LIVE</span>
   </div>
   <nav>
+    <a href="#network">Network</a>
     <a href="#tokens">Tokens</a>
     <a href="#agents">Agents</a>
     <a href="#docs">Docs</a>
@@ -529,6 +634,16 @@ html = f'''<!DOCTYPE html>
 </div>
 
 <main>
+
+  <!-- ── Agent Network Graph ─────────────────────────────────────────── -->
+  <section id="network">
+    <div class="section-title">Agent Orchestration Network</div>
+    <div class="chart-wrap">
+      <div class="chart-label">Click a node to open its documentation · Drag to rearrange</div>
+      <div id="network-graph"></div>
+      <div class="net-legend" id="net-legend"></div>
+    </div>
+  </section>
 
   <section id="tokens">
     <div class="section-title">Token Usage</div>
@@ -790,6 +905,184 @@ html = f'''<!DOCTYPE html>
   makeBreakdownChart('chartRemote', tokenTotals.claude, 'rgba(174,227,243,0.85)');
   // 4 — Local breakdown
   makeBreakdownChart('chartLocal',  tokenTotals.ollama, 'rgba(188,235,203,0.85)');
+
+  // ── Agent Network Graph (D3 force-directed) — identical to analytics ─────
+  (function renderNetwork() {{
+    const net = data.agentNetwork;
+    if (!net || !net.nodes || net.nodes.length === 0) return;
+
+    const agentMap = {{}};
+    (data.agents || []).forEach(a => {{ agentMap[a.name] = a; }});
+
+    const container = document.getElementById('network-graph');
+    const W = container.clientWidth || 960;
+    const H = 520;
+
+    const TYPE_COLOR = {{
+      'architecture':  '#CFBDDE',
+      'implementation':'#AEE3F3',
+      'qa':            '#BCEBCB',
+      'automation':    '#FCCB66',
+      'security':      '#FBC19D',
+      'other':         '#E0E0E0',
+    }};
+    const EDGE_COLOR = {{
+      'flow':       'rgba(58,0,29,0.35)',
+      'retry':      'rgba(242,150,184,0.75)',
+      'dependency': 'rgba(174,227,243,0.65)',
+    }};
+
+    function fmtNum(n) {{
+      if (n >= 1_000_000) return (n/1_000_000).toFixed(1)+'M';
+      if (n >= 1_000) return (n/1_000).toFixed(1)+'K';
+      return String(n);
+    }}
+
+    // Legend
+    const legendEl = document.getElementById('net-legend');
+    Object.entries(TYPE_COLOR).forEach(([type, color]) => {{
+      if (type === 'other') return;
+      legendEl.innerHTML += `<div class="net-legend-item">
+        <div class="net-legend-dot" style="background:${{color}}"></div>
+        <span>${{type}}</span></div>`;
+    }});
+    legendEl.innerHTML += `
+      <div class="net-legend-item" style="margin-left:12px">
+        <svg width="24" height="2"><line x1="0" y1="1" x2="24" y2="1" stroke="rgba(58,0,29,0.4)" stroke-width="1.5"/></svg>
+        <span>flow</span></div>
+      <div class="net-legend-item">
+        <svg width="24" height="2"><line x1="0" y1="1" x2="24" y2="1" stroke="rgba(242,150,184,0.85)" stroke-width="1.5"/></svg>
+        <span>retry</span></div>
+      <div class="net-legend-item">
+        <svg width="24" height="2"><line x1="0" y1="1" x2="24" y2="1" stroke="rgba(174,227,243,0.8)" stroke-width="1.5" stroke-dasharray="4,3"/></svg>
+        <span>dependency</span></div>`;
+
+    const svg = d3.select(container).append('svg')
+      .attr('width', W).attr('height', H).style('background', 'transparent');
+
+    const defs = svg.append('defs');
+    Object.entries(EDGE_COLOR).forEach(([type, color]) => {{
+      defs.append('marker')
+        .attr('id', `arrow-${{type}}`)
+        .attr('viewBox', '0 -4 8 8').attr('refX', 18).attr('refY', 0)
+        .attr('markerWidth', 6).attr('markerHeight', 6).attr('orient', 'auto')
+        .append('path').attr('d', 'M0,-4L8,0L0,4')
+        .attr('fill', color.slice(0, color.lastIndexOf(',')) + ',0.9)');
+    }});
+
+    const maxTokens = Math.max(...net.nodes.map(n => n.tokens || 0), 1);
+    const radius = n => Math.max(9, Math.min(28, 9 + Math.sqrt((n.tokens || 0) / Math.max(maxTokens / 400, 1))));
+
+    const neighbors = {{}};
+    net.nodes.forEach(n => {{ neighbors[n.id] = new Set(); }});
+    net.edges.forEach(e => {{
+      neighbors[e.source]?.add(e.target);
+      neighbors[e.target]?.add(e.source);
+    }});
+
+    const nodes = net.nodes.map(n => ({{...n}}));
+    const edges = net.edges.map(e => ({{...e}}));
+
+    const sim = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(edges).id(n => n.id).distance(130).strength(0.6))
+      .force('charge', d3.forceManyBody().strength(-450))
+      .force('center', d3.forceCenter(W / 2, H / 2).strength(0.05))
+      .force('collision', d3.forceCollide().radius(n => radius(n) + 18));
+
+    const linkGroup = svg.append('g');
+    const nodeGroup = svg.append('g');
+
+    const link = linkGroup.selectAll('line').data(edges).enter().append('line')
+      .attr('class', 'net-link')
+      .attr('stroke', e => EDGE_COLOR[e.edgeType] || EDGE_COLOR.flow)
+      .attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', e => e.edgeType === 'dependency' ? '5,3' : null)
+      .attr('marker-end', e => `url(#arrow-${{e.edgeType}})`);
+
+    const node = nodeGroup.selectAll('g').data(nodes).enter().append('g')
+      .attr('class', 'net-node')
+      .call(d3.drag()
+        .on('start', (ev, n) => {{ if (!ev.active) sim.alphaTarget(0.3).restart(); n.fx = n.x; n.fy = n.y; }})
+        .on('drag',  (ev, n) => {{ n.fx = ev.x; n.fy = ev.y; }})
+        .on('end',   (ev, n) => {{ if (!ev.active) sim.alphaTarget(0); n.fx = null; n.fy = null; }})
+      );
+
+    node.append('circle')
+      .attr('r', radius)
+      .attr('fill', n => TYPE_COLOR[n.type] || TYPE_COLOR.other)
+      .attr('stroke', '#3A001D').attr('stroke-width', 1);
+
+    node.append('text')
+      .attr('class', 'net-label')
+      .attr('text-anchor', 'middle')
+      .attr('dy', n => radius(n) + 13)
+      .attr('font-family', 'Fredoka, sans-serif').attr('font-size', 11).attr('fill', '#5A2E3D')
+      .text(n => n.label);
+
+    sim.on('tick', () => {{
+      link.attr('x1', e => e.source.x).attr('y1', e => e.source.y)
+          .attr('x2', e => e.target.x).attr('y2', e => e.target.y);
+      node.attr('transform', n => `translate(${{n.x}},${{n.y}})`);
+    }});
+
+    const popover = document.createElement('div');
+    popover.className = 'net-popover';
+    document.body.appendChild(popover);
+    popover.addEventListener('click', e => e.stopPropagation());
+
+    let selected = null;
+
+    node.on('click', function(event, n) {{
+      event.stopPropagation();
+      if (selected === n.id) {{
+        selected = null;
+        node.style('opacity', 1);
+        link.style('opacity', 1);
+        popover.style.display = 'none';
+        return;
+      }}
+      selected = n.id;
+
+      const connected = neighbors[n.id] || new Set();
+      node.style('opacity', m => (m.id === n.id || connected.has(m.id)) ? 1 : 0.18);
+      link.style('opacity', e => {{
+        const src = typeof e.source === 'object' ? e.source.id : e.source;
+        const tgt = typeof e.target === 'object' ? e.target.id : e.target;
+        return (src === n.id || tgt === n.id) ? 1 : 0.06;
+      }});
+
+      const ag = agentMap[n.id];
+      popover.innerHTML = `
+        <strong>${{n.label}}</strong>
+        <div class="net-pop-row"><span>Type</span><span>${{n.type}}</span></div>
+        <div class="net-pop-row"><span>Tokens</span><span>${{fmtNum(n.tokens || 0)}}</span></div>
+        <div class="net-pop-row"><span>Cost</span><span>$${{(n.cost || 0).toFixed(3)}}</span></div>
+        <div class="net-pop-row"><span>Connections</span><span>${{connected.size}}</span></div>
+        ${{ag ? `<span class="net-pop-link">View agent docs →</span>` : ''}}`;
+
+      popover.querySelector('.net-pop-link')?.addEventListener('click', () => {{
+        if (ag) openModal(ag.name, routingBadgeHtml(ag.routing), ag.markdown);
+      }});
+
+      popover.style.display = 'block';
+      popover.style.left = (event.clientX + 14) + 'px';
+      popover.style.top  = (event.clientY - 10) + 'px';
+    }});
+
+    svg.on('click', () => {{
+      selected = null;
+      node.style('opacity', 1);
+      link.style('opacity', 1);
+      popover.style.display = 'none';
+    }});
+
+    node.on('mousemove', function(event) {{
+      if (selected) {{
+        popover.style.left = (event.clientX + 14) + 'px';
+        popover.style.top  = (event.clientY - 10) + 'px';
+      }}
+    }});
+  }})();
 }})();
 </script>
 
