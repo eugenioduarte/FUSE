@@ -14,6 +14,9 @@ OUT="$OUT_DIR/demonstration-orchestration.html"
 
 mkdir -p "$OUT_DIR"
 
+# Copy logo to docs/ so it's available on GitHub Pages
+cp "$REPO_ROOT/assets/images/logo.png" "$OUT_DIR/logo.png" 2>/dev/null || true
+
 python3 - "$AI_DIR" "$CSV" "$OUT" << 'PYEOF'
 import sys, os, json, re
 from datetime import datetime
@@ -238,7 +241,8 @@ html = f'''<!DOCTYPE html>
       top: 0;
       z-index: 10;
     }}
-    .header-title {{ display: flex; align-items: center; gap: 12px; }}
+    .header-title {{ display: flex; align-items: center; gap: 10px; }}
+    .header-logo {{ width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }}
     .header-title h1 {{ font-size: 1.2rem; font-weight: 600; letter-spacing: 0.01em; }}
     .header-title .badge {{
       background: var(--accent-orange);
@@ -441,7 +445,8 @@ html = f'''<!DOCTYPE html>
       grid-template-columns: 1fr 1fr;
       gap: 16px;
     }}
-    .chart-full {{ grid-column: 1 / -1; }}
+    .chart-full  {{ grid-column: 1 / -1; }}
+    .chart-half  {{ grid-column: span 1; }}
     .chart-wrap {{
       background: var(--surface);
       border: 1px solid var(--border);
@@ -457,6 +462,7 @@ html = f'''<!DOCTYPE html>
       margin-bottom: 16px;
     }}
     .chart-wrap canvas {{ max-height: 260px; }}
+    #chartPie {{ max-height: 320px; }}
     .empty-state {{
       text-align: center; color: var(--text-soft);
       padding: 40px; font-size: 0.9rem;
@@ -493,13 +499,14 @@ html = f'''<!DOCTYPE html>
 
 <header>
   <div class="header-title">
+    <img src="logo.png" alt="FUSE" class="header-logo" />
     <h1>FUSE — AI Engineering Dashboard</h1>
     <span class="badge">LIVE</span>
   </div>
   <nav>
+    <a href="#tokens">Tokens</a>
     <a href="#agents">Agents</a>
     <a href="#docs">Docs</a>
-    <a href="#tokens">Tokens</a>
     <a href="#router">Routing</a>
   </nav>
 </header>
@@ -522,6 +529,32 @@ html = f'''<!DOCTYPE html>
 
 <main>
 
+  <section id="tokens">
+    <div class="section-title">Token Usage</div>
+    <div class="charts-grid">
+      <!-- Row 1: Daily bar chart full width -->
+      <div class="chart-wrap chart-full">
+        <div class="chart-label">Daily Usage — Last 7 Days (total tokens)</div>
+        <canvas id="chartDaily"></canvas>
+        <div class="empty-state" id="token-empty" style="display:none">No token data yet.</div>
+      </div>
+      <!-- Row 2: Pie full width -->
+      <div class="chart-wrap chart-full">
+        <div class="chart-label">Remote vs Local Share</div>
+        <canvas id="chartPie"></canvas>
+      </div>
+      <!-- Row 3: Remote + Local side by side -->
+      <div class="chart-wrap chart-half">
+        <div class="chart-label">Remote LLM (Claude) — Breakdown</div>
+        <canvas id="chartRemote"></canvas>
+      </div>
+      <div class="chart-wrap chart-half">
+        <div class="chart-label">Local LLM (Ollama) — Breakdown</div>
+        <canvas id="chartLocal"></canvas>
+      </div>
+    </div>
+  </section>
+
   <section id="agents">
     <div class="section-title">AI Agents</div>
     <div class="card-grid" id="agent-grid">
@@ -532,29 +565,6 @@ html = f'''<!DOCTYPE html>
   <section id="docs">
     <div class="section-title">Documentation</div>
     <div id="doc-groups"></div>
-  </section>
-
-  <section id="tokens">
-    <div class="section-title">Token Usage</div>
-    <div class="charts-grid">
-      <div class="chart-wrap chart-full">
-        <div class="chart-label">Daily Usage — Last 7 Days (total tokens)</div>
-        <canvas id="chartDaily"></canvas>
-        <div class="empty-state" id="token-empty" style="display:none">No token data yet.</div>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-label">Remote vs Local Share</div>
-        <canvas id="chartPie"></canvas>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-label">Remote LLM (Claude) — Breakdown</div>
-        <canvas id="chartRemote"></canvas>
-      </div>
-      <div class="chart-wrap">
-        <div class="chart-label">Local LLM (Ollama) — Breakdown</div>
-        <canvas id="chartLocal"></canvas>
-      </div>
-    </div>
   </section>
 
   <section id="router">
