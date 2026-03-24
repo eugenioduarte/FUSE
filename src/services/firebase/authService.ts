@@ -13,7 +13,7 @@ import {
   updateProfile,
 } from 'firebase/auth'
 // Note: For React Native persistence, we'll require RN-specific exports at runtime
-import { useAuthStore } from '../../store/useAuthStore'
+import { useAuthStore } from '../../store/auth.store'
 import { generateAvatarUrl, parseAvatarUrl } from '../profile/avatar.service'
 import { getFirebaseApp } from './firebaseInit'
 import { getUserAvatarMeta, upsertUserProfile } from './userProfile.service'

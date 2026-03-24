@@ -1,6 +1,6 @@
 import React from 'react'
 import { render } from '@testing-library/react-native'
-import MenuScreen from '../menu-screen'
+import MenuScreen from '../menu.screen'
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn(), closeDrawer: jest.fn() }),

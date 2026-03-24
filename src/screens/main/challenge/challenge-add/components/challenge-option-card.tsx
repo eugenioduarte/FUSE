@@ -1,7 +1,7 @@
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
-import { useThemeStore } from '@/store/useThemeStore'
+import { useThemeStore } from '@/store/theme.store'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'

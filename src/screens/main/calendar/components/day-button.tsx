@@ -1,5 +1,5 @@
 import { Text } from '@/components'
-import { useThemeStore } from '@/store/useThemeStore'
+import { useThemeStore } from '@/store/theme.store'
 import { useTheme } from '@react-navigation/native'
 import React from 'react'
 import { TouchableOpacity, View } from 'react-native'

@@ -1,4 +1,4 @@
-import useSummaryProgressArcs from '../hooks/use-summary-progress-arcs'
+import useSummaryProgressArcs from '../topic-details.hook'
 import { renderHook } from '@testing-library/react-native'
 
 jest.mock('@/hooks/use-theme', () => ({

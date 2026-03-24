@@ -1,4 +1,4 @@
-import useProfile from '../use-profile'
+import useProfile from '../profile.hook'
 import { renderHook } from '@testing-library/react-native'
 
 jest.mock('@/components/snackbar-provider/snackbar-provider', () => ({
@@ -21,7 +21,7 @@ jest.mock('@/services/profile/avatar.service', () => ({
   parseAvatarUrl: jest.fn(() => ({ style: 'avataaars', seed: 'abc' })),
   randomSeed: jest.fn(() => 'seed-123'),
 }))
-jest.mock('@/store/useAuthStore', () => ({
+jest.mock('@/store/auth.store', () => ({
   useAuthStore: (selector: any) =>
     selector({ user: { id: 'user-1', displayName: 'Test', email: 'test@test.com' } }),
 }))

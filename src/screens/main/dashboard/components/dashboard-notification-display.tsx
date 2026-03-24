@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react'
 import { Image, StyleSheet, View } from 'react-native'
 import { Text } from '../../../../components'
 import { type AppNotification } from '../../../../services/firebase/notifications.service'
-import { useCalendarStore } from '../../../../store/useCalendarStore'
+import { useCalendarStore } from '../../../../store/calendar.store'
 
 const IMAGE_SIZE = 60
 const IMAGE_PLACEHOLDER = 'https://picsum.photos/200/300'

@@ -10,64 +10,63 @@ import { EasingFunction } from 'react-native-reanimated'
 
 import { Header } from '../components'
 import { RouteName, ROUTES } from '../constants/routes'
-import { useAuthStore } from '../store/useAuthStore'
-import { useThemeStore } from '../store/useThemeStore'
+import { useAuthStore } from '../store/auth.store'
+import { useThemeStore } from '../store/theme.store'
 import { navigationRef } from './navigationRef'
 
 // Menu (drawer content)
-import MenuScreen from '../screens/main/menu/menu-screen'
+import MenuScreen from '../screens/main/menu/menu.screen'
 
 // Auth
-import LoginScreen from '../screens/auth/login/login-screen'
-import Onboarding from '../screens/auth/onboarding/onboarding'
-import RecoveryPassScreen from '../screens/auth/recovery-password/recovery-password-screen'
-import RegisterScreen from '../screens/auth/register/register-screen'
+import LoginScreen from '../screens/auth/login/login.screen'
+import Onboarding from '../screens/auth/onboarding/onboarding.screen'
+import RecoveryPassScreen from '../screens/auth/recovery-password/recovery-password.screen'
+import RegisterScreen from '../screens/auth/register/register.screen'
 
 // Main
-import DashboardScreen from '../screens/main/dashboard/dashboard-screen'
-import TopicScreen from '../screens/main/topic/topic-screen'
+import DashboardScreen from '../screens/main/dashboard/dashboard.screen'
+import TopicScreen from '../screens/main/topic/topic.screen'
 
 // Calendar
-import CalendarScreen from '../screens/main/calendar/calendar-screen'
-import CalendarAddScreen from '../screens/main/calendar/calendar-add-screen'
-import CalendarDetailsScreen from '../screens/main/calendar/calendar-details-screen'
-import CalendarEditScreen from '../screens/main/calendar/calendar-edit-screen'
+import CalendarAddScreen from '../screens/main/calendar/calendar-add/calendar-add.screen'
+import CalendarDetailsScreen from '../screens/main/calendar/calendar-details/calendar-details.screen'
+import CalendarEditScreen from '../screens/main/calendar/calendar-edit/calendar-edit.screen'
+import CalendarScreen from '../screens/main/calendar/calendar.screen'
 
 // Challenge
-import ChallengeAddScreen from '../screens/main/challenge/challenge-add/challenge-add-screen'
-import ChallengeReviewHangmanScreen from '../screens/main/challenge/challenge-review-hangman/challenge-review-hangman-screen'
-import ChallengeReviewMatrixScreen from '../screens/main/challenge/challenge-review-matrix/challenge-review-matrix-screen'
-import ChallengeReviewQuizScreen from '../screens/main/challenge/challenge-review-quiz/challenge-review-quiz-screen'
-import ChallengeReviewTextAnswerScreen from '../screens/main/challenge/challenge-review-text-answer/challenge-review-text-answer-screen'
-import ChallengeFinishedScoreScreen from '../screens/main/challenge/challenge-finished-score-screen'
-import ChallengeRunHangmanScreen from '../screens/main/challenge/challenge-run-hangman-screen'
-import ChallengeRunMatrixScreen from '../screens/main/challenge/challenge-run-matrix-screen'
-import ChallengeRunQuizScreen from '../screens/main/challenge/challenge-run-quiz-screen'
-import ChallengeRunTextAnswerScreen from '../screens/main/challenge/challenge-run-text-answer-screen'
-import ChallengesListScreen from '../screens/main/challenge/challenges-list-screen'
+import ChallengeAddScreen from '../screens/main/challenge/challenge-add/challenge-add.screen'
+import ChallengeFinishedScoreScreen from '../screens/main/challenge/challenge-finished-score/challenge-finished-score.screen'
+import ChallengeReviewHangmanScreen from '../screens/main/challenge/challenge-review-hangman/challenge-review-hangman.screen'
+import ChallengeReviewMatrixScreen from '../screens/main/challenge/challenge-review-matrix/challenge-review-matrix.screen'
+import ChallengeReviewQuizScreen from '../screens/main/challenge/challenge-review-quiz/challenge-review-quiz.screen'
+import ChallengeReviewTextAnswerScreen from '../screens/main/challenge/challenge-review-text-answer/challenge-review-text-answer.screen'
+import ChallengeRunHangmanScreen from '../screens/main/challenge/challenge-run-hangman/challenge-run-hangman.screen'
+import ChallengeRunMatrixScreen from '../screens/main/challenge/challenge-run-matrix/challenge-run-matrix.screen'
+import ChallengeRunQuizScreen from '../screens/main/challenge/challenge-run-quiz/challenge-run-quiz.screen'
+import ChallengeRunTextAnswerScreen from '../screens/main/challenge/challenge-run-text-answer/challenge-run-text-answer.screen'
+import ChallengesListScreen from '../screens/main/challenge/challenges-list/challenges-list.screen'
 
 // Topic details & summary
-import SummaryDetailsScreen from '../screens/main/topic/summary/summary-details-screen'
-import SummaryScreen from '../screens/main/topic/summary/summary-screen'
-import TopicAddScreen from '../screens/main/topic/topic-add/topic-add-screen'
-import TopicChatScreen from '../screens/main/topic/topic-chat/topic-chat-screen'
+import SummaryDetailsScreen from '../screens/main/topic/summary/summary-details.screen'
+import SummaryScreen from '../screens/main/topic/summary/summary.screen'
+import TopicAddScreen from '../screens/main/topic/topic-add/topic-add.screen'
+import TopicChatScreen from '../screens/main/topic/topic-chat/topic-chat.screen'
 import TopicDetailsScreen from '../screens/main/topic/topic-details'
 
 // Menu screens (as regular stack screens)
-import ComponentsScreen from '../screens/main/components/components-screen'
-import ConnectionsScreen from '../screens/main/menu/connections/connections-screen'
-import PaymentScreen from '../screens/main/menu/payment/payment-screen'
-import ProfileScreen from '../screens/main/menu/profile/profile-screen'
-import NotificationsScreen from '../screens/main/notifications/notifications-screen'
+import ConnectionsScreen from '../screens/main/menu/connections/connections.screen'
+import PaymentScreen from '../screens/main/menu/payment/payment.screen'
+import ProfileScreen from '../screens/main/menu/profile/profile.screen'
+import NotificationsScreen from '../screens/main/notifications/notifications.screen'
 
-import EditOverlay from '../screens/main/utils/edit-overlay/edit-overlay'
-import ErrorOverlay from '../screens/main/utils/error-overlay/error-overlay'
-import FastWayOverlay from '../screens/main/utils/fast-way-overlay/fast-way-overlay'
-import LoadingOverlay from '../screens/main/utils/loading-overlay/loading-overlay'
-import NotificationOverlay from '../screens/main/utils/notification-overlay/notification-overlay'
-import RankingOverlay from '../screens/main/utils/ranking-overlay/ranking-overlay'
-import ShareOverlay from '../screens/main/utils/share-overlay/share-overlay'
-import SuccessOverlay from '../screens/main/utils/success-overlay/success-overlay'
+import EditOverlay from '../screens/main/utils/edit-overlay/edit-overlay.screen'
+import ErrorOverlay from '../screens/main/utils/error-overlay/error-overlay.screen'
+import FastWayOverlay from '../screens/main/utils/fast-way-overlay/fast-way-overlay.screen'
+import LoadingOverlay from '../screens/main/utils/loading-overlay/loading-overlay.screen'
+import NotificationOverlay from '../screens/main/utils/notification-overlay/notification-overlay.screen'
+import RankingOverlay from '../screens/main/utils/ranking-overlay/ranking-overlay.screen'
+import ShareOverlay from '../screens/main/utils/share-overlay/share-overlay.screen'
+import SuccessOverlay from '../screens/main/utils/success-overlay/success-overlay.screen'
 import {
   initFirebaseAuthListener,
   waitForAuthReady,
@@ -87,8 +86,8 @@ import {
   listenUserNotificationsTopLevel,
 } from '../services/firebase/notifications.service'
 import { registerForPushNotificationsAsync } from '../services/push/expoPush.service'
-import { useCalendarStore } from '../store/useCalendarStore'
-import { useOverlay } from '../store/useOverlay'
+import { useCalendarStore } from '../store/calendar.store'
+import { useOverlay } from '../store/overlay.store'
 import { RootStackParamList } from './navigatorManager'
 
 const Stack = createStackNavigator<RootStackParamList>()
@@ -320,13 +319,6 @@ function MainStack() {
         name={ROUTES.NotificationsScreen}
         component={NotificationsScreen}
         options={{ title: ROUTES.NotificationsScreen }}
-      />
-
-      {/* Dev / Components */}
-      <Stack.Screen
-        name={ROUTES.ComponentsScreen}
-        component={ComponentsScreen}
-        options={{ title: ROUTES.ComponentsScreen }}
       />
     </Stack.Navigator>
   )

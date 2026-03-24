@@ -1,5 +1,0 @@
-export { default as LoginScreen } from './auth/login/login-screen'
-export { default as RecoveryScreen } from './auth/recovery-password/recovery-password-screen'
-export { default as RegisterScreen } from './auth/register/register-screen'
-export { default as DashboardScreen } from './main/dashboard/dashboard-screen'
-export { default as NotificationsScreen } from './main/notifications/notifications-screen'

@@ -288,14 +288,14 @@ This includes:
 
 ### Implementation Requests
 
-| Request Type      | Agent                   | Skills Used                                      | When to Delegate                                |
-| ----------------- | ----------------------- | ------------------------------------------------ | ----------------------------------------------- |
-| Implement feature | `react-native-engineer` | All skills                                                                 | After SDD exists, implementing components/hooks |
-| Create component  | `react-native-engineer` | `react-native-best-practices`, `ux-ui-standards`                           | UI implementation                               |
-| Create hook       | `react-native-engineer` | `clean-code-rules`, `typescript-strict-rules`                              | Business logic                                  |
-| Integrate API     | `react-native-engineer` | `api-integration-pattern`, `typescript-strict-rules`                       | Service/query layer, API calls                  |
-| Refactor code     | `react-native-engineer` | All applicable skills                                                      | Code improvements                               |
-| Add translation   | `react-native-engineer` | `translations`                                                             | i18n updates                                    |
+| Request Type      | Agent                   | Skills Used                                          | When to Delegate                                |
+| ----------------- | ----------------------- | ---------------------------------------------------- | ----------------------------------------------- |
+| Implement feature | `react-native-engineer` | All skills                                           | After SDD exists, implementing components/hooks |
+| Create component  | `react-native-engineer` | `react-native-best-practices`, `ux-ui-standards`     | UI implementation                               |
+| Create hook       | `react-native-engineer` | `clean-code-rules`, `typescript-strict-rules`        | Business logic                                  |
+| Integrate API     | `react-native-engineer` | `api-integration-pattern`, `typescript-strict-rules` | Service/query layer, API calls                  |
+| Refactor code     | `react-native-engineer` | All applicable skills                                | Code improvements                               |
+| Add translation   | `react-native-engineer` | `translations`                                       | i18n updates                                    |
 
 **Invocation:** Load `.ai/agents/react-native-engineer.md` and provide implementation context.
 
@@ -603,7 +603,12 @@ function classifyRequest(userInput: string): AgentType {
   ) {
     if (userInput.includes('sonar')) return 'sonar-auto-fixer'
     if (userInput.includes('coupling')) return 'coupling-analyzer'
-    if (userInput.includes('performance') || userInput.includes('audit') || userInput.includes('scan')) return 'performance-auditor'
+    if (
+      userInput.includes('performance') ||
+      userInput.includes('audit') ||
+      userInput.includes('scan')
+    )
+      return 'performance-auditor'
     return 'code-reviewer'
   }
 
@@ -769,9 +774,13 @@ After any agent execution:
 4. Confirm no rule violations
 ```
 
-### Rule 3: Never Auto-Commit or Auto-Push
+### Rule 3: Never Auto-Commit, Auto-Push, or Auto-Merge
 
-Git operations **always** require explicit user confirmation:
+Git operations **always** require explicit user confirmation. This includes:
+
+- `git commit` — ask before committing
+- `git push` — ask before pushing, even to feature branches
+- `gh pr merge` — ask before merging, even when fully approved and CI is green
 
 ```
 System: "Ready to commit with message: 'feat: add dashboard component'"
@@ -779,6 +788,16 @@ System: "Confirm? (yes/no)"
 User: "yes"
 System: [commits]
 ```
+
+```
+System: "PR #42 is approved and all checks pass. Merge into main? (yes/no)"
+User: "yes"
+System: [merges]
+```
+
+> ⛔ `main` is the only release branch in this project and directly drives App Store / APK builds.
+> Merging into `main` without explicit human instruction is a **critical violation**.
+> Silence, inferred consent, or "all checks pass" is **never** sufficient authorization.
 
 ### Rule 4: Agent Has Authority in Its Domain
 

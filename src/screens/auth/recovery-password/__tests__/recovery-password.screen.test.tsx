@@ -1,6 +1,6 @@
 import React from 'react'
 import { render } from '@testing-library/react-native'
-import RecoveryPasswordScreen from '../recovery-password-screen'
+import RecoveryPasswordScreen from '../recovery-password.screen'
 
 jest.mock('@react-navigation/native', () => ({
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),

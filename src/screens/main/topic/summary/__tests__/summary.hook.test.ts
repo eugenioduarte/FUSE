@@ -1,4 +1,4 @@
-import useSummaryScreen from '../use-summary-screen'
+import useSummaryScreen from '../summary.hook'
 import { renderHook } from '@testing-library/react-native'
 
 jest.mock('@/locales/translation', () => ({ t: (k: string) => k }))
@@ -6,7 +6,7 @@ jest.mock('@/navigation/navigatorManager', () => ({ navigatorManager: { navigate
 jest.mock('@/services/repositories/summaries.repository', () => ({
   summariesRepository: { create: jest.fn(), getAll: jest.fn().mockResolvedValue([]) },
 }))
-jest.mock('@/store/useOverlay', () => ({
+jest.mock('@/store/overlay.store', () => ({
   useOverlay: () => ({ setLoadingOverlay: jest.fn(), setErrorOverlay: jest.fn() }),
 }))
 jest.mock('expo-document-picker', () => ({ getDocumentAsync: jest.fn() }))

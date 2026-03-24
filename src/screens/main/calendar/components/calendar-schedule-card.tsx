@@ -1,7 +1,7 @@
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
-import { useThemeStore } from '@/store/useThemeStore'
+import { useThemeStore } from '@/store/theme.store'
 import type { CalendarCommitment } from '@/types/calendar.type'
 import React from 'react'
 import { TouchableOpacity, View } from 'react-native'

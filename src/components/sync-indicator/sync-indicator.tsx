@@ -1,4 +1,4 @@
-import { useSyncStatusStore } from '@/store/useSyncStatusStore'
+import { useSyncStatusStore } from '@/store/sync-status.store'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 

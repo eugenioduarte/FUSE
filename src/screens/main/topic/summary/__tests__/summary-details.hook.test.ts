@@ -1,4 +1,4 @@
-import { useSummaryDetails } from '../hooks/use-summary-details'
+import { useSummaryDetails } from '../summary-details.hook'
 import { renderHook } from '@testing-library/react-native'
 
 jest.mock('@/locales/translation', () => ({ t: (k: string) => k }))
@@ -16,7 +16,7 @@ jest.mock('@/services/usage/usageTracker', () => ({
   startSession: jest.fn(),
   stopSessionByKey: jest.fn(),
 }))
-jest.mock('@/store/useOverlay', () => ({
+jest.mock('@/store/overlay.store', () => ({
   useOverlay: () => ({ setLoadingOverlay: jest.fn(), setErrorOverlay: jest.fn() }),
 }))
 jest.mock('@/utils/errorLogger', () => ({ reportError: jest.fn() }))

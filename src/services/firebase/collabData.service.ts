@@ -6,7 +6,7 @@ import {
   setDoc,
   writeBatch,
 } from 'firebase/firestore'
-import { useAuthStore } from '../../store/useAuthStore'
+import { useAuthStore } from '../../store/auth.store'
 import { Challenge, Summary, Topic } from '../../types/domain'
 import { getFirebaseApp } from './firebaseInit'
 

@@ -3,7 +3,7 @@ import React, { useEffect, useMemo, useRef } from 'react'
 import { FlatList, TouchableOpacity, View } from 'react-native'
 import { Card, Text } from '../../../../components'
 import { navigatorManager } from '../../../../navigation/navigatorManager'
-import { useCalendarStore } from '../../../../store/useCalendarStore'
+import { useCalendarStore } from '../../../../store/calendar.store'
 
 const CalendarCard = ({
   title,

@@ -15,7 +15,7 @@ jest.mock('@react-navigation/native', () => ({
   },
 }))
 
-jest.mock('../../store/useOverlay', () => ({
+jest.mock('../../store/overlay.store', () => ({
   useOverlay: {
     getState: jest.fn().mockReturnValue({
       setRankingOverlay: jest.fn(),
