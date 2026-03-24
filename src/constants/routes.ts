@@ -11,12 +11,7 @@ export const ROUTES = {
   CalendarDetailsScreen: 'CalendarDetailsScreen',
   CalendarEditScreen: 'CalendarEditScreen',
   // Main - Challenge
-  ChallengeScreen: 'ChallengeScreen',
   ChallengeAddScreen: 'ChallengeAddScreen',
-  ChallengeAddHangmanScreen: 'ChallengeAddHangmanScreen',
-  ChallengeAddMatrixScreen: 'ChallengeAddMatrixScreen',
-  ChallengeAddQuizScreen: 'ChallengeAddQuizScreen',
-  ChallengeAddTextAnswerScreen: 'ChallengeAddTextAnswerScreen',
   ChallengesListScreen: 'ChallengesListScreen',
   ChallengeRunQuizScreen: 'ChallengeRunQuizScreen',
   ChallengeRunHangmanScreen: 'ChallengeRunHangmanScreen',
@@ -34,8 +29,6 @@ export const ROUTES = {
 
   SummaryScreen: 'SummaryScreen',
 
-  // Topic - Ranking
-  TopicRankingScreen: 'TopicRankingScreen',
   // Topic - Chat
   TopicChatScreen: 'TopicChatScreen',
   // Main - Menu
@@ -43,10 +36,6 @@ export const ROUTES = {
   ConnectionsScreen: 'ConnectionsScreen',
   PaymentScreen: 'PaymentScreen',
   NotificationsScreen: 'NotificationsScreen',
-  // Main - Dev / Components
-  ComponentsScreen: 'ComponentsScreen',
-  // Tabs/Other
-  SummaryListTab: 'SummaryListTab',
 } as const
 
 export type RouteKey = keyof typeof ROUTES

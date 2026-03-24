@@ -2,7 +2,7 @@ import { Text } from '@/components'
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import Svg, { Circle, G, Path, Text as SvgText } from 'react-native-svg'
-import useSummaryProgressArcs from '../hooks/use-summary-progress-arcs'
+import useSummaryProgressArcs from '../topic-details.hook'
 type Item = { title: string; value: number; color: string }
 type Props = { data: Item[] }
 

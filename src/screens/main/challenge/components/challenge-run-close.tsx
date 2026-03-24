@@ -1,6 +1,6 @@
 import { useTheme } from '@/hooks/use-theme'
-import { useOverlay } from '@/store/useOverlay'
-import { useThemeStore } from '@/store/useThemeStore'
+import { useOverlay } from '@/store/overlay.store'
+import { useThemeStore } from '@/store/theme.store'
 import { Ionicons } from '@expo/vector-icons'
 import React from 'react'
 import { SafeAreaView, StyleSheet, TouchableOpacity, View } from 'react-native'

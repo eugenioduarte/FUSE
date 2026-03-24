@@ -1,4 +1,4 @@
-import useDashboard from '../hooks/use-dashboard'
+import useDashboard from '../dashboard.hook'
 import { renderHook } from '@testing-library/react-native'
 
 jest.mock('@/store', () => ({

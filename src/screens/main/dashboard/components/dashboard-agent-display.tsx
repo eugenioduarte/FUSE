@@ -6,10 +6,10 @@ import {
   AppNotification,
   listenUserNotificationsTopLevel,
 } from '@/services/firebase/notifications.service'
-import { useAuthStore } from '@/store/useAuthStore'
-import { useCalendarStore } from '@/store/useCalendarStore'
-import { useOverlay } from '@/store/useOverlay'
-import { useThemeStore } from '@/store/useThemeStore'
+import { useAuthStore } from '@/store/auth.store'
+import { useCalendarStore } from '@/store/calendar.store'
+import { useOverlay } from '@/store/overlay.store'
+import { useThemeStore } from '@/store/theme.store'
 import { ThemeType } from '@/types/theme.type'
 import { getCurrentLocale } from '@/locales'
 import React, { useEffect, useState } from 'react'

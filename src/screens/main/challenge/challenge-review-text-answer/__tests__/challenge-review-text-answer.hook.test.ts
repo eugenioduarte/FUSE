@@ -1,6 +1,3 @@
-import { useChallengeReviewTextAnswer } from '../use-challenge-review-text-answer'
-import { renderHook } from '@testing-library/react-native'
-
 jest.mock('@react-navigation/native', () => ({
   useRoute: () => ({ params: {} }),
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),

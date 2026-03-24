@@ -1,4 +1,4 @@
-import useChallengeAdd from '../hooks/use-challenge-add'
+import useChallengeAdd from '../challenge-add.hook'
 import { renderHook } from '@testing-library/react-native'
 
 jest.mock('@/navigation/navigatorManager', () => ({ navigatorManager: { navigate: jest.fn() } }))
@@ -11,7 +11,7 @@ jest.mock('@/services/repositories/summaries.repository', () => ({
 jest.mock('@/services/repositories/topics.repository', () => ({
   topicsRepository: { getAll: jest.fn().mockResolvedValue([]) },
 }))
-jest.mock('@/store/useOverlay', () => ({
+jest.mock('@/store/overlay.store', () => ({
   useOverlay: () => ({ setLoadingOverlay: jest.fn(), setErrorOverlay: jest.fn() }),
 }))
 

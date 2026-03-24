@@ -1,11 +1,11 @@
-import { useCalendarScreen } from '../hooks/use-calendar-screen'
+import { useCalendarScreen } from '../calendar.hook'
 import { renderHook } from '@testing-library/react-native'
 
-jest.mock('@/store/useCalendarStore', () => ({
+jest.mock('@/store/calendar.store', () => ({
   useCalendarStore: (selector: any) =>
     selector({ selectedDate: null, setSelectedDate: jest.fn(), removeAppointment: jest.fn(), events: [] }),
 }))
-jest.mock('@/store/useAuthStore', () => ({
+jest.mock('@/store/auth.store', () => ({
   useAuthStore: (selector: any) => selector({ user: { id: 'user-1' } }),
 }))
 jest.mock('@/navigation/navigatorManager', () => ({ navigatorManager: { navigate: jest.fn() } }))

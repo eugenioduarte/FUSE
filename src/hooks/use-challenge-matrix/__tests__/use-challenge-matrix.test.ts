@@ -10,10 +10,10 @@ jest.mock('@/services/repositories/challenges.repository', () => ({
 jest.mock('@/services/repositories/summaries.repository', () => ({
   summariesRepository: { getById: jest.fn().mockResolvedValue(null) },
 }))
-jest.mock('@/store/useAuthStore', () => ({
+jest.mock('@/store/auth.store', () => ({
   useAuthStore: jest.fn().mockReturnValue(undefined),
 }))
-jest.mock('@/store/useOverlay', () => ({
+jest.mock('@/store/overlay.store', () => ({
   useOverlay: jest.fn().mockReturnValue({
     setLoadingOverlay: jest.fn(),
     setErrorOverlay: jest.fn(),

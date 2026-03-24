@@ -1,4 +1,4 @@
-import { useThemeStore } from '@/store/useThemeStore'
+import { useThemeStore } from '@/store/theme.store'
 import React, { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import Svg, { Circle, Path } from 'react-native-svg'

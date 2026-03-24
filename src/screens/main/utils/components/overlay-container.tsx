@@ -1,5 +1,5 @@
 import { useTheme } from '@/hooks/use-theme'
-import { useThemeStore } from '@/store/useThemeStore'
+import { useThemeStore } from '@/store/theme.store'
 import React from 'react'
 import { View } from 'react-native'
 

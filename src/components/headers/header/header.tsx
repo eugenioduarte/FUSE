@@ -1,7 +1,7 @@
 import { ROUTES } from '@/constants/routes'
 import { navigationRef } from '@/navigation/navigationRef'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
-import { useThemeStore } from '@/store/useThemeStore'
+import { useThemeStore } from '@/store/theme.store'
 import { Ionicons } from '@expo/vector-icons'
 import React, { useEffect, useState } from 'react'
 import { StyleSheet, TouchableOpacity, View } from 'react-native'

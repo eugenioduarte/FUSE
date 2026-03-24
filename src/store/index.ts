@@ -1,2 +1,2 @@
-export * from './useAuthStore'
-export * from './useFastwayStore'
+export * from './auth.store'
+export * from './fastway.store'

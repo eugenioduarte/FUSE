@@ -10,7 +10,7 @@ import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
 import { navigatorManager } from '@/navigation/navigatorManager'
 import { topicsRepository } from '@/services/repositories/topics.repository'
-import { useOverlay } from '@/store/useOverlay'
+import { useOverlay } from '@/store/overlay.store'
 import { Topic } from '@/types/domain'
 import { ThemeType } from '@/types/theme.type'
 import { reportError } from '@/utils/errorLogger'
@@ -125,7 +125,6 @@ const TopicLinksContainer = ({
         message: t('common.error'),
         context: { flow: 'ranking.open', topicId },
       })
-      navigatorManager.goToTopicRanking(topicId)
     }
   }
 

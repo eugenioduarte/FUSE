@@ -12,7 +12,7 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore'
-import { useAuthStore } from '../../store/useAuthStore'
+import { useAuthStore } from '../../store/auth.store'
 import { NotificationInvite, Topic } from '../../types/domain'
 import { getCurrentUser } from './authService'
 import { getFirebaseApp } from './firebaseInit'

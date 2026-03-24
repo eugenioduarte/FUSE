@@ -1,6 +1,5 @@
 import { DrawerActions } from '@react-navigation/native'
 import { ROUTES } from '../constants/routes'
-import { useOverlay } from '../store/useOverlay'
 import { navigationRef } from './navigationRef'
 
 export type RootStackParamList = {
@@ -14,12 +13,7 @@ export type RootStackParamList = {
   CalendarAddScreen: { date?: string } | undefined
   CalendarDetailsScreen: undefined
   CalendarEditScreen: { id: string }
-  ChallengeScreen: undefined
   ChallengeAddScreen: { summaryId?: string } | undefined
-  ChallengeAddHangmanScreen: { summaryId?: string } | undefined
-  ChallengeAddMatrixScreen: { summaryId?: string } | undefined
-  ChallengeAddQuizScreen: { summaryId?: string } | undefined
-  ChallengeAddTextAnswerScreen: { summaryId?: string } | undefined
   ChallengesListScreen: { summaryId?: string } | undefined
   ChallengeRunQuizScreen: { challengeId: string } | undefined
   ChallengeReviewQuizScreen: { challengeId: string } | undefined
@@ -29,7 +23,9 @@ export type RootStackParamList = {
   ChallengeReviewMatrixScreen: { challengeId: string } | undefined
   ChallengeRunTextAnswerScreen: { challengeId: string } | undefined
   ChallengeReviewTextAnswerScreen: { challengeId: string } | undefined
-  ChallengeFinishedScoreScreen: { score: number; total?: number; summaryId?: string } | undefined
+  ChallengeFinishedScoreScreen:
+    | { score: number; total?: number; summaryId?: string }
+    | undefined
   TopicDetailsScreen: { topicId: string }
   SummaryDetailsScreen: {
     summaryId: string
@@ -41,9 +37,7 @@ export type RootStackParamList = {
   ConnectionsScreen: undefined
   PaymentScreen: undefined
   NotificationsScreen: undefined
-  TopicRankingScreen: { topicId: string }
   TopicChatScreen: { topicId: string }
-  ComponentsScreen: undefined
 }
 
 export const navigatorManager = {
@@ -108,28 +102,9 @@ export const navigatorManager = {
   },
 
   // Challenge
-  goToChallenge: () => {
-    if (navigationRef.isReady()) navigationRef.navigate(ROUTES.ChallengeScreen)
-  },
   goToChallengeAdd: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeAddScreen, params)
-  },
-  goToChallengeAddHangman: (params?: { summaryId?: string }) => {
-    if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddHangmanScreen, params as any)
-  },
-  goToChallengeAddMatrix: (params?: { summaryId?: string }) => {
-    if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddMatrixScreen, params as any)
-  },
-  goToChallengeAddQuiz: (params?: { summaryId?: string }) => {
-    if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddQuizScreen, params as any)
-  },
-  goToChallengeAddTextAnswer: (params?: { summaryId?: string }) => {
-    if (navigationRef.isReady())
-      navigationRef.navigate(ROUTES.ChallengeAddTextAnswerScreen, params as any)
   },
   goToChallengesList: (params?: { summaryId?: string }) => {
     if (navigationRef.isReady())
@@ -151,7 +126,11 @@ export const navigatorManager = {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeRunTextAnswerScreen, params as any)
   },
-  goToChallengeFinishedScore: (params: { score: number; total?: number; summaryId?: string }) => {
+  goToChallengeFinishedScore: (params: {
+    score: number
+    total?: number
+    summaryId?: string
+  }) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.ChallengeFinishedScoreScreen, params as any)
   },
@@ -214,24 +193,9 @@ export const navigatorManager = {
       navigationRef.navigate(ROUTES.NotificationsScreen)
   },
 
-  goToTopicRanking: (topicId: string) => {
-    try {
-      const { setRankingOverlay } = useOverlay.getState()
-      setRankingOverlay({ id: `ranking-${topicId}`, topicId })
-    } catch {
-      if (navigationRef.isReady())
-        navigationRef.navigate(ROUTES.TopicRankingScreen, { topicId } as any)
-    }
-  },
-
   goToTopicChat: (topicId: string) => {
     if (navigationRef.isReady())
       navigationRef.navigate(ROUTES.TopicChatScreen, { topicId } as any)
-  },
-
-  // Dev / Components
-  goToComponents: () => {
-    if (navigationRef.isReady()) navigationRef.navigate(ROUTES.ComponentsScreen)
   },
 
   goBack: () => {

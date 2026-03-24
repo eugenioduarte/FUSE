@@ -8,7 +8,7 @@ import {
   serverTimestamp,
   Timestamp,
 } from 'firebase/firestore'
-import { useAuthStore } from '../../store/useAuthStore'
+import { useAuthStore } from '../../store/auth.store'
 import { getFirebaseAuth } from './authService'
 import { getFirebaseApp } from './firebaseInit'
 

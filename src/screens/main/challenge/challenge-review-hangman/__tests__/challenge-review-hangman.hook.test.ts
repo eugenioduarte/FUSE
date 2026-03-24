@@ -1,6 +1,3 @@
-import { useChallengeReviewHangman } from '../use-challenge-review-hangman'
-import { renderHook } from '@testing-library/react-native'
-
 jest.mock('@react-navigation/native', () => ({
   useRoute: () => ({ params: {} }),
   useNavigation: () => ({ navigate: jest.fn(), goBack: jest.fn() }),

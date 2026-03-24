@@ -7,7 +7,7 @@ import { StatusBar } from 'react-native'
 import 'react-native-reanimated'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import Navigation from './src/navigation/Navigation'
-import { useThemeStore } from './src/store/useThemeStore'
+import { useThemeStore } from './src/store/theme.store'
 
 const queryClient = new QueryClient({
   defaultOptions: {

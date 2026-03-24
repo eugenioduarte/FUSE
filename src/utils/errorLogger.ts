@@ -1,4 +1,4 @@
-import { useOverlay } from '@/store/useOverlay'
+import { useOverlay } from '@/store/overlay.store'
 
 type ReportOptions = {
   message?: string

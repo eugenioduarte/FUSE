@@ -1,4 +1,4 @@
-import useTopicScreen from '../hooks/use-topic-screen'
+import useTopicScreen from '../topic.hook'
 import { renderHook } from '@testing-library/react-native'
 
 jest.mock('@/hooks/use-theme', () => ({

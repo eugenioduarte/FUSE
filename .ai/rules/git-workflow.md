@@ -39,9 +39,9 @@ The assistant must ask:
 
 ---
 
-## ❌ No Direct Push to Main
+## ❌ No Direct Push to Main — Ever
 
-Direct pushes to `main` are forbidden.
+Direct pushes to `main` are **absolutely forbidden** for agents.
 
 All changes must go through:
 
@@ -49,6 +49,11 @@ All changes must go through:
 - pull request
 - code review
 - passing quality gates
+- explicit human approval
+
+> **`main` is the only release branch in this project.**
+> It is the source for all App Store / APK builds.
+> Any direct push or merge by an agent is a critical violation.
 
 ---
 
@@ -56,12 +61,21 @@ All changes must go through:
 
 Allowed branches:
 
-- `main` → production
-- `develop` → integration
-- `feature/<feature-name>`
-- `fix/<issue-name>`
-- `refactor/<context>`
-- `chore/<context>`
+- `main` → production / App Store / APK releases — **human-only, never touched by agents**
+- `feature/<feature-name>` → agent work branch
+- `fix/<issue-name>` → agent work branch
+- `refactor/<context>` → agent work branch
+- `chore/<context>` → agent work branch
+
+> `develop` is **not used** in this project. Do not create it.
+
+### Agent Branch Rules
+
+- Agents **only** create and push to `feature/*`, `fix/*`, `refactor/*`, `chore/*` branches
+- Agents **never** push to `main` — not even fast-forward
+- Agents **never** merge into `main` — not even via GitHub API
+- Any operation targeting `main` requires **explicit written user confirmation**
+- Push to any branch (including feature branches) requires **explicit user confirmation**
 
 Branch names must be kebab-case.
 
@@ -184,8 +198,10 @@ Feature lifecycle:
 3. Test Writer writes tests
 4. Code Reviewer audits
 5. Performance Auditor (if needed)
-6. Commit only after approval
-7. Push only after confirmation
+6. Commit only after **explicit user confirmation**
+7. Push only after **explicit user confirmation** — never automatic
+8. PR opened by agent — merge only after **human approves and instructs agent to merge**
+9. Agent **never** triggers merge autonomously, even when all CI checks pass
 
 ---
 
@@ -193,10 +209,10 @@ Feature lifecycle:
 
 Force push is forbidden on:
 
-- main
-- develop
+- `main` — always
+- any feature branch already published (with open PR)
 
-Allowed only on personal feature branches.
+Allowed only on local feature branches before a PR is opened.
 
 ---
 

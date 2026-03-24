@@ -5,7 +5,7 @@ import {
   serverTimestamp,
   setDoc,
 } from 'firebase/firestore'
-import { useAuthStore } from '../../store/useAuthStore'
+import { useAuthStore } from '../../store/auth.store'
 import { getCurrentUser } from './authService'
 import { getFirebaseApp } from './firebaseInit'
 

@@ -1,6 +1,6 @@
 import { offlineQueue } from '../../storage/offlineQueue'
-import { useNetworkStore } from '../../store/useNetworkStore'
-import { useSyncStatusStore } from '../../store/useSyncStatusStore'
+import { useNetworkStore } from '../../store/network.store'
+import { useSyncStatusStore } from '../../store/sync-status.store'
 
 export async function processOfflineQueue() {
   const online = useNetworkStore.getState().online

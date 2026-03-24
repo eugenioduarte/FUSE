@@ -1,6 +1,6 @@
 import React from 'react'
 import { render } from '@testing-library/react-native'
-import LoadingOverlay from '../loading-overlay'
+import LoadingOverlay from '../loading-overlay.screen'
 
 describe('LoadingOverlay', () => {
   it('renders without crashing', () => {
