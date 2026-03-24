@@ -9,8 +9,8 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 import { useAuthStore } from '../../store/auth.store'
-import { getFirebaseAuth } from './authService'
-import { getFirebaseApp } from './firebaseInit'
+import { getFirebaseAuth } from './auth.service'
+import { getFirebaseApp } from './firebase-init'
 
 export type TopicChatMessage = {
   id: string

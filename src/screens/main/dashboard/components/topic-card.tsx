@@ -5,7 +5,7 @@ import { ThemeType } from '@/types/theme.type'
 import React from 'react'
 import { FlatList, Image, StyleSheet, View } from 'react-native'
 import { Card, Text } from '../../../../components'
-import { navigatorManager } from '../../../../navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { TopicCardChart } from './topic-card-chart'
 
 type User = {

@@ -1,5 +1,5 @@
 import { t } from '@/locales/translation'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { useOverlay } from '@/store/overlay.store'
 import * as DocumentPicker from 'expo-document-picker'

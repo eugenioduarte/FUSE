@@ -1,5 +1,5 @@
-import { generateMatrixQA } from '@/hooks/use-challenge-matrix/use-challenge-matrix'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { generateMatrixQA } from '@/hooks/use-challenge-matrix'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { buildHangmanPrompt, buildQuizPrompt } from '@/services/prompts'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'

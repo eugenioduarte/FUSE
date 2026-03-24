@@ -4,7 +4,7 @@ import { renderHook } from '@testing-library/react-native'
 jest.mock('@/store', () => ({
   useAuthStore: (selector: any) => selector({ user: { id: 'user-1' } }),
 }))
-jest.mock('@/navigation/navigatorManager', () => ({ navigatorManager: { goToLoginScreen: jest.fn() } }))
+jest.mock('@/navigation/navigator-manager', () => ({ navigatorManager: { goToLoginScreen: jest.fn() } }))
 jest.mock('@/services/repositories/summaries.repository', () => ({
   summariesRepository: { getAll: jest.fn().mockResolvedValue([]) },
 }))

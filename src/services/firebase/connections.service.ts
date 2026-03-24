@@ -14,8 +14,8 @@ import {
 } from 'firebase/firestore'
 import { ConnectionRequest, RequestStatus } from '../../types/domain'
 import { generateAvatarUrl } from '../profile/avatar.service'
-import { getCurrentUser } from './authService'
-import { getFirebaseApp } from './firebaseInit'
+import { getCurrentUser } from './auth.service'
+import { getFirebaseApp } from './firebase-init'
 
 function db() {
   return getFirestore(getFirebaseApp())

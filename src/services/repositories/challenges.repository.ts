@@ -1,5 +1,5 @@
-import { getDb } from '../../lib/db/db'
 import { challengesDao } from '../../lib/db/dao/challenges.dao'
+import { getDb } from '../../lib/db/db'
 import { offlineQueue } from '../../storage/offlineQueue'
 import { Challenge } from '../../types/domain'
 
@@ -48,9 +48,8 @@ export const challengesRepository = {
     })
 
     try {
-      const { deleteGroupChallenge } = await import(
-        '../firebase/collabData.service'
-      )
+      const { deleteGroupChallenge } =
+        await import('../firebase/collab-data.service')
       await deleteGroupChallenge(id)
     } catch {}
   },

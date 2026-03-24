@@ -10,14 +10,14 @@ jest.mock('@/store/overlay.store', () => ({
 jest.mock('@/store/fastway.store', () => ({
   useFastwayStore: () => ({}),
 }))
-jest.mock('@/navigation/navigationRef', () => ({
+jest.mock('@/navigation/navigation-ref', () => ({
   navigationRef: {
     current: null,
     isReady: jest.fn(() => false),
     getCurrentRoute: jest.fn(() => null),
   },
 }))
-jest.mock('@/navigation/navigatorManager', () => ({
+jest.mock('@/navigation/navigator-manager', () => ({
   navigatorManager: { navigate: jest.fn() },
 }))
 jest.mock('@/services/repositories/challenges.repository', () => ({

@@ -5,11 +5,11 @@ import {
   changePassword,
   updateAvatarUrl,
   updateDisplayName,
-} from '@/services/firebase/authService'
+} from '@/services/firebase/auth.service'
 import {
   setUserAvatarMeta,
   upsertUserProfile,
-} from '@/services/firebase/userProfile.service'
+} from '@/services/firebase/user-profile.service'
 import {
   AVATAR_STYLES,
   AvatarStyle,

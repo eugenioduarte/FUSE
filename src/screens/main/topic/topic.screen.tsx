@@ -4,7 +4,7 @@ import LoadingContainer from '@/components/containers/loading-container/loading-
 import SubContainer from '@/components/containers/sub-container/sub-container'
 import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { useThemeStore } from '@/store/theme.store'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'

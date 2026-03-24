@@ -1,6 +1,6 @@
 import { PathIcon, Settings } from '@/assets/icons'
 import { useTheme } from '@/hooks/use-theme'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { useOverlay } from '@/store/overlay.store'
 import { useThemeStore } from '@/store/theme.store'
 import { ThemeType } from '@/types/theme.type'

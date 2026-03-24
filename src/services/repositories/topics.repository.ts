@@ -1,6 +1,5 @@
-import { topicsMock } from '../../mock/topics.mock'
-import { getDb } from '../../lib/db/db'
 import { topicsDao } from '../../lib/db/dao/topics.dao'
+import { getDb } from '../../lib/db/db'
 import { offlineQueue } from '../../storage/offlineQueue'
 import { Topic } from '../../types/domain'
 import { summariesRepository } from './summaries.repository'
@@ -19,19 +18,7 @@ export const topicsRepository = {
   },
 
   async seedIfEmpty() {
-    const db = await getDb()
-    const count = await topicsDao.count(db)
-    if (count > 0) return
-    const mapped: Topic[] = topicsMock.map((m) => ({
-      id: m.id,
-      title: m.topicName,
-      description: undefined,
-      createdAt: Date.parse(m.createdAt) || Date.now(),
-      updatedAt: Date.now(),
-    }))
-    for (const topic of mapped) {
-      await topicsDao.upsert(db, topic)
-    }
+    // no-op: topics are sourced from real data (Firebase / AI)
   },
 
   async getById(id: string): Promise<Topic | null> {
@@ -88,7 +75,8 @@ export const topicsRepository = {
     })
 
     try {
-      const { deleteGroupTopic } = await import('../firebase/collabData.service')
+      const { deleteGroupTopic } =
+        await import('../firebase/collab-data.service')
       await deleteGroupTopic(id)
     } catch {}
   },

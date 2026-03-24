@@ -1,7 +1,7 @@
 import { ChevronIcon, PathIcon } from '@/assets/icons'
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/use-theme'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { useOverlay } from '@/store/overlay.store'
 import { useThemeStore } from '@/store/theme.store'
 import { ThemeType } from '@/types/theme.type'

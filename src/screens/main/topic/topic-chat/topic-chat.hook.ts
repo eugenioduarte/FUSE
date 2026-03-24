@@ -1,12 +1,12 @@
 import { t } from '@/locales/translation'
-import { RootStackParamList } from '@/navigation/navigatorManager'
-import { getFirebaseAuth } from '@/services/firebase/authService'
+import { RootStackParamList } from '@/navigation/navigator-manager'
+import { getFirebaseAuth } from '@/services/firebase/auth.service'
 import {
   listenTopicChat,
   sendTopicChatMessage,
   TopicChatMessage,
 } from '@/services/firebase/chat.service'
-import { getFirebaseApp } from '@/services/firebase/firebaseInit'
+import { getFirebaseApp } from '@/services/firebase/firebase-init'
 import { useAuthStore } from '@/store/auth.store'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import { doc, getDoc, getFirestore } from 'firebase/firestore'

@@ -1,1 +1,1 @@
-export { default } from './use-challenge-matrix'
+export { default, generateMatrixQA } from './challenge-matrix.hook'

@@ -15,8 +15,8 @@ import { Colors, spacings, typography } from '../../../../constants/theme'
 import {
   navigatorManager,
   RootStackParamList,
-} from '../../../../navigation/navigatorManager'
-import { getCurrentUser } from '../../../../services/firebase/authService'
+} from '@/navigation/navigator-manager'
+import { getCurrentUser } from '../../../../services/firebase/auth.service'
 import { createSharedEvent } from '../../../../services/firebase/calendar.service'
 import {
   listAcceptedConnections,

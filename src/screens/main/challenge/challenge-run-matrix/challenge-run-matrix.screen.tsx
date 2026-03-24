@@ -6,7 +6,7 @@ import { useTheme } from '@/hooks/use-theme'
 import {
   RootStackParamList,
   navigatorManager,
-} from '@/navigation/navigatorManager'
+} from '@/navigation/navigator-manager'
 import { useOverlay } from '@/store/overlay.store'
 import { useThemeStore } from '@/store/theme.store'
 import { ThemeType } from '@/types/theme.type'

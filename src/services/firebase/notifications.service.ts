@@ -10,8 +10,8 @@ import {
   updateDoc,
   where,
 } from 'firebase/firestore'
-import { sendPushToUser } from '../push/expoPush.service'
-import { getFirebaseApp } from './firebaseInit'
+import { sendPushToUser } from '../push/expo-push.service'
+import { getFirebaseApp } from './firebase-init'
 
 function pruneUndefined<T>(obj: T): T {
   if (obj === null || typeof obj !== 'object') return obj

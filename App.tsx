@@ -6,7 +6,7 @@ import React from 'react'
 import { StatusBar } from 'react-native'
 import 'react-native-reanimated'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
-import Navigation from './src/navigation/Navigation'
+import Navigation from './src/navigation/navigation'
 import { useThemeStore } from './src/store/theme.store'
 
 const queryClient = new QueryClient({

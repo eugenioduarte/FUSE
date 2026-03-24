@@ -17,10 +17,10 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native'
-import { navigatorManager } from '../../../navigation/navigatorManager'
-import { firebaseRegister } from '../../../services/firebase/authService'
+import { navigatorManager } from '@/navigation/navigator-manager'
+import { firebaseRegister } from '../../../services/firebase/auth.service'
 import { useAuthStore } from '../../../store/auth.store'
-import { useLoginAnimation } from '../login/use-login-animation'
+import { useLoginAnimation } from '../login/login-animation.hook'
 import { registerSchema, RegisterSchema } from './register.schema'
 
 export default function RegisterScreen() {

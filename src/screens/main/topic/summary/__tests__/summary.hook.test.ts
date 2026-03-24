@@ -2,7 +2,7 @@ import useSummaryScreen from '../summary.hook'
 import { renderHook } from '@testing-library/react-native'
 
 jest.mock('@/locales/translation', () => ({ t: (k: string) => k }))
-jest.mock('@/navigation/navigatorManager', () => ({ navigatorManager: { navigate: jest.fn() } }))
+jest.mock('@/navigation/navigator-manager', () => ({ navigatorManager: { navigate: jest.fn() } }))
 jest.mock('@/services/repositories/summaries.repository', () => ({
   summariesRepository: { create: jest.fn(), getAll: jest.fn().mockResolvedValue([]) },
 }))

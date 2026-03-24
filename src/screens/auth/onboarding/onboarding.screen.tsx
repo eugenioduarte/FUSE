@@ -14,7 +14,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { useAuthStore } from '@/store/auth.store'
 import { ThemeType } from '@/types/theme.type'
 

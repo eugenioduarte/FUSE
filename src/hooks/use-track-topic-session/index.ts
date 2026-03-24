@@ -1,1 +1,1 @@
-export { default } from './use-track-topic-session'
+export { default } from './track-topic-session.hook'

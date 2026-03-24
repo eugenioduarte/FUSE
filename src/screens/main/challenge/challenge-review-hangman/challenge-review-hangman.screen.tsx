@@ -1,7 +1,7 @@
 import { useTheme } from '@/hooks/use-theme'
 import useTrackTopicSession from '@/hooks/use-track-topic-session'
 import { t } from '@/locales/translation'
-import { RootStackParamList } from '@/navigation/navigatorManager'
+import { RootStackParamList } from '@/navigation/navigator-manager'
 import { useThemeStore } from '@/store/theme.store'
 import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useRoute } from '@react-navigation/native'

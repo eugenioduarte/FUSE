@@ -1,3 +1,3 @@
-export { default as Navigation } from './Navigation'
-export { navigationRef } from './navigationRef'
-export { navigatorManager } from './navigatorManager'
+export { default as Navigation } from './navigation'
+export { navigationRef } from './navigation-ref'
+export { navigatorManager } from './navigator-manager'

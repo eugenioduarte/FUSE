@@ -7,7 +7,7 @@ import { t } from '@/locales/translation'
 import {
   navigatorManager,
   RootStackParamList,
-} from '@/navigation/navigatorManager'
+} from '@/navigation/navigator-manager'
 import { useThemeStore } from '@/store/theme.store'
 import { ThemeType } from '@/types/theme.type'
 import { RouteProp, useRoute } from '@react-navigation/native'

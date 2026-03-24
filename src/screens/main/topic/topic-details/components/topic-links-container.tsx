@@ -8,7 +8,7 @@ import {
 import IconButton from '@/components/buttons/icon-button/icon-button'
 import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { topicsRepository } from '@/services/repositories/topics.repository'
 import { useOverlay } from '@/store/overlay.store'
 import { Topic } from '@/types/domain'

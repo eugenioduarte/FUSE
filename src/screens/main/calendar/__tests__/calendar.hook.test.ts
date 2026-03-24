@@ -8,7 +8,7 @@ jest.mock('@/store/calendar.store', () => ({
 jest.mock('@/store/auth.store', () => ({
   useAuthStore: (selector: any) => selector({ user: { id: 'user-1' } }),
 }))
-jest.mock('@/navigation/navigatorManager', () => ({ navigatorManager: { navigate: jest.fn() } }))
+jest.mock('@/navigation/navigator-manager', () => ({ navigatorManager: { navigate: jest.fn() } }))
 jest.mock('@/services/firebase/calendar.service', () => ({
   deleteOwnedCalendarEvent: jest.fn(),
   leaveCalendarEvent: jest.fn(),

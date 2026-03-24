@@ -10,22 +10,22 @@ jest.mock('@react-navigation/native', () => ({
 
 describe('navigationRef', () => {
   it('creates a navigation container ref', () => {
-    const { navigationRef } = require('../navigationRef')
+    const { navigationRef } = require('../navigation-ref')
     expect(navigationRef).toBeDefined()
   })
 
   it('exposes isReady method', () => {
-    const { navigationRef } = require('../navigationRef')
+    const { navigationRef } = require('../navigation-ref')
     expect(typeof navigationRef.isReady).toBe('function')
   })
 
   it('exposes navigate method', () => {
-    const { navigationRef } = require('../navigationRef')
+    const { navigationRef } = require('../navigation-ref')
     expect(typeof navigationRef.navigate).toBe('function')
   })
 
   it('exposes goBack method', () => {
-    const { navigationRef } = require('../navigationRef')
+    const { navigationRef } = require('../navigation-ref')
     expect(typeof navigationRef.goBack).toBe('function')
   })
 })

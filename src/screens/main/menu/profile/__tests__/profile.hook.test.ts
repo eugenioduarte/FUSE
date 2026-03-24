@@ -1,17 +1,14 @@
-import useProfile from '../profile.hook'
-import { renderHook } from '@testing-library/react-native'
-
 jest.mock('@/components/snackbar-provider/snackbar-provider', () => ({
   useSnackbar: () => ({ showSnackbar: jest.fn() }),
 }))
 jest.mock('@/locales/translation', () => ({ t: (k: string) => k }))
-jest.mock('@/services/firebase/authService', () => ({
+jest.mock('@/services/firebase/auth.service', () => ({
   changeEmail: jest.fn(),
   changePassword: jest.fn(),
   updateAvatarUrl: jest.fn(),
   updateDisplayName: jest.fn(),
 }))
-jest.mock('@/services/firebase/userProfile.service', () => ({
+jest.mock('@/services/firebase/user-profile.service', () => ({
   setUserAvatarMeta: jest.fn(),
   upsertUserProfile: jest.fn(),
 }))
@@ -23,7 +20,9 @@ jest.mock('@/services/profile/avatar.service', () => ({
 }))
 jest.mock('@/store/auth.store', () => ({
   useAuthStore: (selector: any) =>
-    selector({ user: { id: 'user-1', displayName: 'Test', email: 'test@test.com' } }),
+    selector({
+      user: { id: 'user-1', displayName: 'Test', email: 'test@test.com' },
+    }),
 }))
 
 describe('useProfile', () => {
