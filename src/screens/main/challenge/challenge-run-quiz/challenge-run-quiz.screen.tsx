@@ -4,7 +4,7 @@ import { useTheme } from '@/hooks/use-theme'
 import {
   RootStackParamList,
   navigatorManager,
-} from '@/navigation/navigatorManager'
+} from '@/navigation/navigator-manager'
 import { useThemeStore } from '@/store/theme.store'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect, useRef } from 'react'

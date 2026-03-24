@@ -4,7 +4,7 @@ import Container from '@/components/containers/container/container'
 import { useTheme } from '@/hooks/use-theme'
 import { useUpdateBackgroundColor } from '@/hooks/use-update-background-color'
 import { t } from '@/locales/translation'
-import { firebaseLogin } from '@/services/firebase/authService'
+import { firebaseLogin } from '@/services/firebase/auth.service'
 import { ThemeType } from '@/types/theme.type'
 import { zodResolver } from '@hookform/resolvers/zod'
 import React from 'react'
@@ -20,10 +20,10 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native'
-import { navigatorManager } from '../../../navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { useAuthStore } from '../../../store/auth.store'
+import { useLoginAnimation } from './login-animation.hook'
 import { loginSchema } from './login.schema'
-import { useLoginAnimation } from './use-login-animation'
 
 type LoginFormValues = {
   email: string

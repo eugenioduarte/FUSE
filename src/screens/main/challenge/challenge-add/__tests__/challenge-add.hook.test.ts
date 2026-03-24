@@ -1,7 +1,7 @@
 import useChallengeAdd from '../challenge-add.hook'
 import { renderHook } from '@testing-library/react-native'
 
-jest.mock('@/navigation/navigatorManager', () => ({ navigatorManager: { navigate: jest.fn() } }))
+jest.mock('@/navigation/navigator-manager', () => ({ navigatorManager: { navigate: jest.fn() } }))
 jest.mock('@/services/repositories/challenges.repository', () => ({
   challengesRepository: { getAll: jest.fn().mockResolvedValue([]) },
 }))

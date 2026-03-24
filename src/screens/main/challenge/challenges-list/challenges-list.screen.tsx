@@ -4,11 +4,11 @@ import { useTheme } from '@/hooks/use-theme'
 import {
   RootStackParamList,
   navigatorManager,
-} from '@/navigation/navigatorManager'
+} from '@/navigation/navigator-manager'
 import { getUserProfile } from '@/services/firebase/connections.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
-import { startSession, stopSessionByKey } from '@/services/usage/usageTracker'
+import { startSession, stopSessionByKey } from '@/services/usage/usage-tracker'
 import { useAuthStore } from '@/store/auth.store'
 import { useThemeStore } from '@/store/theme.store'
 import { RouteProp, useFocusEffect, useRoute } from '@react-navigation/native'
@@ -137,15 +137,13 @@ const ChallengesListScreen: React.FC = () => {
       let mounted = true
       ;(async () => {
         try {
-          const { processOfflineQueue } = await import(
-            '@/services/sync/sync.service'
-          )
+          const { processOfflineQueue } =
+            await import('@/services/sync/sync.service')
           await processOfflineQueue()
         } catch {}
         try {
-          const { flushLocalCollaborativeChanges } = await import(
-            '@/services/firebase/collabFlush.service'
-          )
+          const { flushLocalCollaborativeChanges } =
+            await import('@/services/firebase/collab-flush.service')
           await flushLocalCollaborativeChanges()
         } catch {}
 
@@ -153,9 +151,8 @@ const ChallengesListScreen: React.FC = () => {
           if (summaryId) {
             const { getFirestore, collection, getDocs, query, where } =
               await import('firebase/firestore')
-            const { getFirebaseApp } = await import(
-              '@/services/firebase/firebaseInit'
-            )
+            const { getFirebaseApp } =
+              await import('@/services/firebase/firebase-init')
             const db = getFirestore(getFirebaseApp())
             const q = query(
               collection(db, 'challenges'),

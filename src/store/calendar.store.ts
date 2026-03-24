@@ -1,7 +1,6 @@
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
-import { calendarMock } from '../mock/calendar.mock'
 import { CalendarCommitment } from '../types/calendar.type'
 
 interface CalendarState {
@@ -45,9 +44,7 @@ export const useCalendarStore = create<CalendarState>()(
         }),
       getEventsForDate: (date) => get().events.filter((e) => e.date === date),
       seedIfEmpty: async () => {
-        const hasData = get().events.length > 0
-        if (hasData) return
-        set({ events: calendarMock })
+        // no-op: calendar events come from Firebase real-time sync
       },
       addAppointment: (a) =>
         set((s) => {

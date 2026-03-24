@@ -1,6 +1,6 @@
 import { useTheme } from '@/hooks/use-theme'
 import { topicsRepository } from '@/services/repositories/topics.repository'
-import { getDailyTotals } from '@/services/usage/usageTracker'
+import { getDailyTotals } from '@/services/usage/usage-tracker'
 import { Topic } from '@/types/domain'
 import { useCallback, useEffect, useState } from 'react'
 

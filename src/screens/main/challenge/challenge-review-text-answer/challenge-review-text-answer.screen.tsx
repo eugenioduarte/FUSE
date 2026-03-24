@@ -1,4 +1,4 @@
-import { RootStackParamList } from '@/navigation/navigatorManager'
+import { RootStackParamList } from '@/navigation/navigator-manager'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React from 'react'
 import { ScrollView, StyleSheet, View } from 'react-native'

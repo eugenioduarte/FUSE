@@ -1,4 +1,4 @@
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import {
   deleteOwnedCalendarEvent,
   leaveCalendarEvent,

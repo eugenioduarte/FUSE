@@ -13,7 +13,7 @@ import {
   where,
 } from 'firebase/firestore'
 import type { CalendarCommitment } from '../../types/calendar.type'
-import { getFirebaseApp } from './firebaseInit'
+import { getFirebaseApp } from './firebase-init'
 
 export type NewSharedEvent = {
   title: string

@@ -4,7 +4,7 @@ import LoadingContainer from '@/components/containers/loading-container/loading-
 import StepDot from '@/components/step-dot/step-dot'
 import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
-import { RootStackParamList } from '@/navigation/navigatorManager'
+import { RootStackParamList } from '@/navigation/navigator-manager'
 import { useThemeStore } from '@/store/theme.store'
 import { RouteProp, useRoute } from '@react-navigation/native'
 import React, { useEffect } from 'react'

@@ -1,4 +1,4 @@
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
 import { useAuthStore } from '@/store'
@@ -76,23 +76,20 @@ export default function useDashboard() {
       let active = true
       ;(async () => {
         try {
-          const { syncUserTopicsMembership } = await import(
-            '@/services/firebase/invites.service'
-          )
+          const { syncUserTopicsMembership } =
+            await import('@/services/firebase/invites.service')
           await syncUserTopicsMembership()
         } catch {}
 
         try {
-          const { processOfflineQueue } = await import(
-            '@/services/sync/sync.service'
-          )
+          const { processOfflineQueue } =
+            await import('@/services/sync/sync.service')
           // Fire-and-forget — never block dashboard loading
           processOfflineQueue().catch(() => {})
         } catch {}
         try {
-          const { flushLocalCollaborativeChanges } = await import(
-            '@/services/firebase/collabFlush.service'
-          )
+          const { flushLocalCollaborativeChanges } =
+            await import('@/services/firebase/collab-flush.service')
           await flushLocalCollaborativeChanges()
         } catch {}
         const topics = await topicsRepository.list()

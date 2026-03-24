@@ -1,11 +1,11 @@
 import useTrackTopicSession from '@/hooks/use-track-topic-session'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
+import { callAI, toJSONSafe } from '@/services/ai/ai.service'
 import {
   TEXT_EVALUATION_PROMPT,
   TEXT_EXERCISES_SYSTEM,
   buildTextExercisesPrompt,
 } from '@/services/prompts'
-import { callAI, toJSONSafe } from '@/services/ai/ai.service'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { useAuthStore } from '@/store/auth.store'
@@ -86,11 +86,14 @@ export default function useChallengeRunTextAnswer(challengeId: string) {
 
         // Use pre-generated exercises if available (stored at challenge creation time)
         const preGenExercises: TAExercise[] | undefined =
-          Array.isArray(ch.payload?.exercises) && ch.payload.exercises.length > 0
+          Array.isArray(ch.payload?.exercises) &&
+          ch.payload.exercises.length > 0
             ? (ch.payload.exercises as TAExercise[])
             : undefined
 
-        const setQ = preGenExercises ?? await generateOpenQuestionSet(summary.content, tExercises)
+        const setQ =
+          preGenExercises ??
+          (await generateOpenQuestionSet(summary.content, tExercises))
         if (!active) return
         setExercises(setQ)
         setLoading(false)
@@ -200,12 +203,15 @@ export default function useChallengeRunTextAnswer(challengeId: string) {
     })
     setChallenge(updated)
     // navigate to finished screen with score
-    navigatorManager.goToChallengeFinishedScore({ score: final, total: 10, summaryId: challenge.summaryId })
+    navigatorManager.goToChallengeFinishedScore({
+      score: final,
+      total: 10,
+      summaryId: challenge.summaryId,
+    })
     try {
       setLoadingOverlay(true, 'Sincronizando…')
-      const { immediateCollaborativeFlush } = await import(
-        '@/services/firebase/immediateFlush'
-      )
+      const { immediateCollaborativeFlush } =
+        await import('@/services/firebase/immediate-flush')
       await immediateCollaborativeFlush(1500)
     } catch {
     } finally {
@@ -265,12 +271,15 @@ export default function useChallengeRunTextAnswer(challengeId: string) {
       })
       setChallenge(updated)
       // navigate to finished screen with score
-      navigatorManager.goToChallengeFinishedScore({ score: final, total: 10, summaryId: challenge.summaryId })
+      navigatorManager.goToChallengeFinishedScore({
+        score: final,
+        total: 10,
+        summaryId: challenge.summaryId,
+      })
       try {
         setLoadingOverlay(true, 'Sincronizando…')
-        const { immediateCollaborativeFlush } = await import(
-          '@/services/firebase/immediateFlush'
-        )
+        const { immediateCollaborativeFlush } =
+          await import('@/services/firebase/immediate-flush')
         await immediateCollaborativeFlush(1500)
       } catch {}
     } catch (e) {
@@ -321,7 +330,8 @@ export async function generateOpenQuestionSet(summary: string, total: number) {
     }))
     .filter((x: TAExercise) => x.question && x.correctAnswer)
     .slice(0, total)
-  if (parsed.length === 0) throw new Error('Text AI returned no valid exercises')
+  if (parsed.length === 0)
+    throw new Error('Text AI returned no valid exercises')
   return parsed
 }
 
@@ -355,5 +365,3 @@ async function evaluateOpenAnswer(ex: TAExercise, userAnswer: string) {
     return { score: 0, feedback: 'Falha ao avaliar.' }
   }
 }
-
-

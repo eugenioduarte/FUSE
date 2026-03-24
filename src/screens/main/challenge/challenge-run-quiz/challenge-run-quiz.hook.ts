@@ -1,9 +1,9 @@
-import { buildQuizPrompt, QUIZ_SYSTEM } from '@/services/prompts'
 import { callAI, toJSONSafe } from '@/services/ai/ai.service'
+import { buildQuizPrompt, QUIZ_SYSTEM } from '@/services/prompts'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
-import { startSession, stopSessionByKey } from '@/services/usage/usageTracker'
+import { startSession, stopSessionByKey } from '@/services/usage/usage-tracker'
 import { useAuthStore } from '@/store/auth.store'
 import { useOverlay } from '@/store/overlay.store'
 import { Challenge } from '@/types/domain'
@@ -67,7 +67,8 @@ export const useChallengeRunQuiz = (challengeId: string) => {
 
         // Use pre-generated questions if available (stored at challenge creation time)
         const preGenQuestions: AIQuizQuestion[] | undefined =
-          Array.isArray(ch.payload?.questions) && ch.payload.questions.length > 0
+          Array.isArray(ch.payload?.questions) &&
+          ch.payload.questions.length > 0
             ? (ch.payload.questions as AIQuizQuestion[])
             : undefined
 
@@ -187,8 +188,10 @@ export const useChallengeRunQuiz = (challengeId: string) => {
     setChallenge(updated)
     setFinished({ score, total: questions.length })
     // fire-and-forget — never block navigation
-    import('@/services/firebase/immediateFlush')
-      .then(({ immediateCollaborativeFlush }) => immediateCollaborativeFlush(1500))
+    import('@/services/firebase/immediate-flush')
+      .then(({ immediateCollaborativeFlush }) =>
+        immediateCollaborativeFlush(1500),
+      )
       .catch(() => {})
   }
 
@@ -227,8 +230,10 @@ export const useChallengeRunQuiz = (challengeId: string) => {
     }
     setChallenge(updated)
     setFinished({ score, total: questions.length })
-    import('@/services/firebase/immediateFlush')
-      .then(({ immediateCollaborativeFlush }) => immediateCollaborativeFlush(1500))
+    import('@/services/firebase/immediate-flush')
+      .then(({ immediateCollaborativeFlush }) =>
+        immediateCollaborativeFlush(1500),
+      )
       .catch(() => {})
   }
 
@@ -302,6 +307,5 @@ function shuffleArray<T>(arr: T[]): T[] {
   }
   return a
 }
-
 
 export default useChallengeRunQuiz

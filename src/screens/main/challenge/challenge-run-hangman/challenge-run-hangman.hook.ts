@@ -3,8 +3,8 @@ import { useThemeStore } from '@/store/theme.store'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Animated, Dimensions, Easing } from 'react-native'
 // navigatorManager not required in hook
-import { buildHangmanPrompt, HANGMAN_SYSTEM } from '@/services/prompts'
 import { callAI, toJSONSafe } from '@/services/ai/ai.service'
+import { buildHangmanPrompt, HANGMAN_SYSTEM } from '@/services/prompts'
 import { challengesRepository } from '@/services/repositories/challenges.repository'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'
@@ -283,9 +283,8 @@ export default function useChallengeRunHangman(
     setFinished({ score: nextScore, total: rounds.length })
     try {
       setLoadingOverlay(true, 'Sincronizando…')
-      const { immediateCollaborativeFlush } = await import(
-        '@/services/firebase/immediateFlush'
-      )
+      const { immediateCollaborativeFlush } =
+        await import('@/services/firebase/immediate-flush')
       await immediateCollaborativeFlush(1500)
     } catch {
     } finally {
@@ -338,9 +337,8 @@ export default function useChallengeRunHangman(
       setChallenge(updated)
       setFinished({ score: finalScore, total: rounds.length })
       try {
-        const { immediateCollaborativeFlush } = await import(
-          '@/services/firebase/immediateFlush'
-        )
+        const { immediateCollaborativeFlush } =
+          await import('@/services/firebase/immediate-flush')
         await immediateCollaborativeFlush(1500)
       } catch {}
     } catch (e) {
@@ -402,7 +400,9 @@ export type HangmanGen = { question: string; answer: string }
 
 // buildHangmanPrompt moved to src/services/prompts
 
-export async function generateHangmanRounds(prompt: string): Promise<HangmanGen[]> {
+export async function generateHangmanRounds(
+  prompt: string,
+): Promise<HangmanGen[]> {
   const content = await callAI(
     [
       { role: 'system', content: HANGMAN_SYSTEM },
@@ -422,4 +422,3 @@ export async function generateHangmanRounds(prompt: string): Promise<HangmanGen[
   if (!parsed.length) throw new Error('Hangman AI returned no valid rounds')
   return parsed
 }
-

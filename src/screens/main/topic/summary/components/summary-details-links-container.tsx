@@ -1,7 +1,7 @@
 import { DeleteIcon, DownloadIcon, QuizIcon } from '@/assets/icons'
 import IconButton from '@/components/buttons/icon-button/icon-button'
 import { useTheme } from '@/hooks/use-theme'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { Summary } from '@/types/domain'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'

@@ -1,7 +1,7 @@
 import { ChevronIcon } from '@/assets/icons'
 import { Text } from '@/components'
 import { useTheme } from '@/hooks/use-theme'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { Summary } from '@/types/domain'
 import { ThemeType } from '@/types/theme.type'
 import React from 'react'

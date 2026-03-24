@@ -1,5 +1,5 @@
-import { useLoginAnimation } from '../use-login-animation'
 import { renderHook } from '@testing-library/react-native'
+import { useLoginAnimation } from '../login-animation.hook'
 
 const mockTheme = {
   spacings: { small: 8, large: 24 },

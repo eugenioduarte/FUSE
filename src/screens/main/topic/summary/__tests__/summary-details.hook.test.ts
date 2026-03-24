@@ -1,10 +1,12 @@
-import { useSummaryDetails } from '../summary-details.hook'
-import { renderHook } from '@testing-library/react-native'
-
 jest.mock('@/locales/translation', () => ({ t: (k: string) => k }))
-jest.mock('@/services/ai/ai.service', () => ({ aiService: { generate: jest.fn() } }))
+jest.mock('@/services/ai/ai.service', () => ({
+  aiService: { generate: jest.fn() },
+}))
 jest.mock('@/services/repositories/summaries.repository', () => ({
-  summariesRepository: { getById: jest.fn().mockResolvedValue(null), update: jest.fn() },
+  summariesRepository: {
+    getById: jest.fn().mockResolvedValue(null),
+    update: jest.fn(),
+  },
 }))
 jest.mock('@/services/repositories/topics.repository', () => ({
   topicsRepository: { getById: jest.fn().mockResolvedValue(null) },
@@ -12,12 +14,15 @@ jest.mock('@/services/repositories/topics.repository', () => ({
 jest.mock('@/services/repositories/whiteboard.repository', () => ({
   whiteboardRepository: { getById: jest.fn().mockResolvedValue(null) },
 }))
-jest.mock('@/services/usage/usageTracker', () => ({
+jest.mock('@/services/usage/usage-tracker', () => ({
   startSession: jest.fn(),
   stopSessionByKey: jest.fn(),
 }))
 jest.mock('@/store/overlay.store', () => ({
-  useOverlay: () => ({ setLoadingOverlay: jest.fn(), setErrorOverlay: jest.fn() }),
+  useOverlay: () => ({
+    setLoadingOverlay: jest.fn(),
+    setErrorOverlay: jest.fn(),
+  }),
 }))
 jest.mock('@/utils/errorLogger', () => ({ reportError: jest.fn() }))
 jest.mock('expo-file-system/legacy', () => ({}))

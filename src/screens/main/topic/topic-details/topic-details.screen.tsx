@@ -6,7 +6,7 @@ import { t } from '@/locales/translation'
 import {
   navigatorManager,
   RootStackParamList,
-} from '@/navigation/navigatorManager'
+} from '@/navigation/navigator-manager'
 import { listAcceptedConnections } from '@/services/firebase/connections.service'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { topicsRepository } from '@/services/repositories/topics.repository'

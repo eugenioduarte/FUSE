@@ -3,7 +3,7 @@ import { Text } from '@/components'
 import IconButton from '@/components/buttons/icon-button/icon-button'
 import { useTheme } from '@/hooks/use-theme'
 import { t } from '@/locales/translation'
-import { navigatorManager } from '@/navigation/navigatorManager'
+import { navigatorManager } from '@/navigation/navigator-manager'
 import { useThemeStore } from '@/store/theme.store'
 import { ThemeType } from '@/types/theme.type'
 import React, { useMemo } from 'react'
@@ -14,10 +14,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native'
-import HeaderTopics from './header-topics'
-import HeaderWithBack from './header-with-back'
-import SummaryItem from './summary-item'
-import TopicBlock from './topic-block'
+import HeaderTopics from './components/header-topics'
+import HeaderWithBack from './components/header-with-back'
+import SummaryItem from './components/summary-item'
+import TopicBlock from './components/topic-block'
 import { useFastWayOverlayLogic } from './fast-way-overlay.hook'
 
 type FWMode = 'topics' | 'topic' | 'summaries' | 'challenges' | 'challenge'

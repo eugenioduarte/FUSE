@@ -14,8 +14,8 @@ import {
 } from 'firebase/firestore'
 import { useAuthStore } from '../../store/auth.store'
 import { NotificationInvite, Topic } from '../../types/domain'
-import { getCurrentUser } from './authService'
-import { getFirebaseApp } from './firebaseInit'
+import { getCurrentUser } from './auth.service'
+import { getFirebaseApp } from './firebase-init'
 
 function db() {
   return getFirestore(getFirebaseApp())
@@ -27,7 +27,7 @@ async function ensureTopicOnFirestore(topicId: string) {
   const snap = await getDoc(ref)
   if (snap.exists()) return
   try {
-    const { promoteTopicToGroup } = await import('./collabData.service')
+    const { promoteTopicToGroup } = await import('./collab-data.service')
     await promoteTopicToGroup(topicId)
   } catch (e) {
     console.error('Failed to promote topic before inviting', e)
@@ -137,9 +137,8 @@ export async function acceptInvite(inviteId: string) {
         updatedAt: Date.now(),
       }
       try {
-        const { topicsRepository } = await import(
-          '../repositories/topics.repository'
-        )
+        const { topicsRepository } =
+          await import('../repositories/topics.repository')
         await topicsRepository.upsert(topic, '/sync/acceptInvite')
       } catch {}
     }
@@ -185,9 +184,8 @@ export async function syncUserTopicsMembership() {
       updatedAt: t.updatedAt?.toMillis?.() ?? Date.now(),
     }
     // Lazy import to avoid circular deps
-    const { topicsRepository } = await import(
-      '../repositories/topics.repository'
-    )
+    const { topicsRepository } =
+      await import('../repositories/topics.repository')
     await topicsRepository.upsert(topic, '/sync/topic')
   }
 }

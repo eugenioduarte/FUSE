@@ -1,4 +1,3 @@
-import { topicsMock } from '../../mock/topics.mock'
 import { localCache } from '../../storage/localCache'
 import { TopicCardModel } from '../../types/dashboard.type'
 
@@ -11,9 +10,6 @@ export const dashboardRepository = {
   },
 
   async seedTopicCardsIfEmpty() {
-    const cached = await localCache.get<TopicCardModel[]>(CACHE_KEY)
-    if (cached?.data && cached.data.length > 0) return
-
-    await localCache.set(CACHE_KEY, topicsMock, Date.now())
+    // no-op: dashboard cards are derived from real data (Firebase / AI)
   },
 }

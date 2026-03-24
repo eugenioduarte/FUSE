@@ -1,5 +1,5 @@
-import { getDb } from '../../lib/db/db'
 import { summariesDao } from '../../lib/db/dao/summaries.dao'
+import { getDb } from '../../lib/db/db'
 import { offlineQueue } from '../../storage/offlineQueue'
 import { ExpandableTerm, Summary } from '../../types/domain'
 import { aiService } from '../ai/ai.service'
@@ -65,9 +65,8 @@ export const summariesRepository = {
       await processOfflineQueue()
     } catch {}
     try {
-      const { flushLocalCollaborativeChanges } = await import(
-        '../firebase/collabFlush.service'
-      )
+      const { flushLocalCollaborativeChanges } =
+        await import('../firebase/collab-flush.service')
       await flushLocalCollaborativeChanges()
     } catch {}
     return summary
@@ -101,9 +100,8 @@ export const summariesRepository = {
       await processOfflineQueue()
     } catch {}
     try {
-      const { flushLocalCollaborativeChanges } = await import(
-        '../firebase/collabFlush.service'
-      )
+      const { flushLocalCollaborativeChanges } =
+        await import('../firebase/collab-flush.service')
       await flushLocalCollaborativeChanges()
     } catch {}
     return summary
@@ -138,9 +136,8 @@ export const summariesRepository = {
     })
 
     try {
-      const { deleteGroupSummary } = await import(
-        '../firebase/collabData.service'
-      )
+      const { deleteGroupSummary } =
+        await import('../firebase/collab-data.service')
       await deleteGroupSummary(id)
     } catch {}
   },
@@ -163,7 +160,11 @@ export const summariesRepository = {
 
     const updatedAt = Date.now()
     for (const s of list) {
-      const updated: Summary = { ...s, backgroundColor: color || undefined, updatedAt }
+      const updated: Summary = {
+        ...s,
+        backgroundColor: color || undefined,
+        updatedAt,
+      }
       await summariesDao.upsert(db, updated)
 
       if (!opts?.fromSync) {

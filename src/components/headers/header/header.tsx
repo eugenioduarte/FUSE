@@ -1,5 +1,5 @@
 import { ROUTES } from '@/constants/routes'
-import { navigationRef } from '@/navigation/navigationRef'
+import { navigationRef } from '@/navigation/navigation-ref'
 import { summariesRepository } from '@/services/repositories/summaries.repository'
 import { useThemeStore } from '@/store/theme.store'
 import { Ionicons } from '@expo/vector-icons'

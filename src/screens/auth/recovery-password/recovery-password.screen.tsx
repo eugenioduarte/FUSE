@@ -17,9 +17,9 @@ import {
   TouchableWithoutFeedback,
   View,
 } from 'react-native'
-import { navigatorManager } from '../../../navigation/navigatorManager'
-import { firebaseSendPasswordReset } from '../../../services/firebase/authService'
-import { useLoginAnimation } from '../login/use-login-animation'
+import { navigatorManager } from '@/navigation/navigator-manager'
+import { firebaseSendPasswordReset } from '../../../services/firebase/auth.service'
+import { useLoginAnimation } from '../login/login-animation.hook'
 import { RecoverySchema, recoverySchema } from './recovery-password.schema'
 
 export default function RecoveryPasswordScreen() {
