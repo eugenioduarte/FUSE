@@ -995,8 +995,8 @@ html = f'''<!DOCTYPE html>
         .attr('fill', color.slice(0, color.lastIndexOf(',')) + ',0.9)');
     }});
 
-    const maxTokens = Math.max(...net.nodes.map(n => n.tokens || 0), 1);
-    const radius = n => Math.max(9, Math.min(28, 9 + Math.sqrt((n.tokens || 0) / Math.max(maxTokens / 400, 1))));
+    // Use fixed radius for consistent node sizes
+    const radius = n => 22;
 
     const neighbors = {{}};
     net.nodes.forEach(n => {{ neighbors[n.id] = new Set(); }});
@@ -1012,7 +1012,19 @@ html = f'''<!DOCTYPE html>
       .force('link', d3.forceLink(edges).id(n => n.id).distance(130).strength(0.6))
       .force('charge', d3.forceManyBody().strength(-450))
       .force('center', d3.forceCenter(W / 2, H / 2).strength(0.05))
-      .force('collision', d3.forceCollide().radius(n => radius(n) + 18));
+      .force('collision', d3.forceCollide().radius(n => radius(n) + 18))
+      .force('x', d3.forceX(W / 2).strength(0.1))
+      .force('y', d3.forceY(H / 2).strength(0.1));
+
+    // Bounding box force to keep nodes inside visible area
+    function boundingBox() {{
+      const padding = 40;
+      nodes.forEach(n => {{
+        const r = radius(n) + 18;
+        n.x = Math.max(padding + r, Math.min(W - padding - r, n.x || W / 2));
+        n.y = Math.max(padding + r, Math.min(H - padding - r, n.y || H / 2));
+      }});
+    }}
 
     const linkGroup = svg.append('g');
     const nodeGroup = svg.append('g');
@@ -1045,6 +1057,7 @@ html = f'''<!DOCTYPE html>
       .text(n => n.label);
 
     sim.on('tick', () => {{
+      boundingBox();
       link.attr('x1', e => e.source.x).attr('y1', e => e.source.y)
           .attr('x2', e => e.target.x).attr('y2', e => e.target.y);
       node.attr('transform', n => `translate(${{n.x}},${{n.y}})`);
