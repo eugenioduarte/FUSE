@@ -176,7 +176,6 @@ const createStyles = (theme: ThemeType) =>
     },
     tagText: {
       overflow: 'hidden',
-      textOverflow: 'ellipsis',
       textAlign: 'center',
     },
   })
