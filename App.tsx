@@ -8,6 +8,9 @@ import 'react-native-reanimated'
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context'
 import Navigation from './src/navigation/navigation'
 import { useThemeStore } from './src/store/theme.store'
+import { printBanner } from './src/utils/print-banner'
+
+printBanner()
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -1,21 +1,12 @@
-import {
-  AVATAR_STYLES,
-  generateAvatarUrl,
-  parseAvatarUrl,
-  randomSeed,
-} from '../avatar.service'
+import { AVATAR_STYLES, generateAvatarUrl, parseAvatarUrl, randomSeed } from '../avatar.service'
 
-// crypto.randomUUID is not available in Node.js test environment
-let _uuidCounter = 0
-Object.defineProperty(global, 'crypto', {
-  value: {
-    randomUUID: jest.fn(
-      () =>
-        `${String(++_uuidCounter).padStart(8, '0')}-cccc-dddd-eeee-000000000000`,
-    ),
-  },
-  configurable: true,
-})
+// Mock @/utils/uuid since expo-modules-core native UUID is not available in Jest
+let mockUuidCounter = 0
+jest.mock('@/utils/uuid', () => ({
+  randomUUID: jest.fn(
+    () => `${String(++mockUuidCounter).padStart(8, '0')}-cccc-dddd-eeee-000000000000`,
+  ),
+}))
 
 describe('AVATAR_STYLES', () => {
   it('is a non-empty array', () => {

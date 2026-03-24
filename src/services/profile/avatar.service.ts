@@ -1,3 +1,5 @@
+import { randomUUID } from '@/utils/uuid'
+
 export type AvatarStyle =
   | 'adventurer'
   | 'adventurer-neutral'
@@ -19,7 +21,7 @@ export const AVATAR_STYLES: AvatarStyle[] = [
 ]
 
 export function randomSeed() {
-  return crypto.randomUUID().replace(/-/g, '').substring(0, 8)
+  return randomUUID().replace(/-/g, '').substring(0, 8)
 }
 
 export function generateAvatarUrl(style: AvatarStyle, seed?: string) {
@@ -30,9 +32,7 @@ export function generateAvatarUrl(style: AvatarStyle, seed?: string) {
   )}&size=200&backgroundType=gradientLinear`
 }
 
-export function parseAvatarUrl(
-  url: string,
-): { style: string; seed: string } | null {
+export function parseAvatarUrl(url: string): { style: string; seed: string } | null {
   try {
     const u = new URL(url)
     // path looks like /7.x/{style}/png

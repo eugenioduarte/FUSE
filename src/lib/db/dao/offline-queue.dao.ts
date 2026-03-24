@@ -1,5 +1,6 @@
-import { SQLiteDatabase } from 'expo-sqlite'
 import { QueueItem } from '@/storage/offlineQueue'
+import { randomUUID } from '@/utils/uuid'
+import { SQLiteDatabase } from 'expo-sqlite'
 
 type QueueRow = {
   id: string
@@ -28,7 +29,7 @@ export const offlineQueueDao = {
     db: SQLiteDatabase,
     item: Omit<QueueItem, 'id' | 'createdAt' | 'tries'>,
   ): Promise<QueueItem> {
-    const id = `${Date.now()}-${crypto.randomUUID()}`
+    const id = `${Date.now()}-${randomUUID()}`
     const createdAt = Date.now()
     await db.runAsync(
       `INSERT INTO offline_queue
@@ -58,9 +59,6 @@ export const offlineQueueDao = {
   },
 
   async bumpTries(db: SQLiteDatabase, id: string): Promise<void> {
-    await db.runAsync(
-      `UPDATE offline_queue SET tries = tries + 1 WHERE id = ?`,
-      [id],
-    )
+    await db.runAsync(`UPDATE offline_queue SET tries = tries + 1 WHERE id = ?`, [id])
   },
 }
