@@ -21,7 +21,7 @@
 
 - [x] **Firebase version lock** — fixado `^12.11.0` ✅ concluído 2026-03-25 _(2 min)_
 - [x] **`dotenv` → devDependencies** — movido para `devDependencies` ✅ concluído 2026-03-25 _(2 min)_
-- [ ] **API Key no bundle (proxy)** — código completo ✅ · pendente: `npm install --prefix functions` + `firebase functions:secrets:set ANTHROPIC_API_KEY` + `firebase deploy --only functions` + remover `EXPO_PUBLIC_ANTHROPIC_API_KEY` do `.env`
+- [x] **API Key no bundle (proxy)** — `anthropicProxy` deployed ✅ · `EXPO_PUBLIC_ANTHROPIC_API_KEY` removida do `.env` ✅ concluído 2026-03-25 _(~2h)_
 - [x] **Alinhar thresholds de cobertura** — floor real: stmt 20%, branch 12%, fn 21%, lines 20% ✅ concluído 2026-03-25 _(1h)_
 
 ### 🟡 Melhorias Estruturais
@@ -576,8 +576,8 @@ useFocusEffect(
 | --- | -------------------------------------- | ------------- | ---------- | ----------- | ------------- | ------------------------------------------- |
 | 1   | Firebase version lock                  | Grok + Review | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: pinado ^12.11.0                  |
 | 2   | `dotenv` → devDependencies             | Review 5.1    | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: movido para devDeps              |
-| 3   | Alinhar coverage thresholds            | Review PC-2   | ✅ Feito   | 🟢 Baixa    | 2026-03-25    | Floor real: 20%/12%/21%/20% — meta 70%   |
-| 4   | API Key no bundle (proxy)              | Grok + Review | � Deploy   | 🟡 Média    | 2026-03-25    | Código completo — pendente secrets + deploy |
+| 3   | Alinhar coverage thresholds            | Review PC-2   | ✅ Feito   | 🟢 Baixa    | 2026-03-25    | Floor real: 20%/12%/21%/20% — meta 70%      |
+| 4   | API Key no bundle (proxy)              | Grok + Review | ✅ Feito   | 🟡 Média    | 2026-03-25    | Concluído: proxy deployed, key fora do bundle |
 | 5   | AIProvider abstraction                 | base3.md C-2  | 🟡 Média   | 🟢 Baixa    | 2–4h          | Reescrita total para trocar provider        |
 | 6   | Validação Zod para respostas de IA     | Review 4.5    | 🟡 Média   | 🟢 Baixa    | 2–3h          | Crashes silenciosos de parsing              |
 | 7   | Extrair `navigation.tsx`               | Review PC-3   | 🟡 Média   | 🟡 Média    | 4–6h          | Bottleneck de manutenibilidade #1           |
@@ -617,8 +617,8 @@ Para cada item foi avaliado:
 
 - [x] `grep -r "EXPO_PUBLIC_" .env*` — mapeado: `EXPO_PUBLIC_ANTHROPIC_API_KEY` presente no `.env` local ✅ 2026-03-25
 - [x] Decidir proxy: **Firebase Functions** (onCall v2) ✅ 2026-03-25
-- [ ] Deploy pendente: `cd functions && npm install`, `firebase functions:secrets:set ANTHROPIC_API_KEY`, `firebase deploy --only functions`
-- [ ] Remover `EXPO_PUBLIC_ANTHROPIC_API_KEY` do `.env` após deploy confirmado
+- [x] Deploy: `firebase functions:secrets:set ANTHROPIC_API_KEY` + `firebase deploy --only functions` ✅ 2026-03-25
+- [x] `EXPO_PUBLIC_ANTHROPIC_API_KEY` removida do `.env` ✅ 2026-03-25
 - [ ] Extrair `loadDashItems()` no `dashboard.hook.ts` (15 min)
 - [ ] Unificar `buildNotificationHandler` + `buildTopLevelNotificationHandler` numa função parametrizada
 
@@ -647,8 +647,8 @@ Para cada item foi avaliado:
 | 2026-03-24 | Atualização com review      | ✅ Atualizado | Integrar todas as sugestões do `react-native-agent-review.md` (6.5/10)                                            |
 | 2026-03-25 | Firebase version lock       | ✅ Fixado     | `^12.11.0` (era `latest`, lock confirmou 12.11.0)                                                                 |
 | 2026-03-25 | `dotenv` → devDependencies  | ✅ Movido     | Usado só em `app.config.js` (config-time), não no bundle                                                          |
-| 2026-03-25 | Alinhar coverage thresholds | ✅ Alinhado   | Floor real (stmt 20%, branch 12%, fn 21%, lines 20%); `mandatory-rules.md` atualizado; meta 70% com ratchet |
-| 2026-03-25 | API Key no bundle           | 🔄 Em curso   | Código completo: `anthropicProxy` + refactor `ai.service.ts`. Pendente: `firebase functions:secrets:set` + deploy |
+| 2026-03-25 | Alinhar coverage thresholds | ✅ Alinhado   | Floor real (stmt 20%, branch 12%, fn 21%, lines 20%); `mandatory-rules.md` atualizado; meta 70% com ratchet       |
+| 2026-03-25 | API Key no bundle           | ✅ Concluído  | `anthropicProxy` deployed (us-central1), key no Secret Manager, `EXPO_PUBLIC_ANTHROPIC_API_KEY` removida do `.env` |
 | —          | AIProvider abstraction      | —             | —                                                                                                                 |
 | —          | Validação Zod para IA       | —             | —                                                                                                                 |
 | —          | Extrair navigation.tsx      | —             | —                                                                                                                 |
