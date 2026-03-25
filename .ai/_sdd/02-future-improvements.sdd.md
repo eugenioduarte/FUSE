@@ -21,7 +21,7 @@
 
 - [x] **Firebase version lock** — fixado `^12.11.0` ✅ concluído 2026-03-25 _(2 min)_
 - [x] **`dotenv` → devDependencies** — movido para `devDependencies` ✅ concluído 2026-03-25 _(2 min)_
-- [ ] **API Key no bundle (proxy)** — implementar proxy server-side, remover `EXPO_PUBLIC_ANTHROPIC_API_KEY` _(1–2 dias)_
+- [ ] **API Key no bundle (proxy)** — código completo ✅ · pendente: `npm install --prefix functions` + `firebase functions:secrets:set ANTHROPIC_API_KEY` + `firebase deploy --only functions` + remover `EXPO_PUBLIC_ANTHROPIC_API_KEY` do `.env`
 - [ ] **Alinhar thresholds de cobertura** — `jest.config.js` 5% vs `mandatory-rules.md` 70-80% _(1h)_
 
 ### 🟡 Melhorias Estruturais
@@ -65,10 +65,10 @@ O objetivo **não é implementar tudo de uma vez**. É registrar o que foi ident
 | Expo                | ~54.0.0                              | SDK mais recente                                                       |
 | New Architecture    | `newArchEnabled: true` ✅            | Habilitado no `app.json`                                               |
 | Turbo Modules       | Não auditado                         | New Arch ativo mas deps não verificadas                                |
-| Gestão de segredos  | `EXPO_PUBLIC_` + `expo-secure-store` | Padrão correto — mas `EXPO_PUBLIC_ANTHROPIC_API_KEY` exposta no bundle |
+| Gestão de segredos  | `EXPO_PUBLIC_` + `expo-secure-store` | `ANTHROPIC_API_KEY` movida para Firebase Secret Manager (proxy `anthropicProxy`) |
 | Storage chave-valor | `AsyncStorage`                       | MMKV seria ~10x mais rápido                                            |
 | Estrutura           | Single-package                       | Sem monorepo                                                           |
-| Firebase            | `firebase: ^12.11.0` ✅               | Versão fixada — era `latest`, instalado 12.11.0                        |
+| Firebase            | `firebase: ^12.11.0` ✅              | Versão fixada — era `latest`, instalado 12.11.0                        |
 
 ---
 
@@ -99,19 +99,46 @@ Correto:
   App → Firebase ID token (usuário autenticado) → Proxy Server → ANTHROPIC_API_KEY (server-side) → Anthropic API
 ```
 
-**O que deve mudar:**
+**Abordagem decidida:** Firebase Functions v2 `onCall` + Firebase Secret Manager.
 
-- Implementar proxy server-side: **Firebase Function** (já no projeto, zero setup extra) ou **Cloudflare Worker** (cold start < 5ms, mais barato)
-- Proxy valida Firebase ID token → aplica rate limit por uid → proxia para Anthropic
-- Remover `EXPO_PUBLIC_ANTHROPIC_API_KEY` do client
-- Mock local continua funcionando quando key ausente ✅ (pattern já existe no `ai.service.ts`)
-- `dotenv@17.2.3` listado como dep de runtime: verificar se é apenas para scripts de build/CI — se sim, mover para `devDependencies`
+**O que foi implementado (2026-03-25):**
 
-**Questões a investigar:**
+- `functions/src/index.ts` — `anthropicProxy` (Firebase Function), retry 3x, auth guard automático via `onCall`
+- `functions/package.json` + `functions/tsconfig.json` + `firebase.json` + `.firebaserc` — infra completa
+- `src/services/ai/ai.service.ts` — removida chamada direta ao Anthropic; `callAI()` usa `httpsCallable(getFunctions(), 'anthropicProxy')`
+- `src/services/firebase/auth.service.ts` — adicionado `getCurrentUserIdToken()` helper
+- Mock fallback: `!getFirebaseAuth().currentUser` (em vez de `!ANTHROPIC_API_KEY`) — mesma UX sem conta
+- `firebase/functions` já incluso no `firebase@^12.11.0` — zero install extra no bundle mobile
 
-- Firebase Functions (já no projeto) vs Cloudflare Worker — custo e latência para portfólio?
-- `EXPO_PUBLIC_ANTHROPIC_API_KEY` está no `.env` local ou exposta em algum lugar?
-- `dotenv` é usado em algum código de runtime além de scripts de CI?
+**Passos manuais pendentes (terminal):**
+
+```bash
+# 1. Instalar deps do servidor
+cd functions && npm install && cd ..
+
+# 2. Guardar a key no Firebase Secret Manager (não vai para o código)
+firebase functions:secrets:set ANTHROPIC_API_KEY
+# → colar valor actual do .env: sk-ant-api03-...
+
+# 3. Deploy
+firebase deploy --only functions
+
+# 4. Remover key do cliente (mover para .env.backup antes de deletar)
+sed -i '' '/EXPO_PUBLIC_ANTHROPIC_API_KEY/d' .env
+
+# 5. Verificar que a key não está no bundle
+npx expo export --platform ios 2>/dev/null && strings dist/_expo/static/js/*.js | grep 'sk-ant' || echo 'OK — key not in bundle'
+```
+
+**Decisão: `onCall` sobre REST direto**
+- Firebase SDK injeta o ID token automaticamente — sem gestão manual de `Authorization`
+- CORS gerido pelo SDK
+- `request.auth.uid` disponível para rate limit futuro
+
+**Por que Firebase Functions e não Cloudflare Worker:**
+- Firebase já no projecto (zero setup de infra adicional)
+- Billing consolidado no mesmo projecto Firebase
+- Cold start Node 20 < 200ms (aceitável para Claude que demora 1–5s)
 
 **Prioridade:** 🔴 Alta — `base3.md` classifica como CRITICAL-001, pré-requisito para qualquer release público
 
@@ -548,7 +575,7 @@ useFocusEffect(
 | 1   | Firebase version lock                  | Grok + Review | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: pinado ^12.11.0           |
 | 2   | `dotenv` → devDependencies             | Review 5.1    | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: movido para devDeps       |
 | 3   | Alinhar coverage thresholds            | Review PC-2   | 🔴 Alta    | 🟢 Baixa    | 1h            | Credibilidade de todo o `.ai/rules/` |
-| 4   | API Key no bundle (proxy)              | Grok + Review | 🔴 Alta    | 🟡 Média    | 1–2 dias      | Chave de billing exposta no bundle   |
+| 4   | API Key no bundle (proxy)              | Grok + Review | � Deploy  | 🟡 Média    | 2026-03-25    | Código completo — pendente secrets + deploy |
 | 5   | AIProvider abstraction                 | base3.md C-2  | 🟡 Média   | 🟢 Baixa    | 2–4h          | Reescrita total para trocar provider |
 | 6   | Validação Zod para respostas de IA     | Review 4.5    | 🟡 Média   | 🟢 Baixa    | 2–3h          | Crashes silenciosos de parsing       |
 | 7   | Extrair `navigation.tsx`               | Review PC-3   | 🟡 Média   | 🟡 Média    | 4–6h          | Bottleneck de manutenibilidade #1    |
@@ -586,8 +613,10 @@ Para cada item foi avaliado:
 
 ### Esta semana
 
-- [ ] `grep -r "EXPO_PUBLIC_" .env*` — mapear o que está exposto no bundle
-- [ ] Decidir proxy: Firebase Functions vs Cloudflare Worker
+- [x] `grep -r "EXPO_PUBLIC_" .env*` — mapeado: `EXPO_PUBLIC_ANTHROPIC_API_KEY` presente no `.env` local ✅ 2026-03-25
+- [x] Decidir proxy: **Firebase Functions** (onCall v2) ✅ 2026-03-25
+- [ ] Deploy pendente: `cd functions && npm install`, `firebase functions:secrets:set ANTHROPIC_API_KEY`, `firebase deploy --only functions`
+- [ ] Remover `EXPO_PUBLIC_ANTHROPIC_API_KEY` do `.env` após deploy confirmado
 - [ ] Extrair `loadDashItems()` no `dashboard.hook.ts` (15 min)
 - [ ] Unificar `buildNotificationHandler` + `buildTopLevelNotificationHandler` numa função parametrizada
 
@@ -617,7 +646,7 @@ Para cada item foi avaliado:
 | 2026-03-25 | Firebase version lock       | ✅ Fixado     | `^12.11.0` (era `latest`, lock confirmou 12.11.0)                      |
 | 2026-03-25 | `dotenv` → devDependencies  | ✅ Movido     | Usado só em `app.config.js` (config-time), não no bundle               |
 | —          | Alinhar coverage thresholds | —             | —                                                                      |
-| —          | API Key no bundle           | —             | —                                                                      |
+| 2026-03-25 | API Key no bundle           | 🔄 Em curso   | Código completo: `anthropicProxy` + refactor `ai.service.ts`. Pendente: `firebase functions:secrets:set` + deploy |
 | —          | AIProvider abstraction      | —             | —                                                                      |
 | —          | Validação Zod para IA       | —             | —                                                                      |
 | —          | Extrair navigation.tsx      | —             | —                                                                      |

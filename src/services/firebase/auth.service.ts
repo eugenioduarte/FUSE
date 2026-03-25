@@ -191,6 +191,21 @@ export function getCurrentUser() {
   return getFirebaseAuth().currentUser
 }
 
+/**
+ * Returns a fresh Firebase ID token for the currently authenticated user.
+ * Used by ai.service.ts to authenticate calls to the anthropicProxy Firebase Function.
+ * The Firebase client SDK (onCall) injects this token automatically — this helper
+ * is exposed for any code that needs the raw token (e.g. custom HTTP calls).
+ * Returns null if no user is signed in.
+ */
+export async function getCurrentUserIdToken(
+  forceRefresh = false,
+): Promise<string | null> {
+  const user = getFirebaseAuth().currentUser
+  if (!user) return null
+  return user.getIdToken(forceRefresh)
+}
+
 function mapFirebaseUser(user: import('firebase/auth').User) {
   return {
     id: user.uid,

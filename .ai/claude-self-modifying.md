@@ -112,7 +112,21 @@ callback fires, creating a race condition that results in a permanent white scre
 
 ---
 
-## 📝 How to Update This File
+## � Dependencies — Never Use `latest` for Critical Packages
+
+**Rule:** Never set `"firebase"`, `"react"`, `"react-native"`, `"expo"`, or any package with a
+history of breaking changes to `"latest"` in `package.json`. Always pin to an explicit version
+range (e.g. `"^12.11.0"`).
+
+**Why:** `yarn install` on a new machine or CI can silently install a different major version.
+Discovered on 2026-03-25 when Firebase was `"latest"` (resolved 12.11.0) — fixed to `"^12.11.0"`.
+
+**Applies to:** All new dependencies added to `package.json`. When in doubt, use `yarn info <pkg> version`
+to get the latest stable version and pin it explicitly.
+
+---
+
+## �📝 How to Update This File
 
 Whenever:
 - The user corrects something that was done incorrectly
