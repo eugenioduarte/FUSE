@@ -4,21 +4,21 @@
 
 ### Anthropic (AI)
 
-| Variable | Client bundle | Description |
-|---|---|---|
-| `EXPO_PUBLIC_ANTHROPIC_MODEL` | ✅ Safe | Model name; default `claude-haiku-4-5` |
-| `EXPO_PUBLIC_ANTHROPIC_API_KEY` | ❌ Dev only | **Never in prod bundle.** Only for local dev if you need to bypass auth. In prod, the key lives exclusively in Firebase Secret Manager. |
+| Variable                        | Client bundle | Description                                                                                                                             |
+| ------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| `EXPO_PUBLIC_ANTHROPIC_MODEL`   | ✅ Safe       | Model name; default `claude-haiku-4-5`                                                                                                  |
+| `EXPO_PUBLIC_ANTHROPIC_API_KEY` | ❌ Dev only   | **Never in prod bundle.** Only for local dev if you need to bypass auth. In prod, the key lives exclusively in Firebase Secret Manager. |
 
 ### Firebase
 
-| Variable | Description |
-|---|---|
-| `FIREBASE_API_KEY` | Firebase Web API key |
-| `FIREBASE_AUTH_DOMAIN` | `<project>.firebaseapp.com` |
-| `FIREBASE_PROJECT_ID` | Firebase project ID |
-| `FIREBASE_STORAGE_BUCKET` | Storage bucket URL |
+| Variable                       | Description                      |
+| ------------------------------ | -------------------------------- |
+| `FIREBASE_API_KEY`             | Firebase Web API key             |
+| `FIREBASE_AUTH_DOMAIN`         | `<project>.firebaseapp.com`      |
+| `FIREBASE_PROJECT_ID`          | Firebase project ID              |
+| `FIREBASE_STORAGE_BUCKET`      | Storage bucket URL               |
 | `FIREBASE_MESSAGING_SENDER_ID` | Sender ID for push notifications |
-| `FIREBASE_APP_ID` | Firebase App ID |
+| `FIREBASE_APP_ID`              | Firebase App ID                  |
 
 All Firebase vars are injected via `app.config.js` → `expo.extra.firebase` at build time (never `EXPO_PUBLIC_`).
 

@@ -3,8 +3,8 @@
  * Architecture: App → Firebase ID token (onCall) → anthropicProxy → Anthropic API
  */
 
-import { getFunctions, httpsCallable } from 'firebase/functions'
-import { getApp } from 'firebase/app'
+import { getCurrentLocale } from '@/locales'
+import { getFirebaseAuth } from '@/services/firebase/auth.service'
 import {
   KNOWLEDGE_SYSTEM,
   knowledgeUserPrompt,
@@ -12,8 +12,8 @@ import {
   SUMMARY_SYSTEM,
   summaryUserPrompt,
 } from '@/services/prompts'
-import { getCurrentLocale } from '@/locales'
-import { getFirebaseAuth } from '@/services/firebase/auth.service'
+import { getApp } from 'firebase/app'
+import { getFunctions, httpsCallable } from 'firebase/functions'
 
 type AISummary = {
   title: string
@@ -31,8 +31,7 @@ export type AIKnowledgeSummary = AISummary & {
   recommendations?: string[]
 }
 
-const MODEL =
-  process.env.EXPO_PUBLIC_ANTHROPIC_MODEL || 'claude-haiku-4-5'
+const MODEL = process.env.EXPO_PUBLIC_ANTHROPIC_MODEL || 'claude-haiku-4-5'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -44,16 +43,22 @@ const MODEL =
 export function toJSONSafe(str: string): any {
   if (!str) return null
   // 1. Try direct parse
-  try { return JSON.parse(str) } catch {}
+  try {
+    return JSON.parse(str)
+  } catch {}
   // 2. Strip markdown code block (```json ... ``` or ``` ... ```)
   const codeBlock = /```(?:json)?\s*([\s\S]*?)```/.exec(str)
   if (codeBlock) {
-    try { return JSON.parse(codeBlock[1].trim()) } catch {}
+    try {
+      return JSON.parse(codeBlock[1].trim())
+    } catch {}
   }
   // 3. Extract first { ... } block
   const obj = /\{[\s\S]*\}/.exec(str)
   if (obj) {
-    try { return JSON.parse(obj[0]) } catch {}
+    try {
+      return JSON.parse(obj[0])
+    } catch {}
   }
   return null
 }
@@ -63,9 +68,7 @@ export function toJSONSafe(str: string): any {
  * so they can be sent to the Anthropic API format.
  */
 function splitMessages(messages: { role: string; content: string }[]) {
-  const systemParts = messages
-    .filter((m) => m.role === 'system')
-    .map((m) => m.content)
+  const systemParts = messages.filter((m) => m.role === 'system').map((m) => m.content)
   const chatMessages = messages.filter((m) => m.role !== 'system')
   return {
     system: systemParts.join('\n') || undefined,
@@ -101,12 +104,7 @@ export async function callAI(
   }
   const language = langNames[locale] ?? locale
   const { system, messages: chatMessages } = splitMessages(messages)
-  const systemWithLang = [
-    `Always respond in ${language}.`,
-    system,
-  ]
-    .filter(Boolean)
-    .join('\n')
+  const systemWithLang = [`Always respond in ${language}.`, system].filter(Boolean).join('\n')
 
   const proxy = httpsCallable<
     {
@@ -178,10 +176,7 @@ export const aiService = {
     return 'https://picsum.photos/1024/768'
   },
 
-  async ttsToBase64(
-    _text: string,
-    _format: 'mp3' | 'wav' = 'mp3',
-  ): Promise<string | null> {
+  async ttsToBase64(_text: string, _format: 'mp3' | 'wav' = 'mp3'): Promise<string | null> {
     // Anthropic does not have a TTS API
     return null
   },
@@ -197,16 +192,11 @@ function parseSummary(text: string, _fallbackPrompt: string): AISummary {
   return {
     title: String(parsed.title),
     content: String(parsed.content),
-    keywords: Array.isArray(parsed.keywords)
-      ? parsed.keywords.map(String).slice(0, 20)
-      : [],
+    keywords: Array.isArray(parsed.keywords) ? parsed.keywords.map(String).slice(0, 20) : [],
   }
 }
 
-function parseKnowledgeSummary(
-  text: string,
-  _fallbackPrompt: string,
-): AIKnowledgeSummary {
+function parseKnowledgeSummary(text: string, _fallbackPrompt: string): AIKnowledgeSummary {
   const parsed = toJSONSafe(text)
   if (!parsed?.title || !parsed?.content) {
     throw new Error('AI knowledge: unexpected format')
@@ -226,9 +216,7 @@ function parseKnowledgeSummary(
   return {
     title: String(parsed.title),
     content: String(parsed.content),
-    keywords: Array.isArray(parsed.keywords)
-      ? parsed.keywords.map(String).slice(0, 20)
-      : [],
+    keywords: Array.isArray(parsed.keywords) ? parsed.keywords.map(String).slice(0, 20) : [],
     expandableTerms: terms,
     recommendations: recs,
   }

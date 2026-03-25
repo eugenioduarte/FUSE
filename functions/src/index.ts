@@ -1,6 +1,6 @@
 import * as admin from 'firebase-admin'
-import { onCall, HttpsError } from 'firebase-functions/v2/https'
 import { defineSecret } from 'firebase-functions/params'
+import { HttpsError, onCall } from 'firebase-functions/v2/https'
 
 admin.initializeApp()
 
@@ -45,24 +45,13 @@ export const anthropicProxy = onCall<ProxyRequest>(
   async (request) => {
     // Guard: reject unauthenticated calls
     if (!request.auth) {
-      throw new HttpsError(
-        'unauthenticated',
-        'You must be signed in to use AI features.',
-      )
+      throw new HttpsError('unauthenticated', 'You must be signed in to use AI features.')
     }
 
-    const {
-      messages,
-      system,
-      temperature = 0.4,
-      model = 'claude-haiku-4-5',
-    } = request.data
+    const { messages, system, temperature = 0.4, model = 'claude-haiku-4-5' } = request.data
 
     if (!Array.isArray(messages) || messages.length === 0) {
-      throw new HttpsError(
-        'invalid-argument',
-        'messages must be a non-empty array.',
-      )
+      throw new HttpsError('invalid-argument', 'messages must be a non-empty array.')
     }
 
     const body: Record<string, unknown> = {
@@ -73,8 +62,7 @@ export const anthropicProxy = onCall<ProxyRequest>(
     }
     if (system) body.system = system
 
-    const sleep = (ms: number) =>
-      new Promise<void>((r) => setTimeout(r, ms))
+    const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms))
     const maxAttempts = 3
 
     for (let attempt = 1; attempt <= maxAttempts; attempt++) {
@@ -116,10 +104,7 @@ export const anthropicProxy = onCall<ProxyRequest>(
       }
 
       const errText = await res.text().catch(() => '')
-      throw new HttpsError(
-        'internal',
-        `Anthropic error ${res.status}: ${errText.slice(0, 200)}`,
-      )
+      throw new HttpsError('internal', `Anthropic error ${res.status}: ${errText.slice(0, 200)}`)
     }
 
     throw new HttpsError('internal', 'AI request failed after retries.')

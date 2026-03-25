@@ -1,5 +1,25 @@
 import { aiService, callAI, toJSONSafe } from '../ai.service'
 
+// ── Mocks for the proxy-based AI service ────────────────────────────────────
+
+// firebase/app — getApp() must return something for getFunctions
+jest.mock('firebase/app', () => ({
+  getApp: jest.fn(() => ({})),
+}))
+
+// firebase/functions — httpsCallable returns a jest.fn by default (no real call)
+const mockProxy = jest.fn()
+jest.mock('firebase/functions', () => ({
+  getFunctions: jest.fn(() => ({})),
+  httpsCallable: jest.fn(() => mockProxy),
+}))
+
+// auth.service — getFirebaseAuth().currentUser drives mock/live branching
+const mockGetFirebaseAuth = jest.fn()
+jest.mock('@/services/firebase/auth.service', () => ({
+  getFirebaseAuth: () => mockGetFirebaseAuth(),
+}))
+
 // ── toJSONSafe ───────────────────────────────────────────────────────────────
 
 describe('toJSONSafe', () => {
@@ -33,22 +53,22 @@ describe('toJSONSafe', () => {
   })
 })
 
-// ── callAI without API key ───────────────────────────────────────────────────
+// ── callAI without authenticated user ───────────────────────────────────────
 
 describe('callAI', () => {
-  it('throws when EXPO_PUBLIC_ANTHROPIC_API_KEY is not set', async () => {
-    delete process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY
+  it('throws when user is not authenticated', async () => {
+    mockGetFirebaseAuth.mockReturnValue({ currentUser: null })
     await expect(callAI([{ role: 'user', content: 'hello' }])).rejects.toThrow(
-      'EXPO_PUBLIC_ANTHROPIC_API_KEY not set',
+      'User not authenticated',
     )
   })
 })
 
-// ── aiService – mock mode (no API key) ───────────────────────────────────────
+// ── aiService – mock mode (no authenticated user) ────────────────────────────
 
 describe('aiService', () => {
   beforeEach(() => {
-    delete process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY
+    mockGetFirebaseAuth.mockReturnValue({ currentUser: null })
   })
 
   describe('generateSummary', () => {

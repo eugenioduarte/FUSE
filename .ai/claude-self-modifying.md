@@ -8,6 +8,7 @@
 > confirmed in previous sessions. **It must be read before any implementation.**
 >
 > Format of each entry:
+>
 > - **Rule** — what to do / not do
 > - **Why** — context or incident that generated the rule
 > - **Applies to** — where this rule has effect
@@ -129,6 +130,7 @@ to get the latest stable version and pin it explicitly.
 ## �📝 How to Update This File
 
 Whenever:
+
 - The user corrects something that was done incorrectly
 - A relevant architectural decision is made
 - A recurring error pattern is identified

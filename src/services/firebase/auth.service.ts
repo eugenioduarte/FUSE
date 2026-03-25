@@ -29,10 +29,7 @@ export function getFirebaseAuth(): ReturnType<typeof getAuth> {
   // (MASVS-STORAGE-1: tokens stored in encrypted storage, not plaintext AsyncStorage).
   // expo-secure-store uses iOS Keychain and Android Keystore under the hood.
   try {
-    const {
-      initializeAuth,
-      getReactNativePersistence,
-    } = require('firebase/auth')
+    const { initializeAuth, getReactNativePersistence } = require('firebase/auth')
     const SecureStore = require('expo-secure-store')
     // expo-secure-store only allows [A-Za-z0-9._-] in keys.
     // Firebase uses colons in its keys (e.g. 'firebase:authUser:apiKey:appId'),
@@ -48,9 +45,7 @@ export function getFirebaseAuth(): ReturnType<typeof getAuth> {
         if (countStr) {
           const count = parseInt(countStr, 10)
           const parts = await Promise.all(
-            Array.from({ length: count }, (_, i) =>
-              SecureStore.getItemAsync(`${k}__chunk_${i}`),
-            ),
+            Array.from({ length: count }, (_, i) => SecureStore.getItemAsync(`${k}__chunk_${i}`)),
           )
           if (parts.some((p) => p === null)) return null
           return parts.join('')
@@ -81,9 +76,7 @@ export function getFirebaseAuth(): ReturnType<typeof getAuth> {
         await SecureStore.deleteItemAsync(k).catch(() => undefined)
         await Promise.all([
           SecureStore.setItemAsync(`${k}__chunks`, String(chunks.length)),
-          ...chunks.map((chunk, i) =>
-            SecureStore.setItemAsync(`${k}__chunk_${i}`, chunk),
-          ),
+          ...chunks.map((chunk, i) => SecureStore.setItemAsync(`${k}__chunk_${i}`, chunk)),
         ])
       },
       removeItem: async (key: string) => {
@@ -93,9 +86,7 @@ export function getFirebaseAuth(): ReturnType<typeof getAuth> {
           const n = parseInt(countStr, 10)
           await Promise.all([
             SecureStore.deleteItemAsync(`${k}__chunks`),
-            ...Array.from({ length: n }, (_, i) =>
-              SecureStore.deleteItemAsync(`${k}__chunk_${i}`),
-            ),
+            ...Array.from({ length: n }, (_, i) => SecureStore.deleteItemAsync(`${k}__chunk_${i}`)),
           ])
         }
         return SecureStore.deleteItemAsync(k)
@@ -158,11 +149,7 @@ export function initFirebaseAuthListener() {
 }
 
 export async function firebaseLogin(email: string, password: string) {
-  const res = await signInWithEmailAndPassword(
-    getFirebaseAuth(),
-    email,
-    password,
-  )
+  const res = await signInWithEmailAndPassword(getFirebaseAuth(), email, password)
   const user = res.user
 
   const { login } = useAuthStore.getState()
@@ -198,9 +185,7 @@ export function getCurrentUser() {
  * is exposed for any code that needs the raw token (e.g. custom HTTP calls).
  * Returns null if no user is signed in.
  */
-export async function getCurrentUserIdToken(
-  forceRefresh = false,
-): Promise<string | null> {
+export async function getCurrentUserIdToken(forceRefresh = false): Promise<string | null> {
   const user = getFirebaseAuth().currentUser
   if (!user) return null
   return user.getIdToken(forceRefresh)
@@ -246,10 +231,7 @@ export async function changeEmail(currentPassword: string, newEmail: string) {
   upsertUserProfile({ email: newEmail }).catch(() => {})
 }
 
-export async function changePassword(
-  currentPassword: string,
-  newPassword: string,
-) {
+export async function changePassword(currentPassword: string, newPassword: string) {
   const user = await reauth(currentPassword)
   await updatePassword(user, newPassword)
 }
