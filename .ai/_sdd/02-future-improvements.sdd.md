@@ -8,7 +8,7 @@
 
 > Status: Investigation
 > Data de criação: 2026-03-24
-> Última atualização: 2026-03-24
+> Última atualização: 2026-03-25
 > Fontes: `report.md` (Grok) + `react-native-agent-review.md` (Claude Opus 4.6) + `base3.md`
 
 ---
@@ -19,8 +19,8 @@
 
 ### 🔴 Críticos / Bloqueiam Release
 
-- [ ] **Firebase version lock** — fixar `"firebase": "latest"` → `"^11.x.x"` _(2 min)_
-- [ ] **`dotenv` → devDependencies** — mover de `dependencies` para `devDependencies` _(2 min)_
+- [x] **Firebase version lock** — fixado `^12.11.0` ✅ concluído 2026-03-25 _(2 min)_
+- [x] **`dotenv` → devDependencies** — movido para `devDependencies` ✅ concluído 2026-03-25 _(2 min)_
 - [ ] **API Key no bundle (proxy)** — implementar proxy server-side, remover `EXPO_PUBLIC_ANTHROPIC_API_KEY` _(1–2 dias)_
 - [ ] **Alinhar thresholds de cobertura** — `jest.config.js` 5% vs `mandatory-rules.md` 70-80% _(1h)_
 
@@ -68,7 +68,7 @@ O objetivo **não é implementar tudo de uma vez**. É registrar o que foi ident
 | Gestão de segredos  | `EXPO_PUBLIC_` + `expo-secure-store` | Padrão correto — mas `EXPO_PUBLIC_ANTHROPIC_API_KEY` exposta no bundle |
 | Storage chave-valor | `AsyncStorage`                       | MMKV seria ~10x mais rápido                                            |
 | Estrutura           | Single-package                       | Sem monorepo                                                           |
-| Firebase            | `firebase: latest`                   | Versão não fixada — risco de breaking change                           |
+| Firebase            | `firebase: ^12.11.0` ✅               | Versão fixada — era `latest`, instalado 12.11.0                        |
 
 ---
 
@@ -545,8 +545,8 @@ useFocusEffect(
 
 | #   | Item                                   | Fonte         | Prioridade | Dificuldade | Esforço       | Risco de Não Fazer                   |
 | --- | -------------------------------------- | ------------- | ---------- | ----------- | ------------- | ------------------------------------ |
-| 1   | Firebase version lock                  | Grok + Review | 🔴 Alta    | 🟢 Mínima   | 2 min         | Breaking change silencioso em CI     |
-| 2   | `dotenv` → devDependencies             | Review 5.1    | 🔴 Alta    | 🟢 Mínima   | 2 min         | ~15KB de código morto no bundle      |
+| 1   | Firebase version lock                  | Grok + Review | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: pinado ^12.11.0           |
+| 2   | `dotenv` → devDependencies             | Review 5.1    | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: movido para devDeps       |
 | 3   | Alinhar coverage thresholds            | Review PC-2   | 🔴 Alta    | 🟢 Baixa    | 1h            | Credibilidade de todo o `.ai/rules/` |
 | 4   | API Key no bundle (proxy)              | Grok + Review | 🔴 Alta    | 🟡 Média    | 1–2 dias      | Chave de billing exposta no bundle   |
 | 5   | AIProvider abstraction                 | base3.md C-2  | 🟡 Média   | 🟢 Baixa    | 2–4h          | Reescrita total para trocar provider |
@@ -579,8 +579,8 @@ Para cada item foi avaliado:
 
 ### Imediato (esta sessão / hoje)
 
-- [ ] `yarn list firebase` → fixar versão no `package.json` + commit
-- [ ] Mover `dotenv` para `devDependencies` + verificar `app.config.js`
+- [x] `yarn list firebase` → fixar versão no `package.json` + commit ✅ 2026-03-25
+- [x] Mover `dotenv` para `devDependencies` + verificar `app.config.js` ✅ 2026-03-25
 - [ ] `yarn test:coverage` → verificar cobertura real → ajustar thresholds no `jest.config.js`
 - [ ] Atualizar `mandatory-rules.md` para refletir política de cobertura real
 
@@ -614,8 +614,8 @@ Para cada item foi avaliado:
 | ---------- | --------------------------- | ------------- | ---------------------------------------------------------------------- |
 | 2026-03-24 | Criação deste documento     | ✅ Criado     | Consolidar melhorias técnicas identificadas por Grok + base3.md        |
 | 2026-03-24 | Atualização com review      | ✅ Atualizado | Integrar todas as sugestões do `react-native-agent-review.md` (6.5/10) |
-| —          | Firebase version lock       | —             | —                                                                      |
-| —          | `dotenv` → devDependencies  | —             | —                                                                      |
+| 2026-03-25 | Firebase version lock       | ✅ Fixado     | `^12.11.0` (era `latest`, lock confirmou 12.11.0)                      |
+| 2026-03-25 | `dotenv` → devDependencies  | ✅ Movido     | Usado só em `app.config.js` (config-time), não no bundle               |
 | —          | Alinhar coverage thresholds | —             | —                                                                      |
 | —          | API Key no bundle           | —             | —                                                                      |
 | —          | AIProvider abstraction      | —             | —                                                                      |
