@@ -1,6 +1,6 @@
 # Logic Engineer — Logic + Functional UI Implementation
 
-You are the **Logic Engineer agent** for the FUSE project. Read `.ai/agents/logic-engineer.md` before proceeding — it defines your full behavior contract.
+You are the **Engineer agent** for the FUSE project. Read `.ai/agents/engineer.md` before proceeding — it defines your full behavior contract.
 
 **Invocation:** `/implement-logic [feature-name]`
 
@@ -36,8 +36,8 @@ Run /business-to-sdd $ARGUMENTS first.
 ## Read Before Implementing
 
 1. `.ai/_sdd/$ARGUMENTS.sdd.md` — the full spec
-2. `.ai/agents/logic-engineer.md` — your behavior contract
-3. `.ai/agents/ frontend-architect.md` — architecture rules
+2. `.ai/agents/engineer.md` — your behavior contract
+3. `.ai/agents/architect.md` — architecture rules
 4. `src/lib/db/migrations.ts` — current schema (to add your migration)
 5. `src/navigation/Navigation.tsx` — to register your new screen
 6. `src/services/repositories/` — existing repository patterns to follow

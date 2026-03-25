@@ -48,22 +48,15 @@ graph TB
         SystemMD[system.md<br/>Master Coordinator]
     end
 
-    subgraph Agents["🤖 Agent Layer (14 Agents)"]
+    subgraph Agents["🤖 Agent Layer (7 Agents — v2.0.0)"]
         direction LR
-        A1[frontend-architect]
-        A2[react-native-engineer]
-        A3[code-reviewer]
+        A1[architect]
+        A2[engineer]
+        A3[reviewer]
         A4[test-writer]
-        A5[performance-auditor]
-        A6[sonar-auto-fixer]
-        A7[coupling-analyzer]
-        A8[pr-lifecycle]
-        A9[business-analyst]
-        A10[doc-designer]
-        A11[logic-engineer]
-        A12[ui-designer]
-        A13[test-write-e2e]
-        A14[pr-review-fixer]
+        A5[quality]
+        A6[design-docs]
+        A7[pr-lifecycle]
     end
 
     subgraph Skills["📚 Skills Layer (9 Skills)"]
@@ -123,29 +116,26 @@ flowchart TD
     Classify -->|PR Management| PRPath[PR Path]
 
     ArchPath --> SelectArch{Complexity?}
-    SelectArch -->|System Design| BA[business-analyst]
-    SelectArch -->|Component Design| FA[frontend-architect]
-    SelectArch -->|Coupling Analysis| CA[coupling-analyzer]
+    SelectArch -->|Architecture/SDD| AR[architect]
+    SelectArch -->|Business→SDD| DD[design-docs]
 
     DevPath --> SelectDev{Implementation Type?}
-    SelectDev -->|Feature/Component| RNE[react-native-engineer]
-    SelectDev -->|Business Logic| LE[logic-engineer]
-    SelectDev -->|UI/UX| UID[ui-designer]
+    SelectDev -->|Feature/Component/Logic| ENG[engineer]
+    SelectDev -->|UI Polish/Docs| DD2[design-docs]
 
     QAPath --> SelectQA{Review Type?}
-    SelectQA -->|Code Review| CR[code-reviewer]
-    SelectQA -->|Performance| PA[performance-auditor]
-    SelectQA -->|SonarQube| SAF[sonar-auto-fixer]
+    SelectQA -->|Code Review| REV[reviewer]
+    SelectQA -->|Performance + Sonar| QL[quality]
 
     TestPath --> SelectTest{Test Type?}
     SelectTest -->|Unit/Integration| TW[test-writer]
-    SelectTest -->|E2E| TE2E[test-write-e2e]
+    SelectTest -->|E2E| TW[test-writer]
 
-    DocPath --> DD[doc-designer]
+    DocPath --> DD3[design-docs]
 
     PRPath --> SelectPR{PR Operation?}
     SelectPR -->|Full Lifecycle| PRL[pr-lifecycle]
-    SelectPR -->|Fix Review Issues| PRF[pr-review-fixer]
+    SelectPR -->|Fix Review Issues| REV2[reviewer]
 
     BA --> LoadSkills[Load Required Skills]
     FA --> LoadSkills
@@ -191,7 +181,7 @@ flowchart TD
     CheckSize -->|Yes| RouteCloud
     CheckSize -->|No| CheckAgent{Agent Always<br/>Remote?}
 
-    CheckAgent -->|Yes| ForceCloud[Force Claude:<br/>• code-reviewer<br/>• performance-auditor<br/>• coupling-analyzer<br/>• pr-lifecycle]
+    CheckAgent -->|Yes| ForceCloud[Force Claude:<br/>• architect<br/>• reviewer<br/>• quality (perf mode)<br/>• pr-lifecycle<br/>• design-docs (UI/BA)]
     CheckAgent -->|No| CheckMechanical{Mechanical<br/>Task?}
 
     ForceCloud --> RouteCloud
@@ -225,20 +215,13 @@ Matrix showing which skills each agent loads into context.
 ```mermaid
 graph TD
     subgraph Agents["🤖 Agents"]
-        FA[frontend-architect]
-        RNE[react-native-engineer]
-        CR[code-reviewer]
+        AR[architect]
+        ENG[engineer]
+        REV[reviewer]
         TW[test-writer]
-        TE2E[test-write-e2e]
-        PA[performance-auditor]
-        SAF[sonar-auto-fixer]
-        CA[coupling-analyzer]
+        QL[quality]
         PRL[pr-lifecycle]
-        PRF[pr-review-fixer]
-        BA[business-analyst]
-        DD[doc-designer]
-        LE[logic-engineer]
-        UID[ui-designer]
+        DD[design-docs]
     end
 
     subgraph CoreSkills["📚 Core Skills"]
@@ -325,10 +308,10 @@ Complete workflow from SDD to production-ready code.
 sequenceDiagram
     participant User
     participant System as system.md
-    participant BA as business-analyst
-    participant RNE as react-native-engineer
+    participant DD as design-docs
+    participant ENG as engineer
     participant TW as test-writer
-    participant CR as code-reviewer
+    participant REV as reviewer
     participant PRL as pr-lifecycle
 
     User->>System: Request new feature
@@ -407,21 +390,21 @@ flowchart TD
     Scenario -->|Performance Issue| PerfFlow[Performance Flow]
     Scenario -->|Feature with Design| DesignFlow[Design Flow]
 
-    RefactorFlow --> CA[coupling-analyzer]
-    CA --> |coupling report| RNE1[react-native-engineer]
+    RefactorFlow --> AR[architect]
+    AR --> |coupling report| ENG1[engineer]
     RNE1 --> |refactored code| TW1[test-writer]
-    TW1 --> |tests| CR1[code-reviewer]
+    TW1 --> |tests| REV1[reviewer]
     CR1 --> RefactorEnd([Complete])
 
-    PerfFlow --> PA[performance-auditor]
-    PA --> |bottleneck report| RNE2[react-native-engineer]
+    PerfFlow --> QL[quality]
+    QL --> |bottleneck report| ENG2[engineer]
     RNE2 --> |optimized code| TW2[test-writer]
-    TW2 --> |perf tests| PA2[performance-auditor]
+    TW2 --> |perf tests| QL2[quality]
     PA2 --> |verification| PerfEnd([Complete])
 
-    DesignFlow --> UID[ui-designer]
-    UID --> |mockup/specs| RNE3[react-native-engineer]
-    RNE3 --> |implementation| CR2[code-reviewer]
+    DesignFlow --> DD[design-docs]
+    DD --> |design specs| ENG3[engineer]
+    ENG3 --> |implementation| REV2[reviewer]
     CR2 --> |UI validation| DesignEnd([Complete])
 
     RefactorEnd --> Commit[pr-lifecycle<br/>Commit & Merge]
@@ -444,7 +427,7 @@ OWASP Mobile Application Security (MAS) parallel execution.
 
 ```mermaid
 flowchart TB
-    Trigger([Security Audit Trigger]) --> PA[performance-auditor<br/>Master Coordinator]
+    Trigger([Security Audit Trigger]) --> QL[quality<br/>Master Coordinator]
 
     PA --> Spawn[Spawn 7 Parallel Sub-Agents]
 
@@ -470,7 +453,7 @@ flowchart TB
 
     Report --> AutoFix{Auto-Fixable?}
 
-    AutoFix -->|Yes| SAF[sonar-auto-fixer<br/>Apply Fixes]
+    AutoFix -->|Yes| QL2[quality<br/>Apply Fixes]
     AutoFix -->|No| Manual[Flag for Manual Review]
 
     SAF --> Verify[Verify Fixes]
@@ -611,7 +594,7 @@ sequenceDiagram
     participant Git as Git Operations
     participant GH as GitHub
     participant CI as GitHub Actions
-    participant SAF as sonar-auto-fixer
+    participant QL as quality
     participant SOnar as SonarQube
 
     Dev->>PRL: Request PR creation

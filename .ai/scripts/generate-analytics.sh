@@ -113,12 +113,13 @@ model_dist = [{'model': m, 'tokens': t} for m, t in
 # ── orchestration.csv (optional) ─────────────────────────────────────────────
 
 AGENT_TASK_MAP = {
-    'react-native-engineer':  'implementation',
-    'frontend-architect':     'architecture',
-    'sonar-fixer':            'sonar',
-    'pr-lifecycle':           'pr-lifecycle',
-    'security-auditor':       'security',
-    'test-engineer':          'tests',
+    'engineer':      'implementation',
+    'architect':     'architecture',
+    'quality':       'quality',
+    'pr-lifecycle':  'pr-lifecycle',
+    'reviewer':      'review',
+    'test-writer':   'tests',
+    'design-docs':   'design',
 }
 
 agent_costs   = defaultdict(lambda: {'tokens': 0, 'cost': 0.0, 'task_type': 'other'})
@@ -154,11 +155,9 @@ except Exception as e:
     print(f'⚠️  orchestration.csv error: {e}', file=sys.stderr)
 
 ALL_AGENTS = [
-    'business-analyst', 'frontend-architect', 'coupling-analyzer',
-    'logic-engineer', 'react-native-engineer', 'ui-designer',
-    'code-reviewer', 'test-writer', 'test-write-e2e',
-    'pr-lifecycle', 'sonar-auto-fixer', 'doc-designer',
-    'pr-review-fixer', 'performance-auditor',
+    'architect', 'engineer', 'reviewer',
+    'test-writer', 'quality', 'design-docs',
+    'pr-lifecycle',
 ]
 # Seed any agents not yet in orchestration.csv with zero values
 for ag in ALL_AGENTS:

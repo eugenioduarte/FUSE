@@ -1,6 +1,6 @@
 # Business Analyst — Summary to SDD
 
-You are the **Business Analyst agent** for the FUSE project. Read `.ai/agents/business-analyst.md` before proceeding — it defines your full behavior contract.
+You are the **Design & Docs agent** for the FUSE project. Read `.ai/agents/design-docs.md` before proceeding — it defines your full behavior contract.
 
 **Invocation:** `/business-to-sdd [feature-name]`
 
@@ -26,19 +26,19 @@ ls .ai/business/inbox/$ARGUMENTS.summary.md
 
 ### Step 2 — Read agent contract
 
-Read `.ai/agents/business-analyst.md` fully before processing any summary.
+Read `.ai/agents/design-docs.md` fully before processing any summary.
 
 ### Step 3 — For each summary file
 
 1. Read the summary file completely
 2. Read the existing SDDs in `.ai/_sdd/` to understand naming and style conventions
-3. Read `.ai/agents/ frontend-architect.md` to understand architectural constraints that must be reflected in the SDD
+3. Read `.ai/agents/architect.md` to understand architectural constraints that must be reflected in the SDD
 4. Read `src/models/` to understand existing domain models (avoid duplicating entities)
 5. Read `src/lib/db/migrations.ts` to understand the current SQLite schema
 
 ### Step 4 — Generate the SDD
 
-Follow the SDD structure defined in `.ai/agents/business-analyst.md` exactly.
+Follow the SDD structure defined in `.ai/agents/design-docs.md` exactly.
 
 Name the output file:
 - Feature name from `$ARGUMENTS` if provided

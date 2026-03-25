@@ -156,7 +156,7 @@ cat > "$REPORT_FILE" << EOF
 
 **Generated:** $(date '+%Y-%m-%d %H:%M:%S')  
 **Mode:** $MODE  
-**Analyzer:** coupling-analyzer  
+**Analyzer:** architect  
 **Model:** claude-sonnet-4-6
 
 ---

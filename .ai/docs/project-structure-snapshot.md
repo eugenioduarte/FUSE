@@ -118,12 +118,12 @@ Model           src/models/{domain}.ts
 | File                              | Role                                        |
 | --------------------------------- | ------------------------------------------- |
 | `system.md`                       | Master context — loaded by all agents       |
-| `agents/react-native-engineer.md` | Implementation — builds features end-to-end |
-| `agents/code-reviewer.md`         | Review — enforces all rules on diffs        |
-| `agents/performance-auditor.md`   | Audit — rendering and bundle performance    |
+| `agents/engineer.md`              | Implementation — builds features end-to-end |
+| `agents/reviewer.md`              | Review — enforces all rules on diffs        |
+| `agents/quality.md`               | Audit — performance, Sonar auto-fixer       |
 | `agents/test-writer.md`           | Tests — unit + integration, 80% minimum     |
-| `agents/test-write-e2e.md`        | E2E — full user-flow device tests           |
-| `agents/frontend-architect.md`    | Architecture — structural decisions         |
+| `agents/test-writer.md`           | Tests — unit + E2E Maestro flows            |
+| `agents/architect.md`             | Architecture — structural decisions, coupling |
 
 ### Rules (`/rules/`)
 

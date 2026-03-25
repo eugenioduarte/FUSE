@@ -25,13 +25,12 @@ A partir daí, cada solicitação é analisada e delegada.
 
 ### Agentes Especializados
 
-- **frontend-architect**: Cria SDDs e decisões arquiteturais
-- **react-native-engineer**: Implementa código (o agente mais utilizado)
-- **test-writer** / **test-write-e2e**: Gera testes unitários e flows Maestro
-- **code-reviewer**: Executa quality gate antes de qualquer commit
-- **performance-auditor**: Analisa FPS, JS thread e consumo de memória
-- **sonar-auto-fixer**: Corrige issues do Sonar automaticamente
-- **coupling-analyzer**: Detecta acoplamento excessivo
+- **architect**: Cria SDDs, decisões arquiteturais e análise de acoplamento
+- **engineer**: Implementa código — screens, hooks, lógica de negócio
+- **test-writer**: Gera testes unitários e flows Maestro E2E
+- **reviewer**: Executa quality gate e resolve review comments
+- **quality**: Analisa performance, FPS, JS thread e corrige issues Sonar
+- **design-docs**: UI polish, README auto-update, business → SDD
 - **pr-lifecycle**: Gerencia o ciclo completo de Pull Request
 
 ### Router Inteligente (Local vs Remote)
@@ -56,7 +55,7 @@ O que mais impactou não foram os agentes em si, mas as regras que ninguém pode
 - Conventional Commits obrigatório
 - Nunca auto-commit ou auto-push
 
-O `code-reviewer` rejeita automaticamente qualquer violação.
+O `reviewer` rejeita automaticamente qualquer violação.
 
 <img src="./images/wall.png" alt="Code Reviewer – O guardião que não aceita violações" width="100%" height="200" style="object-fit: cover;" />
 

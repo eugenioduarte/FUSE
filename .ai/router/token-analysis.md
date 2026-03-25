@@ -155,20 +155,21 @@ Based on mock data patterns (16-21 March) and real sessions (22-23 March):
 
 ### High-Volume Claude Agents
 
-| Agent                   | Primary Model | Avg Tokens/Request | Why Claude?                                              |
-| ----------------------- | ------------- | -----------------: | -------------------------------------------------------- |
-| **code-reviewer**       | Claude        |    25,000 - 50,000 | Multi-dimensional quality gates, complex reasoning       |
-| **performance-auditor** | Claude        |    30,000 - 80,000 | Profiler data analysis, bottleneck identification        |
-| **coupling-analyzer**   | Claude        |   40,000 - 100,000 | Dependency graph analysis, architectural recommendations |
-| **pr-lifecycle**        | Claude        |    15,000 - 30,000 | Git operations require high reliability                  |
+| Agent                   | Primary Model | Avg Tokens/Request | Why Claude?                                         |
+| ----------------------- | ------------- | -----------------: | --------------------------------------------------- |
+| **reviewer**            | Claude        |    25,000 - 50,000 | Multi-dimensional quality gates, complex reasoning  |
+| **architect**           | Claude        |   40,000 - 100,000 | SDD design + coupling analysis across full codebase |
+| **quality** (perf mode) | Claude        |    30,000 - 80,000 | Profiler data analysis, bottleneck identification   |
+| **pr-lifecycle**        | Claude        |    15,000 - 30,000 | Git operations require high reliability             |
+| **design-docs** (UI+BA) | Claude        |    15,000 - 35,000 | Design system + SDD understanding                   |
 
 ### High-Volume Ollama Agents
 
-| Agent                     | Primary Model | Avg Tokens/Request | Why Ollama?                                      |
-| ------------------------- | ------------- | -----------------: | ------------------------------------------------ |
-| **sonar-auto-fixer**      | Ollama        |     8,000 - 15,000 | Mechanical fixes (unused vars, type corrections) |
-| **react-native-engineer** | Ollama\*      |    10,000 - 20,000 | Simple implementations (basic components, hooks) |
-| **test-writer**           | Ollama\*      |     8,000 - 18,000 | Straightforward unit test generation             |
+| Agent                    | Primary Model | Avg Tokens/Request | Why Ollama?                                      |
+| ------------------------ | ------------- | -----------------: | ------------------------------------------------ |
+| **quality** (sonar mode) | Ollama        |     8,000 - 15,000 | Mechanical fixes (unused vars, type corrections) |
+| **engineer**             | Ollama\*      |    10,000 - 20,000 | Simple implementations (basic components, hooks) |
+| **test-writer**          | Ollama\*      |     8,000 - 18,000 | Unit + E2E test generation — template-driven     |
 
 \* _Escalates to Claude for complex tasks via router_
 

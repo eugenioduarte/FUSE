@@ -1,4 +1,5 @@
-> **[PT]** Diagrama visual (Mermaid) do sistema de orquestração de agents — mostra o fluxo completo desde o pedido do utilizador até à execução, com mapeamento de skills, LLM routing e sequência de uma feature completa.
+````markdown
+> **[PT]** Diagrama visual (Mermaid) do sistema de orquestração de agents — mostra o fluxo completo desde o pedido do utilizador até à execução, com mapeamento de skills, LLM routing e sequência de uma feature completa. Versão 2.0: 14 agentes consolidados em 7.
 
 ---
 
@@ -6,7 +7,7 @@
 
 ## Overview
 
-The FUSE AI system is a **constrained engineering environment** where specialized agents handle different domains. All agents share the same architectural contracts, mandatory rules, and quality gates. The orchestrator (`system.md`) analyses every incoming request and routes it to the correct agent — or handles it directly for git operations.
+The FUSE AI system is a **constrained engineering environment** where 7 specialized agents handle different domains. All agents share the same architectural contracts, mandatory rules, and quality gates. The orchestrator (`system.md`) analyses every incoming request and routes it to the correct agent — or handles it directly for git operations.
 
 ---
 
@@ -19,15 +20,13 @@ graph TB
 
     USER --> SYS
 
-    SYS --> ARCH[🏗 frontend-architect\nDesign · SDD · Architecture]
-    SYS --> ENG[⚙️ react-native-engineer\nImplement · Debug · Refactor]
-    SYS --> TEST[🧪 test-writer\nUnit tests · Coverage]
-    SYS --> E2E[🎭 test-write-e2e\nE2E · Flow-driven tests]
-    SYS --> REV[🔍 code-reviewer\nPre-merge validation]
-    SYS --> PERF[⚡ performance-auditor\nFPS · Memory · TTI]
-    SYS --> SONAR[🔧 sonar-auto-fixer\nAuto-fix quality issues]
-    SYS --> COUP[📊 coupling-analyzer\nFan-in / Fan-out metrics]
-    SYS --> PR[🔄 pr-review-fixer\nAutonomous PR lifecycle]
+    SYS --> ARCH[🏗 architect\nDesign · SDD · Coupling Analysis]
+    SYS --> ENG[⚙️ engineer\nImplement · Logic · Debug · Stage 1+2]
+    SYS --> TEST[🧪 test-writer\nUnit tests · Integration · E2E]
+    SYS --> REV[🛡 reviewer\nPre-merge validation · PR fix]
+    SYS --> QUAL[🚀 quality\nPerformance audit · Sonar auto-fix]
+    SYS --> DD[🎨 design-docs\nUI polish · README · Business→SDD]
+    SYS --> PRL[🔄 pr-lifecycle\nAutonomous PR lifecycle]
     SYS --> GIT[📦 SYSTEM DIRECT\ngit operations]
 ```
 
@@ -37,61 +36,63 @@ graph TB
 
 ```mermaid
 flowchart LR
-    ARCH[frontend-architect]       --> SA1[project-architecture]
-    ARCH                           --> SA2[ux-ui-standards]
+    ARCH[architect]      --> SA1[project-architecture]
+    ARCH                 --> SA2[ux-ui-standards]
+    ARCH                 --> SA3[coupling-analysis]
 
-    ENG[react-native-engineer]     --> SE1[react-native-best-practices]
-    ENG                            --> SE2[typescript-strict-rules]
-    ENG                            --> SE3[clean-code-rules]
-    ENG                            --> SE4[ux-ui-standards]
-    ENG                            --> SE5[api-integration-pattern]
-    ENG                            --> SE6[project-architecture]
-    ENG                            --> SE7[translations]
+    ENG[engineer]        --> SE1[react-native-best-practices]
+    ENG                  --> SE2[typescript-strict-rules]
+    ENG                  --> SE3[clean-code-rules]
+    ENG                  --> SE4[api-integration-pattern]
+    ENG                  --> SE5[project-architecture]
+    ENG                  --> SE6[translations]
 
-    TEST[test-writer]              --> ST1[clean-code-rules]
+    TEST[test-writer]    --> ST1[clean-code-rules]
+    TEST                 --> ST2[react-native-best-practices]
 
-    E2E[test-write-e2e]            --> ST2[react-native-best-practices]
+    REV[reviewer]        --> SR1[ALL mandatory skills]
 
-    REV[code-reviewer]             --> SR1[ALL mandatory skills]
+    QUAL[quality]        --> SQ1[react-native-best-practices]
+    QUAL                 --> SQ2[clean-code-rules]
+    QUAL                 --> SQ3[typescript-strict-rules]
 
-    PERF[performance-auditor]      --> SP1[react-native-best-practices]
+    DD[design-docs]      --> SD1[ux-ui-standards]
+    DD                   --> SD2[project-architecture]
 
-    SONAR[sonar-auto-fixer]        --> SS1[clean-code-rules]
-    SONAR                          --> SS2[typescript-strict-rules]
-
-    COUP[coupling-analyzer]        --> SC1[coupling-analysis]
-    COUP                           --> SC2[project-architecture]
-
-    PR[pr-review-fixer]            --> SPR1[sonar-auto-fixer skill]
-    PR                             --> SPR2[clean-code-rules]
+    PRL[pr-lifecycle]    --> SPR1[git-workflow]
+    PRL                  --> SPR2[clean-code-rules]
 ```
 
 ---
 
-## 3 — Standard Feature Flow
+## 3 — Standard Feature Flow (3-Stage Pipeline)
 
 ```mermaid
 sequenceDiagram
     participant User
     participant System
-    participant Architect as frontend-architect
-    participant Engineer as react-native-engineer
+    participant Architect as architect
+    participant Engineer as engineer
     participant Tests as test-writer
-    participant Reviewer as code-reviewer
+    participant Reviewer as reviewer
+    participant DD as design-docs
     participant Git
 
     User->>System: Feature request
-    System->>Architect: Create SDD
+    System->>Architect: Create SDD + coupling check
     Architect-->>System: SDD approved
 
-    System->>Engineer: Implement feature
+    System->>Engineer: Implement feature (Stages 1+2: logic + functional UI)
     Engineer-->>System: Code ready
 
     System->>Tests: Write unit tests
-    Tests-->>System: Tests passing (≥90% hooks)
+    Tests-->>System: Tests passing (>=80% global, >=90% hooks)
 
     System->>Reviewer: Review code
     Reviewer-->>System: Approved
+
+    System->>DD: UI Polish (Stage 3) + README update
+    DD-->>System: UI production-ready, README updated
 
     System->>User: Confirm commit?
     User->>System: Yes
@@ -105,15 +106,14 @@ sequenceDiagram
 
 | Agent | Model | Reason |
 |---|---|---|
-| `frontend-architect` | ☁️ Claude Sonnet (always) | High-value architectural reasoning |
-| `code-reviewer` | ☁️ Claude Sonnet (always) | Pattern recognition across full codebase |
-| `performance-auditor` | ☁️ Claude Sonnet (always) | Complex profiling & root cause analysis |
-| `coupling-analyzer` | ☁️ Claude Sonnet (always) | Holistic codebase structure analysis |
-| `pr-review-fixer` | ☁️ Claude Sonnet (always) | Multi-step autonomous decision making |
-| `test-writer` | 🏠 Local `qwen2.5-coder:14b` | Template-driven, deterministic |
-| `test-write-e2e` | 🏠 Local `qwen2.5-coder:14b` | `flow.md` → test code mapping |
-| `react-native-engineer` | 🔀 Conditional | Local for boilerplate; Claude for complex refactor |
-| `sonar-auto-fixer` | 🔀 Conditional | Local for mechanical fixes; Claude for architecture |
+| `architect` | Claude Sonnet (always) | Architectural reasoning + coupling analysis across full codebase |
+| `reviewer` | Claude Sonnet (always) | Pattern recognition across codebase, nuanced quality gates |
+| `design-docs` (UI + Business) | Claude Sonnet (always) | Design system + architecture understanding |
+| `design-docs` (Doc Update) | Claude Haiku | Low-complexity README writing — fast and cheap |
+| `pr-lifecycle` | Claude Sonnet (always) | Multi-step autonomous PR decision making |
+| `test-writer` | Local qwen2.5-coder:14b | Template-driven, deterministic (unit + E2E) |
+| `engineer` | Conditional | Local for boilerplate; Claude for complex refactor/integration |
+| `quality` | Conditional | Local for mechanical Sonar fixes; Claude for performance analysis |
 
 **Strategy:** Save Claude tokens for reasoning-heavy work. Use local model for repetitive mechanical tasks. Escalate to Claude only when complexity signals are detected.
 
@@ -123,37 +123,37 @@ sequenceDiagram
 
 ```mermaid
 graph LR
-    REV[code-reviewer] -->|boundary violation| ARCH[frontend-architect]
+    REV[reviewer] -->|boundary violation| ARCH[architect]
     ARCH -->|architecture guidance| REV
 
-    PERF[performance-auditor] -->|systemic issue| ARCH
-    ARCH -->|redesign| ENG[react-native-engineer]
+    QUAL[quality] -->|systemic performance issue| ARCH
+    ARCH -->|redesign guidance| ENG[engineer]
 
-    COUP[coupling-analyzer] -->|structural issue| ARCH
-
-    PR[pr-review-fixer] -->|CI failure| SONAR[sonar-auto-fixer]
-    SONAR -->|auto-fixed| PR
+    DD[design-docs] -->|Stage 3 after Stage 2| ENG
+    REV -->|approved, trigger| DD
 ```
 
 ---
 
-## 6 — Request → Agent Routing Matrix
+## 6 — Request -> Agent Routing Matrix
 
-| Request type | Agent | Skills loaded |
+| Request type | Agent | Mode / Command |
 |---|---|---|
-| New feature design / SDD | `frontend-architect` | project-architecture, ux-ui-standards |
-| Feature implementation | `react-native-engineer` | all |
-| Component / hook creation | `react-native-engineer` | react-native-best-practices, clean-code-rules |
-| API integration | `react-native-engineer` | api-integration-pattern |
-| Bug fix | `react-native-engineer` | relevant skills |
-| Unit tests | `test-writer` | clean-code-rules |
-| E2E tests | `test-write-e2e` | react-native-best-practices |
-| Pre-merge code review | `code-reviewer` | ALL mandatory rules |
-| Performance issues | `performance-auditor` | react-native-best-practices |
-| SonarQube issues | `sonar-auto-fixer` | clean-code-rules, typescript-strict-rules |
-| Coupling analysis | `coupling-analyzer` | coupling-analysis, project-architecture |
-| Autonomous PR lifecycle | `pr-review-fixer` | sonar-auto-fixer, clean-code-rules |
-| `commit` / `push` / `pr` | **SYSTEM DIRECT** | git-workflow rules |
+| New feature design / SDD | `architect` | default |
+| Coupling / dependency analysis | `architect` | `/analyze-coupling` |
+| Feature implementation (full stack) | `engineer` | default |
+| Component / hook / bug fix | `engineer` | default |
+| Unit / integration tests | `test-writer` | default |
+| E2E tests from flow.md | `test-writer` | `/test-e2e` |
+| Pre-merge code review | `reviewer` | default |
+| Fix PR review comments | `reviewer` | `/fix-pr <PR_NUMBER>` |
+| SonarQube issue auto-fix | `quality` | `/fix-sonar <PR_NUMBER>` |
+| Performance audit | `quality` | `/audit-performance` |
+| UI polish Stage 3 | `design-docs` | `/ui-polish` |
+| README auto-update | `design-docs` | `/update-readme` (pre-push) |
+| Business summary to SDD | `design-docs` | `/business-to-sdd` |
+| Autonomous PR lifecycle | `pr-lifecycle` | `/pr-lifecycle <PR_NUMBER>` |
+| commit / push / branch | **SYSTEM DIRECT** | git-workflow rules |
 | Novel / unknown request | **CREATE NEW AGENT** | — |
 
 ---
@@ -193,6 +193,7 @@ All agents log to `.ai/router/`:
 | `sonar-fixes.csv` | Auto-fix history & success rate |
 | `pr-lifecycle.csv` | PR processing metrics |
 | `orchestration.csv` | Agent invocation patterns |
-| `coupling-history.csv` | Coupling metrics trend over time |
 
-**Token tracking flow:** `log-claude-tokens.sh` / `log-ollama-tokens.sh` → `token-usage.csv` → `generate-token-md.sh` (runs on pre-push) → `token-usage.md` committed automatically.
+**Token tracking flow:** `log-claude-tokens.sh` / `log-ollama-tokens.sh` -> `token-usage.csv` -> `generate-token-md.sh` (runs on pre-push) -> `token-usage.md` committed automatically.
+
+````

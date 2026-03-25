@@ -35,14 +35,14 @@ SYSTEM DIRECT         ┌──────────────────�
 
 | Keywords in Request                             | Agent to Load           |
 | ----------------------------------------------- | ----------------------- |
-| sdd, architecture, design, refactor strategy    | `frontend-architect`    |
-| implement, create, add feature, component, hook | `react-native-engineer` |
+| sdd, architecture, design, refactor strategy    | `architect`             |
+| implement, create, add feature, component, hook | `engineer`              |
 | unit test, test coverage                        | `test-writer`           |
-| e2e test, maestro, flow                         | `test-write-e2e`        |
-| review, approve, validate                       | `code-reviewer`         |
-| sonar, quality gate, code smell                 | `sonar-auto-fixer`      |
-| coupling, dependencies, architecture debt       | `coupling-analyzer`     |
-| performance, slow, optimize, profile            | `performance-auditor`   |
+| e2e test, maestro, flow                         | `test-writer` (E2E mode)|
+| review, approve, validate                       | `reviewer`              |
+| sonar, quality gate, code smell                 | `quality`               |
+| coupling, dependencies, architecture debt       | `architect`             |
+| performance, slow, optimize, profile            | `quality`               |
 | commit, push, branch, pr                        | `SYSTEM_DIRECT`         |
 
 ---
@@ -53,21 +53,21 @@ SYSTEM DIRECT         ┌──────────────────�
 
 ```
 1. Check if SDD exists
-   YES → Load react-native-engineer
-   NO  → Load frontend-architect first
+   YES → Load engineer
+   NO  → Load architect first
 2. After implementation → Load test-writer
-3. After tests → Load code-reviewer
+3. After tests → Load reviewer
 4. Ask user to confirm commit
 ```
 
 ### Pattern 2: "Fix/Refactor X"
 
 ```
-1. Load code-reviewer (analyze current state)
-2. If architectural → Load frontend-architect
-3. Load react-native-engineer (apply changes)
+1. Load reviewer (analyze current state)
+2. If architectural → Load architect
+3. Load engineer (apply changes)
 4. Load test-writer (update tests)
-5. Load code-reviewer (validate)
+5. Load reviewer (validate)
 6. Ask user to confirm commit
 ```
 
@@ -75,10 +75,10 @@ SYSTEM DIRECT         ┌──────────────────�
 
 ```
 1. Determine analysis type:
-   - Code quality → code-reviewer
-   - Performance → performance-auditor
-   - Coupling → coupling-analyzer
-   - Sonar → sonar-auto-fixer
+   - Code quality → reviewer
+   - Performance → quality
+   - Coupling → architect
+   - Sonar → quality
 2. Load appropriate agent
 3. Return report to user
 ```
@@ -103,15 +103,15 @@ SYSTEM DIRECT         ┌──────────────────�
 ### Full Feature Flow
 
 ```
-frontend-architect
+architect
     ↓ (creates SDD)
-react-native-engineer
+engineer
     ↓ (implements)
 test-writer
     ↓ (adds tests)
-code-reviewer
+reviewer
     ↓ (validates)
-performance-auditor (if needed)
+quality (if needed)
     ↓ (optimizes)
 SYSTEM validates rules
     ↓
@@ -121,15 +121,15 @@ User confirms commit
 ### Refactoring Flow
 
 ```
-coupling-analyzer
+architect (coupling mode)
     ↓ (identifies issues)
-frontend-architect
+architect
     ↓ (plans strategy)
-react-native-engineer
+engineer
     ↓ (executes)
 test-writer
     ↓ (updates tests)
-code-reviewer
+reviewer
     ↓ (validates)
 SYSTEM validates rules
     ↓
@@ -275,7 +275,7 @@ After completing any request, log to `.ai/router/orchestration.csv`:
 
 ```csv
 date,request_type,agent_used,created_new_agent,success,duration_ms,complexity
-2026-03-21 14:30:00,feature_implementation,react-native-engineer,false,true,45000,medium
+2026-03-21 14:30:00,feature_implementation,engineer,false,true,45000,medium
 ```
 
 ---

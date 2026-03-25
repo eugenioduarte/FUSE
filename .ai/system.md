@@ -276,64 +276,77 @@ This includes:
 
 ### Architecture & Design Requests
 
-| Request Type         | Agent                | Skills Used                                | When to Delegate                          |
-| -------------------- | -------------------- | ------------------------------------------ | ----------------------------------------- |
-| Design new feature   | `frontend-architect` | `project-architecture`, `ux-ui-standards`  | Creating SDD, structural decisions        |
-| Architectural review | `frontend-architect` | `project-architecture`, `folder-structure` | Cross-cutting concerns, refactoring       |
-| Create diagram       | `frontend-architect` | -                                          | Documentation, architecture visualization |
+| Request Type                   | Agent       | Skills Used                                | When to Delegate                          |
+| ------------------------------ | ----------- | ------------------------------------------ | ----------------------------------------- |
+| Design new feature             | `architect` | `project-architecture`, `ux-ui-standards`  | Creating SDD, structural decisions        |
+| Architectural review           | `architect` | `project-architecture`, `folder-structure` | Cross-cutting concerns, refactoring       |
+| Coupling / dependency analysis | `architect` | `coupling-analysis`                        | Before refactoring, weekly audits         |
+| Create diagram                 | `architect` | -                                          | Documentation, architecture visualization |
 
-**Invocation:** Load `.ai/agents/frontend-architect.md` and delegate with full feature context.
+**Invocation:** Load `.ai/agents/architect.md` and delegate with full feature context.
 
 ---
 
 ### Implementation Requests
 
-| Request Type      | Agent                   | Skills Used                                          | When to Delegate                                |
-| ----------------- | ----------------------- | ---------------------------------------------------- | ----------------------------------------------- |
-| Implement feature | `react-native-engineer` | All skills                                           | After SDD exists, implementing components/hooks |
-| Create component  | `react-native-engineer` | `react-native-best-practices`, `ux-ui-standards`     | UI implementation                               |
-| Create hook       | `react-native-engineer` | `clean-code-rules`, `typescript-strict-rules`        | Business logic                                  |
-| Integrate API     | `react-native-engineer` | `api-integration-pattern`, `typescript-strict-rules` | Service/query layer, API calls                  |
-| Refactor code     | `react-native-engineer` | All applicable skills                                | Code improvements                               |
-| Add translation   | `react-native-engineer` | `translations`                                       | i18n updates                                    |
+| Request Type                            | Agent      | Skills Used                                          | When to Delegate                    |
+| --------------------------------------- | ---------- | ---------------------------------------------------- | ----------------------------------- |
+| Implement full feature (logic + screen) | `engineer` | All skills                                           | After SDD exists — full layer stack |
+| Create component / hook                 | `engineer` | `react-native-best-practices`, `clean-code-rules`    | UI implementation, business logic   |
+| Integrate API                           | `engineer` | `api-integration-pattern`, `typescript-strict-rules` | Service/query layer, API calls      |
+| Refactor code                           | `engineer` | All applicable skills                                | Code improvements                   |
+| Add translation                         | `engineer` | `translations`                                       | i18n updates                        |
 
-**Invocation:** Load `.ai/agents/react-native-engineer.md` and provide implementation context.
+**Invocation:** Load `.ai/agents/engineer.md` and provide implementation context.
 
 ---
 
 ### Testing Requests
 
-| Request Type      | Agent            | Skills Used                   | When to Delegate                               |
-| ----------------- | ---------------- | ----------------------------- | ---------------------------------------------- |
-| Write unit tests  | `test-writer`    | `clean-code-rules`            | After implementation, for hooks/utils/services |
-| Write E2E tests   | `test-write-e2e` | `react-native-best-practices` | After feature complete, for flows              |
-| Add test coverage | `test-writer`    | -                             | Coverage < 80%                                 |
+| Request Type                  | Agent         | Skills Used                   | When to Delegate                               |
+| ----------------------------- | ------------- | ----------------------------- | ---------------------------------------------- |
+| Write unit/integration tests  | `test-writer` | `clean-code-rules`            | After implementation, for hooks/utils/services |
+| Write E2E tests (`/test-e2e`) | `test-writer` | `react-native-best-practices` | After feature complete, with `*.flow.md`       |
+| Add test coverage             | `test-writer` | -                             | Coverage < 80%                                 |
 
-**Invocation:** Load appropriate test agent with files to be tested.
+**Invocation:** Load `.ai/agents/test-writer.md` with files to be tested (unit mode) or `feature.flow.md` (E2E mode).
 
 ---
 
 ### Quality & Review Requests
 
-| Request Type      | Agent                 | Skills Used                                   | When to Delegate                  |
-| ----------------- | --------------------- | --------------------------------------------- | --------------------------------- |
-| Review code       | `code-reviewer`       | All rules                                     | Before merge, PR review           |
-| Fix Sonar issues  | `sonar-auto-fixer`    | `clean-code-rules`, `typescript-strict-rules` | After Sonar quality gate fails    |
-| Analyze coupling  | `coupling-analyzer`   | `coupling-analysis`                           | Before refactoring, weekly audits |
-| Performance audit | `performance-auditor` | `react-native-best-practices`                 | Performance problems detected     |
+| Request Type                             | Agent      | Skills Used                                   | When to Delegate               |
+| ---------------------------------------- | ---------- | --------------------------------------------- | ------------------------------ |
+| Review code                              | `reviewer` | All rules                                     | Before merge, PR review        |
+| Fix PR review comments (`/fix-pr`)       | `reviewer` | `clean-code-rules`, `typescript-strict-rules` | After reviewer leaves comments |
+| Fix Sonar issues (`/fix-sonar`)          | `quality`  | `clean-code-rules`, `typescript-strict-rules` | After Sonar quality gate fails |
+| Performance audit (`/audit-performance`) | `quality`  | `react-native-best-practices`                 | Performance problems detected  |
 
 **Invocation:** Load agent and provide scope (file/feature/PR).
 
 ---
 
+### Design, Docs & Business Requests
+
+| Request Type                                | Agent         | Skills Used            | When to Delegate               |
+| ------------------------------------------- | ------------- | ---------------------- | ------------------------------ |
+| UI polish — Stage 3 (`/ui-polish`)          | `design-docs` | `ux-ui-standards`      | After Engineer Stage 2         |
+| Update README (`/update-readme`)            | `design-docs` | -                      | After any significant push     |
+| Convert summary to SDD (`/business-to-sdd`) | `design-docs` | `project-architecture` | Business inbox has new summary |
+
+**Invocation:** Load `.ai/agents/design-docs.md` and specify mode.
+
+---
+
 ### Git & Version Control Requests
 
-| Request Type          | Agent             | Skills Used    | When to Delegate             |
-| --------------------- | ----------------- | -------------- | ---------------------------- |
-| Create commit         | **SYSTEM DIRECT** | `git-workflow` | Always - never auto-commit   |
-| Review commit message | **SYSTEM DIRECT** | `git-workflow` | Validate conventional commit |
-| Manage branches       | **SYSTEM DIRECT** | `git-workflow` | Branch operations            |
-| Create PR             | **SYSTEM DIRECT** | `git-workflow` | After all checks pass        |
+| Request Type                        | Agent             | Skills Used    | When to Delegate             |
+| ----------------------------------- | ----------------- | -------------- | ---------------------------- |
+| Create commit                       | **SYSTEM DIRECT** | `git-workflow` | Always — never auto-commit   |
+| Review commit message               | **SYSTEM DIRECT** | `git-workflow` | Validate conventional commit |
+| Manage branches                     | **SYSTEM DIRECT** | `git-workflow` | Branch operations            |
+| Create PR                           | **SYSTEM DIRECT** | `git-workflow` | After all checks pass        |
+| Full PR lifecycle (`/pr-lifecycle`) | `pr-lifecycle`    | `git-workflow` | Autonomous PR management     |
 
 **Note:** Git operations are handled directly by System with `git-workflow` rule enforcement. Never delegate git commits to agents.
 
@@ -341,11 +354,10 @@ This includes:
 
 ### Analysis & Metrics Requests
 
-| Request Type       | Agent               | Skills Used                                 | When to Delegate                        |
-| ------------------ | ------------------- | ------------------------------------------- | --------------------------------------- |
-| Analyze coupling   | `coupling-analyzer` | `coupling-analysis`, `project-architecture` | Architectural review, pre-refactor      |
-| Token usage report | **SYSTEM DIRECT**   | -                                           | Run `.ai/router/update-token-totals.sh` |
-| Project metrics    | **SYSTEM DIRECT**   | -                                           | Aggregate data from various CSVs        |
+| Request Type       | Agent             | Skills Used | When to Delegate                        |
+| ------------------ | ----------------- | ----------- | --------------------------------------- |
+| Token usage report | **SYSTEM DIRECT** | -           | Run `.ai/router/update-token-totals.sh` |
+| Project metrics    | **SYSTEM DIRECT** | -           | Aggregate data from various CSVs        |
 
 ---
 
@@ -557,7 +569,7 @@ Manage git commits following conventional commit standards
 
 ```typescript
 function classifyRequest(userInput: string): AgentType {
-  // Architecture keywords
+  // Architecture & coupling keywords
   if (
     matches(userInput, [
       'sdd',
@@ -565,9 +577,12 @@ function classifyRequest(userInput: string): AgentType {
       'design',
       'structure',
       'refactor strategy',
+      'coupling',
+      'dependency graph',
+      'analyze-coupling',
     ])
   ) {
-    return 'frontend-architect'
+    return 'architect'
   }
 
   // Implementation keywords
@@ -579,37 +594,55 @@ function classifyRequest(userInput: string): AgentType {
       'add feature',
       'component',
       'hook',
+      'logic',
     ])
   ) {
-    return 'react-native-engineer'
+    return 'engineer'
   }
 
   // Testing keywords
-  if (matches(userInput, ['test', 'e2e', 'coverage', 'unit test'])) {
-    return userInput.includes('e2e') ? 'test-write-e2e' : 'test-writer'
+  if (matches(userInput, ['test', 'e2e', 'coverage', 'unit test', 'flow'])) {
+    return 'test-writer' // handles both unit and E2E modes
   }
 
-  // Quality keywords
+  // Review & fix keywords
+  if (matches(userInput, ['review', 'fix-pr', 'pr comment'])) {
+    return 'reviewer'
+  }
+
+  // Quality keywords (Sonar + Performance)
   if (
     matches(userInput, [
-      'review',
       'sonar',
-      'quality',
-      'coupling',
+      'fix-sonar',
+      'quality gate',
       'performance',
       'audit',
       'scan',
+      'fps',
+      'memory',
+      'tti',
     ])
   ) {
-    if (userInput.includes('sonar')) return 'sonar-auto-fixer'
-    if (userInput.includes('coupling')) return 'coupling-analyzer'
-    if (
-      userInput.includes('performance') ||
-      userInput.includes('audit') ||
-      userInput.includes('scan')
-    )
-      return 'performance-auditor'
-    return 'code-reviewer'
+    return 'quality'
+  }
+
+  // Design & docs keywords
+  if (
+    matches(userInput, [
+      'ui-polish',
+      'update readme',
+      'business-to-sdd',
+      'summary',
+      'design system',
+    ])
+  ) {
+    return 'design-docs'
+  }
+
+  // PR lifecycle
+  if (matches(userInput, ['pr-lifecycle', 'pull request lifecycle'])) {
+    return 'pr-lifecycle'
   }
 
   // Git keywords
@@ -628,17 +661,15 @@ function classifyRequest(userInput: string): AgentType {
 
 ### ✅ Available Agents
 
-| Agent                   | Status    | Documentation                         |
-| ----------------------- | --------- | ------------------------------------- |
-| `frontend-architect`    | ✅ Active | `.ai/agents/frontend-architect.md`    |
-| `react-native-engineer` | ✅ Active | `.ai/agents/react-native-engineer.md` |
-| `test-writer`           | ✅ Active | `.ai/agents/test-writer.md`           |
-| `test-write-e2e`        | ✅ Active | `.ai/agents/test-write-e2e.md`        |
-| `code-reviewer`         | ✅ Active | `.ai/agents/code-reviewer.md`         |
-| `performance-auditor`   | ✅ Active | `.ai/agents/performance-auditor.md`   |
-| `sonar-auto-fixer`      | ✅ Active | `.ai/agents/sonar-auto-fixer.md`      |
-| `coupling-analyzer`     | ✅ Active | `.ai/agents/coupling-analyzer.md`     |
-| `pr-review-fixer`       | ✅ Active | `.ai/agents/pr-review-fixer.md`       |
+| Agent          | Status    | Documentation                |
+| -------------- | --------- | ---------------------------- |
+| `architect`    | ✅ Active | `.ai/agents/architect.md`    |
+| `engineer`     | ✅ Active | `.ai/agents/engineer.md`     |
+| `reviewer`     | ✅ Active | `.ai/agents/reviewer.md`     |
+| `test-writer`  | ✅ Active | `.ai/agents/test-writer.md`  |
+| `quality`      | ✅ Active | `.ai/agents/quality.md`      |
+| `design-docs`  | ✅ Active | `.ai/agents/design-docs.md`  |
+| `pr-lifecycle` | ✅ Active | `.ai/agents/pr-lifecycle.md` |
 
 ### 📋 Planned Agents
 
@@ -662,20 +693,20 @@ System Analysis:
   → Request Type: New Feature
   → Complexity: Medium (new screen + logic)
   → Required Agents:
-    1. frontend-architect (SDD)
-    2. react-native-engineer (implementation)
+    1. architect (SDD)
+    2. engineer (implementation)
     3. test-writer (tests)
-    4. code-reviewer (validation)
+    4. reviewer (validation)
 
 System Response:
-  1. Load frontend-architect
+  1. Load architect
   2. Create SDD for profile feature
   3. Get user approval
-  4. Load react-native-engineer
+  4. Load engineer
   5. Implement screen + hook
   6. Load test-writer
   7. Generate tests
-  8. Load code-reviewer
+  8. Load reviewer
   9. Validate all rules
   10. Ask user to commit
 ```
@@ -706,10 +737,10 @@ User: "scan performance issues"
 
 System Analysis:
   → Request Type: Performance Analysis
-  → Agent: performance-auditor
+  → Agent: quality
 
 System Response:
-  1. Load .ai/agents/performance-auditor.md
+  1. Load .ai/agents/quality.md
   2. Load .ai/skills/react-native-best-practices.md
   3. Execute performance audit
   4. Generate report with recommendations
@@ -803,9 +834,9 @@ System: [merges]
 
 Once delegated, the agent makes decisions within its domain:
 
-- `frontend-architect` decides architecture
-- `code-reviewer` approves/rejects code
-- `performance-auditor` determines optimizations
+- `architect` decides architecture
+- `reviewer` approves/rejects code
+- `quality` determines performance optimizations and Sonar fixes
 
 System orchestrator does not override agent decisions.
 
@@ -853,21 +884,23 @@ Before completion:
         ↓
 2. System Orchestrator (analyzes & routes)
         ↓
-3. frontend-architect (defines structure → creates SDD)
+3. architect (defines structure → creates SDD)
         ↓
-4. react-native-engineer (implements → creates code)
+4. engineer (implements → creates code)
         ↓
 5. test-writer (writes tests → ensures coverage)
         ↓
-6. code-reviewer (audits → approves/rejects)
+6. reviewer (audits → approves/rejects)
         ↓
-7. performance-auditor (if needed → optimizes)
+7. quality (if needed → Sonar fix or perf audit)
         ↓
-8. System validates all rules passed
+8. design-docs (UI polish Stage 3 + README update)
         ↓
-9. User confirms commit (explicit confirmation required)
+9. System validates all rules passed
         ↓
-10. System executes commit (never auto-push)
+10. User confirms commit (explicit confirmation required)
+        ↓
+11. System executes commit (never auto-push)
 ```
 
 ## Agent-to-Agent Communication
@@ -875,15 +908,15 @@ Before completion:
 Agents can request other agents:
 
 ```
-code-reviewer detects architectural violation
+reviewer detects architectural violation
         ↓
-code-reviewer → System: "Request frontend-architect review"
+reviewer → System: "Request architect review"
         ↓
-System loads frontend-architect
+System loads architect
         ↓
-frontend-architect provides guidance
+architect provides guidance
         ↓
-System returns to code-reviewer
+System returns to reviewer
 ```
 
 ## You Must Act According to Current Role
