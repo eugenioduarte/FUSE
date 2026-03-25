@@ -832,102 +832,53 @@
   "agentNetwork": {
     "nodes": [
       {
-        "id": "business-analyst",
-        "label": "Business Analyst",
+        "id": "architect",
+        "label": "Architect",
         "type": "architecture",
-        "tokens": 95464,
-        "cost": 3.3744
+        "tokens": 267017,
+        "cost": 11.0039
       },
       {
-        "id": "frontend-architect",
-        "label": "Frontend Architect",
-        "type": "architecture",
-        "tokens": 125315,
-        "cost": 5.7326
-      },
-      {
-        "id": "coupling-analyzer",
-        "label": "Coupling Analyzer",
-        "type": "architecture",
-        "tokens": 141702,
-        "cost": 5.2713
-      },
-      {
-        "id": "performance-auditor",
-        "label": "Performance Auditor",
-        "type": "architecture",
-        "tokens": 128515,
-        "cost": 4.2262
-      },
-      {
-        "id": "logic-engineer",
-        "label": "Logic Engineer",
+        "id": "engineer",
+        "label": "Engineer",
         "type": "implementation",
-        "tokens": 386309,
+        "tokens": 665779,
         "cost": 0.0
       },
       {
-        "id": "react-native-engineer",
-        "label": "React Native Engineer",
-        "type": "implementation",
-        "tokens": 279470,
-        "cost": 0.0
-      },
-      {
-        "id": "ui-designer",
-        "label": "Ui Designer",
-        "type": "implementation",
-        "tokens": 97648,
-        "cost": 3.6355
-      },
-      {
-        "id": "code-reviewer",
-        "label": "Code Reviewer",
+        "id": "reviewer",
+        "label": "Reviewer",
         "type": "qa",
-        "tokens": 354991,
+        "tokens": 445671,
         "cost": 15.444
       },
       {
         "id": "test-writer",
         "label": "Test Writer",
         "type": "qa",
-        "tokens": 77594,
+        "tokens": 142039,
         "cost": 0.0
       },
       {
-        "id": "test-write-e2e",
-        "label": "Test Write E2e",
-        "type": "qa",
-        "tokens": 64445,
-        "cost": 0.0
+        "id": "quality",
+        "label": "Quality",
+        "type": "automation",
+        "tokens": 231075,
+        "cost": 4.2262
+      },
+      {
+        "id": "design-docs",
+        "label": "Design & Docs",
+        "type": "automation",
+        "tokens": 215831,
+        "cost": 7.7777
       },
       {
         "id": "pr-lifecycle",
-        "label": "Pr Lifecycle",
+        "label": "PR Lifecycle",
         "type": "automation",
         "tokens": 143714,
         "cost": 5.5853
-      },
-      {
-        "id": "sonar-auto-fixer",
-        "label": "Sonar Auto Fixer",
-        "type": "automation",
-        "tokens": 102560,
-        "cost": 0.0
-      },
-      {
-        "id": "doc-designer",
-        "label": "Doc Designer",
-        "type": "automation",
-        "tokens": 22719,
-        "cost": 0.7678
-      },
-      {
-        "id": "pr-review-fixer",
-        "label": "Pr Review Fixer",
-        "type": "automation",
-        "tokens": 90680,
-        "cost": 0.0
       },
       {
         "id": "security-orchestrator",
@@ -988,102 +939,97 @@
     ],
     "edges": [
       {
-        "source": "business-analyst",
-        "target": "frontend-architect",
+        "source": "design-docs",
+        "target": "architect",
         "edgeType": "flow"
       },
       {
-        "source": "frontend-architect",
-        "target": "logic-engineer",
+        "source": "architect",
+        "target": "engineer",
         "edgeType": "flow"
       },
       {
-        "source": "frontend-architect",
-        "target": "react-native-engineer",
+        "source": "architect",
+        "target": "engineer",
         "edgeType": "flow"
       },
       {
-        "source": "frontend-architect",
-        "target": "code-reviewer",
+        "source": "architect",
+        "target": "reviewer",
         "edgeType": "flow"
       },
       {
-        "source": "logic-engineer",
-        "target": "ui-designer",
+        "source": "engineer",
+        "target": "design-docs",
         "edgeType": "flow"
       },
       {
-        "source": "ui-designer",
-        "target": "react-native-engineer",
+        "source": "design-docs",
+        "target": "engineer",
         "edgeType": "flow"
       },
       {
-        "source": "react-native-engineer",
-        "target": "code-reviewer",
+        "source": "engineer",
+        "target": "reviewer",
         "edgeType": "flow"
       },
       {
-        "source": "react-native-engineer",
-        "target": "frontend-architect",
+        "source": "engineer",
+        "target": "architect",
         "edgeType": "retry"
       },
       {
-        "source": "logic-engineer",
-        "target": "frontend-architect",
+        "source": "engineer",
+        "target": "architect",
         "edgeType": "retry"
       },
       {
-        "source": "sonar-auto-fixer",
-        "target": "frontend-architect",
+        "source": "quality",
+        "target": "architect",
         "edgeType": "retry"
       },
       {
-        "source": "code-reviewer",
-        "target": "frontend-architect",
+        "source": "reviewer",
+        "target": "architect",
         "edgeType": "dependency"
       },
       {
         "source": "pr-lifecycle",
-        "target": "sonar-auto-fixer",
+        "target": "quality",
         "edgeType": "flow"
       },
       {
         "source": "pr-lifecycle",
-        "target": "code-reviewer",
+        "target": "reviewer",
         "edgeType": "dependency"
       },
       {
-        "source": "coupling-analyzer",
-        "target": "frontend-architect",
+        "source": "architect",
+        "target": "reviewer",
         "edgeType": "flow"
       },
       {
-        "source": "coupling-analyzer",
-        "target": "code-reviewer",
-        "edgeType": "flow"
-      },
-      {
-        "source": "performance-auditor",
-        "target": "frontend-architect",
+        "source": "quality",
+        "target": "architect",
         "edgeType": "flow"
       },
       {
         "source": "test-writer",
-        "target": "react-native-engineer",
+        "target": "engineer",
         "edgeType": "dependency"
       },
       {
-        "source": "test-write-e2e",
+        "source": "test-writer",
         "target": "pr-lifecycle",
         "edgeType": "dependency"
       },
       {
-        "source": "doc-designer",
+        "source": "design-docs",
         "target": "pr-lifecycle",
         "edgeType": "flow"
       },
       {
-        "source": "performance-auditor",
+        "source": "quality",
         "target": "security-orchestrator",
         "edgeType": "flow"
       },

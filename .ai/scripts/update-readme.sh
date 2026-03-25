@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # ─────────────────────────────────────────────────────────────
-# update-readme.sh — doc-designer agent trigger
+# update-readme.sh — design-docs agent trigger
 #
 # Called from .husky/pre-push after quality gates pass.
 # Reviews the diff about to be pushed and updates README.md
@@ -23,7 +23,7 @@ fi
 CHANGED=$(git diff --name-only "${REMOTE_REF}..HEAD" 2>/dev/null || true)
 
 if [ -z "$CHANGED" ]; then
-  echo "📄 doc-designer: no changes to push — skipping README check"
+  echo "📄 design-docs: no changes to push — skipping README check"
   exit 0
 fi
 
@@ -35,25 +35,25 @@ SIGNIFICANT=$(echo "$CHANGED" | grep -v -E \
   head -30)
 
 if [ -z "$SIGNIFICANT" ]; then
-  echo "📄 doc-designer: only dependency/lock files changed — skipping README check"
+  echo "📄 design-docs: only dependency/lock files changed — skipping README check"
   exit 0
 fi
 
 # Check claude CLI is available
 if ! command -v claude &> /dev/null; then
-  echo "⚠️  doc-designer: claude CLI not found — skipping README check"
+  echo "⚠️  design-docs: claude CLI not found — skipping README check"
   echo "   Install: https://claude.ai/claude-code"
   exit 0
 fi
 
 echo ""
-echo "🎨 doc-designer: checking if README needs an update..."
+echo "🎨 design-docs: checking if README needs an update..."
 
 DIFF_STAT=$(git diff --stat "${REMOTE_REF}..HEAD" 2>/dev/null | tail -3)
 AGENT_LIST=$(ls .ai/agents/*.md 2>/dev/null | xargs -I{} basename {} .md | sort | tr '\n' ', ')
 
-PROMPT="You are the doc-designer agent for the FUSE React Native project.
-Read .ai/agents/doc-designer.md for your full instructions and rules.
+PROMPT="You are the design-docs agent for the FUSE React Native project.
+Read .ai/agents/design-docs.md for your full instructions and rules.
 
 ## Changed files in this push:
 ${SIGNIFICANT}
@@ -77,12 +77,12 @@ Output exactly one of:
 RESULT=$(echo "$PROMPT" | claude -p - --model claude-haiku-4-5-20251001 --output-format text 2>/dev/null || true)
 
 if [ -z "$RESULT" ]; then
-  echo "⚠️  doc-designer: claude returned empty response — skipping"
+  echo "⚠️  design-docs: claude returned empty response — skipping"
   exit 0
 fi
 
 if echo "$RESULT" | grep -q "^NO_CHANGE"; then
-  echo "✅ doc-designer: README is up to date"
+  echo "✅ design-docs: README is up to date"
   exit 0
 fi
 
@@ -91,9 +91,9 @@ if echo "$RESULT" | grep -q "^UPDATED_README:"; then
   echo "$RESULT" | awk '/^UPDATED_README:/{found=1; next} found{print}' > README.md
   git add README.md
   git commit --amend --no-edit --quiet
-  echo "✅ doc-designer: README updated and included in this commit"
+  echo "✅ design-docs: README updated and included in this commit"
   exit 0
 fi
 
-echo "⚠️  doc-designer: unexpected response format — skipping"
+echo "⚠️  design-docs: unexpected response format — skipping"
 exit 0

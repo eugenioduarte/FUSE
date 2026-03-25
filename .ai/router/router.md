@@ -29,10 +29,10 @@ Se a task exige julgamento, raciocínio ou contexto amplo → Remoto (claude-son
 
 ## Models
 
-| Type   | Model               | Cost       | When to use                                       |
-| ------ | ------------------- | ---------- | ------------------------------------------------- |
-| Local  | `qwen2.5-coder:14b` | Zero       | Mechanical tasks, boilerplate, tests, translations |
-| Remote | `claude-sonnet-4-6` | Per token  | Architecture, review, debug, refactor, tradeoffs  |
+| Type   | Model               | Cost      | When to use                                        |
+| ------ | ------------------- | --------- | -------------------------------------------------- |
+| Local  | `qwen2.5-coder:14b` | Zero      | Mechanical tasks, boilerplate, tests, translations |
+| Remote | `claude-sonnet-4-6` | Per token | Architecture, review, debug, refactor, tradeoffs   |
 
 ---
 
@@ -40,13 +40,14 @@ Se a task exige julgamento, raciocínio ou contexto amplo → Remoto (claude-son
 
 ### Always Remote (Claude)
 
-These agents **never use the local model** because the work requires reasoning about the entire codebase, detection of subtle pattern violations, and cross-feature impact analysis — capabilities that the local model does not support reliably.
+These agents **never use the local model** because the work requires reasoning about the entire codebase, detection of subtle pattern violations, and cross-feature impact analysis.
 
-| Agent                 | Reason                                                                                       |
-| --------------------- | -------------------------------------------------------------------------------------------- |
-| `frontend-architect`  | SDD, cross-cutting design, layer dependency analysis, decisions with tradeoffs               |
-| `code-reviewer`       | Quality gates, architectural violation detection, reasoning about codebase context           |
-| `performance-auditor` | Profiling, bottleneck analysis, optimization tradeoffs with real data                        |
+| Agent                               | Reason                                                                             |
+| ----------------------------------- | ---------------------------------------------------------------------------------- |
+| `architect`                         | SDD, coupling analysis, cross-cutting design, architectural tradeoffs              |
+| `reviewer`                          | Quality gates, architectural violation detection, reasoning about codebase context |
+| `design-docs` (UI + Business modes) | Design system understanding, SDD writing, product intent interpretation            |
+| `pr-lifecycle`                      | Multi-step autonomous PR management — requires cross-cutting reasoning             |
 
 > **Economy:** these agents are invoked infrequently (once per feature or per review cycle). The cost per invocation is justified by the impact of the decisions.
 
@@ -54,26 +55,24 @@ These agents **never use the local model** because the work requires reasoning a
 
 ### Always Local (qwen2.5-coder:14b)
 
-These agents **always use the local model** because the output is fully deterministic: given the correct input (hook, service, flow.md), the mapping to test code follows fixed templates without need for judgment.
+These agents **always use the local model** because the output is fully deterministic.
 
-| Agent            | Reason                                                                                                |
-| ---------------- | ----------------------------------------------------------------------------------------------------- |
-| `test-writer`    | Unit/integration test generation — template-driven, deterministic, no product interpretation needed   |
-| `test-write-e2e` | Translation of `flow.md` to E2E tests — 1:1 mapping (Given/When/Then → setup/action/assertion)        |
+| Agent                           | Reason                                                                                      |
+| ------------------------------- | ------------------------------------------------------------------------------------------- |
+| `test-writer`                   | Unit/integration + E2E test generation — template-driven, deterministic, no judgment needed |
+| `design-docs` (Doc Update mode) | README writing is low-complexity — uses Claude Haiku (not Sonnet, not local)                |
 
-> **Economy:** these agents are the most frequently invoked in the development cycle. Running 100% locally eliminates token costs for the bulk of request volume.
+> **Economy:** `test-writer` is the most frequently invoked agent. Running 100% locally eliminates token costs for the bulk of request volume.
 
 ---
 
-### Dynamic (`react-native-engineer`)
+### Dynamic Routing
 
-The engineer is the most versatile agent — implements features, writes components, hooks, adapters, and handles debugging. The model choice depends on the nature of the task.
+**`engineer`** — most versatile agent (features, components, hooks, debug). Local by default, escalating to Claude only when complexity signals are present.
 
-**Strategy:** local by default, escalating to Claude only when complexity signals are present.
+**`quality`** — local by default for mechanical Sonar fixes; Claude for performance analysis and architectural refactors.
 
 #### Signals that force Claude (remote)
-
-Qualquer um destes termos na descrição da task:
 
 ```
 refactor    debug       architecture    integration
@@ -85,10 +84,8 @@ migration   tradeoff    performance     design
 ```
 create component    add hook          write test
 add translation     rename            extract
-move file           add export        generate boilerplate
+move file           generate boilerplate
 ```
-
-> **Economy:** most daily engineer tasks (creating screens, adding hooks, writing boilerplate) contain no complexity signals. Running locally for these cases significantly reduces token consumption over a sprint.
 
 ---
 
@@ -98,20 +95,25 @@ move file           add export        generate boilerplate
 flowchart TD
     T([Task received]) --> A{Which agent?}
 
-    A -->|frontend-architect\ncode-reviewer\nperformance-auditor| CLAUDE
+    A -->|architect\nreviewer\ndesign-docs UI+BA\npr-lifecycle| CLAUDE
 
-    A -->|test-writer\ntest-write-e2e| LOCAL
+    A -->|test-writer| LOCAL
 
-    A -->|react-native-engineer| C{Complexity signals\nin task?}
+    A -->|engineer| C{Complexity signals
+in task?}
+    A -->|quality| D{Task type?}
 
     C -->|yes\nrefactor · debug · architecture\nintegration · tradeoff| CLAUDE
-    C -->|no\ncomponent · hook · boilerplate\ntranslation · rename| LOCAL
+    C -->|no\ncomponent · hook · boilerplate| LOCAL
+
+    D -->|performance audit| CLAUDE
+    D -->|sonar fix - mechanical| LOCAL
 
     CLAUDE["☁️  Claude Sonnet\nclaude-sonnet-4-6\n(remote — per token)"]
     LOCAL["🖥️  Ollama Local\nqwen2.5-coder:14b\n(local — zero cost)"]
 
-    CLAUDE --> R1["• Architecture and SDD\n• Code review\n• Debug and refactor\n• Performance tradeoffs\n• Cross-feature impact"]
-    LOCAL  --> R2["• Boilerplate and hooks\n• Unit / E2E tests\n• Translations\n• Simple components\n• Mechanical generation"]
+    CLAUDE --> R1["• Architecture and SDD\n• Code review\n• Debug and refactor\n• Performance tradeoffs\n• UI polish and business analysis"]
+    LOCAL  --> R2["• Boilerplate and hooks\n• Unit / E2E tests\n• Mechanical Sonar fixes\n• Translations\n• Simple components"]
 ```
 
 ---
@@ -120,14 +122,17 @@ flowchart TD
 
 In a typical feature cycle:
 
-| Step                     | Agent                   | Model  | Frequency        |
-| ------------------------ | ----------------------- | ------ | ---------------- |
-| Structure definition     | `frontend-architect`    | Claude | 1x per feature   |
-| Implementation (simple)  | `react-native-engineer` | Local  | N×               |
-| Implementation (complex) | `react-native-engineer` | Claude | 0–2x per feature |
-| Test generation          | `test-writer`           | Local  | N×               |
-| E2E generation           | `test-write-e2e`        | Local  | 1–2x per feature |
-| Code review              | `code-reviewer`         | Claude | 1x per feature   |
+| Step                     | Agent         | Model  | Frequency        |
+| ------------------------ | ------------- | ------ | ---------------- |
+| Structure definition     | `architect`   | Claude | 1x per feature   |
+| Implementation (simple)  | `engineer`    | Local  | N×               |
+| Implementation (complex) | `engineer`    | Claude | 0–2x per feature |
+| Test generation          | `test-writer` | Local  | N×               |
+| Code review              | `reviewer`    | Claude | 1x per feature   |
+| UI polish                | `design-docs` | Claude | 1x per feature   |
+| README update            | `design-docs` | Haiku  | 1x per push      |
+| Sonar fix (mechanical)   | `quality`     | Local  | On-demand        |
+| Performance audit        | `quality`     | Claude | On-demand        |
 
 > The bulk of volume (simple implementation + tests) goes to the local model. Claude is used selectively for high-impact decisions.
 

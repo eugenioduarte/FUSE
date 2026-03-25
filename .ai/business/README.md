@@ -26,7 +26,7 @@ src/screens/feature-name/            (design system applied, UI complete)
 **Action:** Drop a `*.summary.md` file in `inbox/`
 **Then run:** `/business-to-sdd`
 
-The business-analyst agent reads all summaries in `inbox/`, converts each to a full SDD at `.ai/_sdd/`, and deletes the summary file.
+The design-docs agent (business mode) reads all summaries in `inbox/`, converts each to a full SDD at `.ai/_sdd/`, and deletes the summary file.
 
 ### SDD Naming Convention
 
@@ -79,7 +79,7 @@ Short description of the feature goal.
 
 ## Stage 2 — SDD → Logic Implementation
 
-**Who:** AI agent (logic-engineer)
+**Who:** AI agent (engineer)
 **Action:** Reads the SDD, implements all layers
 **Run:** `/implement-logic feature-name`
 
@@ -97,7 +97,7 @@ The screen renders correctly and the feature works end-to-end. UI is intentional
 
 ## Stage 3 — Functional UI → Polished UI
 
-**Who:** AI agent (ui-designer)
+**Who:** AI agent (design-docs, UI mode)
 **Action:** Applies design system to existing screens
 **Run:** `/ui-polish feature-name`
 

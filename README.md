@@ -56,11 +56,11 @@ The project also serves as a **reference implementation of a full AI-assisted en
 | ------------------------------ | ----------------------------------------------------------------------- |
 | 🧠 **AI-generated content**    | Summaries and challenges created by AI from user topics                 |
 | 📴 **Offline-first**           | SQLite is the single source of truth — works with no network            |
-| 🤖 **14 specialized agents**   | Full engineering lifecycle covered end-to-end (all v1.0.0)              |
+| 🤖 **7 specialized agents**    | Full engineering lifecycle covered end-to-end (v2.0.0)                  |
 | 🔄 **Autonomous PR lifecycle** | Agent creates PR, monitors CI, fixes failures, resolves reviews, merges |
 | 🔧 **Sonar auto-fixer**        | Quality gate failures resolved automatically without human intervention |
 | 🏗️ **Strict architecture**     | Enforced layer separation: Screen → Hook → Repository → DAO → SQLite    |
-| 📊 **Living documentation**    | README auto-updates on every push via the doc-designer agent            |
+| 📊 **Living documentation**    | README auto-updates on every push via the design-docs agent             |
 | 💰 **Token economics**         | 65% local routing (Ollama) with ~35% cost savings vs Claude-only        |
 | 📐 **Architecture as code**    | 10 Mermaid diagrams with complete system visualization                  |
 
@@ -70,26 +70,19 @@ The project also serves as a **reference implementation of a full AI-assisted en
 
 Every development task is routed to a specialized agent. No shortcuts.
 
-### Agent Roster (v1.0.0)
+### Agent Roster (v2.0.0)
 
 > **Version tracking:** All agents versioned with [semantic versioning](.ai/agents/CHANGELOG.md) · Skills have [YAML metadata headers](.ai/skills/)
 
-| Agent                     | Responsibility                                        | Model          | Trigger                       |
-| ------------------------- | ----------------------------------------------------- | -------------- | ----------------------------- |
-| **frontend-architect**    | Define architecture, write SDDs, structural decisions | Claude Sonnet  | Feature planning, refactoring |
-| **react-native-engineer** | Implement screens, hooks, components, services        | Local → Claude | Feature implementation        |
-| **logic-engineer**        | Business logic and utilities                          | Local → Claude | Complex algorithms            |
-| **ui-designer**           | UI/UX implementation                                  | Local → Claude | Design implementation         |
-| **test-writer**           | Unit tests (≥80% coverage)                            | Local (Ollama) | After implementation          |
-| **test-write-e2e**        | Maestro E2E scenarios                                 | Local (Ollama) | Complete user flows           |
-| **code-reviewer**         | Quality gates, architectural compliance               | Claude Sonnet  | PR review, pre-merge          |
-| **performance-auditor**   | Profiling, re-render analysis, optimization           | Claude Sonnet  | Performance issues            |
-| **sonar-auto-fixer**      | Auto-fix SonarCloud quality gate failures             | Local → Claude | Sonar gate failure            |
-| **coupling-analyzer**     | Dependency graph analysis, architectural violations   | Claude Sonnet  | Architecture reviews          |
-| **pr-lifecycle**          | Full PR: create → CI → fix → reviews → merge          | Claude Sonnet  | `/pr-lifecycle [PR]`          |
-| **pr-review-fixer**       | Fix review comments on existing PRs                   | Local → Claude | PR review received            |
-| **business-analyst**      | Convert requirements to SDD                           | Claude Sonnet  | Feature planning              |
-| **doc-designer**          | README auto-update on every push                      | Claude Haiku   | Auto: pre-push hook           |
+| Agent            | Responsibility                                               | Model          | Trigger                                 |
+| ---------------- | ------------------------------------------------------------ | -------------- | --------------------------------------- |
+| **architect**    | Architecture design, SDDs, coupling analysis                 | Claude Sonnet  | Feature planning, architecture review   |
+| **engineer**     | Screens, hooks, components, services, business logic         | Local → Claude | Feature implementation                  |
+| **reviewer**     | Quality gates, architectural compliance, fix review comments | Claude Sonnet  | PR review, pre-merge, `/fix-pr`         |
+| **test-writer**  | Unit tests (≥80% coverage) + Maestro E2E scenarios           | Local (Ollama) | After implementation, `/test-e2e`       |
+| **quality**      | Performance auditing + SonarCloud auto-fixer                 | Local → Claude | `/audit-performance`, `/fix-sonar`      |
+| **design-docs**  | UI/UX, README auto-update, business requirements → SDD       | Sonnet / Haiku | UI polish, pre-push, `/business-to-sdd` |
+| **pr-lifecycle** | Full PR: create → CI → fix → reviews → merge                 | Claude Sonnet  | `/pr-lifecycle [PR]`                    |
 
 ### Token Economics
 
@@ -110,17 +103,17 @@ Every development task is routed to a specialized agent. No shortcuts.
 ```
 User Request
      ↓
-frontend-architect  →  Creates SDD (.ai/_sdd/)
+architect  →  Creates SDD (.ai/_sdd/)
      ↓
-react-native-engineer  →  Implements feature
+engineer  →  Implements feature
      ↓
 test-writer  →  Adds unit tests
      ↓
-code-reviewer  →  Validates quality gates
+reviewer  →  Validates quality gates
      ↓
 commit + push
      ↓
-doc-designer  →  Updates README if needed  (automatic, pre-push)
+design-docs  →  Updates README if needed  (automatic, pre-push)
      ↓
 pr-lifecycle  →  Creates PR, monitors CI, addresses reviews, merges
 ```
@@ -145,12 +138,12 @@ The most powerful agent in the system. Invoked with `/pr-lifecycle` (or `/pr-lif
 - On failure, fetches the full run logs (`gh run view --log-failed`)
 - Identifies the failure type and applies the correct fix strategy:
 
-| Failure            | Detection          | Fix                                        |
-| ------------------ | ------------------ | ------------------------------------------ |
-| ESLint violation   | `yarn lint` output | Reads file → fixes violation → verifies    |
-| Test failure       | Jest output        | Reads test + source → fixes code → re-runs |
-| TypeScript error   | `tsc` errors       | Reads file → fixes type → re-runs lint     |
-| Sonar quality gate | SonarCloud API     | Delegates to sonar-auto-fixer strategies   |
+| Failure            | Detection          | Fix                                              |
+| ------------------ | ------------------ | ------------------------------------------------ |
+| ESLint violation   | `yarn lint` output | Reads file → fixes violation → verifies          |
+| Test failure       | Jest output        | Reads test + source → fixes code → re-runs       |
+| TypeScript error   | `tsc` errors       | Reads file → fixes type → re-runs lint           |
+| Sonar quality gate | SonarCloud API     | Delegates to `quality` agent (`/fix-sonar` mode) |
 
 - After fixing, commits and pushes (`fix: <description>`) then re-polls CI
 - Max 3 fix attempts per unique failure before stopping and reporting
@@ -172,9 +165,9 @@ The most powerful agent in the system. Invoked with `/pr-lifecycle` (or `/pr-lif
 
 ---
 
-### 🔧 Sonar Auto-Fixer Agent
+### 🔧 Quality Agent (Performance + Sonar)
 
-Invoked with `/fix-sonar <PR_NUMBER>` when a SonarCloud quality gate fails. Also called internally by pr-lifecycle when it detects Sonar gate failures.
+Invoked with `/fix-sonar <PR_NUMBER>` when a SonarCloud quality gate fails, or `/audit-performance` for profiling. Also called internally by pr-lifecycle when it detects Sonar gate failures. Consolidated into the `quality` agent.
 
 **What it does:**
 
@@ -197,9 +190,9 @@ Invoked with `/fix-sonar <PR_NUMBER>` when a SonarCloud quality gate fails. Also
 
 ---
 
-### 📝 Doc-Designer Agent
+### 📝 Design & Docs Agent
 
-Runs automatically on every `git push` via the pre-push hook (`.husky/pre-push` → `.ai/scripts/update-readme.sh`). Skips automatically if only lock files, test files, or non-source files changed.
+Handles three modes — UI polish, documentation, and business analysis. The doc mode runs automatically on every `git push` via the pre-push hook (`.husky/pre-push` → `.ai/scripts/update-readme.sh`). Skips automatically if only lock files, test files, or non-source files changed.
 
 **What it updates:**
 
@@ -213,7 +206,7 @@ Runs automatically on every `git push` via the pre-push hook (`.husky/pre-push` 
 
 ---
 
-### 🏗️ Frontend Architect Agent
+### 🏗️ Architect Agent
 
 Invoked before any non-trivial feature. Produces a **Software Design Document (SDD)** in `.ai/_sdd/` before a single line of code is written.
 
@@ -226,11 +219,11 @@ Invoked before any non-trivial feature. Produces a **Software Design Document (S
 - Migration strategy (if existing code changes)
 - Verification checklist
 
-Every feature implementation must reference its SDD. The react-native-engineer agent reads the SDD before writing any code.
+Every feature implementation must reference its SDD. The engineer agent reads the SDD before writing any code.
 
 ---
 
-### 🔍 Code Reviewer Agent
+### 🔍 Reviewer Agent
 
 Validates every feature before it merges. Checks:
 
@@ -243,7 +236,7 @@ Validates every feature before it merges. Checks:
 
 ---
 
-### 📊 Coupling Analyzer Agent
+### 📊 Coupling Analysis (via Architect Agent)
 
 Runs on demand or weekly. Uses [Madge](https://github.com/pahen/madge) to generate the full dependency graph, then analyzes:
 
@@ -255,7 +248,7 @@ Runs on demand or weekly. Uses [Madge](https://github.com/pahen/madge) to genera
 | Circular dependencies        | 0         |
 | Architectural violations     | 0         |
 
-Generates a full coupling report in `.ai/analysis/coupling-report-<date>.md` with a prioritized refactoring roadmap.
+Generates a full coupling report in `.ai/analysis/coupling-report-<date>.md` with a prioritized refactoring roadmap. Invoked via the `architect` agent.
 
 ---
 
@@ -267,22 +260,22 @@ Generates a full coupling report in `.ai/analysis/coupling-report-<date>.md` wit
 # 1. Create feature branch
 git checkout -b feature/notification-center
 
-# 2. Architecture (invokes frontend-architect)
+# 2. Architecture (invokes architect)
 # → "Create SDD for notification center"
 
-# 3. Implementation (invokes react-native-engineer)
+# 3. Implementation (invokes engineer)
 # → "Implement notification center following SDD"
 
 # 4. Tests (invokes test-writer)
 # → "Add unit tests for notification hooks"
 
-# 5. Review (invokes code-reviewer)
+# 5. Review (invokes reviewer)
 # → "Review notification feature code"
 
 # 6. Commit + push + PR (fully autonomous from here)
 # → "commit, push, pr"
 # Claude handles the commit message, pre-push gates run,
-# doc-designer updates the README if needed,
+# design-docs updates the README if needed,
 # then pr-lifecycle creates and manages the full PR lifecycle
 ```
 
@@ -327,7 +320,7 @@ cat .ai/agents/CHANGELOG.md
 2. ESLint (full project)
 3. Jest tests + coverage report
 4. Token usage report (daily AI cost monitoring)
-5. **doc-designer** — README auto-update if source files changed
+5. **design-docs** — README auto-update if source files changed
 
 ### CI/CD (GitHub Actions — every PR and push to `main`)
 
@@ -337,7 +330,7 @@ cat .ai/agents/CHANGELOG.md
 4. Build validation
 5. E2E tests (Maestro)
 
-If SonarCloud fails on a PR, the sonar-auto-fixer agent is triggered to create a fix PR automatically.
+If SonarCloud fails on a PR, the quality agent (/fix-sonar mode) is triggered to create a fix PR automatically.
 
 ---
 
@@ -356,7 +349,7 @@ If SonarCloud fails on a PR, the sonar-auto-fixer agent is triggered to create a
 
 ### For Developers
 
-- 🤖 **14 Specialized AI Agents (v1.0.0)** — Architecture, engineering, testing, review, auditing, docs, PR lifecycle
+- 🤖 **7 Specialized AI Agents (v2.0.0)** — Architecture, engineering, testing, review, auditing, docs, PR lifecycle
 - 📝 **SDD-driven development** — Every feature starts with a Software Design Document
 - 🗄️ **SQLite + DAO pattern** — Typed data access objects, versioned migrations, ACID offline queue
 - 🛠️ **Hybrid LLM** — Local model (Ollama) for speed; Claude for reasoning (65% local / 35% remote)
@@ -406,7 +399,7 @@ If SonarCloud fails on a PR, the sonar-auto-fixer agent is triggered to create a
 ### AI
 
 - **Claude Sonnet 4** (Anthropic) — Architectural reasoning, code review, PR lifecycle (35% of requests)
-- **Claude Haiku 4** (Anthropic) — Documentation updates (doc-designer)
+- **Claude Haiku 4** (Anthropic) — Documentation updates (design-docs)
 - **Ollama llama3.2** — Local mechanical tasks (tests, boilerplate, Sonar fixes) (65% of requests)
 
 **Token Economics ([full analysis →](.ai/router/token-analysis.md)):**
@@ -570,7 +563,7 @@ EXPO_PUBLIC_FIREBASE_API_KEY=your_key_here
 ```
 FUSE/
 ├── .ai/                      # AI Engineering System
-│   ├── agents/               # 14 specialized AI agents (v1.0.0)
+│   ├── agents/               # 7 specialized AI agents (v2.0.0)
 │   │   └── CHANGELOG.md      # Version tracking for all agents
 │   ├── skills/               # 9 reusable agent skills (all v1.0.0 with YAML headers)
 │   ├── rules/                # Naming, git, folder conventions
@@ -596,7 +589,7 @@ FUSE/
 ├── package.json
 ├── tsconfig.json
 ├── jest.config.js
-└── README.md                 # Auto-maintained by doc-designer agent
+└── README.md                 # Auto-maintained by design-docs agent
 ```
 
 ---
@@ -665,7 +658,7 @@ yarn e2e
 
 ✅ **Versioning System**
 
-- All 14 agents tracked with semantic versioning (v1.0.0)
+- All 7 agents tracked with semantic versioning (v2.0.0)
 - All 9 skills have YAML metadata headers (name, version, author, dates)
 - [CHANGELOG.md](.ai/agents/CHANGELOG.md) for complete version history
 
@@ -692,6 +685,6 @@ yarn e2e
 
 <div align="center">
 
-**README auto-maintained by the [doc-designer](.ai/agents/doc-designer.md) agent on every push.**
+**README auto-maintained by the [design-docs](.ai/agents/design-docs.md) agent on every push.**
 
 </div>

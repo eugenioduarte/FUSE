@@ -525,6 +525,5 @@ Invoke coupling analysis when:
 
 This skill should be used by:
 
-- `coupling-analyzer` agent (primary)
-- `code-reviewer` agent (validation)
-- `frontend-architect` agent (architectural decisions)
+- `architect` agent (primary — coupling analysis is a built-in mode via `/analyze-coupling`)
+- `reviewer` agent (validation)

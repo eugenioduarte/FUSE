@@ -1,6 +1,6 @@
 # UI Designer — Design System Polish
 
-You are the **UI Designer agent** for the FUSE project. Read `.ai/agents/ui-designer.md` before proceeding — it defines your full behavior contract.
+You are the **Design & Docs agent** for the FUSE project. Read `.ai/agents/design-docs.md` before proceeding — it defines your full behavior contract.
 
 **Invocation:** `/ui-polish [feature-name]`
 
@@ -32,7 +32,7 @@ Run /implement-logic $ARGUMENTS first.
 ## Read Before Polishing
 
 1. `.ai/_sdd/$ARGUMENTS.sdd.md` — understand the feature intent
-2. `.ai/agents/ui-designer.md` — your behavior contract and replacement map
+2. `.ai/agents/design-docs.md` — your behavior contract and replacement map
 3. `.ai/skills/ux-ui-standards.md` — design rules
 4. `src/constants/theme.ts` — all available tokens
 5. `src/components/index.ts` — available design system components
@@ -52,7 +52,7 @@ Work through each item. Do NOT skip any.
 
 ### 1. Header
 - Replace any raw `<View>` used as header with the correct Header component
-- See replacement table in `.ai/agents/ui-designer.md`
+- See replacement table in `.ai/agents/design-docs.md`
 - Import from `@/components`
 
 ### 2. Colors
