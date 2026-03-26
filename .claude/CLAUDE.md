@@ -56,6 +56,10 @@ Rules:
 - `skills/` hold reusable domain knowledge and templates
 - `agents/` define execution roles, tools, and default skill packs
 - `agent-memory/` is reserved for persistent role memory
+- `sdd/` is the canonical design backlog and delivery spec surface
+- `inbox/` receives raw business summaries before SDD conversion
+- `observability/` stores token logs, orchestration metrics, and runtime hook scripts
+- `templates/` stores reusable authoring assets that back commands and skills
 
 ## Governance
 
@@ -69,3 +73,7 @@ Rules:
 - Skills: `.claude/skills/`
 - Agents: `.claude/agents/`
 - Memory: `.claude/agent-memory/`
+- SDDs: `.claude/sdd/`
+- Inbox: `.claude/inbox/`
+- Observability: `.claude/observability/`
+- Templates: `.claude/templates/`

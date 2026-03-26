@@ -37,14 +37,14 @@
     <section class="hero">
       <span class="badge">FUSE enterprise AI documentation</span>
       <h1>FUSE AI System Hub</h1>
-      <p>Public entrypoint for the active <code>.claude/</code> Skills-First architecture, orchestration model, and historical analytics. This hub is designed to keep documentation aligned with the live system rather than with archived prompts.</p>
+      <p>Public entrypoint for the active <code>.claude/</code> Skills-First architecture, including the live agent model, reusable skills, path-scoped rules, command surface, runtime hooks, and historical analytics. This hub is designed to stay aligned with the actual repository configuration.</p>
       <p class="meta">AI system version: <strong>v3.0.0</strong> | Last page load: <span id="ts"></span></p>
     </section>
     <section class="grid">
       <a class="card" href="./ai-system.html">
         <span class="tag orange">Architecture</span>
         <h2>AI System</h2>
-        <p>Generated overview of agents, skills, rules, memory readiness, and migration timeline.</p>
+        <p>Generated overview of the full <code>.claude/</code> tree: entrypoint, agents, skills, rules, memory, commands, hooks, and migration timeline.</p>
       </a>
       <a class="card" href="./demonstration-orchestration.html">
         <span class="tag blue">Operations</span>
@@ -57,7 +57,7 @@
         <p>Historical token and orchestration metrics, reframed around the current Skills-First system.</p>
       </a>
     </section>
-    <p class="footer">The archived `.ai/` tree remains preserved in-repo for historical traceability, but the operational source of truth is `.claude/`.</p>
+    <p class="footer">The repository now operates entirely from `.claude/`. Legacy `.ai` material was retained as historical documentation under `docs/history/legacy-ai/`.</p>
   </main>
   <script>
     document.getElementById('ts').textContent = new Date().toLocaleString();

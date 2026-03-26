@@ -26,14 +26,14 @@ else
 fi
 
 # Token usage tracking
-if [ -f ".ai/router/update-token-totals.sh" ]; then
+if [ -f ".claude/observability/update-token-totals.sh" ]; then
   echo ""
-  .ai/router/update-token-totals.sh
+  .claude/observability/update-token-totals.sh
 fi
 
-# doc-designer: update README.md if meaningful code changes were made
-if [ -f ".ai/scripts/update-readme.sh" ]; then
-  bash .ai/scripts/update-readme.sh
+# Documentation drift check
+if [ -f ".claude/scripts/update-readme.sh" ]; then
+  bash .claude/scripts/update-readme.sh
 fi
 
 echo "✅ All checks passed. Pushing..."

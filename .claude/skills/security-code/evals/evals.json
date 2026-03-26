@@ -1,0 +1,1 @@
+{"version":1,"cases":[{"name":"input_validation","input":"Review string-built SQL and eval(userInput).","expect":["Flags injection vectors","Separates critical from medium issues","Suggests runtime validation"]}]}

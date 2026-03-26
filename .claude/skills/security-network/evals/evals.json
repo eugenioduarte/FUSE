@@ -1,0 +1,1 @@
+{"version":1,"cases":[{"name":"detects_transport_bypass","input":"Review networking for rejectUnauthorized false and http production URLs.","expect":["Flags trust bypass","Flags cleartext traffic","Separates baseline from hardening issues"]}]}
