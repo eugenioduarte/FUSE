@@ -8,22 +8,19 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
-    :root {
-      --bg:#fff8ee; --surface:#f4ebda; --surface-2:#fffdf7; --ink:#1f1534; --muted:#6d596d;
-      --border:#38213a; --accent:#efb366; --accent-2:#9dd7e5; --accent-3:#b7dfb2; --radius:16px;
-    }
+    :root { --bg:#fff8ee; --surface:#f4ebda; --surface-2:#fffdf7; --ink:#1f1534; --muted:#6d596d; --border:#38213a; --accent:#efb366; --accent-2:#9dd7e5; --accent-3:#b7dfb2; --radius:16px; }
     * { box-sizing:border-box; }
     body { margin:0; font-family:'Fredoka',sans-serif; background:linear-gradient(180deg,#fff9f1 0%,#f7efe2 100%); color:var(--ink); }
     header { padding:24px 24px 18px; border-bottom:1px solid var(--border); background:rgba(255,248,238,.92); position:sticky; top:0; backdrop-filter:blur(8px); }
     nav a { margin-right:10px; color:var(--ink); text-decoration:none; border:1px solid var(--border); border-radius:999px; padding:6px 12px; background:#fffaf3; }
     main { max-width:1120px; margin:0 auto; padding:32px 20px 60px; }
-    .hero, .panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }
+    .hero,.panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }
     .hero { display:grid; gap:14px; margin-bottom:18px; }
     .badge { display:inline-block; padding:4px 10px; border:1px solid var(--border); border-radius:999px; background:var(--accent); font-size:12px; font-weight:600; }
     .meta { color:var(--muted); font-size:14px; }
     .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:14px; }
     .card { background:var(--surface-2); border:1px solid var(--border); border-radius:14px; padding:16px; }
-    h1,h2,h3,p { margin:0; }
+    h1,h2,h3,p,ul { margin:0; }
     h1 { font-size:32px; }
     h2 { font-size:18px; margin-bottom:12px; }
     h3 { font-size:16px; margin-bottom:8px; }
@@ -34,6 +31,8 @@
     th,td { text-align:left; padding:10px 8px; border-bottom:1px solid rgba(56,33,58,.18); vertical-align:top; }
     th { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--muted); }
     .two { display:grid; grid-template-columns:1.2fr .8fr; gap:14px; }
+    .tiny { font-size:13px; }
+    ul { padding-left:18px; margin-top:8px; color:var(--muted); line-height:1.45; }
     @media (max-width: 860px) { .two { grid-template-columns:1fr; } h1 { font-size:28px; } }
   </style>
 </head>
@@ -49,19 +48,19 @@
     <section class="hero">
       <span class="badge">v3.0.0 Skills-First</span>
       <h1>FUSE AI Orchestration</h1>
-      <p>The active orchestration model is now centered on <code>.claude/</code>, with lean agents, path-scoped rules, and lazy-loaded skills. This page gives a practical view of the live operating surface.</p>
-      <p class="meta">Generated at 2026-03-25 23:19</p>
+      <p>The active orchestration model is centered on <code>.claude/</code>. This page shows the operational surface: how requests flow across agents, which knowledge packs are preloaded, and which rule surfaces are activated by file context.</p>
+      <p class="meta">Generated at 2026-03-26 00:40</p>
     </section>
     <section class="two">
       <div class="panel">
         <h2>Execution Flow</h2>
         <table>
           <tr><th>Step</th><th>Role</th><th>Outcome</th></tr>
-          <tr><td>1</td><td>Architect</td><td>Defines SDD, boundaries, and migration-safe decisions.</td></tr>
-          <tr><td>2</td><td>Engineer</td><td>Implements within layer contract and project standards.</td></tr>
+          <tr><td>1</td><td>Architect</td><td>Defines SDD, boundaries, migration strategy, and cross-cutting constraints.</td></tr>
+          <tr><td>2</td><td>Engineer</td><td>Implements within the layer contract and repository standards.</td></tr>
           <tr><td>3</td><td>Test Writer</td><td>Adds isolated verification around public behaviour.</td></tr>
-          <tr><td>4</td><td>Reviewer / Quality</td><td>Checks regressions, performance, and quality gates.</td></tr>
-          <tr><td>5</td><td>PR Lifecycle</td><td>Runs deterministic PR handling without autonomous merge.</td></tr>
+          <tr><td>4</td><td>Reviewer / Quality</td><td>Checks regressions, maintainability, performance, and gates.</td></tr>
+          <tr><td>5</td><td>PR Lifecycle</td><td>Handles deterministic PR flow without autonomous merge.</td></tr>
         </table>
       </div>
       <div class="panel">
@@ -70,47 +69,63 @@
           <span>No barrel imports</span>
           <span>No inline styles</span>
           <span>DTOs never reach UI</span>
-          <span>Coverage >= 80%</span>
+          <span>Coverage &gt;= 80%</span>
           <span>No real API calls in unit tests</span>
           <span>No auto-push</span>
         </div>
       </div>
     </section>
     <section class="panel">
-      <h2>Agents</h2>
+      <h2>Operational Surfaces</h2>
+      <div class="chips" id="counts"></div>
+    </section>
+    <section class="panel">
+      <h2>Agents in Operation</h2>
       <div class="grid" id="agents"></div>
     </section>
     <section class="panel">
-      <h2>Skill Catalog</h2>
+      <h2>Skills in Rotation</h2>
       <div class="grid" id="skills"></div>
     </section>
     <section class="panel">
-      <h2>Rule Surface</h2>
+      <h2>Rule Activation Surface</h2>
       <div class="grid" id="rules"></div>
     </section>
   </main>
-  <script id="payload" type="application/json">{"generatedAt": "2026-03-25 23:19", "agents": [{"name": "architect", "description": "Architecture authority for SDDs, system design, coupling analysis, and migration strategy.", "model": "sonnet", "tools": "Read, Grep, Glob", "skills": ""}, {"name": "design-docs", "description": "Documentation and UX standards agent for AI system docs, business translation, and presentation quality.", "model": "haiku", "tools": "Read, Write, Edit", "skills": ""}, {"name": "engineer", "description": "Delivery agent for feature implementation, bug fixes, and refactors inside project constraints.", "model": "sonnet", "tools": "Read, Write, Edit, Bash, Grep, Glob", "skills": ""}, {"name": "pr-lifecycle", "description": "Deterministic PR workflow agent for create, fix, review-follow-up, and merge gate actions.", "model": "sonnet", "tools": "Read, Bash", "skills": ""}, {"name": "quality", "description": "Quality gate agent for performance analysis, static quality issues, and measurable engineering risks.", "model": "sonnet", "tools": "Read, Grep, Bash", "skills": ""}, {"name": "reviewer", "description": "Pre-merge reviewer focused on regressions, architectural drift, performance risks, and code quality.", "model": "sonnet", "tools": "Read, Grep, Glob, Bash", "skills": ""}, {"name": "security-analyst", "description": "Security specialist for OWASP-aligned reviews across storage, crypto, network, auth, platform, code, and resilience.", "model": "sonnet", "tools": "Read, Grep, Glob", "skills": ""}, {"name": "test-writer", "description": "Test author for unit and integration coverage with deterministic, isolated test design.", "model": "haiku", "tools": "Read, Write, Edit, Bash", "skills": ""}], "skills": [{"name": "api-integration", "description": "API integration patterns for DTO boundaries, service design, query orchestration, and testable transport code.", "context": "inline", "tools": "Read, Grep, Write, Edit"}, {"name": "clean-code", "description": "Clean code standards for function size, intent clarity, low nesting, duplication control, and maintainable implementation.", "context": "inline", "tools": "Read, Grep, Bash"}, {"name": "coupling-analysis", "description": "Analyze fan-in, fan-out, layering violations, and cross-feature coupling before major refactors.", "context": "fork", "tools": "Read, Grep, Glob, Bash"}, {"name": "owasp-security", "description": "OWASP-aligned mobile security review across storage, crypto, network, auth, platform, code quality, and resilience domains.", "context": "fork", "tools": "Read, Grep, Glob"}, {"name": "pr-workflow", "description": "Deterministic PR workflow skill for explicit /create-pr, /fix-pr, and /merge-pr command handling.", "context": "fork", "tools": "Read, Bash"}, {"name": "project-architecture", "description": "Pushy architecture guidance for layer contracts, feature structure, and cross-cutting system consistency.", "context": "inline", "tools": "Read, Grep, Glob"}, {"name": "react-native-patterns", "description": "React Native and Expo implementation standards for performance, lists, rendering, touch targets, and mobile-safe UI behaviour.", "context": "inline", "tools": "Read, Grep"}, {"name": "sdd-creation", "description": "Create or refine software design documents with explicit scope, decisions, rollout, verification, and risk sections.", "context": "fork", "tools": "Read, Grep, Glob, Write, Edit"}, {"name": "translations", "description": "Translation and i18n guidance for any string change, locale-sensitive UX copy, or new user-facing text.", "context": "fork", "tools": "Read, Grep, Write, Edit"}, {"name": "typescript-strict", "description": "Strict TypeScript enforcement for safe boundaries, explicit state, exhaustive branching, and runtime validation.", "context": "inline", "tools": "Read, Grep"}, {"name": "ux-standards", "description": "UX and UI standards for accessible, consistent, state-complete mobile interfaces and documentation of presentation quality.", "context": "inline", "tools": "Read"}], "rules": [{"name": "git", "paths": "", "summary": "# Git Rules - Never auto-commit or auto-push - Never push directly to `main` - Use Conventional Commits - Keep workflow changes auditable and intentional - Treat AI system structure changes as architecture changes"}, {"name": "hooks", "paths": "", "summary": "# Hook Rules - Hook names start with `use` - Hooks expose intent-centric state and handlers - Side effects must be explicit and localized - Return stable shapes that are easy for screens to consume - Do not leak DTOs or transport concerns through hook APIs"}, {"name": "screens", "paths": "", "summary": "# Screen Rules - Screens are presentation-first and must not own business logic - Consume hooks as the orchestration boundary - Keep feature files co-located with `components/` and `__tests__/` - Use `StyleSheet.create` for static styles - Do not import services directly into screen files - Loading, error, and empty states are mandatory when relevant"}, {"name": "services", "paths": "", "summary": "# Service Rules - Services own transport, DTO parsing, and response normalization - Query orchestration belongs in the query layer, not inside services - DTOs are API contracts, not UI contracts - External payloads should be validated before crossing boundaries - Keep service APIs deterministic and testable"}, {"name": "tests", "paths": "", "summary": "# Test Rules - Global coverage baseline is `>= 80%` - Hooks and services target `>= 90%` - Unit tests must not call real APIs - Mocks must be local, explicit, and isolated - Each test should verify behaviour, not internal implementation details"}, {"name": "typescript", "paths": "", "summary": "# TypeScript Rules - No implicit `any` - Type `useState` when inference is ambiguous - Prefer exhaustive `switch` handling - Avoid unsafe assertions and silent escapes - Validate external data at runtime when the boundary is untrusted"}]}</script>
+  <script id="payload" type="application/json">{"generatedAt": "2026-03-26 00:40", "agents": [{"name": "architect", "description": "Architecture authority for SDDs, system design, coupling analysis, and migration strategy.", "model": "sonnet", "tools": ["Read", "Grep", "Glob"], "skills": ["sdd-creation", "coupling-analysis", "project-architecture"]}, {"name": "design-docs", "description": "Documentation and UX standards agent for AI system docs, business translation, and presentation quality.", "model": "haiku", "tools": ["Read", "Write", "Edit"], "skills": ["business-analysis", "ux-standards", "translations", "sdd-creation"]}, {"name": "engineer", "description": "Delivery agent for feature implementation, bug fixes, and refactors inside project constraints.", "model": "sonnet", "tools": ["Read", "Write", "Edit", "Bash", "Grep", "Glob"], "skills": ["react-native-patterns", "api-integration", "project-architecture", "clean-code"]}, {"name": "pr-lifecycle", "description": "Deterministic PR workflow agent for create, fix, review-follow-up, and merge gate actions.", "model": "sonnet", "tools": ["Read", "Bash"], "skills": ["pr-workflow"]}, {"name": "quality", "description": "Quality gate agent for performance analysis, static quality issues, and measurable engineering risks.", "model": "sonnet", "tools": ["Read", "Grep", "Bash"], "skills": ["react-native-patterns"]}, {"name": "reviewer", "description": "Pre-merge reviewer focused on regressions, architectural drift, performance risks, and code quality.", "model": "sonnet", "tools": ["Read", "Grep", "Glob", "Bash"], "skills": ["typescript-strict", "react-native-patterns", "clean-code"]}, {"name": "security-analyst", "description": "Security specialist for OWASP-aligned reviews across storage, crypto, network, auth, platform, code, and resilience.", "model": "sonnet", "tools": ["Read", "Grep", "Glob"], "skills": ["owasp-security", "security-storage", "security-crypto", "security-network", "security-auth", "security-platform", "security-code", "security-resilience"]}, {"name": "test-writer", "description": "Test author for unit and integration coverage with deterministic, isolated test design.", "model": "haiku", "tools": ["Read", "Write", "Edit", "Bash"], "skills": ["project-architecture", "typescript-strict"]}], "skills": [{"name": "api-integration", "description": "API integration patterns for DTO boundaries, service design, query orchestration, and testable transport code.", "context": "inline", "tools": ["Read", "Grep", "Write", "Edit"]}, {"name": "business-analysis", "description": "Convert raw product summaries into implementation-grade SDDs aligned with the active `.claude` architecture.", "context": "fork", "tools": ["Read", "Write", "Edit", "Grep", "Glob"]}, {"name": "clean-code", "description": "Clean code standards for function size, intent clarity, low nesting, duplication control, and maintainable implementation.", "context": "inline", "tools": ["Read", "Grep", "Bash"]}, {"name": "coupling-analysis", "description": "Analyze fan-in, fan-out, layering violations, and cross-feature coupling before major refactors.", "context": "fork", "tools": ["Read", "Grep", "Glob", "Bash"]}, {"name": "owasp-security", "description": "OWASP MAS orchestration skill for React Native audits across storage, crypto, network, auth, platform, code, and resilience domains.", "context": "fork", "tools": ["Read", "Grep", "Glob"]}, {"name": "pr-workflow", "description": "Deterministic PR workflow skill for explicit /create-pr, /fix-pr, and /merge-pr command handling.", "context": "fork", "tools": ["Read", "Bash"]}, {"name": "project-architecture", "description": "Pushy architecture guidance for layer contracts, feature structure, and cross-cutting system consistency.", "context": "inline", "tools": ["Read", "Grep", "Glob"]}, {"name": "react-native-patterns", "description": "React Native and Expo implementation standards for performance, lists, rendering, touch targets, and mobile-safe UI behaviour.", "context": "inline", "tools": ["Read", "Grep"]}, {"name": "sdd-creation", "description": "Create or refine software design documents with explicit scope, decisions, rollout, verification, and risk sections.", "context": "fork", "tools": ["Read", "Grep", "Glob", "Write", "Edit"]}, {"name": "security-auth", "description": "Audit authentication, authorization, session handling, token lifecycle, OAuth, and biometric flows.", "context": "fork", "tools": ["Read", "Grep", "Glob"]}, {"name": "security-code", "description": "Audit dependency risk, production build posture, input validation, and code-level exploitability.", "context": "fork", "tools": ["Read", "Grep", "Glob"]}, {"name": "security-crypto", "description": "Audit cryptographic algorithms, randomness, key handling, and secret placement for React Native applications.", "context": "fork", "tools": ["Read", "Grep", "Glob"]}, {"name": "security-network", "description": "Audit transport security, TLS posture, certificate validation, and sensitive network flows for React Native apps.", "context": "fork", "tools": ["Read", "Grep", "Glob"]}, {"name": "security-platform", "description": "Audit deep links, exported components, WebView boundaries, and sensitive UI/platform integration surfaces.", "context": "fork", "tools": ["Read", "Grep", "Glob"]}, {"name": "security-resilience", "description": "Audit anti-tampering, root/jailbreak detection, anti-debug posture, integrity checks, and obfuscation maturity.", "context": "fork", "tools": ["Read", "Grep", "Glob"]}, {"name": "security-storage", "description": "Audit React Native storage, local persistence, logs, backups, and sensitive-data exposure against MASVS storage controls.", "context": "fork", "tools": ["Read", "Grep", "Glob"]}, {"name": "translations", "description": "Translation and i18n guidance for any string change, locale-sensitive UX copy, or new user-facing text.", "context": "fork", "tools": ["Read", "Grep", "Write", "Edit"]}, {"name": "typescript-strict", "description": "Strict TypeScript enforcement for safe boundaries, explicit state, exhaustive branching, and runtime validation.", "context": "inline", "tools": ["Read", "Grep"]}, {"name": "ux-standards", "description": "UX and UI standards for accessible, consistent, state-complete mobile interfaces and documentation of presentation quality.", "context": "inline", "tools": ["Read"]}], "rules": [{"name": "git", "paths": [".gitignore", ".github/**/*.yml", ".github/**/*.yaml"], "summary": "# Git Rules - Never auto-commit or auto-push - Never push directly to `main` - Use Conventional Commits - Keep workflow changes auditable and intentional - Treat AI system structure changes as architecture changes"}, {"name": "hooks", "paths": ["**/*.hook.ts", "**/*.hook.tsx"], "summary": "# Hook Rules - Hook names start with `use` - Hooks expose intent-centric state and handlers - Side effects must be explicit and localized - Return stable shapes that are easy for screens to consume - Do not leak DTOs or transport concerns through hook APIs"}, {"name": "screens", "paths": ["src/screens/**/*.ts", "src/screens/**/*.tsx"], "summary": "# Screen Rules - Screens are presentation-first and must not own business logic - Consume hooks as the orchestration boundary - Keep feature files co-located with `components/` and `__tests__/` - Use `StyleSheet.create` for static styles - Do not import services directly into screen files - Loading, error, and empty states are mandatory when relevant"}, {"name": "services", "paths": ["src/services/**/*.ts", "src/services/**/*.tsx"], "summary": "# Service Rules - Services own transport, DTO parsing, and response normalization - Query orchestration belongs in the query layer, not inside services - DTOs are API contracts, not UI contracts - External payloads should be validated before crossing boundaries - Keep service APIs deterministic and testable"}, {"name": "tests", "paths": ["**/__tests__/**/*.ts", "**/__tests__/**/*.tsx", "**/*.test.ts", "**/*.test.tsx"], "summary": "# Test Rules - Global coverage baseline is `>= 80%` - Hooks and services target `>= 90%` - Unit tests must not call real APIs - Mocks must be local, explicit, and isolated - Each test should verify behaviour, not internal implementation details"}, {"name": "typescript", "paths": ["src/**/*.ts", "src/**/*.tsx"], "summary": "# TypeScript Rules - No implicit `any` - Type `useState` when inference is ambiguous - Prefer exhaustive `switch` handling - Avoid unsafe assertions and silent escapes - Validate external data at runtime when the boundary is untrusted"}], "counts": {"commands": 4, "sdds": 8, "observability": 11}}</script>
   <script>
     const data = JSON.parse(document.getElementById('payload').textContent);
     const agentsRoot = document.getElementById('agents');
     const skillsRoot = document.getElementById('skills');
     const rulesRoot = document.getElementById('rules');
+    const countsRoot = document.getElementById('counts');
+
+    [['Commands', data.counts.commands], ['SDDs', data.counts.sdds], ['Observability assets', data.counts.observability]].forEach(([label, value]) => {
+      const chip = document.createElement('span');
+      chip.textContent = `${label}: ${value}`;
+      countsRoot.appendChild(chip);
+    });
+
     data.agents.forEach((agent) => {
       const el = document.createElement('article');
       el.className = 'card';
-      el.innerHTML = `<h3>${agent.name}</h3><p>${agent.description}</p><p class="meta">Model: ${agent.model}</p><p class="meta">Tools: ${agent.tools}</p>`;
+      const skills = agent.skills.length ? agent.skills.map((skill) => `<li>${skill}</li>`).join('') : '<li>none</li>';
+      el.innerHTML = `<h3>${agent.name}</h3><p>${agent.description}</p><ul class="tiny"><li>Model: ${agent.model}</li><li>Tools: ${agent.tools.join(', ')}</li>${skills}</ul>`;
       agentsRoot.appendChild(el);
     });
+
     data.skills.forEach((skill) => {
       const el = document.createElement('article');
       el.className = 'card';
-      el.innerHTML = `<h3>${skill.name}</h3><p>${skill.description}</p><p class="meta">Context: ${skill.context} | Tools: ${skill.tools}</p>`;
+      el.innerHTML = `<h3>${skill.name}</h3><p>${skill.description}</p><ul class="tiny"><li>Context: ${skill.context}</li><li>Tools: ${skill.tools.join(', ')}</li></ul>`;
       skillsRoot.appendChild(el);
     });
+
     data.rules.forEach((rule) => {
       const el = document.createElement('article');
       el.className = 'card';
-      el.innerHTML = `<h3>${rule.name}</h3><p>${rule.summary}</p><p class="meta">Scoped by frontmatter paths</p>`;
+      const paths = rule.paths.map((path) => `<li>${path}</li>`).join('');
+      el.innerHTML = `<h3>${rule.name}</h3><p>${rule.summary}</p><ul class="tiny">${paths}</ul>`;
       rulesRoot.appendChild(el);
     });
   </script>

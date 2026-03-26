@@ -4,7 +4,7 @@
 
 <!-- Brief: AI-powered learning app built with React Native (Expo) — topics, summaries, AI-generated challenges, offline-first SQLite persistence, and a full AI-assisted engineering system. -->
 
-<img src=".ai/docs/screenshots/01_presentation.png" width="100%" />
+<img src="docs/history/legacy-ai/docs/screenshots/01_presentation.png" width="100%" />
 
 <div align="center">
 
@@ -56,13 +56,13 @@ The project also serves as a **reference implementation of a full AI-assisted en
 | ------------------------------ | ----------------------------------------------------------------------- |
 | 🧠 **AI-generated content**    | Summaries and challenges created by AI from user topics                 |
 | 📴 **Offline-first**           | SQLite is the single source of truth — works with no network            |
-| 🤖 **7 specialized agents**    | Full engineering lifecycle covered end-to-end (v2.0.0)                  |
+| 🤖 **8 specialized agents**    | Full engineering lifecycle covered end-to-end in the `.claude/` system  |
 | 🔄 **Autonomous PR lifecycle** | Agent creates PR, monitors CI, fixes failures, resolves reviews, merges |
-| 🔧 **Sonar auto-fixer**        | Quality gate failures resolved automatically without human intervention |
+| 🛡️ **Security specialization** | Dedicated security agent with modular OWASP-oriented skill packs        |
 | 🏗️ **Strict architecture**     | Enforced layer separation: Screen → Hook → Repository → DAO → SQLite    |
-| 📊 **Living documentation**    | README auto-updates on every push via the design-docs agent             |
-| 💰 **Token economics**         | 65% local routing (Ollama) with ~35% cost savings vs Claude-only        |
-| 📐 **Architecture as code**    | 10 Mermaid diagrams with complete system visualization                  |
+| 📊 **Living documentation**    | README is checked by the design-docs agent during pre-push validation   |
+| 💰 **Token economics**         | Historical usage and cost records tracked in `.claude/observability/`   |
+| 📐 **Architecture as code**    | Public GitHub Pages generated directly from the live `.claude/` tree    |
 
 ---
 
@@ -70,40 +70,41 @@ The project also serves as a **reference implementation of a full AI-assisted en
 
 Every development task is routed to a specialized agent. No shortcuts.
 
-### Agent Roster (v2.0.0)
+### Agent Roster (v3.0.0)
 
-> **Version tracking:** All agents versioned with [semantic versioning](.ai/agents/CHANGELOG.md) · Skills have [YAML metadata headers](.ai/skills/)
+> **Current source of truth:** `.claude/agents/`, `.claude/skills/`, `.claude/rules/`, `.claude/sdd/`, and the generated pages in `docs/`
 
-| Agent            | Responsibility                                               | Model          | Trigger                                 |
-| ---------------- | ------------------------------------------------------------ | -------------- | --------------------------------------- |
-| **architect**    | Architecture design, SDDs, coupling analysis                 | Claude Sonnet  | Feature planning, architecture review   |
-| **engineer**     | Screens, hooks, components, services, business logic         | Local → Claude | Feature implementation                  |
-| **reviewer**     | Quality gates, architectural compliance, fix review comments | Claude Sonnet  | PR review, pre-merge, `/fix-pr`         |
-| **test-writer**  | Unit tests (≥80% coverage) + Maestro E2E scenarios           | Local (Ollama) | After implementation, `/test-e2e`       |
-| **quality**      | Performance auditing + SonarCloud auto-fixer                 | Local → Claude | `/audit-performance`, `/fix-sonar`      |
-| **design-docs**  | UI/UX, README auto-update, business requirements → SDD       | Sonnet / Haiku | UI polish, pre-push, `/business-to-sdd` |
-| **pr-lifecycle** | Full PR: create → CI → fix → reviews → merge                 | Claude Sonnet  | `/pr-lifecycle [PR]`                    |
+| Agent                | Responsibility                                                | Model         | Trigger                                 |
+| -------------------- | ------------------------------------------------------------- | ------------- | --------------------------------------- |
+| **architect**        | Architecture design, SDDs, migration planning, coupling review| Claude Sonnet | Feature planning, architecture review   |
+| **engineer**         | Screens, hooks, services, repositories, business logic        | Claude Sonnet | Feature implementation                  |
+| **reviewer**         | Quality gates, architectural compliance, regression review    | Claude Sonnet | PR review, pre-merge                    |
+| **test-writer**      | Unit and integration tests                                    | Claude Haiku  | After implementation                    |
+| **quality**          | Performance analysis and engineering risk review              | Claude Sonnet | `/audit-performance`, quality gates     |
+| **design-docs**      | UI polish, docs, business summary to SDD                      | Claude Haiku  | `/business-to-sdd`, `/ui-polish`        |
+| **pr-lifecycle**     | Full PR: create → CI → fix → reviews → merge gate            | Claude Sonnet | `/pr-lifecycle [PR]`                    |
+| **security-analyst** | OWASP-aligned security analysis across storage to resilience  | Claude Sonnet | Security audit, hardening review        |
 
 ### Token Economics
 
-**Period:** 16-23 March 2026 · **[Full analysis →](.ai/router/token-analysis.md)**
+**Historical sample:** 16-23 March 2026 · **[Full analysis →](.claude/observability/token-analysis.md)**
 
 | Metric                  | Value     | Description                              |
 | ----------------------- | --------- | ---------------------------------------- |
-| 🏠 **Local routing**    | 65%       | Requests handled by Ollama (llama3.2)    |
-| ☁️ **Remote routing**   | 35%       | Complex tasks escalated to Claude Sonnet |
-| 💰 **Cost savings**     | ~35%      | vs Claude-only architecture              |
+| 🧾 **Tracked provider** | Claude    | Current runtime telemetry is stored in `.claude/observability/` |
+| 🗃️ **Historical data**  | Preserved | Legacy `.ai` analytics are retained in `docs/history/legacy-ai/` |
+| 💰 **Cost records**     | Available | PR and session cost rollups stay versioned in-repo |
 | ⚡ **Cache efficiency** | 173x      | Multiplier on Claude (prompt reuse)      |
 | 📈 **ROI break-even**   | < 1 month | Investment recovered                     |
 
-**How it works:** The [LLM router](.ai/router/router.md) analyzes request complexity (keywords: `refactor`, `debug`, `architecture`, `integration`) and routes to local (fast, free) or remote (reasoning-heavy) models automatically.
+**How it works:** the active system uses `.claude/CLAUDE.md` as entrypoint, path-scoped rules, specialized skills, and command-driven workflows. Historical routing notes remain available in [.claude/observability/router.md](.claude/observability/router.md).
 
 ### Standard Feature Flow
 
 ```
 User Request
      ↓
-architect  →  Creates SDD (.ai/_sdd/)
+architect  →  Creates SDD (.claude/sdd/)
      ↓
 engineer  →  Implements feature
      ↓
@@ -192,7 +193,7 @@ Invoked with `/fix-sonar <PR_NUMBER>` when a SonarCloud quality gate fails, or `
 
 ### 📝 Design & Docs Agent
 
-Handles three modes — UI polish, documentation, and business analysis. The doc mode runs automatically on every `git push` via the pre-push hook (`.husky/pre-push` → `.ai/scripts/update-readme.sh`). Skips automatically if only lock files, test files, or non-source files changed.
+Handles three modes — UI polish, documentation, and business analysis. The doc mode runs automatically on every `git push` via the pre-push hook (`.husky/pre-push` → `.claude/scripts/update-readme.sh`). Skips automatically if only lock files, test files, or non-source files changed.
 
 **What it updates:**
 
@@ -208,7 +209,7 @@ Handles three modes — UI polish, documentation, and business analysis. The doc
 
 ### 🏗️ Architect Agent
 
-Invoked before any non-trivial feature. Produces a **Software Design Document (SDD)** in `.ai/_sdd/` before a single line of code is written.
+Invoked before any non-trivial feature. Produces a **Software Design Document (SDD)** in `.claude/sdd/` before a single line of code is written.
 
 **SDD structure:**
 
@@ -248,7 +249,7 @@ Runs on demand or weekly. Uses [Madge](https://github.com/pahen/madge) to genera
 | Circular dependencies        | 0         |
 | Architectural violations     | 0         |
 
-Generates a full coupling report in `.ai/analysis/coupling-report-<date>.md` with a prioritized refactoring roadmap. Invoked via the `architect` agent.
+Generates a coupling review and refactoring roadmap under the active architecture workflow, driven by the `architect` agent and the `coupling-analysis` skill.
 
 ---
 
@@ -282,26 +283,20 @@ git checkout -b feature/notification-center
 ### Viewing System Stats
 
 ```bash
-# Agent usage statistics (last 7 days)
-.ai/scripts/show-orchestration-stats.sh 7
-
-# Token usage totals (Claude + Ollama)
-.ai/router/update-token-totals.sh
+# Token usage totals
+.claude/observability/update-token-totals.sh
 
 # Token economics analysis
-cat .ai/router/token-analysis.md
+cat .claude/observability/token-analysis.md
 
 # Architecture diagrams (10 Mermaid diagrams)
-cat .ai/docs/architecture.md
+cat docs/ai-system.html
 
-# Agent version history
-cat .ai/agents/CHANGELOG.md
+# Active AI system overview
+open docs/ai-system.html
 
-# Coupling analysis (full codebase)
-.ai/scripts/analyze-coupling.sh full
-
-# PR lifecycle status check
-.ai/scripts/pr-lifecycle.sh 123
+# Active orchestration overview
+open docs/demonstration-orchestration.html
 ```
 
 ---
@@ -320,7 +315,7 @@ cat .ai/agents/CHANGELOG.md
 2. ESLint (full project)
 3. Jest tests + coverage report
 4. Token usage report (daily AI cost monitoring)
-5. **design-docs** — README auto-update if source files changed
+5. **design-docs** — README drift check if source files changed
 
 ### CI/CD (GitHub Actions — every PR and push to `main`)
 
@@ -349,14 +344,14 @@ If SonarCloud fails on a PR, the quality agent (/fix-sonar mode) is triggered to
 
 ### For Developers
 
-- 🤖 **7 Specialized AI Agents (v2.0.0)** — Architecture, engineering, testing, review, auditing, docs, PR lifecycle
+- 🤖 **8 Specialized AI Agents (v3.0.0)** — Architecture, engineering, review, tests, quality, docs, PR flow, security
 - 📝 **SDD-driven development** — Every feature starts with a Software Design Document
 - 🗄️ **SQLite + DAO pattern** — Typed data access objects, versioned migrations, ACID offline queue
-- 🛠️ **Hybrid LLM** — Local model (Ollama) for speed; Claude for reasoning (65% local / 35% remote)
-- 🔧 **Full CI automation** — TypeScript, ESLint, Jest, Sonar, token tracking, README auto-update
-- 📊 **Token economics** — ~35% cost savings with 173x cache efficiency (full ROI analysis)
-- 📐 **Architecture visualization** — 10 Mermaid diagrams (system flows, routing, CI/CD)
-- 🔖 **Versioned system** — Semantic versioning for agents + YAML headers for skills
+- 🛠️ **Skills-first orchestration** — `.claude` holds live agents, skills, rules, SDDs, observability, and command entrypoints
+- 🔧 **Full CI automation** — TypeScript, ESLint, Jest, Sonar, token tracking, README governance
+- 📊 **Observability built in** — Token, orchestration, and PR cost records tracked in `.claude/observability`
+- 📐 **Architecture visualization** — GitHub Pages generated directly from `.claude`
+- 🔖 **Versioned system** — Structured agent, skill, rule, SDD, and template surfaces
 
 ---
 
@@ -398,42 +393,35 @@ If SonarCloud fails on a PR, the quality agent (/fix-sonar mode) is triggered to
 
 ### AI
 
-- **Claude Sonnet 4** (Anthropic) — Architectural reasoning, code review, PR lifecycle (35% of requests)
-- **Claude Haiku 4** (Anthropic) — Documentation updates (design-docs)
-- **Ollama llama3.2** — Local mechanical tasks (tests, boilerplate, Sonar fixes) (65% of requests)
+- **Claude Sonnet 4** (Anthropic) — Architecture, implementation, review, security, PR lifecycle
+- **Claude Haiku 4** (Anthropic) — Documentation and focused support flows
 
-**Token Economics ([full analysis →](.ai/router/token-analysis.md)):**
+**Token Economics ([full analysis →](.claude/observability/token-analysis.md)):**
 
-- 65% local routing saves ~35% vs Claude-only
-- 173x cache efficiency on Claude (prompt reuse)
-- ROI break-even in < 1 month
+- Historical token and cost records are preserved in-repo
+- Runtime hooks append current Claude usage into `.claude/observability`
+- GitHub Pages analytics are generated from the same observability surface
 
 ---
 
 ## 📐 System Architecture & Documentation
 
-The complete system architecture is documented with **10 Mermaid diagrams** in [.ai/docs/architecture.md](.ai/docs/architecture.md):
+The active system architecture is documented in the generated GitHub Pages hub:
 
-| Diagram                         | Purpose                                                  |
-| ------------------------------- | -------------------------------------------------------- |
-| **1. System Overview**          | Orchestrator → Agents → Skills → LLM layers              |
-| **2. Request Routing Flow**     | How `system.md` distributes requests to agents           |
-| **3. LLM Router Decision Tree** | Local vs Cloud complexity-based routing                  |
-| **4. Agent-Skills Map**         | Which skills each agent loads                            |
-| **5. Standard Feature Flow**    | SDD → Implementation → Tests → Review → PR               |
-| **6. Inter-Agent Coordination** | Multi-agent workflows (refactoring, performance, design) |
-| **7. Security Audit Pipeline**  | OWASP MAS with 7 parallel sub-agents                     |
-| **8. Data Flow Architecture**   | Model → Service → Query → Hook → Screen                  |
-| **9. Token Economics Flow**     | Cost tracking and LLM router decisions                   |
-| **10. CI/CD Integration**       | PR lifecycle with GitHub Actions automation              |
+| Page                                 | Purpose                                                         |
+| ------------------------------------ | --------------------------------------------------------------- |
+| **docs/ai-system.html**              | Full `.claude` map: agents, skills, rules, hooks, SDDs, assets |
+| **docs/demonstration-orchestration.html** | Operational view of routing, agent packs, and rule surfaces |
+| **docs/analytics.html**              | Token, orchestration, and PR cost analytics                     |
 
 ### Key Documentation
 
-- **[Architecture Diagrams](.ai/docs/architecture.md)** — Complete system visualization
-- **[Agent Changelog](.ai/agents/CHANGELOG.md)** — Version history for all agents
-- **[Token Analysis](.ai/router/token-analysis.md)** — Economic analysis and ROI (16-23 March 2026)
-- **[Orchestrator Reference](.ai/docs/orchestrator-quick-reference.md)** — Fast decision tree
-- **[Skills](.ai/skills/)** — 9 reusable knowledge modules (all with YAML version headers)
+- **[AI System](docs/ai-system.html)** — Complete `.claude` architecture visualization
+- **[Agent Changelog](docs/history/legacy-ai/agents/CHANGELOG.md)** — Version history for all agents
+- **[Token Analysis](.claude/observability/token-analysis.md)** — Economic analysis and ROI (16-23 March 2026)
+- **[Orchestration View](docs/demonstration-orchestration.html)** — Live operational network
+- **[Analytics](docs/analytics.html)** — GitHub Pages analytics surface
+- **[Skills](.claude/skills/)** — Reusable knowledge modules in the active system
 
 ---
 
@@ -562,21 +550,17 @@ EXPO_PUBLIC_FIREBASE_API_KEY=your_key_here
 
 ```
 FUSE/
-├── .ai/                      # AI Engineering System
-│   ├── agents/               # 7 specialized AI agents (v2.0.0)
-│   │   └── CHANGELOG.md      # Version tracking for all agents
-│   ├── skills/               # 9 reusable agent skills (all v1.0.0 with YAML headers)
-│   ├── rules/                # Naming, git, folder conventions
-│   ├── router/               # LLM routing logic
-│   │   ├── token-usage.csv   # Raw token logs (Claude + Ollama)
-│   │   ├── token-usage.md    # Token summary report
-│   │   └── token-analysis.md # Economic analysis (ROI, cost savings)
-│   ├── docs/                 # System documentation
-│   │   ├── architecture.md   # 10 Mermaid diagrams (consolidated)
-│   │   └── orchestrator-quick-reference.md
-│   ├── scripts/              # Automation scripts
-│   ├── _sdd/                 # Software Design Documents
-│   └── system.md             # Master orchestration document
+├── .claude/                  # Active AI engineering system
+│   ├── agents/               # 8 execution roles
+│   ├── skills/               # Reusable knowledge modules
+│   ├── rules/                # Path-scoped guardrails
+│   ├── commands/             # Operational command entrypoints
+│   ├── sdd/                  # Active Software Design Documents
+│   ├── inbox/                # Raw summaries before SDD conversion
+│   ├── observability/        # Token, orchestration, and PR telemetry
+│   ├── templates/            # Reusable authoring assets
+│   └── CLAUDE.md             # Primary AI entrypoint
+├── docs/history/legacy-ai/   # Archived `.ai` generation for traceability
 │
 ├── src/                      # Application source code
 ├── assets/                   # Static assets (icons, images, fonts)
@@ -652,29 +636,27 @@ yarn e2e
 
 ---
 
-## 📝 Recent Updates (2026-03-23)
+## 📝 Recent Updates (2026-03-26)
 
-**System now production-ready with full governance and audit trail:**
+**System now runs `.claude`-only with full governance and audit trail:**
 
 ✅ **Versioning System**
 
-- All 7 agents tracked with semantic versioning (v2.0.0)
-- All 9 skills have YAML metadata headers (name, version, author, dates)
-- [CHANGELOG.md](.ai/agents/CHANGELOG.md) for complete version history
+- Active system consolidated under `.claude/`
+- 8 agents and expanded modular skill packs, including business analysis and domain-specific security
+- Legacy `.ai` generation archived under `docs/history/legacy-ai/`
 
 ✅ **Architecture Documentation**
 
-- [10 Mermaid diagrams](.ai/docs/architecture.md) covering complete system
-- System Overview, Request Routing, LLM Router, Agent-Skills Map, Feature Flow, CI/CD, etc.
-- Consolidated documentation replaces scattered diagrams
+- [AI System](docs/ai-system.html) generated from the live `.claude` tree
+- [Orchestration](https://eugenioduarte.github.io/FUSE/demonstration-orchestration.html) updated for the active agent network
+- Public documentation now includes commands, SDDs, templates, observability, and runtime hooks
 
 ✅ **Token Economics**
 
-- [Detailed analysis](.ai/router/token-analysis.md) with real data (16-23 March)
-- 65% local routing (Ollama) / 35% remote (Claude)
-- ~35% cost savings vs Claude-only setup
-- 173x cache efficiency multiplier
-- ROI break-even < 1 month
+- Historical analytics preserved and moved into `.claude/observability/`
+- Runtime hooks now write directly to the active observability surface
+- GitHub Pages analytics now read from `.claude/observability/`
 
 ✅ **GitHub Pages Updates**
 
@@ -685,6 +667,6 @@ yarn e2e
 
 <div align="center">
 
-**README auto-maintained by the [design-docs](.ai/agents/design-docs.md) agent on every push.**
+**README governed by the [design-docs](.claude/agents/design-docs.md) agent during pre-push validation.**
 
 </div>

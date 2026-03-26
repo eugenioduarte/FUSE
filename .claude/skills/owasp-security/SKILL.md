@@ -1,6 +1,6 @@
 ---
 name: owasp-security
-description: OWASP-aligned mobile security review across storage, crypto, network, auth, platform, code quality, and resilience domains.
+description: OWASP MAS orchestration skill for React Native audits across storage, crypto, network, auth, platform, code, and resilience domains.
 context: fork
 allowed-tools: Read, Grep, Glob
 model: sonnet
@@ -8,14 +8,24 @@ model: sonnet
 
 # OWASP Security
 
-Review by domain:
+Use this skill as the umbrella coordinator for a complete React Native security review.
 
-- storage
-- cryptography
-- network transport
-- authentication and session handling
-- platform exposure
-- code-level vulnerabilities
-- resilience and recovery
+Operating model:
 
-Prefer concrete findings with severity, impact, and remediation guidance.
+- establish scope first: source code, manifests, binaries, or mixed review
+- classify app sensitivity: low, medium, high, critical
+- review each domain with the dedicated security skill
+- map findings to MASVS controls whenever possible
+- report by severity, affected surface, exploitability, and remediation priority
+
+Domain pack:
+
+- `security-storage`
+- `security-crypto`
+- `security-network`
+- `security-auth`
+- `security-platform`
+- `security-code`
+- `security-resilience`
+
+Prefer concrete findings with evidence, platform scope, and React Native-specific remediation guidance.

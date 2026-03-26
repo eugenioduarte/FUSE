@@ -2,9 +2,9 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
-TOKENS="$REPO_ROOT/.ai/router/token-usage.csv"
-ORCH="$REPO_ROOT/.ai/router/orchestration.csv"
-PRS="$REPO_ROOT/.ai/router/pr-costs.csv"
+TOKENS="$REPO_ROOT/.claude/observability/token-usage.csv"
+ORCH="$REPO_ROOT/.claude/observability/orchestration.csv"
+PRS="$REPO_ROOT/.claude/observability/pr-costs.csv"
 OUT="$REPO_ROOT/docs/analytics.html"
 
 python3 - "$TOKENS" "$ORCH" "$PRS" "$OUT" <<'PYEOF'
