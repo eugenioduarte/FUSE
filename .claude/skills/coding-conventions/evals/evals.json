@@ -1,0 +1,6 @@
+[
+  "Review this file and folder structure for naming violations: LoginHook.ts, UserService.ts, IUserModel.ts.",
+  "What is the correct hook name for the checkout screen's business logic?",
+  "A service function fetches user data. What should it be named and where should it live?",
+  "A new Zustand store is needed for notifications. Describe the file structure and hook naming."
+]

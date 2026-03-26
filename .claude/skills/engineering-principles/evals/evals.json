@@ -1,0 +1,6 @@
+[
+  "A screen needs to call an API directly to avoid adding a service layer. Is this acceptable?",
+  "Explain the trade-off between shipping faster and maintaining architectural boundaries.",
+  "A hook returns a DTO directly to the screen. What principle does this violate and why?",
+  "Two features share a component with tightly coupled state. What engineering principle applies and what should be done?"
+]

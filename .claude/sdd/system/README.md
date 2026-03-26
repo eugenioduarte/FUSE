@@ -1,6 +1,6 @@
 # FUSE Enterprise SDD System
 
-Status: proposed extension
+Status: active
 Base runtime: `.claude/`
 Purpose: support domain-driven, Jira-ingested, modular SDD generation without turning `.claude/` into a monolith.
 
@@ -44,17 +44,14 @@ Flow:
 - model domain memory explicitly through `contexts/`
 - do not couple Jira/Figma assumptions into every agent prompt
 
-## Immediate Scope
+## Active Integrations
 
-- define the structure
-- define the naming contract
-- define the modular SDD contract
-- define the context model
-- define how `.claude` invokes the system
+- Jira MCP: configured in `.claude/settings.json`
+- Figma MCP: configured in `.claude/settings.json`
+- Intake workflow: `/jira-to-sdd` command
+- Business intake: `/business-to-sdd` command
 
 ## Deferred Scope
 
-- real Jira MCP wiring
-- real Figma MCP wiring
 - automated PR evidence attachment
 - fully autonomous delivery pipeline

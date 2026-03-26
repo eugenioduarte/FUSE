@@ -87,17 +87,17 @@ Every development task is routed to a specialized agent. No shortcuts.
 
 ### Token Economics
 
-**Historical sample:** 16-23 March 2026 · **[Full analysis →](.claude/observability/token-analysis.md)**
+**Real sessions tracked since 2026-03-22 · [Full analysis →](.claude/observability/token-analysis.md)**
 
-| Metric                  | Value     | Description                              |
-| ----------------------- | --------- | ---------------------------------------- |
-| 🧾 **Tracked provider** | Claude    | Current runtime telemetry is stored in `.claude/observability/` |
-| 🗃️ **Historical data**  | Preserved | Legacy `.ai` analytics are retained in `docs/history/legacy-ai/` |
-| 💰 **Cost records**     | Available | PR and session cost rollups stay versioned in-repo |
-| ⚡ **Cache efficiency** | 173x      | Multiplier on Claude (prompt reuse)      |
-| 📈 **ROI break-even**   | < 1 month | Investment recovered                     |
+| Metric | Value | Description |
+|---|---|---|
+| Provider | Claude Sonnet 4.6 | Claude-only since 2026-03-25 |
+| Sessions tracked | 2 | Real data only — mock data removed 2026-03-26 |
+| Total tokens | 2,056,339 | Input + output across all real sessions |
+| Cache reads | 369,762,715 | ~5,400x multiplier (prompt reuse via skills) |
+| Total cost | $140.96 | Dominated by cache reads at $0.30/1M |
 
-**How it works:** the active system uses `.claude/CLAUDE.md` as entrypoint, path-scoped rules, specialized skills, and command-driven workflows. Historical routing notes remain available in [.claude/observability/router.md](.claude/observability/router.md).
+**How it works:** Stop hook (`settings.json`) fires on every session end, appends token counts to `token-usage.csv` and `orchestration.csv`. PR costs tracked separately in `pr-costs.csv` as PRs are merged.
 
 ### Standard Feature Flow
 
@@ -187,7 +187,7 @@ Invoked with `/fix-sonar <PR_NUMBER>` when a SonarCloud quality gate fails, or `
 
 **What it never auto-fixes:** Security vulnerabilities, authentication/authorization logic, cryptographic operations, anything in `services/firebase/`.
 
-**Model routing:** Local Ollama (`llama3.2`) for mechanical fixes. Escalates to Claude Sonnet for complex refactoring or architectural smells.
+**Model:** Claude Sonnet (Claude-only architecture since 2026-03-25).
 
 ---
 
@@ -393,14 +393,14 @@ If SonarCloud fails on a PR, the quality agent (/fix-sonar mode) is triggered to
 
 ### AI
 
-- **Claude Sonnet 4** (Anthropic) — Architecture, implementation, review, security, PR lifecycle
-- **Claude Haiku 4** (Anthropic) — Documentation and focused support flows
+- **Claude Sonnet 4.6** (Anthropic) — Architecture, implementation, review, security, PR lifecycle
+- **Claude Haiku 4.5** (Anthropic) — Documentation and focused support flows
 
 **Token Economics ([full analysis →](.claude/observability/token-analysis.md)):**
 
-- Historical token and cost records are preserved in-repo
-- Runtime hooks append current Claude usage into `.claude/observability`
-- GitHub Pages analytics are generated from the same observability surface
+- Real session data tracked from 2026-03-22 via Stop hook
+- CSV-backed: `token-usage.csv`, `orchestration.csv`, `pr-costs.csv`
+- Claude-only architecture (no Ollama) since 2026-03-25
 
 ---
 
@@ -417,11 +417,12 @@ The active system architecture is documented in the generated GitHub Pages hub:
 ### Key Documentation
 
 - **[AI System](docs/ai-system.html)** — Complete `.claude` architecture visualization
-- **[Agent Changelog](docs/history/legacy-ai/agents/CHANGELOG.md)** — Version history for all agents
-- **[Token Analysis](.claude/observability/token-analysis.md)** — Economic analysis and ROI (16-23 March 2026)
+- **[SDD System](docs/sdd-system.html)** — Enterprise design layer with domain contexts and contracts
 - **[Orchestration View](docs/demonstration-orchestration.html)** — Live operational network
-- **[Analytics](docs/analytics.html)** — GitHub Pages analytics surface
-- **[Skills](.claude/skills/)** — Reusable knowledge modules in the active system
+- **[Analytics](docs/analytics.html)** — Token, orchestration, and PR cost analytics
+- **[Token Analysis](.claude/observability/token-analysis.md)** — Real session cost breakdown
+- **[Agent Changelog](docs/history/legacy-ai/agents/CHANGELOG.md)** — Version history for all agents
+- **[Skills](.claude/skills/)** — 23 reusable knowledge modules in the active system
 
 ---
 
@@ -638,30 +639,38 @@ yarn e2e
 
 ## 📝 Recent Updates (2026-03-26)
 
-**System now runs `.claude`-only with full governance and audit trail:**
+**Fidelity restoration, observability cleanup, and enterprise SDD layer activated:**
 
-✅ **Versioning System**
+✅ **Skills-First Architecture (v3.0.0)**
 
-- Active system consolidated under `.claude/`
-- 8 agents and expanded modular skill packs, including business analysis and domain-specific security
+- Active system consolidated under `.claude/` — 8 agents, 23 skills, 7 path-scoped rules
 - Legacy `.ai` generation archived under `docs/history/legacy-ai/`
+- `engineering-principles` and `coding-conventions` skills restored and wired to architect + engineer
 
-✅ **Architecture Documentation**
+✅ **Observability — Fresh Start**
 
-- [AI System](docs/ai-system.html) generated from the live `.claude` tree
-- [Orchestration](https://eugenioduarte.github.io/FUSE/demonstration-orchestration.html) updated for the active agent network
-- Public documentation now includes commands, SDDs, templates, observability, and runtime hooks
+- All mock/legacy CSV data removed — real sessions only from 2026-03-22
+- `token-usage.csv`, `orchestration.csv`, `pr-costs.csv` — clean headers, real rows
+- `token-analysis.md` rewritten for Claude-only architecture
+- Stop hook active: every session end appends to CSV automatically
 
-✅ **Token Economics**
+✅ **Enterprise SDD Layer — Active**
 
-- Historical analytics preserved and moved into `.claude/observability/`
-- Runtime hooks now write directly to the active observability surface
-- GitHub Pages analytics now read from `.claude/observability/`
+- `.claude/sdd/system/` confirmed active (not "proposed")
+- 4 formal contracts: SDD, orchestrator, delivery, context
+- Domain contexts bootstrapped: `auth`, `dashboard`
+- Jira → raw intake → orchestrator → modular SDDs workflow defined
 
-✅ **GitHub Pages Updates**
+✅ **Agent Memory — Populated**
 
-- [Dashboard](https://eugenioduarte.github.io/FUSE/demonstration-orchestration.html) with Architecture & Versioning section
-- [Analytics](https://eugenioduarte.github.io/FUSE/analytics.html) with Token Economics KPIs
+- `architect`: 3 real entries (layer contract, AI system decision, SDD status)
+- `engineer`: 5 real entries (GlobalLoadingObserver, flat store, navigation, hydration, dependencies)
+- `reviewer`: git commit authorship policy
+
+✅ **GitHub Wiki — Removed**
+
+- Wiki disabled and local wiki directory removed
+- All documentation now lives in `docs/` (GitHub Pages) — single source of truth
 
 ---
 

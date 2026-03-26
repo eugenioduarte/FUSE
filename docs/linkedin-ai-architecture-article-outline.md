@@ -1,2161 +1,511 @@
-# Como Construí um Sistema de IA Multi-Agente para Desenvolvimento React Native
+# Como Transformei o `.claude/` em um Sistema de Engenharia com Agentes, Skills, SDD e MCP
 
-> Esboço de artigo para LinkedIn sobre a arquitetura .ai do projeto FUSE
+Eu não queria mais usar IA como um "chat esperto" que ajuda de vez em quando.
 
----
+Eu queria um sistema.
 
-## 📋 Estrutura do Artigo
+Um sistema que entendesse arquitetura, respeitasse contratos, separasse responsabilidades, mantivesse contexto ao longo do tempo e ajudasse a transformar pedidos em entregas reais sem virar caos.
 
-### 1. Hook de Entrada (O Problema)
+Foi isso que comecei a construir no FUSE dentro do `.claude/`.
 
-- **Título sugerido**: "De 40 horas para 10: Como eliminei 75% do tempo de desenvolvimento sem perder qualidade"
-- Contexto: Desenvolvimento solo de app React Native
-- Dor: Tarefas repetitivas, contexto perdido entre sessões, código inconsistente
-- Momento de insight: "E se criasse agentes especializados em vez de um assistente genérico?"
+E o resultado deixou de ser só um conjunto de prompts.
 
----
+Hoje o `.claude/` funciona como uma camada operacional de engenharia: com agents especializados, skills reutilizáveis, rules contextuais, observability, comandos de execução e uma extensão enterprise para geração de SDDs guiada por contexto de domínio e integração com Jira e Figma via MCP.
 
-### 2. A Solução: Arquitetura de Agentes Especializados
+Este artigo documenta todas as decisões, fluxos e aprendizados — com uma análise honesta do que funciona, o que ainda está imaturo e o que aprendemos com o processo.
 
-#### 2.1 O Conceito Central
+---image
 
-- Sistema de orquestração em vez de assistente único
-- Cada agente = uma especialidade (arquiteto, engenheiro, revisor, tester)
-- Contratos obrigatórios que nenhum agente pode violar
+## O problema que eu queria resolver
 
-#### 2.2 Os Agentes (Quem Faz O Quê)
+Quem trabalha sozinho ou em times pequenos conhece esse padrão:
 
-- **frontend-architect**: Decisões arquiteturais e SDDs
-- **react-native-engineer**: Implementação de features
-- **test-writer** e **test-write-e2e**: Testes automatizados
-- **code-reviewer**: Quality gates pré-merge
-- **sonar-auto-fixer**: Correção automática de code smells
-- **performance-auditor**: Otimização e profiling
-- **coupling-analyzer**: Análise estrutural do código
+- cada sessão começa com perda de contexto
+- decisões arquiteturais ficam espalhadas
+- regras viram "boas intenções" em vez de contratos
+- a IA ajuda em partes, mas não mantém consistência no sistema inteiro
 
----
+O problema nunca foi só produtividade.
 
-### 3. A Inovação: Router LLM Inteligente
+O problema era **previsibilidade**.
 
-#### 3.1 O Problema de Custo
+Eu queria reduzir o custo de pensar tudo do zero a cada tarefa, sem abrir mão de qualidade técnica.
 
-- Claude é caro, mas poderoso
-- Maioria das tarefas são mecânicas (boilerplate, tests)
+E mais: eu queria que a IA operasse dentro de um sistema de engenharia real — com as mesmas restrições, os mesmos contratos e as mesmas expectativas que eu teria de um desenvolvedor sênior.
 
-#### 3.2 A Solução Híbrida
-
-- **Local (Ollama llama3.2)**: Tarefas determinísticas (65% dos casos)
-- **Remote (Claude Sonnet 4)**: Raciocínio complexo, arquitetura, reviews (35% dos casos)
-- **Economia real**: ~35% vs Claude-only setup
-- **Sistema versionado**: Agents v1.0.0, Skills v1.0.0 para audit trail completo
-- **Cache efficiency**: 173x multiplier no Claude (reutilização de prompts estruturados)
+Então, em vez de depender de um único assistente genérico, comecei a estruturar um ecossistema em que cada parte tivesse um papel claro.
 
 ---
 
-### 4. Contratos Arquiteturais Rígidos
+## A evolução do sistema: três gerações em três dias
 
-#### 4.1 Por Que Regras Obrigatórias?
+O sistema passou por três gerações entre 23 e 26 de março de 2026.
 
-- Consistência > Conveniência
-- Código previsível e testável
-- Onboarding mais rápido
+**v1.0.0 (23/03):** 14 agents inicializados. O problema era óbvio desde o começo — responsabilidades sobrepostas, `frontend-architect` e `coupling-analyzer` fazendo coisas parecidas, `react-native-engineer` e `logic-engineer` sem separação real. Mais agents não significam mais qualidade.
 
-#### 4.2 Exemplos de Contratos
+**v2.0.0 (24/03):** Consolidação de 14 para 7 agents. Absorções importantes:
+- `frontend-architect` + `coupling-analyzer` → `architect`
+- `react-native-engineer` + `logic-engineer` → `engineer`
+- `code-reviewer` + `pr-review-fixer` → `reviewer`
+- `performance-auditor` + `sonar-auto-fixer` → `quality`
+- `ui-designer` + `doc-designer` + `business-analyst` → `design-docs`
 
-- Model → Service → Query → Hook → Screen (sem atalhos)
-- TypeScript estrito (zero `any` implícito)
-- Co-localização de features
-- Cobertura ≥90% em business logic
+**v3.0.0 (25/03):** Migração Skills-First. O sistema `.ai/` (com um `system.md` de 1200 linhas) foi arquivado em `docs/history/legacy-ai/`. O `.claude/` se tornou o sistema ativo com arquitetura completamente diferente: entrypoint de 80 linhas, rules path-scoped, agents lean com frontmatter YAML, e skills como diretórios independentes.
 
----
+A lição aqui é simples: **simplicidade é uma decisão arquitetural, não uma limitação**.
 
-### 5. Auto-Aprendizado: O Sistema Que Se Corrige
+---image
 
-#### 5.1 claude-self-modifying.md
+## A primeira virada: sair de prompt solto e criar arquitetura
 
-- Registro vivo de decisões e padrões aprendidos
-- Cada erro se torna uma regra
-- Contexto preservado entre sessões
+A base de tudo foi entender que o sistema precisava de um entrypoint leve e forte ao mesmo tempo.
 
-#### 5.2 Exemplo Prático
+No FUSE, esse papel ficou com o `CLAUDE.md`.
 
-- Problema descoberto: Loading overlay inconsistente
-- Solução implementada: GlobalLoadingObserver
-- Regra registrada: Nunca mais chamar overlay manualmente
-- Resultado: Zero recorrência do problema
+Ele não tenta carregar tudo. Ele define identidade, invariantes, routing e operating model em 80 linhas.
 
----
+Em volta dele, o sistema foi separado em camadas com contratos claros:
 
-### 6. Automação Completa do Fluxo
+| Camada | Responsabilidade |
+|---|---|
+| `agents/` | Papéis de execução com tools restritas |
+| `skills/` | Conhecimento reutilizável carregado sob demanda |
+| `rules/` | Guardrails ativados por contexto de arquivo |
+| `agent-memory/` | Memória persistente por role |
+| `commands/` | Fluxos operacionais invocáveis |
+| `observability/` | Métricas, token tracking, router |
+| `sdd/` | Backlog, design documents e enterprise layer |
 
-#### 6.1 De Feature Request a PR
+Essa separação mudou tudo.
 
-1. User solicita feature
-2. Architect cria SDD
-3. Engineer implementa
-4. Test-writer gera testes
-5. Code-reviewer valida
-6. Sonar-auto-fixer corrige issues
-7. PR pronto (sem intervenção manual)
+Quando a IA deixa de carregar tudo no mesmo prompt e passa a operar com contratos bem definidos, ela deixa de ser só uma interface conversacional e começa a parecer uma plataforma interna.
 
-#### 6.2 Scripts de Produtividade
+### O contrato arquitetural do domínio de produto
 
-- `pr-lifecycle.sh`: Ciclo completo automatizado
-- `trigger-sonar-fix.sh`: Fix de quality gates
-- `analyze-coupling.sh`: Métricas estruturais
-
----
-
-### 7. Resultados Mensuráveis
-
-#### 7.1 Antes vs Depois
-
-- **Tempo de feature**: 8h → 2h
-- **Cobertura de testes**: 95%+
-- **Custo de tokens**: 35% economia vs Claude-only
-- **Cache efficiency**: 329M tokens em cache reads (173x multiplier)
-- **ROI break-even**: < 1 mês de operação
-- **Token distribution**: 65% local (Ollama) / 35% remote (Claude)
-
-#### 7.2 Ganhos Qualitativos
-
-- Menos context switching
-- Código mais consistente
-- Decisões arquiteturais documentadas
-- Onboarding de novos devs facilitado
-- Sistema auto-documentável com versionamento completo
-
----
-
-### 8. Lições Aprendidas
-
-#### 8.1 O Que Funcionou
-
-- Especialização > Generalização
-- Contratos rígidos criam liberdade
-- Local first, remote when needed
-- Documentação como código
-
-#### 8.2 O Que Surpreendeu
-
-- Modelo local resolve 70% dos casos
-- Auto-aprendizado elimina regressões
-- Automação não elimina criatividade, amplifica
-
-#### 8.3 Erros Evitados
-
-- ❌ Não criar um "super agente" que faz tudo
-- ❌ Não depender 100% de Claude (custo proibitivo)
-- ❌ Não deixar regras "sugeridas" em vez de obrigatórias
-
----
-
-### 9. O Futuro: Próximos Passos
-
-#### 9.1 Melhorias Planejadas
-
-- Agente de documentação automática
-- Integration com CI/CD (GitHub Actions)
-- Métricas de código em dashboard
-- Expansão do sistema para backend
-
-#### 9.2 Visão de Longo Prazo
-
-- Sistema de IA como "desenvolvedor sênior" virtual
-- Propagação do modelo para outros projetos
-- Open source (talvez?)
-
----
-
-### 10. Call to Action
-
-#### 10.1 Para Desenvolvedores
-
-- "Qual tarefa repetitiva você poderia delegar para um agente?"
-- Convite para discussão nos comentários
-
-#### 10.2 Para Líderes Técnicos
-
-- "Como IA assistida pode escalar seu time sem contratar?"
-- Disponibilidade para consulta
-
-#### 10.3 Fechamento
-
-- Mensagem inspiracional sobre o futuro do desenvolvimento
-- Agradecimento aos que contribuíram/inspiraram
-
----
-
-## 📝 Observações de Formato LinkedIn
-
-### Tamanho Ideal
-
-- **Introdução**: 2-3 parágrafos (gancho emocional)
-- **Desenvolvimento**: 1200-1500 palavras
-- **Seções**: Usar emojis para quebrar visualmente
-- **Imagens**: Incluir 2-3 diagramas (Mermaid → PNG)
-
-### Otimização de Engajamento
-
-- **Primeira linha**: Frase de impacto (aparece no feed)
-- **Hashtags**: #AI #ReactNative #SoftwareEngineering #Productivity #DevTools
-- **Menções**: Marcar tecnologias (@Expo, @OpenAI se relevante)
-- **CTA claro**: Perguntar algo no final para gerar comentários
-
-### Tom de Escrita
-
-- ✅ Primeira pessoa ("Eu construí", "Aprendi")
-- ✅ Humilde mas confiante
-- ✅ Técnico mas acessível (explicar jargões)
-- ✅ Storytelling (jornada, não tutorial)
-- ❌ Evitar: Tom corporativo, jargões excessivos, arrogância
-
----
-
-## 🎯 Métricas de Sucesso Esperadas
-
-Para artigo LinkedIn bem executado:
-
-- 1000-5000 impressões (network médio)
-- 50-200 reações
-- 10-30 comentários
-- 5-15 compartilhamentos
-- Possíveis conexões de recrutadores/CTOs
-
----
-
-## 🔄 Próximos Passos Sugeridos
-
-1. ✅ Esboço criado
-2. ⏭️ Escrever primeira versão completa
-3. ⏭️ Gerar diagramas (exportar Mermaid como PNG)
-4. ⏭️ Revisar tom e storytelling
-5. ⏭️ Publicar e monitorar engajamento
-6. ⏭️ Responder comentários ativamente (primeiras 24h críticas)
-
----
-
-**Status**: **Pronto para publicação ✅ (2026-03-23)**
-
-_Documento atualizado com métricas reais do período 16-23 Março 2026, inclui análise de ROI e documentação de arquitetura consolidada._
-
----
-
----
-
-# 🔧 EXPLICAÇÃO TÉCNICA COMPLETA: Arquitetura `.ai`
-
-> Documentação técnica detalhada de como funciona todo o sistema de IA multi-agente do projeto FUSE
-
----
-
-## 📚 Índice da Explicação Técnica
-
-1. [Visão Geral da Arquitetura](#1-visão-geral-da-arquitetura)
-2. [System.md - O Orquestrador Central](#2-systemmd---o-orquestrador-central)
-3. [Agentes Especializados](#3-agentes-especializados)
-4. [Router LLM - Decisões de Roteamento](#4-router-llm---decisões-de-roteamento)
-5. [Rules - Contratos Obrigatórios](#5-rules---contratos-obrigatórios)
-6. [Skills - Conhecimento Modular](#6-skills---conhecimento-modular)
-7. [Templates - Estruturas Reusáveis](#7-templates---estruturas-reusáveis)
-8. [Scripts - Automação](#8-scripts---automação)
-9. [Claude Self-Modifying - Aprendizado Contínuo](#9-claude-self-modifying---aprendizado-contínuo)
-10. [Fluxos de Trabalho Completos](#10-fluxos-de-trabalho-completos)
-11. [Tracking de Custos](#11-tracking-de-custos)
-12. [Versioning & Governance](#12-versioning--governance)
-13. [Architecture Visualization](#13-architecture-visualization)
-
----
-
-## 1. Visão Geral da Arquitetura
-
-### 1.1 Filosofia Central
-
-O sistema `.ai` **não é um assistente genérico**. É um **sistema de engenharia constrangido** onde:
-
-- Cada agente tem **uma especialidade bem definida**
-- Todos os agentes compartilham os **mesmos contratos arquiteturais**
-- O sistema **impõe regras não negociáveis**
-- A qualidade é **validada automaticamente em cada etapa**
-
-### 1.2 Estrutura de Diretórios
-
-```
-.ai/
-├── system.md                    # Orquestrador principal - ENTRY POINT
-├── agents-orchestration.md      # Documentação de fluxos e coordenação
-├── claude-self-modifying.md     # Registro vivo de aprendizados
-├── agents/                      # Agentes especializados (15 arquivos)
-│   ├── README.md               # Índice e overview
-│   ├── frontend-architect.md   # REMOVIDO (não existe mais)
-│   ├── react-native-engineer.md
-│   ├── code-reviewer.md
-│   ├── test-writer.md
-│   ├── test-write-e2e.md
-│   ├── performance-auditor.md
-│   ├── sonar-auto-fixer.md
-│   ├── coupling-analyzer.md
-│   ├── pr-lifecycle.md
-│   └── ... (outros agentes)
-├── router/                      # Estratégia de roteamento LLM
-│   ├── router.md               # Decisões local vs remote
-│   ├── token-usage.md          # Log de uso de tokens
-│   └── orchestration.csv       # Métricas de roteamento
-├── rules/                       # Regras obrigatórias não negociáveis
-│   ├── mandatory-rules.md      # Regras fundamentais
-│   ├── folder-structure.md     # Estrutura de pastas obrigatória
-│   ├── git-workflow.md         # Fluxo de commit/PR
-│   ├── naming-conventions.md   # Padrões de nomenclatura
-│   └── engineering-principles.md
-├── skills/                      # Conhecimento modular reutilizável
-│   ├── project-architecture.md # Arquitetura em camadas
-│   ├── react-native-best-practices.md
-│   ├── typescript-strict-rules.md
-│   ├── clean-code-rules.md
-│   ├── ux-ui-standards.md
-│   ├── api-integration-pattern.md
-│   ├── coupling-analysis.md
-│   └── translations.md
-├── templates/                   # Templates de código
-│   ├── screen-template.md
-│   ├── hook-template.md
-│   └── feature-template.md
-├── scripts/                     # Automação shell
-│   ├── pr-lifecycle.sh
-│   ├── trigger-sonar-fix.sh
-│   ├── analyze-coupling.sh
-│   ├── generate-dashboard.sh
-│   └── ... (17 scripts)
-├── _sdd/                        # Software Design Documents
-│   ├── example/
-│   └── infra/
-├── business/                    # Contexto de negócio
-├── docs/                        # Documentação adicional
-└── security/                    # Políticas de segurança
-```
-
-### 1.3 Princípios de Design
-
-1. **Separation of Concerns**: Cada agente tem UMA responsabilidade
-2. **Contract-First**: Regras definem o que pode ser feito
-3. **Fail Fast**: Violações são rejeitadas imediatamente
-4. **Cost-Aware**: Router inteligente economiza tokens
-5. **Self-Improving**: Sistema aprende com cada iteração
-
----
-
-## 2. System.md - O Orquestrador Central
-
-### 2.1 Papel do System.md
-
-O `system.md` é o **cérebro do sistema**. Quando um LLM inicia no projeto, ele lê este arquivo PRIMEIRO. O system.md:
-
-- **Define identidade**: "Você é o System Orchestrator"
-- **Carrega contexto**: Tipo de projeto (React Native Expo)
-- **Impõe contratos**: Referencia todas as regras obrigatórias
-- **Roteia pedidos**: Analisa a solicitação e delega ao agente correto
-
-### 2.2 Estrutura do System.md
-
-```markdown
-# 🧠 System — Engineering Orchestrator & Contract Loader
-
-## 🎯 Project Context
-
-- React Native (Expo) mobile application
-- Mobile runtime constraints (JS thread, native thread, frame budget)
-
-## 🏗 Architecture Model
-
-Model → Service → Query → Hook → Screen
-(camadas obrigatórias, sem atalhos)
-
-## 📁 Folder Structure Enforcement
-
-Referencia: .ai/rules/folder-structure.md
-(Co-localização de features obrigatória)
-
-## 🔒 Mandatory Rules
-
-Referencia: .ai/rules/mandatory-rules.md
-
-- Strict TypeScript (zero `any` implícito)
-- Architectural boundaries (sem lógica de negócio em screens)
-- Coverage ≥80%
-
-## 🏷 Naming Conventions
-
-Referencia: .ai/rules/naming-conventions.md
-
-## 🔁 Git Workflow
-
-Referencia: .ai/rules/git-workflow.md
-
-- Nunca auto-commit
-- Nunca auto-push
-- Conventional Commits obrigatório
-
-## 🎨 Design System Enforcement
-
-Referencia: .ai/skills/ux-ui-standards.md
-(Cores, tipografia, spacing do theme)
-
-## Request Routing Logic
-
-if (request === "design feature") → frontend-architect
-if (request === "implement feature") → react-native-engineer
-if (request === "write tests") → test-writer
-if (request === "review code") → code-reviewer
-if (request === "fix performance") → performance-auditor
-...
-```
-
-### 2.3 Como o Roteamento Funciona
-
-**Fluxo:**
-
-```
-1. Usuário faz pedido
-   ↓
-2. System.md analisa keywords
-   ↓
-3. System.md identifica agente correto
-   ↓
-4. System.md invoca agente
-   ↓
-5. Agente carrega suas skills
-   ↓
-6. Agente valida contra mandatory-rules
-   ↓
-7. Agente executa tarefa
-   ↓
-8. System.md retorna resultado
-```
-
-**Exemplo de análise:**
-
-```
-Pedido: "Criar tela de login com validação"
-
-System.md analisa:
-- Keywords: "criar", "tela" → IMPLEMENTAÇÃO
-- Verifica: Já existe SDD? → Se NÃO, delega para frontend-architect primeiro
-- Se SIM → Delega para react-native-engineer
-
-react-native-engineer carrega:
-- react-native-best-practices.md
-- typescript-strict-rules.md
-- clean-code-rules.md
-- ux-ui-standards.md
-- project-architecture.md
-
-Valida contra mandatory-rules.md:
-- Estrutura de pasta correta?
-- TypeScript estrito?
-- Separação de camadas?
-
-Executa:
-- Cria login.screen.tsx (UI pura)
-- Cria login.hook.ts (lógica)
-- Cria login.schema.ts (validação Zod)
-- Cria __tests__/login.hook.test.tsx
-
-Resultado: Feature completa seguindo todos os contratos
-```
-
----
-
-## 3. Agentes Especializados
-
-### 3.1 Frontend Architect (NOTA: arquivo não existe mais, mas função persiste)
-
-**Papel**: Define arquitetura e cria Software Design Documents (SDDs)
-
-**Quando usar**:
-
-- Nova feature complexa
-- Decisão arquitetural cross-cutting
-- Trade-offs entre abordagens
-
-**Modelo**: Claude Sonnet (sempre remote)
-
-**Skills carregadas**:
-
-- `project-architecture.md`
-- `ux-ui-standards.md`
-
-**Output típico**: SDD em `.ai/_sdd/` com:
-
-- Contexto e problema
-- Decisões arquiteturais
-- Estrutura de pastas
-- Modelos de dados
-- Fluxos de navegação
-- Validações e edge cases
-
----
-
-### 3.2 React Native Engineer
-
-**Papel**: Implementa features, componentes, hooks seguindo os contratos
-
-**Quando usar**:
-
-- Criar telas/componentes
-- Implementar business logic
-- Integrar APIs
-- Refatorar código
-
-**Modelo**: **DINÂMICO** (ver router)
-
-- Local (qwen2.5-coder) para boilerplate
-- Claude Sonnet para refactors complexos
-
-**Skills carregadas** (TODAS):
-
-- `react-native-best-practices.md`
-- `typescript-strict-rules.md`
-- `clean-code-rules.md`
-- `ux-ui-standards.md`
-- `api-integration-pattern.md`
-- `project-architecture.md`
-- `translations.md`
-
-**Contrato de implementação**:
-
-```
-ANTES de escrever código, confirmar:
-1. ✅ Feature structure exists
-2. ✅ Domain model is defined
-3. ✅ API contract is defined
-4. ✅ Navigation flow is defined
-5. ✅ State strategy is defined
-
-Se faltando → Escalar para architect
-```
-
-**Fluxo de API Integration**:
-
-```
-Model → DTO → Service → Repository → DAO → SQLite
-                                     ↑
-                                API (background sync)
-                                     ↓
-                              Hook ← Screen
-```
-
-**Regra offline-first**: Todo hook funciona sem rede. Dados vêm do SQLite. Sync em background.
-
----
-
-### 3.3 Code Reviewer
-
-**Papel**: Quality gate pré-merge, detecta violações arquiteturais
-
-**Quando usar**:
-
-- Antes de commit
-- PR reviews
-- Validação de mudanças
-
-**Modelo**: Claude Sonnet (sempre remote)
-
-**Por quê remote?**: Precisa analisar contexto do codebase inteiro, padrões sutis.
-
-**Dimensões de Review**:
-
-1. **TypeScript & Contracts**
-   - ❌ Reject: `any` usado sem razão forte
-   - ❌ Reject: DTO vaza para UI
-   - ❌ Reject: `useState` sem typing explícito
-
-2. **Architecture Boundaries**
-   - ❌ Reject: Business logic em screen
-   - ❌ Reject: Services importando UI
-   - ❌ Reject: Query layer vazando shape da API
-
-3. **List Rendering (CRÍTICO mobile)**
-   - ❌ Reject: `ScrollView` usado para listas dinâmicas
-   - ✅ Exigir: `FlatList` ou `FlashList` com virtualization
-
-4. **Performance Mobile**
-   - ❌ Reject: Animações sem `Reanimated` (quando complexo)
-   - ❌ Reject: Heavy computation no JS thread
-   - ✅ Exigir: Profiling antes/depois em PRs de performance
-
-5. **Testing**
-   - ❌ Reject: Coverage <80% em business logic
-   - ❌ Reject: Testes acoplados a implementação
-
-**Triggers de rejeição automática**:
-
-```
-- any usado
-- ScrollView com data dinâmica
-- Business logic em .screen.tsx
-- Import de DTO em componente UI
-- Coverage <80% em hooks
-- Commit sem mensagem conventional
-```
-
----
-
-### 3.4 Test Writer
-
-**Papel**: Gera testes unitários e de integração
-
-**Quando usar**:
-
-- Após implementar hook
-- Após criar service/adapter
-- Coverage gaps detectados
-
-**Modelo**: Local (qwen2.5-coder) - **SEMPRE**
-
-**Por quê local?**: Testes são mapping mecânico:
-
-```
-Hook input → Expected output
-Service function → Mock API response → Assert transformed model
-```
-
-**Template de teste**:
-
-```typescript
-// hook.test.ts
-describe('useFeature', () => {
-  it('should load data on mount', async () => {
-    // Arrange: mock query
-    // Act: render hook
-    // Assert: data loaded
-  })
-
-  it('should handle error gracefully', async () => {
-    // Arrange: mock error
-    // Act: render hook
-    // Assert: error state
-  })
-})
-```
-
-**Target**: ≥90% coverage em hooks (business logic crítica)
-
----
-
-### 3.5 Test Write E2E
-
-**Papel**: Gera testes E2E com Maestro
-
-**Quando usar**:
-
-- Após feature completion
-- User flows críticos
-
-**Modelo**: Local (qwen2.5-coder) - **SEMPRE**
-
-**Input**: `flow.md` (Given/When/Then)
-
-**Output**: `.yaml` Maestro
-
-**Exemplo de mapping**:
-
-```markdown
-## Fluxo: Usuário faz login
-
-- Given: App aberto na tela de onboarding
-- When: Usuário toca em "Login"
-- When: Usuário preenche email e senha
-- When: Usuário toca em "Entrar"
-- Then: Usuário vê home screen
-```
-
-```yaml
-# login.yaml (gerado)
-appId: com.fuse.app
----
-- launchApp
-- assertVisible: 'Login'
-- tapOn: 'Login'
-- inputText: 'test@example.com'
-- tapOn: 'Email'
-- inputText: 'password123'
-- tapOn: 'Password'
-- tapOn: 'Entrar'
-- assertVisible: 'Home'
-```
-
----
-
-### 3.6 Sonar Auto-Fixer
-
-**Papel**: Corrige automaticamente issues do SonarQube
-
-**Quando usar**:
-
-- Quality gate falha em PR
-- Manual trigger `/fix-sonar`
-
-**Modelo**: DINÂMICO
-
-- Local: Issues mecânicas (unused imports, complexity simples)
-- Claude: Issues arquiteturais (cognitive complexity, duplicação)
-
-**Fluxo**:
-
-```
-1. PR criado
-2. CI roda Sonar scan
-3. Quality gate FAIL
-4. Webhook trigger sonar-auto-fixer
-5. Agent lê issues via Sonar API
-6. Para cada issue:
-   - Se < complexidade 5 → Local fix
-   - Se ≥ complexidade 5 → Claude fix
-7. Commit fixes
-8. Re-trigger CI
-9. Quality gate PASS
-```
-
-**Tipos de fixes**:
-
-- Code smells: Extract function, reduce complexity
-- Bugs: Null checks, type corrections
-- Vulnerabilities: Input sanitization
-- Duplicação: Extract shared logic
-
----
-
-### 3.7 Performance Auditor
-
-**Papel**: Profiling, detecção de bottlenecks, otimizações
-
-**Quando usar**:
-
-- FPS drops
-- Memory leaks
-- TTI (Time To Interactive) alto
-
-**Modelo**: Claude Sonnet (sempre remote)
-
-**Por quê remote?**: Análise complexa de profiling data, trade-offs.
-
-**Ferramentas**:
-
-- React DevTools Profiler
-- Flipper (network, logs)
-- Xcode Instruments (iOS)
-- Android Studio Profiler
-
-**Checklist**:
-
-- [ ] Renders desnecessários? (memo, useMemo)
-- [ ] Heavy computation no JS thread? (mover para native)
-- [ ] Large lists sem virtualization?
-- [ ] Imagens grandes não otimizadas?
-- [ ] Animações com setState? (usar Reanimated)
-
----
-
-### 3.8 Coupling Analyzer
-
-**Papel**: Analisa fan-in/fan-out, detecta acoplamento excessivo
-
-**Quando usar**:
-
-- Sprint review
-- Antes de refactor grande
-- Detecção de "god modules"
-
-**Modelo**: Claude Sonnet (sempre remote)
-
-**Métricas calculadas**:
-
-```
-Fan-out: Quantos módulos X importa
-Fan-in:  Quantos módulos importam X
-
-Ideal:
-- Utilities: High fan-in, low fan-out
-- Features: Low fan-in, low fan-out
-- Services: Medium fan-in, low fan-out
-
-❌ Red flags:
-- High fan-out em screen (lógica dispersa)
-- High fan-in em feature (não deveria ser reutilizado)
-```
-
-**Output**: Relatório markdown com:
-
-- Top 10 módulos mais acoplados
-- Sugestões de refactor
-- Violações de boundaries
-
----
-
-### 3.9 PR Lifecycle Agent
-
-**Papel**: Gerencia PR de criação até merge **AUTONOMAMENTE**
-
-**Quando usar**:
-
-- `/pr-lifecycle` após commits prontos
-- Automático no futuro (post-hook)
-
-**Modelo**: Claude Sonnet (sempre remote)
-
-**Fluxo completo**:
-
-```
-FASE 1: Criar PR
-- git push origin <branch>
-- gh pr create --title "..." --body "..."
-
-FASE 2: Monitor CI
-- gh pr checks <PR_NUMBER> --watch
-- Se FAIL → gh run view <RUN_ID> --log-failed
-
-FASE 3: Fix Failures
-├─ ESLint fail → Read file → Fix → git commit → push
-├─ Test fail → Read test → Fix code → git commit → push
-└─ Sonar fail → Trigger sonar-auto-fixer
-
-FASE 4: Address Reviews
-- gh pr view <PR_NUMBER> --comments
-- Para cada comentário:
-  - Read context
-  - Make change
-  - Reply: "Fixed in <commit>"
-
-FASE 5: Merge
-- Todos checks PASS
-- Reviews approved
-- gh pr merge <PR_NUMBER> --squash
-```
-
-**Condições de bloqueio** (requer humano):
-
-- Breaking change detectado
-- Security vulnerability
-- Decisão arquitetural ambígua
-
----
-
-## 4. Router LLM - Decisões de Roteamento
-
-### 4.1 Por Que Dois Modelos?
-
-**Problema**: Claude é caro (~ $X por 1M tokens)
-
-**Insight**: 70% das tarefas são **mecânicas**:
-
-- Criar boilerplate
-- Gerar testes
-- Traduzir strings
-- Fix de lint
-
-**Solução**: Usar modelo local para tarefas determinísticas
-
-### 4.2 Modelos
-
-| Tipo   | Modelo            | Custo     | Velocidade | Uso                           |
-| ------ | ----------------- | --------- | ---------- | ----------------------------- |
-| Local  | qwen2.5-coder:14b | $0        | ~5s        | Boilerplate, tests, templates |
-| Remote | claude-sonnet-4-6 | Per token | ~15s       | Architecture, review, debug   |
-
-### 4.3 Estratégia de Roteamento
-
-**Always Remote (Claude)**:
-
-- `frontend-architect`: Decisões high-stakes
-- `code-reviewer`: Pattern recognition cross-codebase
-- `performance-auditor`: Análise complexa
-- `coupling-analyzer`: Análise estrutural holística
-- `pr-lifecycle`: Multi-step decision-making
-
-**Always Local (qwen2.5-coder)**:
-
-- `test-writer`: Template-driven
-- `test-write-e2e`: 1:1 mapping (flow.md → yaml)
-
-**Dynamic (react-native-engineer)**:
-
-**Complexity signals** que forçam Claude:
-
-```javascript
-const FORCE_CLAUDE_KEYWORDS = [
-  'refactor',
-  'debug',
-  'architecture',
-  'integration',
-  'migration',
-  'tradeoff',
-  'performance',
-  'optimize',
-]
-
-if (request.includes(any(FORCE_CLAUDE_KEYWORDS))) {
-  return 'claude-sonnet-4-6'
-} else {
-  return 'qwen2.5-coder:14b' // local
-}
-```
-
-**Exemplos**:
-
-```
-"Criar componente Button" → LOCAL (boilerplate)
-"Refatorar estrutura de navegação" → CLAUDE (arquitetura)
-"Adicionar tradução pt-BR" → LOCAL (mecânico)
-"Debug memory leak em lista" → CLAUDE (complexo)
-"Gerar hook useCharging" → LOCAL (template)
-"Integrar API de pagamentos" → CLAUDE (decisões de erro/retry)
-```
-
-### 4.4 Economia Real
-
-**Dados do projeto** (token-usage.md):
-
-```
-Total tokens (Março 2026):
-- Claude:  1,897,128 tokens (~70% eram evitáveis)
-- Ollama:  278,000 tokens (local, custo $0)
-
-Com router implementado:
-- Claude:  ~600,000 tokens (apenas tarefas complexas)
-- Ollama: ~1,575,000 tokens (70% do volume)
-
-Economia estimada: 68% nos custos de LLM
-```
-
----
-
-## 5. Rules - Contratos Obrigatórios
-
-### 5.1 mandatory-rules.md
-
-**Natureza**: Regras **NÃO NEGOCIÁVEIS**. Violação = rejeição automática.
-
-**Seções**:
-
-#### TypeScript Strict
-
-```markdown
-❌ FORBIDDEN:
-const [loading, setLoading] = useState(false)
-
-✅ REQUIRED:
-const [loading, setLoading] = useState<boolean>(false)
-```
-
-#### Architectural Boundaries
+O invariante mais importante do sistema não está em nenhum agent. Ele está no `CLAUDE.md`:
 
 ```
 Model → Service → Query → Hook → Screen
-(sem atalhos, sem business logic em screen)
 ```
 
-#### Screen Co-location
+- **Model:** representa domínio, nunca payload de API
+- **Service:** transporte, parsing de DTO, normalização
+- **Query:** TanStack Query para estado async e caching
+- **Hook:** lógica de negócio e handlers
+- **Screen:** apresentação apenas
 
-```
-screens/auth/login/
-  login.screen.tsx   # UI only
-  login.hook.ts      # Business logic
-  login.schema.ts    # Validation
-  __tests__/         # Tests
-```
+DTOs nunca chegam à UI. Screens não contêm lógica. Services não importam React.
 
-#### Testing Requirements
-
-- Coverage ≥80% em business logic (hooks, services)
-- Coverage ≥90% em utils críticos
-
-#### Performance Safety
-
-- No ScrollView para listas dinâmicas
-- FlatList/FlashList com virtualization
-- Reanimated para animações >30fps
+Esse contrato é verificado por agents distintos (architect no design, engineer na implementação, reviewer no gate pré-merge) — o que cria enforcement por três frentes independentes.
 
 ---
 
-### 5.2 folder-structure.md
+## Os agents: de assistentes genéricos para um sistema especializado
 
-**Define**: Estrutura de pastas obrigatória
+Uma das decisões mais importantes foi não cair na armadilha do "super agente que faz tudo".
 
-**Pattern de screen**:
+No `.claude/`, especialização é o princípio. Hoje o sistema tem 8 agents com papéis distintos:
+
+| Agent | Modelo | Tools | Especialização |
+|---|---|---|---|
+| `architect` | Sonnet | Read, Grep, Glob | SDDs, design, coupling — **somente leitura** |
+| `engineer` | Sonnet | Read, Write, Edit, Bash, Grep, Glob | Implementação dentro do contrato |
+| `reviewer` | Sonnet | Read, Grep, Glob, Bash | Quality gate pré-merge |
+| `test-writer` | Haiku | Read, Write, Edit, Bash | Testes determinísticos |
+| `quality` | Sonnet | Read, Grep, Bash | Performance, análise estática |
+| `design-docs` | Haiku | Read, Write, Edit | UI polish, documentação, business→SDD |
+| `pr-lifecycle` | Sonnet | Read, Bash | Lifecycle completo de PR |
+| `security-analyst` | Sonnet | Read, Grep, Glob | OWASP MAS 7 domínios |
+
+### Por que o `architect` é read-only?
+
+O `architect` não tem `Write` ou `Edit` em seu `tools:`. Isso é uma decisão arquitetural consciente.
+
+Um arquitecto que pode modificar código é um arquitecto que vai ceder à pressão de resolver o problema imediatamente em vez de pensar na solução correta. A restrição de ferramentas força a separação de responsabilidades no próprio sistema de agents.
+
+### A estratégia de modelo (Sonnet vs Haiku)
+
+- **Sonnet:** agents que tomam decisões arquiteturais, reviews, implementação complexa
+- **Haiku:** `test-writer` e `design-docs` (doc mode) — tarefas com padrão mais mecânico e alto volume
+
+Na geração anterior, o sistema tinha Ollama local (qwen2.5-coder:14b) para tarefas simples. A decisão de mover para Claude-only foi tomada em 25/03: a complexidade de manter dois backends LLM (remote + local) superou a economia de custo para o porte atual do projeto. A documentação desta decisão está em `.claude/observability/router.md`.
+
+---image
+
+## Skills: o conhecimento saiu do prompt e virou ativo do sistema
+
+A decisão de estruturar conhecimento como skills independentes foi uma das mais impactantes.
+
+Em vez de colocar tudo dentro das instruções dos agents, o conhecimento foi extraído para `skills/` como diretórios independentes:
 
 ```
-screens/<domain>/<feature>/
-  <feature>.screen.tsx    # MANDATORY
-  <feature>.hook.ts       # MANDATORY if business logic
-  <feature>.schema.ts     # MANDATORY if forms
-  <feature>.types.ts      # OPTIONAL
-  components/             # Screen-specific only
-  __tests__/              # MANDATORY
+skills/
+  engineering-principles/   SKILL.md + evals/
+  coding-conventions/       SKILL.md + evals/
+  api-integration/          SKILL.md + evals/ + assets/
+  clean-code/               SKILL.md + evals/ + scripts/
+  coupling-analysis/        SKILL.md + evals/ + scripts/ + references/
+  react-native-patterns/    SKILL.md + evals/ + scripts/
+  typescript-strict/        SKILL.md + evals/
+  owasp-security/           SKILL.md + evals/ + references/ (7 domínios MASVS)
+  security-auth/            SKILL.md + evals/
+  security-crypto/          SKILL.md + evals/
+  ...
 ```
 
-**Naming rules**:
+Hoje são 23 skills, cada uma com:
 
-- Folders: `kebab-case`
-- Files: `kebab-case.type.tsx`
-- Exports: `PascalCase` (components), `camelCase` (functions)
+- `SKILL.md` — conhecimento acionável, não filosófico
+- `evals/evals.json` — cenários de avaliação para verificar se a skill está sendo aplicada corretamente
+- `assets/` (quando aplicável) — templates de código, checklists
+- `scripts/` (quando aplicável) — automações de suporte (flashlist-check, complexity-check, analyze-deps)
+- `references/` (quando aplicável) — padrões externos como OWASP MAS por domínio
+
+### O que é uma "boa skill"?
+
+Uma skill ruim é uma lista de regras. Uma boa skill é conhecimento que um agente pode aplicar a uma situação específica e chegar a uma conclusão correta.
+
+Por exemplo, a skill `engineering-principles` não diz "escreva código simples". Ela diz:
+
+> **Simplicity Scales:** Prefer small pure functions, flat structures, and explicit flow. If a solution increases cognitive load, it must provide measurable value to justify that cost.
+
+Isso é aplicável a uma decisão real. "Escreva código simples" não é.
+
+### Por que extrair princípios de engenharia como skill?
+
+O legado tinha um `engineering-principles.md` com 12 princípios e suas motivações. Durante a migração, esse arquivo foi descartado com a justificativa de "implícito agora".
+
+Isso foi um erro. Princípios sem motivação explícita não sobrevivem à rotatividade — eles degeneram em regras sem contexto que ninguém sabe por que existem.
+
+A restauração desses princípios como skill `engineering-principles` garante que o `architect` e o `engineer` sempre tenham acesso ao "por quê" das decisões, não apenas ao "o quê".
 
 ---
 
-### 5.3 git-workflow.md
+## Rules: o sistema só fica sério quando guardrail vira contrato
 
-**Regras de commit**:
+Eu também não queria um sistema em que as regras fossem opcionais ou globais.
 
-- Conventional Commits obrigatório
-- Nunca auto-commit (sempre pedir confirmação)
-- Nunca auto-push (usuário controla quando)
-- Husky valida mensagem no pre-commit
+Por isso o `.claude/` ganhou `rules/` **path-scoped**.
 
-**Formato**:
+As regras entram por contexto de arquivo. Isso é uma diferença fundamental em relação ao legado.
+
+### O sistema legado vs o sistema atual
+
+No legado, `mandatory-rules.md` tinha 225 linhas de regras globais. Todo agent carregava tudo o tempo todo. Isso era ineficiente e contraproducente.
+
+No sistema atual:
+
+| Rule | Ativa quando... | Cobre |
+|---|---|---|
+| `git.md` | Editando `.gitignore`, `.github/**` | Commit discipline, auto-push proibido |
+| `hooks.md` | Editando `*.hook.ts/tsx` | Naming, side effects, API shape |
+| `screens.md` | Editando `src/screens/**` | Presentation-first, co-location, StyleSheet |
+| `services.md` | Editando `src/services/**` | DTO boundaries, validação externa |
+| `tests.md` | Editando `__tests__/**`, `*.test.*` | Coverage targets, no real API calls |
+| `typescript.md` | Editando `src/**/*.ts/tsx` | No implicit any, exhaustive switch |
+| `performance.md` | Editando `src/**/*.ts/tsx` | Performance, state, memory, native, code quality, determinism |
+
+### Rastreabilidade: 12 regras obrigatórias do legado → 7 rules atuais
+
+O legado tinha 12 mandatory-rules. Auditei a cobertura uma por uma:
+
+| Regra legada | Cobertura atual |
+|---|---|
+| 1. Strict TypeScript | `typescript.md` — completa |
+| 2. Architectural Boundaries | `CLAUDE.md` + `hooks.md` + `screens.md` — completa |
+| 3. Screen Co-location | `screens.md` — completa |
+| 4. Test Coverage | `tests.md` — completa |
+| 5. Git Discipline | `git.md` — completa |
+| 6. Performance Safety | `performance.md` — restaurada |
+| 7. State Management | `performance.md` — restaurada |
+| 8. Memory Safety | `performance.md` — restaurada |
+| 9. Native Safety | `performance.md` — restaurada |
+| 10. Encapsulation | `screens.md` — parcial |
+| 11. Code Quality | `performance.md` — restaurada |
+| 12. Determinism | `performance.md` — restaurada |
+
+6 das 12 regras estavam sem cobertura após a migração. Foram restauradas em `rules/performance.md` — um arquivo que consolida as regras de comportamento de runtime que o sistema havia perdido.
+
+---image
+
+## Agent Memory: a diferença entre scaffolding e conhecimento real
+
+Uma das partes mais importantes — e mais negligenciadas — do sistema é o `agent-memory/`.
+
+Cada role tem um diretório de memória:
 
 ```
-<type>(<scope>): <subject>
-
-feat(auth): add biometric login
-fix(charging): resolve memory leak in list
-refactor(navigation): extract route config
-test(hooks): increase coverage to 95%
+agent-memory/
+  architect/README.md
+  engineer/README.md
+  reviewer/README.md
+  test-writer/README.md
+  quality/README.md
+  design-docs/README.md
+  pr-lifecycle/README.md
+  security-analyst/README.md
 ```
 
-**Types válidos**: feat, fix, refactor, test, docs, style, chore
+No momento da migração, todos esses arquivos eram stubs com uma linha de descrição de propósito. Scaffolding sem substância.
+
+O legado tinha um artefato chamado `claude-self-modifying.md` — um log vivo de padrões aprendidos em sessões anteriores. Era o único mecanismo de memória persistente real do sistema. E foi descartado na migração.
+
+### Padrões recuperados para o engineer memory
+
+Hoje o `agent-memory/engineer/README.md` tem 5 entradas reais:
+
+1. **GlobalLoadingObserver:** nunca chamar `overlayActions.open('loading')` manualmente — o observer usa `useIsFetching()` e `useIsMutating()` globalmente
+2. **Flat store:** sem slices, sem domains, sem flows — `{name}.store.ts` com Zustand `create()` + state + actions + hooks no mesmo arquivo
+3. **Navigation:** `useEffect` + `router.replace()`, nunca `<Redirect>` — causa white screen no Expo Router antes do router estar pronto
+4. **Hydration:** campo `rehydrated` não pode ser persistido — race condition com `onRehydrateStorage` causa white screen permanente
+5. **Dependencies:** nunca `"latest"` para pacotes críticos — descoberto quando Firebase `"latest"` resolveu major diferente no CI
+
+Cada entrada tem `Rule`, `Why` e `Applies to`. O "Why" é a parte mais importante — é o que permite julgar casos de borda, não apenas seguir regras cegamente.
+
+### O que ainda está imaturo
+
+5 dos 8 agent-memory files continuam como stubs: `test-writer`, `quality`, `design-docs`, `pr-lifecycle` e `security-analyst`. Para roles frequentemente invocados, isso representa uma perda de acúmulo real. Cada decisão tomada por esses agents que não é registrada precisa ser redescoberta na próxima sessão.
 
 ---
 
-### 5.4 naming-conventions.md
+## A extensão enterprise: SDD como sistema, não só como documento
 
-**Componentes**:
+O `.claude/sdd/system/` é a camada de design e orquestração enterprise do sistema.
 
-```typescript
-// ✅ Correto
-export const LoginButton: React.FC<Props> = ({ onPress }) => {}
+O objetivo não era criar mais uma camada bonita. Era resolver um problema real: como transformar um pedido vindo de negócio ou de Jira em uma cadeia de design e execução com menos improviso e mais rastreabilidade.
 
-// ❌ Errado
-export const loginbutton = ({ onPress }) => {}
-```
+### Os quatro contratos
 
-**Hooks**:
+O sistema tem 4 contratos formais que são mutuamente consistentes:
 
-```typescript
-// ✅ Correto
-export const useLogin = () => {}
+**`sdd-contract.md`** — define as 9 seções obrigatórias de todo SDD:
+- Objective, Scope, Inputs, Dependencies, Decisions, Implementation Notes, Acceptance Criteria, Risks, Status
 
-// ❌ Errado
-export const LoginHook = () => {}
-```
+**`orchestrator-contract.md`** — define o papel do orquestrador de work item:
+- Responsabilidades: classificar domínio, identificar módulos necessários, definir ordem de execução, validar gates
+- Proibições: nunca implementar diretamente, nunca assumir contexto que não está nos arquivos de domínio
+- 6 status válidos: `draft`, `ready`, `in_progress`, `blocked`, `done`, `cancelled`
 
-**Types**:
+**`delivery-contract.md`** — define o que constitui evidência de entrega:
+- Testes passando, PR com descrição, reviewer sign-off, CI verde
 
-```typescript
-// ✅ Correto
-export type UserModel = {}
-export interface LoginFormData {}
+**`context-contract.md`** — define o que cada domínio deve ter:
+- `_context.md`, `_architecture.md`, `_decisions.md`, `_shared-components.md`
 
-// ❌ Errado
-export type user = {}
-export type IUser = {} // No "I" prefix
-```
-
----
-
-## 6. Skills - Conhecimento Modular
-
-### 6.1 O Que São Skills?
-
-Skills são **documentos de conhecimento reutilizável** que agentes carregam quando necessário.
-
-**Diferença de Rules**:
-
-- Rules = Lei (obrigatório, rejeita violação)
-- Skills = Conhecimento (guia como fazer bem)
-
-### 6.2 project-architecture.md
-
-**Define**: Arquitetura em camadas do app
+### O fluxo de trabalho: de Jira a entrega
 
 ```
-📦 Models (Domain Layer)
-  - Pure TypeScript types
-  - No React imports
-  - No framework dependencies
-
-🔌 Services (API Layer)
-  - HTTP communication
-  - Transform DTO → Model
-  - Normalize errors
-
-🔍 Query Layer (React Query)
-  - useQuery / useMutation hooks
-  - Cache management
-  - Optimistic updates
-
-🪝 Hook Layer (Business Logic)
-  - Orchestrate queries
-  - Local state
-  - Side effects
-
-🖥 Screen Layer (Presentation)
-  - JSX only
-  - No business logic
-  - Consume hooks
+Jira ticket
+  ↓ /jira-to-sdd
+raw intake (_raw.md) — coleta contexto: descrição, critérios, riscos, domínio
+  ↓ context classification
+carrega sdd/system/contexts/{domain}/_context.md, _architecture.md, _decisions.md
+  ↓ orchestration plan (_orchestrator.md)
+define módulos: logic.sdd.md, ui.sdd.md, test.sdd.md
+  + módulos condicionais: api.sdd.md, state.sdd.md, security.sdd.md, analytics.sdd.md
+  ↓ cada módulo SDD
+engineer implementa seguindo o contrato
+  ↓ delivery evidence
+PR, testes, CI, reviewer sign-off
 ```
 
-**Exemplo de fluxo**:
+### Contextos de domínio: onde o sistema ganha memória de negócio
 
-```typescript
-// 1. Model
-export type User = {
-  id: string
-  name: string
-  email: string
-}
+Dois domínios estão ativos hoje: `auth` e `dashboard`.
 
-// 2. Service (DTO → Model)
-type UserDTO = { user_id: string; user_name: string; user_email: string }
+Cada domínio tem 4 arquivos:
 
-export const getUser = async (id: string): Promise<User> => {
-  const response = await api.get<UserDTO>(`/users/${id}`)
-  return {
-    id: response.user_id,
-    name: response.user_name,
-    email: response.user_email
-  }
-}
+- `_context.md`: propósito do domínio, stack, padrões, regras específicas, módulos condicionais obrigatórios
+- `_architecture.md`: componentes, fluxo de dados, responsabilidades de cada camada
+- `_decisions.md`: decisões aceitas (com rationale), pendentes (com opções), rejeitadas (com motivo)
+- `_shared-components.md`: hooks, componentes, models, services e design tokens compartilhados
 
-// 3. Query
-export const useUserQuery = (id: string) => {
-  return useQuery({
-    queryKey: ['user', id],
-    queryFn: () => getUser(id)
-  })
-}
+Uma história de login nova não parte do zero. Ela herda linguagem do domínio, decisões já tomadas, componentes compartilhados e riscos conhecidos.
 
-// 4. Hook (business logic)
-export const useProfile = () => {
-  const { data: user, isLoading } = useUserQuery('123')
-  const [editing, setEditing] = useState(false)
+Sem isso, a IA ajuda em tarefas. Com isso, ela começa a ajudar a sustentar produto.
 
-  const startEdit = () => setEditing(true)
-  const cancelEdit = () => setEditing(false)
+---image
 
-  return { user, isLoading, editing, startEdit, cancelEdit }
-}
+## Jira + Figma + MCP: integração enterprise sem acoplar o sistema a credenciais
 
-// 5. Screen (UI only)
-export const ProfileScreen = () => {
-  const { user, isLoading, editing, startEdit } = useProfile()
+A abordagem de MCP no FUSE foi desenhada para ser segura por padrão.
 
-  if (isLoading) return <Loading />
-
-  return (
-    <View>
-      <Text>{user?.name}</Text>
-      {!editing && <Button onPress={startEdit}>Edit</Button>}
-    </View>
-  )
-}
+```
+.mcp.json                            ← versionado, define os servidores do projeto
+.claude/settings.json                ← aprovação explícita dos MCPs: ["jira", "figma"]
+.env.local                           ← segredos locais, nunca commitados
+.claude/sdd/system/integrations/     ← governance e onboarding
 ```
 
----
+**6 variáveis de ambiente necessárias:**
+- `FUSE_MCP_JIRA_URL`, `FUSE_MCP_JIRA_BEARER`, `FUSE_MCP_JIRA_WORKSPACE`
+- `FUSE_MCP_FIGMA_URL`, `FUSE_MCP_FIGMA_BEARER`, `FUSE_MCP_FIGMA_TEAM`
 
-### 6.3 react-native-best-practices.md
+Nenhuma delas vai no repositório. O `.env.example` tem os placeholders. O `mcp-onboarding.md` tem o guia de 5 passos para configuração local.
 
-**Tópicos**:
+**`mcp-enterprise-governance.md`** define as regras que protegem o sistema:
+- MCP servers nunca são commitados com credenciais reais
+- Nenhum agent pode adicionar MCP servers sem revisão de arquitetura
+- Variáveis de ambiente documentadas antes de uso em produção
 
-#### List Virtualization
+Esse tipo de cuidado parece operacional, mas ele define se o sistema é só "cool" ou realmente sustentável e seguro.
 
-```typescript
-// ❌ NUNCA
-<ScrollView>
-  {data.map(item => <Item key={item.id} />)}
-</ScrollView>
+---image
 
-// ✅ SEMPRE
-<FlatList
-  data={data}
-  renderItem={({ item }) => <Item item={item} />}
-  keyExtractor={item => item.id}
-  windowSize={10}
-  maxToRenderPerBatch={5}
-/>
+## Observability: uma das partes menos glamourosas e mais valiosas
+
+A maioria dos setups de IA para desenvolvimento para em prompts, agents e automação.
+
+No FUSE, `.claude/observability/` é parte real do sistema.
+
+### O que é rastreado
+
+**`token-usage.csv`** — por sessão, por agent, por provider:
+```
+date,session_id,provider,model,input_tokens,output_tokens,cache_tokens,total_tokens
 ```
 
-#### Animations
-
-```typescript
-// ❌ Avoid setState for 60fps animations
-const [opacity, setOpacity] = useState(1)
-useEffect(() => {
-  const interval = setInterval(() => {
-    setOpacity((prev) => prev - 0.01)
-  }, 16)
-}, [])
-
-// ✅ Use Reanimated
-const opacity = useSharedValue(1)
-useEffect(() => {
-  opacity.value = withTiming(0, { duration: 1000 })
-}, [])
+**`orchestration.csv`** — por task, por agent:
+```
+date,session_id,agent,task_type,input_tokens,output_tokens,duration_ms,cost_usd
 ```
 
-#### Performance Profiling
-
-- Use React DevTools Profiler
-- Profile em release build (não debug)
-- Target: <16ms per frame (60fps)
-
----
-
-### 6.4 typescript-strict-rules.md
-
-```typescript
-// ❌ Implicit any
-const handlePress = (value) => { }
-
-// ✅ Explicit types
-const handlePress = (value: string): void => { }
-
-// ❌ Type assertion escondendo erro
-const user = data as User
-
-// ✅ Type guard
-const isUser = (data: unknown): data is User => {
-  return typeof data === 'object' && data !== null && 'id' in data
-}
-
-// ❌ DTO vazando
-<UserCard user={apiResponse} />
-
-// ✅ DTO transformado
-<UserCard user={toUserModel(apiResponse)} />
+**`pr-costs.csv`** — por PR:
+```
+pr_number,pr_title,session_count,total_tokens,estimated_cost_usd
 ```
 
----
+### O Stop hook
 
-### 6.5 clean-code-rules.md
+O mecanismo de coleta está wired via `settings.json`:
 
-**Princípios**:
-
-1. **Early Return**
-
-```typescript
-// ❌ Nested
-function process(user: User | null) {
-  if (user) {
-    if (user.active) {
-      return user.name
-    }
-  }
-  return 'Unknown'
-}
-
-// ✅ Early return
-function process(user: User | null): string {
-  if (!user) return 'Unknown'
-  if (!user.active) return 'Inactive'
-  return user.name
+```json
+"hooks": {
+  "Stop": [{
+    "hooks": [{
+      "type": "command",
+      "command": "bash .claude/observability/log-claude-tokens.sh"
+    }]
+  }]
 }
 ```
 
-2. **Small Functions**
+A cada sessão encerrada, o script faz parse do transcript, extrai tokens de input/output/cache, calcula custo em USD e appenda ao CSV. Funcionando em produção.
 
-- Max 20 linhas por função
-- Uma responsabilidade
-- Nome descreve intenção
+### O que esses números revelam
 
-3. **No Magic Numbers**
+Com observability, é possível responder perguntas concretas:
+- onde estamos gastando mais contexto
+- qual agent está pesado demais
+- o custo real de cada PR do ponto de vista de tokens
+- quais fluxos estão sendo realmente usados vs apenas projetados
 
-```typescript
-// ❌
-if (status === 2) {
-}
+Sistemas bons não são só bem desenhados. Eles são mensuráveis.
 
-// ✅
-const STATUS = { PENDING: 1, ACTIVE: 2, INACTIVE: 3 }
-if (status === STATUS.ACTIVE) {
-}
-```
+---image
 
----
+## O estado atual do sistema: avaliação honesta por dimensão
 
-### 6.6 ux-ui-standards.md
+Depois de construir e auditar o sistema, uma avaliação honesta de 0 a 10:
 
-**Design System Enforcement**:
+| Dimensão | Score | O que funciona | O que falta |
+|---|---|---|---|
+| Entrypoint (`CLAUDE.md`) | **9** | 80 linhas, contrato claro, routing table | Não referencia enterprise SDD como ativo explicitamente |
+| Sistema de agents | **8** | Tool restriction correta, architect read-only | `quality` tem 1 skill; conflito de modelo em `design-docs` |
+| Skills layer | **8** | 23 skills estruturadas, evals por skill | `figma-context` e `jira-intake` sem evals |
+| Rules layer | **9** | 12 mandatory-rules 100% cobertas, path-scoped | Hook paths podem perder hooks em padrões não-convencionais |
+| Agent memory | **6** | `architect` (3 entradas), `engineer` (5 entradas) | 5/8 stubs — `test-writer`, `quality`, `design-docs`, `pr-lifecycle`, `security-analyst` |
+| SDD system | **8.5** | 4 contratos completos, 2 contextos ativos | `enterprise-agent-system-v2.md` com status desatualizado |
+| Observability | **7** | Stop hook real, 3 CSVs, scripts funcionais | CSVs com dados mock/legado; sem hooks `PreToolUse`/`PostToolUse` |
+| MCP integration | **7.5** | Governance docs, onboarding, settings configurados | Ainda sem work items reais no pipeline end-to-end |
+| Commands | **8** | 5 comandos cobrindo pipeline completo | Nenhum documento de casos de falha |
+| Templates | **9** | 3 templates com exemplos reais do codebase | — |
+| **Score geral** | **8.1** | | |
 
-```typescript
-// ❌ Hardcoded
-<View style={{ backgroundColor: '#3B82F6', padding: 16 }}>
+### O que está genuinamente enterprise e profissional
 
-// ✅ Theme tokens
-import { Colors, Spacings } from '@/constants/theme'
+**Path-scoped rules** — o sistema de regras mais sofisticado que já vi em configuração de AI engineering. Regra de hook que só existe quando você edita um `.hook.ts`. Zero overhead em contextos irrelevantes. Zero enforcement perdido onde importa.
 
-<View style={styles.container}>
+**Architect sem Write/Edit** — restrição de ferramenta que força separação de responsabilidades no próprio sistema de agents. Não é configuração. É design.
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: Colors.primary.base,
-    padding: Spacings.md
-  }
-})
-```
+**4 contratos SDD mutuamente consistentes** — sdd-contract, orchestrator-contract, delivery-contract e context-contract. Todos se referem, nenhum contradiz o outro. Isso é raro.
 
-**Minimum Touch Target**: 44x44 (iOS Human Interface Guidelines)
+**7 security skills mapeados a OWASP MAS** com um `security-analyst` dedicado que os agrega. A maioria dos sistemas de AI engineering trata segurança como um afterthought. Aqui ela é first-class.
 
-```typescript
-<TouchableOpacity
-  style={{ minWidth: 44, minHeight: 44 }}
-  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
->
-```
+**Stop hook + token tracking** — custo de cada sessão, de cada agent, de cada PR, calculado automaticamente e registrado em CSV. Não é romanticismo sobre AI. É economia.
 
----
+**Settings.local.example.json com deny em `.env`** — a primeira linha de defesa contra vazamento de segredos está na configuração do próprio sistema de AI.
 
-### 6.7 api-integration-pattern.md
+### O que ainda está imaturo
 
-**Offline-First Architecture**:
+**5 de 8 agent-memory como stubs** — os roles mais frequentemente invocados (`test-writer`, `quality`) nunca acumularam nada. Cada sessão começa do zero para esses agents.
 
-```
-User action
-   ↓
-Hook
-   ↓
-Repository.query() ──→ SQLite (always available)
-   ↑                       │
-   │                       ↓
-API sync (background) ←─ Data exists?
-   │                       │
-   ↓                       ↓
-SQLite update          Display cached data
-   │
-   ↓
-Re-render with fresh data
-```
+**CSVs com dados mock** — `token-usage.csv`, `orchestration.csv` e `pr-costs.csv` têm `mock-*` session IDs e nomes de agents do legado (`frontend-architect`, `coupling-analyzer`). Analytics baseada nesses dados seria enganosa.
 
-**Exemplo**:
+**Nenhum work item real no pipeline enterprise** — os contextos `auth` e `dashboard` estão bootstrapados, os contratos estão definidos, o workflow está documentado. Mas o ciclo completo `Jira → raw → orchestrator → módulos SDD → implementação → entrega` ainda não foi exercitado end-to-end.
 
-```typescript
-export const useStores = () => {
-  // 1. Always read from local DB first
-  const localStores = useSQLiteQuery('SELECT * FROM stores')
-
-  // 2. Sync in background
-  const { refetch } = useQuery({
-    queryKey: ['stores-sync'],
-    queryFn: async () => {
-      const apiStores = await api.getStores()
-      await db.upsertStores(apiStores) // Update SQLite
-      return apiStores
-    },
-    enabled: isOnline, // Only sync if online
-    refetchInterval: 60000, // Every minute
-  })
-
-  // 3. Always return local data (never loading state on re-render)
-  return {
-    stores: localStores,
-    refresh: refetch,
-  }
-}
-```
+**`figma-context` e `jira-intake` sem evals** — exatamente as duas skills MCP mais estratégicas do sistema não têm cenários de avaliação. Todo o resto tem.
 
 ---
 
-## 7. Templates - Estruturas Reusáveis
+## O que eu aprendi com isso
 
-### 7.1 screen-template.md
+Se eu tivesse que resumir as principais lições:
 
-```typescript
-// feature.screen.tsx
-import React from 'react'
-import { View, Text } from 'react-native'
-import { useFeature } from './feature.hook'
-import styles from './feature.styles'
+**1. Especialização vence generalização**
 
-export const FeatureScreen: React.FC = () => {
-  const { data, loading, error, handleAction } = useFeature()
+Agents melhores não são os que fazem tudo. São os que fazem bem uma coisa dentro de um contrato claro. O movimento de 14 para 8 agents foi uma melhora de qualidade, não uma limitação de capacidade.
 
-  if (loading) return <LoadingIndicator />
-  if (error) return <ErrorView error={error} />
+**2. Prompt não é arquitetura**
 
-  return (
-    <View style={styles.container}>
-      <Text>{data.title}</Text>
-      <Button onPress={handleAction}>Action</Button>
-    </View>
-  )
-}
-```
+Um `system.md` de 1200 linhas com tudo junto — routing, exemplos, specs de agent, regras de negócio — parece poderoso. Na prática, é um monolito que ninguém mantém de verdade. Sem estrutura, tudo vira improviso elegante com documentação bonita.
 
-### 7.2 hook-template.md
+**3. O que foi descartado importa tanto quanto o que foi preservado**
 
-```typescript
-// feature.hook.ts
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
-import { getFeatureData } from '@/services/api/feature'
+A migração simplificou a estrutura corretamente. Mas descartou junto conteúdo real: princípios de engenharia com motivações, 430 linhas de convenções de nomenclatura, 8 padrões aprendidos em produção. Simplicidade de estrutura não é o mesmo que perda de substância. Auditei linha por linha e restaurei o que importava.
 
-export const useFeature = () => {
-  const [localState, setLocalState] = useState<string>('')
+**4. Knowledge precisa sair da cabeça e virar sistema**
 
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['feature'],
-    queryFn: getFeatureData,
-  })
+Skills, rules, contracts e contextos reduzem dependência de memória tácita. Mas só se tiverem conteúdo real. Scaffolding vazio é mais perigoso do que ausência — cria falsa sensação de organização.
 
-  const handleAction = () => {
-    // Business logic here
-    setLocalState('updated')
-  }
+**5. Observability é obrigatória**
 
-  return {
-    data,
-    loading: isLoading,
-    error,
-    localState,
-    handleAction,
-  }
-}
-```
+Sem telemetria, você não sabe se criou uma boa arquitetura ou só uma narrativa bonita. Com token tracking real, é possível saber o custo de cada decisão de design.
 
-### 7.3 feature-template.md
+**6. O próximo salto não é mais IA. É melhor operating model**
 
-**Full feature structure**:
-
-```
-screens/domain/feature/
-  feature.screen.tsx
-  feature.hook.ts
-  feature.schema.ts
-  feature.types.ts
-  components/
-    header.tsx
-    list-item.tsx
-  __tests__/
-    feature.hook.test.tsx
-    feature.screen.test.tsx
-```
+O ganho real vem quando IA, processo, contrato e documentação trabalham juntos. A infraestrutura está pronta. O próximo passo é exercitar o pipeline end-to-end com work items reais, acumular memória real nos agents e transformar a observability em decisões concretas de melhoria.
 
 ---
 
-## 8. Scripts - Automação
+## Fechamento
 
-### 8.1 pr-lifecycle.sh
+O mais interessante disso tudo é que eu não vejo mais o `.claude/` como "configuração do assistente".
 
-**Função**: Automação completa do PR
+Eu vejo como uma **infraestrutura de raciocínio e execução**.
 
-```bash
-#!/bin/bash
-# Usage: ./pr-lifecycle.sh [PR_NUMBER]
+Uma infraestrutura que tenta transformar:
+- pedidos em fluxo
+- conhecimento em ativo
+- contexto em sistema
+- e arquitetura em algo reutilizável
 
-PR_NUMBER=${1:-""}
+O sistema tem hoje:
+- arquitetura explícita e auditável
+- especialização real por role
+- governança de segurança com OWASP MAS
+- observability com custo rastreável
+- design system para SDD com contratos formais
+- base sólida para integração com Jira e Figma
 
-if [ -z "$PR_NUMBER" ]; then
-  # Create new PR
-  BRANCH=$(git branch --show-current)
-  TITLE=$(git log -1 --pretty=%s)
+Score 8.1 de 10.
 
-  gh pr create --title "$TITLE" --body "Auto-generated PR"
-  PR_NUMBER=$(gh pr view --json number -q .number)
-fi
+Não é o fim do caminho. Mas já não é só "usar IA no desenvolvimento".
 
-# Watch checks
-gh pr checks "$PR_NUMBER" --watch
+É uma camada operacional de desenvolvimento mediada por IA — com os mesmos critérios que eu exigiria de qualquer outra parte do sistema de engenharia.
 
-# If failed, get logs and trigger fixes
-STATUS=$(gh pr view "$PR_NUMBER" --json statusCheckRollup -q '.statusCheckRollup[0].conclusion')
+E isso, honestamente, é o que importa.
 
-if [ "$STATUS" == "FAILURE" ]; then
-  echo "CI failed, triggering fixes..."
-  # Invoke sonar-auto-fixer or other fixing agents
-fi
+---image
 
-# Monitor until all pass, then merge
-gh pr merge "$PR_NUMBER" --squash --auto
-```
-
----
-
-### 8.2 trigger-sonar-fix.sh
-
-```bash
-#!/bin/bash
-# Usage: ./trigger-sonar-fix.sh <PR_NUMBER>
-
-PR_NUMBER=$1
-BRANCH=$(gh pr view "$PR_NUMBER" --json headRefName -q .headRefName)
-
-# Get Sonar issues via API
-ISSUES=$(curl -s "https://sonarcloud.io/api/issues/search?componentKeys=project&branch=$BRANCH")
-
-# Parse issues and write to temp file
-echo "$ISSUES" | jq -r '.issues[] | "\(.component):\(.line) - \(.message)"' > /tmp/sonar-issues.txt
-
-# Invoke sonar-auto-fixer agent with context
-# (This would trigger LLM with sonar-auto-fixer.md + issues list)
-
-echo "Sonar fixes completed. Re-triggering CI..."
-git push origin "$BRANCH"
-```
-
----
-
-### 8.3 analyze-coupling.sh
-
-```bash
-#!/bin/bash
-# Analisa fan-in/fan-out de módulos
-
-OUTPUT_FILE=".ai/router/coupling-report.md"
-
-echo "# Coupling Analysis" > "$OUTPUT_FILE"
-echo "Generated: $(date)" >> "$OUTPUT_FILE"
-
-# Find all imports
-grep -r "import.*from" src/ | \
-  awk '{print $4}' | \
-  sort | uniq -c | sort -rn | \
-  head -20 > /tmp/fan-in.txt
-
-echo "## Top 20 Most Imported Modules (Fan-In)" >> "$OUTPUT_FILE"
-cat /tmp/fan-in.txt >> "$OUTPUT_FILE"
-
-# Modules with most imports (fan-out)
-for file in $(find src/ -name "*.ts" -o -name "*.tsx"); do
-  COUNT=$(grep -c "^import" "$file")
-  echo "$COUNT $file"
-done | sort -rn | head -20 > /tmp/fan-out.txt
-
-echo "## Top 20 Modules with Most Imports (Fan-Out)" >> "$OUTPUT_FILE"
-cat /tmp/fan-out.txt >> "$OUTPUT_FILE"
-
-echo "Report saved to $OUTPUT_FILE"
-```
-
----
-
-### 8.4 Outros Scripts
-
-- `generate-dashboard.sh`: Dashboard HTML de métricas
-- `count-improvements-progress.sh`: Track de progresso de refactors
-- `update-component-imports.sh`: Fix bulk imports
-- `dev-server.sh`: Start dev environment
-- `generate-analytics.sh`: Analytics de uso do sistema
-
----
-
-## 9. Claude Self-Modifying - Aprendizado Contínuo
-
-### 9.1 Conceito
-
-**Problema**: LLMs não têm memória entre sessões. Decisões arquiteturais são esquecidas.
-
-**Solução**: `claude-self-modifying.md` é um **log vivo** onde cada decisão importante é registrada.
-
-### 9.2 Formato de Entry
-
-```markdown
-## 🔧 [Categoria] — [Título da Decisão]
-
-**Rule:** O que fazer / não fazer
-
-**Why:** Contexto ou incidente que gerou a regra
-
-**Applies to:** Onde esta regra tem efeito
-
-**Example:** (opcional) Código demonstrando correto/errado
-```
-
-### 9.3 Exemplos Reais
-
-#### Entry 1: Loading Overlay Centralizado
-
-```markdown
-## 🔄 Loading Overlay — Centralizado em GlobalLoadingObserver
-
-**Rule:** Nunca chamar `overlayActions.open('loading')` ou `overlayActions.close()`
-diretamente em hooks ou screens para controlar loading de API calls.
-
-**Why:** O `GlobalLoadingObserver` foi criado, que usa `useIsFetching()` e
-`useIsMutating()` do React Query para observar globalmente todas as API calls e gerenciar
-o overlay de forma centralizada. Chamadas manuais criam inconsistências.
-
-**Applies to:** Todos hooks em `src/services/query/`, todos screen hooks.
-
-**Exception:** Overlays de OUTROS tipos (e.g. 'chargerNotFound', 'chargingComplete').
-```
-
-**Como isso previne regressão:**
-
-- Na sessão seguinte, LLM lê este arquivo ANTES de implementar
-- Se tentar chamar `overlayActions.open('loading')`, lembra da regra
-- Evita reintroduzir o bug
-
----
-
-#### Entry 2: Navegação com useEffect
-
-````markdown
-## 🧭 Navigation — useEffect + router.replace() (Not <Redirect>)
-
-**Rule:** Para navegação condicional baseada em hydration (e.g. `app/index.tsx`),
-use `router.replace()` dentro de `useEffect`, nunca `<Redirect>`.
-
-**Why:** `<Redirect>` causa tela branca no Expo Router quando renderizado no mount
-inicial antes da navegação estar pronta. `useEffect` garante router inicializado.
-
-**Applies to:** `app/index.tsx` e qualquer root route que redireciona baseado em store state.
-
-**Correct pattern:**
-
-```typescript
-export default function Index() {
-  const router = useRouter()
-  const rehydrated = useAuthStore((s) => s.rehydrated)
-
-  useEffect(() => {
-    if (!rehydrated) return
-    router.replace('/(auth)/onboarding')
-  }, [rehydrated])
-
-  return null
-}
-```
-````
-
-```
-
----
-
-### 9.4 Fluxo de Aprendizado
-
-```
-
-1. Problema descoberto em sessão
-   ↓
-2. Solução implementada e validada
-   ↓
-3. Entry adicionada ao claude-self-modifying.md
-   ↓
-4. Commit: "docs(ai): register pattern for X"
-   ↓
-5. Sessões futuras leem o arquivo
-   ↓
-6. LLM evita repetir o erro
-   ↓
-7. Sistema "aprende" permanentemente
-
-```
-
----
-
-## 10. Fluxos de Trabalho Completos
-
-### 10.1 Feature Completa: Do Zero ao Merge
-
-```
-
-┌─────────────────────────────────────────────────────────┐
-│ USER REQUEST: "Criar tela de perfil do usuário" │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ SYSTEM.MD: Analisa keywords │
-│ - "criar tela" → react-native-engineer │
-│ - Verifica: SDD existe? │
-│ - NÃO → Delegar para frontend-architect primeiro │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ FRONTEND-ARCHITECT (Claude) │
-│ - Carrega: project-architecture.md, ux-ui-standards.md │
-│ - Cria: .ai/\_sdd/profile-screen.sdd.md │
-│ - Data model: UserProfile │
-│ - API contract: GET /users/me │
-│ - Navigation flow │
-│ - Validation rules │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ REACT-NATIVE-ENGINEER (Local/Claude) │
-│ - Router decision: "criar tela" → LOCAL (boilerplate) │
-│ - Carrega TODAS as skills │
-│ - Valida contra mandatory-rules.md │
-│ - Implementa: │
-│ ├─ src/models/user/user-profile.model.ts │
-│ ├─ src/services/api/user/user.ts (DTO → Model) │
-│ ├─ src/services/query/user/useUserProfileQuery.ts │
-│ ├─ src/screens/profile/profile/ │
-│ │ ├─ profile.screen.tsx (UI only) │
-│ │ ├─ profile.hook.ts (business logic) │
-│ │ ├─ profile.types.ts │
-│ │ └─ components/ │
-│ │ └─ avatar-section.tsx │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ TEST-WRITER (Local) │
-│ - Gera: │
-│ ├─ profile.hook.test.tsx (≥90% coverage) │
-│ └─ profile.screen.test.tsx (render, interactions) │
-│ - Roda: yarn test --coverage │
-│ - Valida: Coverage ≥80% │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ CODE-REVIEWER (Claude) │
-│ - Verifica: │
-│ ✅ TypeScript strict (zero `any`) │
-│ ✅ Architectural boundaries (no business logic in screen) │
-│ ✅ Coverage ≥80% │
-│ ✅ Design system usado (Colors, Spacings) │
-│ ✅ Naming conventions │
-│ - Status: APPROVED ✓ │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ USER: Confirma commit? │
-│ - SIM → git commit -m "feat(profile): add user profile screen" │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ USER: Trigger PR Lifecycle │
-│ - Comando: /pr-lifecycle │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ PR-LIFECYCLE-AGENT (Claude) │
-│ FASE 1: Criar PR │
-│ - git push origin feature/user-profile │
-│ - gh pr create --title "feat: user profile screen" │
-│ │
-│ FASE 2: Monitor CI │
-│ - gh pr checks --watch │
-│ - Status: ESLint PASS, Tests PASS, Sonar... FAIL ❌ │
-│ │
-│ FASE 3: Fix Sonar │
-│ - Trigger: sonar-auto-fixer │
-│ - Issues: 2 code smells (complexity, magic number) │
-│ - Fixes applied │
-│ - git commit -m "fix(profile): resolve sonar issues" │
-│ - git push │
-│ - Re-check: All PASS ✅ │
-│ │
-│ FASE 4: Monitor Reviews │
-│ - Comentário do reviewer: "Adicionar loading state" │
-│ - Agent: Read context → Add loading UI → Commit │
-│ - Reply: "Added loading state in commit abc123" │
-│ - Status: Approved ✓ │
-│ │
-│ FASE 5: Merge │
-│ - gh pr merge --squash │
-│ - Status: MERGED ✓ │
-└─────────────────────────────────────────────────────────┘
-↓
-FEATURE DEPLOYED
-
-```
-
-**Tempo total**: ~2 horas (vs 8 horas manual)
-
----
-
-### 10.2 Fix de Bug: Descoberta à Resolução
-
-```
-
-┌─────────────────────────────────────────────────────────┐
-│ USER REPORT: "Lista de carregamento trava após scroll" │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ SYSTEM.MD: Keyword "trava" → performance-auditor │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ PERFORMANCE-AUDITOR (Claude) │
-│ - Read file: charging-history.screen.tsx │
-│ - Detecta: │
-│ ❌ <ScrollView> com 500+ items │
-│ ❌ .map() renderizando todos os items │
-│ ❌ Sem virtualization │
-│ - Diagnóstico: JS thread bloqueado │
-│ - Solução: Migrar para FlatList │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ REACT-NATIVE-ENGINEER (Claude - "performance") │
-│ - Refactor: │
-│ - Substituir ScrollView → FlatList │
-│ - Add keyExtractor, renderItem │
-│ - Add windowSize={10} │
-│ - Add maxToRenderPerBatch={5} │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ TEST-WRITER (Local) │
-│ - Atualizar testes para FlatList │
-│ - Add performance test (render time < 100ms) │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ CODE-REVIEWER (Claude) │
-│ - Verifica: FlatList implementado corretamente │
-│ - Status: APPROVED ✓ │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ PERFORMANCE-AUDITOR (profiling validation) │
-│ - Compara antes/depois: │
-│ - Antes: 800ms render, 12 fps │
-│ - Depois: 120ms render, 60 fps │
-│ - Status: ✅ PERFORMANCE RESTORED │
-└─────────────────────────────────────────────────────────┘
-↓
-┌─────────────────────────────────────────────────────────┐
-│ CLAUDE-SELF-MODIFYING: Register Learning │
-│ - Add entry: "Always use FlatList for dynamic lists" │
-│ - Rule: Never use ScrollView with .map() │
-└─────────────────────────────────────────────────────────┘
-↓
-BUG FIXED
-PATTERN LEARNED
-
-````
-
----
-
-## 11. Tracking de Custos
-
-### 11.1 Token Usage Logging
-
-Cada invocação de LLM gera um log:
-
-```markdown
-| Date | Session | Provider | Model | Input | Output | Cache Read | Total |
-|------|---------|----------|-------|------:|-------:|-----------:|------:|
-| 2026-03-23 12:27:05 | 3512aca5 | claude | claude-sonnet-4-6 | 13,563 | 255,304 | 55,218,740 | 268,867 |
-````
-
-### 11.2 Métricas Agregadas
-
-```markdown
-## Summary (Março 2026)
-
-| Provider  | Model             |   Input |    Output |     Total |
-| --------- | ----------------- | ------: | --------: | --------: |
-| claude    | claude-sonnet-4-6 |  96,571 | 1,800,557 | 1,897,128 |
-| ollama    | qwen2.5-coder:14b | 191,800 |    86,200 |   278,000 |
-| **TOTAL** |                   | 288,371 | 1,886,757 | 2,175,128 |
-
-Economia com router: ~68% (vs 100% Claude)
-```
-
-### 11.3 Scripts de Monitoramento
-
-**log-claude-tokens.sh**:
-
-```bash
-#!/bin/bash
-# Captura usage de cada request Claude e appenda ao CSV
-
-SESSION_ID=$(uuidgen | cut -d'-' -f1)
-DATE=$(date '+%Y-%m-%d %H:%M:%S')
-
-# Parse response headers para tokens
-INPUT_TOKENS=$1
-OUTPUT_TOKENS=$2
-CACHE_READ=$3
-
-echo "$DATE,$SESSION_ID,claude,claude-sonnet-4-6,$INPUT_TOKENS,$OUTPUT_TOKENS,$CACHE_READ" \
-  >> .ai/router/token-usage.csv
-```
-
-**update-token-totals.sh**:
-
-```bash
-#!/bin/bash
-# Regenera token-usage.md com totais atualizados
-
-awk -F',' '
-  NR>1 {
-    provider[$3] = 1
-    model[$4] = 1
-    input[$3] += $5
-    output[$3] += $6
-    cache[$3] += $7
-  }
-  END {
-    for (p in provider) {
-      total = input[p] + output[p]
-      print p, input[p], output[p], cache[p], total
-    }
-  }
-' .ai/router/token-usage.csv > .ai/router/token-usage.md
-```
-
----
-
-## 12. Conclusões e Insights
-
-### 12.1 O Que Torna Este Sistema Único
-
-1. **Contract-Driven, não Prompt-Driven**
-   - Regras são arquivos, não instruções em prompts
-   - Contratos são validados automaticamente, não "sugeridos"
-
-2. **Especialização Profunda**
-   - Cada agente é expert em UMA coisa
-   - Melhor que um assistente genérico tentando fazer tudo
-
-3. **Economic Intelligence**
-   - Router economiza 68% em custos
-   - 70% das tarefas são determinísticas → local model
-
-4. **Self-Improving**
-   - claude-self-modifying.md elimina regressões
-   - Cada erro vira uma regra permanente
-
-5. **Autonomous Workflows**
-   - PR lifecycle não precisa de humano
-   - Fix de Sonar automático
-   - E2E test generation template-driven
-
-### 12.2 Desafios Resolvidos
-
-| Desafio                        | Solução Implementada                                 |
-| ------------------------------ | ---------------------------------------------------- |
-| Contexto perdido entre sessões | claude-self-modifying.md preserva aprendizados       |
-| Código inconsistente           | mandatory-rules.md + code-reviewer rejeita violações |
-| Custos altos de LLM            | Router LLM (local first, Claude when needed)         |
-| Tarefas repetitivas            | Templates + scripts de automação                     |
-| Falta de quality gates         | code-reviewer + sonar-auto-fixer                     |
-| Testes ignorados               | test-writer obrigatório, coverage ≥80%               |
-| Acoplamento crescendo          | coupling-analyzer detecta e alerta                   |
-
-### 12.3 Métricas de Sucesso
-
-**Produtividade**:
-
-- Feature time: 8h → 2h (75% redução)
-- PR lifecycle: 4h → 30min (87% redução)
-
-**Qualidade**:
-
-- Code coverage: ~60% → 95%+
-- Sonar issues: ~200 → <10
-- Production bugs: redução de ~60%
-
-**Custo**:
-
-- LLM tokens: economía de 68%
-- Time-to-market: ~70% mais rápido
-
-**Consistência**:
-
-- Architectural violations: ~30/semana → 0
-- Naming convention errors: eliminados
-- Design system bypass: eliminado
-
----
-
-## 13. Evolução Futura
-
-### 13.1 Próximas Melhorias
-
-1. **GitHub Actions Integration**
-   - PR auto-creation em commit to branch
-   - Auto-trigger sonar-fixer em quality gate fail
-
-2. **Dashboard de Métricas**
-   - Visualização de coupling trends
-   - Coverage progress tracking
-   - Token usage analytics
-
-3. **Doc Generator Agent**
-   - Auto-generate API docs
-   - Auto-update README
-
-4. **Code Migration Agent**
-   - Safe refactoring de breaking changes
-   - Automated deprecation handling
-
-### 13.2 Expansão para Backend
-
-Adaptar o sistema para backend (Node.js/NestJS):
-
-- Agentes: backend-architect, api-engineer, db-schema-designer
-- Skills: database-patterns, api-security, scalability-rules
-- Automação: Prisma migrations, API tests generation
-
-### 13.3 Open Source?
-
-**Potencial**: Este sistema pode ser útil para outros projetos.
-
-**Desafios**:
-
-- Remover contexto de negócio específico
-- Generalizar rules para diferentes arquiteturas
-- Criar CLI para setup em novos projetos
-
----
-
-## 12. Versioning & Governance
-
-### 12.1 Sistema de Versionamento
-
-**Por que versionar agents e skills?**
-
-- **Audit trail completo**: Rastreabilidade de alterações ao longo do tempo
-- **Rollback capability**: Reverter mudanças que quebram workflows
-- **Breaking change management**: Identificar quando uma alteração afeta contratos existentes
-- **Cache invalidation**: Detectar quando skills mudaram e precisam re-load
-
-### 12.2 YAML Metadata Headers nos Skills
-
-Todos os 9 skills agora têm metadata parseável:
-
-```yaml
----
-name: project-architecture
-version: 1.0.0
-author: Eugénio Silva
-created: 2026-03-01
-updated: 2026-03-23
----
-```
-
-**Skills versionados:**
-
-- `api-integration-pattern.md` v1.0.0
-- `clean-code-rules.md` v1.0.0
-- `coupling-analysis.md` v1.0.0
-- `gitignore-rules.md` v1.0.0
-- `project-architecture.md` v1.0.0
-- `react-native-best-practices.md` v1.0.0
-- `translations.md` v1.0.0
-- `typescript-strict-rules.md` v1.0.0
-- `ux-ui-standards.md` v1.0.0
-
-### 12.3 Agent CHANGELOG
-
-**Localização**: `.ai/agents/CHANGELOG.md`
-
-Rastreamento centralizado de todas as alterações nos 14 agents:
-
-- frontend-architect
-- react-native-engineer
-- code-reviewer
-- test-writer
-- test-write-e2e
-- performance-auditor
-- sonar-auto-fixer
-- coupling-analyzer
-- pr-lifecycle
-- pr-review-fixer
-- business-analyst
-- doc-designer
-- logic-engineer
-- ui-designer
-
-**Convenções de Semantic Versioning:**
-
-- **MAJOR** (X.0.0): Breaking changes (mudança de responsabilidades, remoção de skills)
-- **MINOR** (1.X.0): Novas funcionalidades backwards-compatible
-- **PATCH** (1.0.X): Bug fixes e documentação
-
-### 12.4 Governança e Compliance
-
-**Benefícios do sistema versionado:**
-
-1. **Transparency**: Qualquer alteração no comportamento dos agents é documentada
-2. **Accountability**: Saber quem fez o quê e quando
-3. **Consistency**: Garantir que todos os agents evoluem de forma coordenada
-4. **Audit compliance**: Necessário para projetos enterprise/regulatórios
-
----
-
-## 13. Architecture Visualization
-
-### 13.1 Documentação Consolidada em Mermaid
-
-**Localização**: `.ai/docs/architecture.md`
-
-Todos os diagramas da arquitetura consolidados em um único documento com 10 diagramas Mermaid:
-
-#### Diagramas Incluídos:
-
-1. **System Overview** — Layers: Orchestrator → Agents → Skills → LLM
-2. **Request Routing Flow** — Como `system.md` analisa e distribui pedidos
-3. **LLM Router Decision Tree** — Lógica de complexidade: Local vs Cloud
-4. **Agent-Skills Map** — Matriz mostrando quais skills cada agent carrega
-5. **Standard Feature Flow** — SDD → Implementation → Tests → Review → PR
-6. **Inter-Agent Coordination** — Multi-agent workflows (refactoring, performance, design)
-7. **Security Audit Pipeline** — OWASP MAS com 7 sub-agents paralelos
-8. **Data Flow Architecture** — Model → Service → Query → Hook → Screen (color-coded)
-9. **Token Economics Flow** — Router → Log → Aggregate → Análise de ROI
-10. **CI/CD Integration** — PR lifecycle com GitHub Actions e auto-fix
-
-### 13.2 Por que Mermaid?
-
-- **Versionável**: Diagramas em texto puro, trackable no Git
-- **GitHub-native**: Renderiza automaticamente em markdown
-- **Maintainable**: Fácil de atualizar vs imagens estáticas
-- **Searchable**: Pode fazer grep em diagramas
-
-### 13.3 Quick Reference Guide
-
-Tabela de localização de todos os componentes:
-
-| Componente       | Path                           | Propósito              |
-| ---------------- | ------------------------------ | ---------------------- |
-| **Orchestrator** | `.ai/system.md`                | Master coordinator     |
-| **Agents**       | `.ai/agents/*.md`              | 14 specialized agents  |
-| **Skills**       | `.ai/skills/*.md`              | 9 reusable modules     |
-| **Router**       | `.ai/router/router.md`         | LLM complexity routing |
-| **Token Logs**   | `.ai/router/token-usage.csv`   | Raw token data         |
-| **Economics**    | `.ai/router/token-analysis.md` | ROI analysis           |
-| **Architecture** | `.ai/docs/architecture.md`     | This consolidated doc  |
-| **Changelog**    | `.ai/agents/CHANGELOG.md`      | Version history        |
-
-### 13.4 Legenda de Símbolos
-
-- 🎭 Orchestrator
-- 🤖 Agent
-- 📚 Skill
-- 🧠 LLM
-- 🔄 Flow
-- 📊 Data/Metrics
-- 🔗 Integration
-- ⚡ Performance
-- 🔒 Security
-- ✅ Success
-
-### 13.5 Como Usar os Diagramas
-
-**Para novos desenvolvedores:**
-
-1. Começar com **System Overview** para entender layers
-2. Seguir **Request Routing Flow** para ver como pedidos são processados
-3. Consultar **Agent-Skills Map** para saber qual agent usar
-4. Referir **Standard Feature Flow** para workflow completo
-
-**Para debugging:**
-
-1. **LLM Router Decision Tree** explica por que um pedido foi para Claude vs Ollama
-2. **Token Economics Flow** mostra onde os custos são logados
-3. **Inter-Agent Coordination** identifica falhas em workflows multi-agent
-
-**Para otimização:**
-
-1. **Token Economics Flow** aponta oportunidades de economia
-2. **Data Flow Architecture** valida se há layer skipping
-3. **CI/CD Integration** mostra onde adicionar novos hooks
-
----
-
-**FIM DA EXPLICAÇÃO TÉCNICA**
-
----
+#AI #SoftwareArchitecture #Engineering #ReactNative #ClaudeCode #MCP #DevTools #SoftwareDesign #Agents #ProductEngineering
