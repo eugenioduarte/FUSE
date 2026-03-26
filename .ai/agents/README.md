@@ -1,5 +1,7 @@
 # 🤖 AI Agents — FUSE Engineering System
 
+> **Archive Notice:** As of 2026-03-25, the active AI system lives in `.claude/agents/`. This catalog remains as historical documentation for the `.ai/` generation.
+
 > **[PT]** Catalog dos 7 agentes especializados do sistema FUSE AI (v2.0.0). Consolidados de 14 agentes para reduzir overhead cognitivo em equipa pequena.
 
 ---

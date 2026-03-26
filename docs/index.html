@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FUSE - AI System Hub</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --bg:#fff8ee; --surface:#f2e8d7; --panel:#fffdf8; --ink:#1f1534; --muted:#6d596d; --border:#38213a; --accent:#efb366; --accent2:#bedfeb; --accent3:#c6e2c4; --radius:18px; }
+    * { box-sizing:border-box; }
+    body { margin:0; font-family:'Fredoka',sans-serif; color:var(--ink); background:
+      radial-gradient(circle at top left, rgba(239,179,102,.32), transparent 28%),
+      radial-gradient(circle at bottom right, rgba(190,223,235,.38), transparent 30%),
+      linear-gradient(180deg, #fffaf3 0%, #f7efe2 100%); }
+    main { max-width:1160px; margin:0 auto; padding:40px 20px 60px; }
+    .hero, .card { border:1px solid var(--border); border-radius:var(--radius); background:rgba(255,253,248,.86); backdrop-filter:blur(6px); }
+    .hero { padding:28px; display:grid; gap:14px; }
+    .badge { display:inline-block; padding:4px 10px; border-radius:999px; border:1px solid var(--border); background:var(--accent); font-size:12px; font-weight:600; }
+    h1,h2,h3,p { margin:0; }
+    h1 { font-size:40px; max-width:10ch; line-height:1; }
+    p { color:var(--muted); line-height:1.55; }
+    .meta { font-size:14px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-top:18px; }
+    .card { padding:18px; text-decoration:none; color:inherit; transition:transform .16s ease, background .16s ease; }
+    .card:hover { transform:translateY(-3px); background:#fff9f1; }
+    .card .tag { display:inline-block; margin-bottom:10px; padding:4px 8px; border-radius:999px; border:1px solid var(--border); font-size:12px; }
+    .orange { background:var(--accent); }
+    .blue { background:var(--accent2); }
+    .green { background:var(--accent3); }
+    .footer { margin-top:22px; font-size:14px; color:var(--muted); }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <span class="badge">FUSE enterprise AI documentation</span>
+      <h1>FUSE AI System Hub</h1>
+      <p>Public entrypoint for the active <code>.claude/</code> Skills-First architecture, orchestration model, and historical analytics. This hub is designed to keep documentation aligned with the live system rather than with archived prompts.</p>
+      <p class="meta">AI system version: <strong>v3.0.0</strong> | Last page load: <span id="ts"></span></p>
+    </section>
+    <section class="grid">
+      <a class="card" href="./ai-system.html">
+        <span class="tag orange">Architecture</span>
+        <h2>AI System</h2>
+        <p>Generated overview of agents, skills, rules, memory readiness, and migration timeline.</p>
+      </a>
+      <a class="card" href="./demonstration-orchestration.html">
+        <span class="tag blue">Operations</span>
+        <h2>Orchestration</h2>
+        <p>Practical view of how the active agents, skills, and rule surfaces work together.</p>
+      </a>
+      <a class="card" href="./analytics.html">
+        <span class="tag green">Metrics</span>
+        <h2>Analytics</h2>
+        <p>Historical token and orchestration metrics, reframed around the current Skills-First system.</p>
+      </a>
+    </section>
+    <p class="footer">The archived `.ai/` tree remains preserved in-repo for historical traceability, but the operational source of truth is `.claude/`.</p>
+  </main>
+  <script>
+    document.getElementById('ts').textContent = new Date().toLocaleString();
+  </script>
+</body>
+</html>

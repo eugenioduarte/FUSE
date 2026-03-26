@@ -100,7 +100,11 @@ Do NOT place screen-specific business logic in unrelated folders.
 
 # 4️⃣ Test Coverage Requirement
 
-- Minimum global coverage: **70%**
+- **Current enforced floor (2026-03-25):** statements 20%, branches 12%, functions 21%, lines 20%
+- **Target:** 70% across all metrics — ratchet up ~5% per sprint
+- **Policy:** thresholds in `jest.config.js` must always reflect real current coverage − 1%.
+  Never set thresholds higher than actual coverage (CI would fail).
+  Never set thresholds lower than real − 2% (defeats the purpose).
 - No feature is complete without tests
 - External dependencies must be mocked
 - Tests must be deterministic
@@ -140,12 +144,12 @@ Priority order for tests:
 
 # 7️⃣ State Management Discipline
 
-| State type       | Solution                     |
-| ---------------- | -----------------------------|
-| Local UI state   | `useState`                   |
-| Screen state     | Screen hook                  |
-| Cross-feature    | Zustand store (slice/domain) |
-| Server state     | TanStack Query               |
+| State type     | Solution                     |
+| -------------- | ---------------------------- |
+| Local UI state | `useState`                   |
+| Screen state   | Screen hook                  |
+| Cross-feature  | Zustand store (slice/domain) |
+| Server state   | TanStack Query               |
 
 - No global context for frequently changing state
 - Subscribe using selectors only

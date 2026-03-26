@@ -8,7 +8,7 @@
 
 > Status: Investigation
 > Data de criação: 2026-03-24
-> Última atualização: 2026-03-24
+> Última atualização: 2026-03-25
 > Fontes: `report.md` (Grok) + `react-native-agent-review.md` (Claude Opus 4.6) + `base3.md`
 
 ---
@@ -19,10 +19,10 @@
 
 ### 🔴 Críticos / Bloqueiam Release
 
-- [ ] **Firebase version lock** — fixar `"firebase": "latest"` → `"^11.x.x"` _(2 min)_
-- [ ] **`dotenv` → devDependencies** — mover de `dependencies` para `devDependencies` _(2 min)_
-- [ ] **API Key no bundle (proxy)** — implementar proxy server-side, remover `EXPO_PUBLIC_ANTHROPIC_API_KEY` _(1–2 dias)_
-- [ ] **Alinhar thresholds de cobertura** — `jest.config.js` 5% vs `mandatory-rules.md` 70-80% _(1h)_
+- [x] **Firebase version lock** — fixado `^12.11.0` ✅ concluído 2026-03-25 _(2 min)_
+- [x] **`dotenv` → devDependencies** — movido para `devDependencies` ✅ concluído 2026-03-25 _(2 min)_
+- [x] **API Key no bundle (proxy)** — `anthropicProxy` deployed ✅ · `EXPO_PUBLIC_ANTHROPIC_API_KEY` removida do `.env` ✅ concluído 2026-03-25 _(~2h)_
+- [x] **Alinhar thresholds de cobertura** — floor real: stmt 20%, branch 12%, fn 21%, lines 20% ✅ concluído 2026-03-25 _(1h)_
 
 ### 🟡 Melhorias Estruturais
 
@@ -59,16 +59,16 @@ O objetivo **não é implementar tudo de uma vez**. É registrar o que foi ident
 
 ## 2. Estado Atual do Projeto (Snapshot)
 
-| Aspecto             | Estado Atual                         | Observação                                                             |
-| ------------------- | ------------------------------------ | ---------------------------------------------------------------------- |
-| React Native        | 0.81.5                               | Último estável                                                         |
-| Expo                | ~54.0.0                              | SDK mais recente                                                       |
-| New Architecture    | `newArchEnabled: true` ✅            | Habilitado no `app.json`                                               |
-| Turbo Modules       | Não auditado                         | New Arch ativo mas deps não verificadas                                |
-| Gestão de segredos  | `EXPO_PUBLIC_` + `expo-secure-store` | Padrão correto — mas `EXPO_PUBLIC_ANTHROPIC_API_KEY` exposta no bundle |
-| Storage chave-valor | `AsyncStorage`                       | MMKV seria ~10x mais rápido                                            |
-| Estrutura           | Single-package                       | Sem monorepo                                                           |
-| Firebase            | `firebase: latest`                   | Versão não fixada — risco de breaking change                           |
+| Aspecto             | Estado Atual                         | Observação                                                                       |
+| ------------------- | ------------------------------------ | -------------------------------------------------------------------------------- |
+| React Native        | 0.81.5                               | Último estável                                                                   |
+| Expo                | ~54.0.0                              | SDK mais recente                                                                 |
+| New Architecture    | `newArchEnabled: true` ✅            | Habilitado no `app.json`                                                         |
+| Turbo Modules       | Não auditado                         | New Arch ativo mas deps não verificadas                                          |
+| Gestão de segredos  | `EXPO_PUBLIC_` + `expo-secure-store` | `ANTHROPIC_API_KEY` movida para Firebase Secret Manager (proxy `anthropicProxy`) |
+| Storage chave-valor | `AsyncStorage`                       | MMKV seria ~10x mais rápido                                                      |
+| Estrutura           | Single-package                       | Sem monorepo                                                                     |
+| Firebase            | `firebase: ^12.11.0` ✅              | Versão fixada — era `latest`, instalado 12.11.0                                  |
 
 ---
 
@@ -99,19 +99,48 @@ Correto:
   App → Firebase ID token (usuário autenticado) → Proxy Server → ANTHROPIC_API_KEY (server-side) → Anthropic API
 ```
 
-**O que deve mudar:**
+**Abordagem decidida:** Firebase Functions v2 `onCall` + Firebase Secret Manager.
 
-- Implementar proxy server-side: **Firebase Function** (já no projeto, zero setup extra) ou **Cloudflare Worker** (cold start < 5ms, mais barato)
-- Proxy valida Firebase ID token → aplica rate limit por uid → proxia para Anthropic
-- Remover `EXPO_PUBLIC_ANTHROPIC_API_KEY` do client
-- Mock local continua funcionando quando key ausente ✅ (pattern já existe no `ai.service.ts`)
-- `dotenv@17.2.3` listado como dep de runtime: verificar se é apenas para scripts de build/CI — se sim, mover para `devDependencies`
+**O que foi implementado (2026-03-25):**
 
-**Questões a investigar:**
+- `functions/src/index.ts` — `anthropicProxy` (Firebase Function), retry 3x, auth guard automático via `onCall`
+- `functions/package.json` + `functions/tsconfig.json` + `firebase.json` + `.firebaserc` — infra completa
+- `src/services/ai/ai.service.ts` — removida chamada direta ao Anthropic; `callAI()` usa `httpsCallable(getFunctions(), 'anthropicProxy')`
+- `src/services/firebase/auth.service.ts` — adicionado `getCurrentUserIdToken()` helper
+- Mock fallback: `!getFirebaseAuth().currentUser` (em vez de `!ANTHROPIC_API_KEY`) — mesma UX sem conta
+- `firebase/functions` já incluso no `firebase@^12.11.0` — zero install extra no bundle mobile
 
-- Firebase Functions (já no projeto) vs Cloudflare Worker — custo e latência para portfólio?
-- `EXPO_PUBLIC_ANTHROPIC_API_KEY` está no `.env` local ou exposta em algum lugar?
-- `dotenv` é usado em algum código de runtime além de scripts de CI?
+**Passos manuais pendentes (terminal):**
+
+```bash
+# 1. Instalar deps do servidor
+cd functions && npm install && cd ..
+
+# 2. Guardar a key no Firebase Secret Manager (não vai para o código)
+firebase functions:secrets:set ANTHROPIC_API_KEY
+# → colar valor actual do .env: sk-ant-api03-...
+
+# 3. Deploy
+firebase deploy --only functions
+
+# 4. Remover key do cliente (mover para .env.backup antes de deletar)
+sed -i '' '/EXPO_PUBLIC_ANTHROPIC_API_KEY/d' .env
+
+# 5. Verificar que a key não está no bundle
+npx expo export --platform ios 2>/dev/null && strings dist/_expo/static/js/*.js | grep 'sk-ant' || echo 'OK — key not in bundle'
+```
+
+**Decisão: `onCall` sobre REST direto**
+
+- Firebase SDK injeta o ID token automaticamente — sem gestão manual de `Authorization`
+- CORS gerido pelo SDK
+- `request.auth.uid` disponível para rate limit futuro
+
+**Por que Firebase Functions e não Cloudflare Worker:**
+
+- Firebase já no projecto (zero setup de infra adicional)
+- Billing consolidado no mesmo projecto Firebase
+- Cold start Node 20 < 200ms (aceitável para Claude que demora 1–5s)
 
 **Prioridade:** 🔴 Alta — `base3.md` classifica como CRITICAL-001, pré-requisito para qualquer release público
 
@@ -543,23 +572,23 @@ useFocusEffect(
 
 ## 4. Matriz de Priorização
 
-| #   | Item                                   | Fonte         | Prioridade | Dificuldade | Esforço       | Risco de Não Fazer                   |
-| --- | -------------------------------------- | ------------- | ---------- | ----------- | ------------- | ------------------------------------ |
-| 1   | Firebase version lock                  | Grok + Review | 🔴 Alta    | 🟢 Mínima   | 2 min         | Breaking change silencioso em CI     |
-| 2   | `dotenv` → devDependencies             | Review 5.1    | 🔴 Alta    | 🟢 Mínima   | 2 min         | ~15KB de código morto no bundle      |
-| 3   | Alinhar coverage thresholds            | Review PC-2   | 🔴 Alta    | 🟢 Baixa    | 1h            | Credibilidade de todo o `.ai/rules/` |
-| 4   | API Key no bundle (proxy)              | Grok + Review | 🔴 Alta    | 🟡 Média    | 1–2 dias      | Chave de billing exposta no bundle   |
-| 5   | AIProvider abstraction                 | base3.md C-2  | 🟡 Média   | 🟢 Baixa    | 2–4h          | Reescrita total para trocar provider |
-| 6   | Validação Zod para respostas de IA     | Review 4.5    | 🟡 Média   | 🟢 Baixa    | 2–3h          | Crashes silenciosos de parsing       |
-| 7   | Extrair `navigation.tsx`               | Review PC-3   | 🟡 Média   | 🟡 Média    | 4–6h          | Bottleneck de manutenibilidade #1    |
-| 8   | Unificar notification handlers         | Review 5.2    | 🟡 Média   | 🟢 Mínima   | 1h            | Copy-paste que diverge com o tempo   |
-| 9   | Integrar `useNetworkStore` com netinfo | Review 4.6    | 🟡 Média   | 🟢 Baixa    | 2h            | Flush offline sem rede = CPU/bateria |
-| 10  | New Arch compatibility audit           | Grok          | 🟡 Média   | 🟡 Média    | Meio dia      | Crashes no próximo Expo SDK update   |
-| 11  | Extrair `loadDashItems()` do dashboard | Review 5.3    | 🟢 Baixa   | 🟢 Mínima   | 15 min        | Code smell — 3 effects duplicados    |
-| 12  | AsyncStorage → MMKV                    | Grok          | 🟢 Baixa   | 🟢 Baixa    | 4–8h          | Performance de startup               |
-| 13  | FlashList nas listas longas            | Grok          | 🟢 Baixa   | 🟢 Baixa    | 2–4h por tela | Performance incremental              |
-| 14  | Consolidar agentes `.ai/`              | Review 5.5    | ✅ Feito   | 🟢 Baixa    | 2026-03-24    | Concluído: 14→7 agentes              |
-| 15  | Monorepo                               | base3.md P11  | ⏸ Depois   | 🔴 Alta     | Semanas       | Nenhum risco agora                   |
+| #   | Item                                   | Fonte         | Prioridade | Dificuldade | Esforço       | Risco de Não Fazer                            |
+| --- | -------------------------------------- | ------------- | ---------- | ----------- | ------------- | --------------------------------------------- |
+| 1   | Firebase version lock                  | Grok + Review | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: pinado ^12.11.0                    |
+| 2   | `dotenv` → devDependencies             | Review 5.1    | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: movido para devDeps                |
+| 3   | Alinhar coverage thresholds            | Review PC-2   | ✅ Feito   | 🟢 Baixa    | 2026-03-25    | Floor real: 20%/12%/21%/20% — meta 70%        |
+| 4   | API Key no bundle (proxy)              | Grok + Review | ✅ Feito   | 🟡 Média    | 2026-03-25    | Concluído: proxy deployed, key fora do bundle |
+| 5   | AIProvider abstraction                 | base3.md C-2  | 🟡 Média   | 🟢 Baixa    | 2–4h          | Reescrita total para trocar provider          |
+| 6   | Validação Zod para respostas de IA     | Review 4.5    | 🟡 Média   | 🟢 Baixa    | 2–3h          | Crashes silenciosos de parsing                |
+| 7   | Extrair `navigation.tsx`               | Review PC-3   | 🟡 Média   | 🟡 Média    | 4–6h          | Bottleneck de manutenibilidade #1             |
+| 8   | Unificar notification handlers         | Review 5.2    | 🟡 Média   | 🟢 Mínima   | 1h            | Copy-paste que diverge com o tempo            |
+| 9   | Integrar `useNetworkStore` com netinfo | Review 4.6    | 🟡 Média   | 🟢 Baixa    | 2h            | Flush offline sem rede = CPU/bateria          |
+| 10  | New Arch compatibility audit           | Grok          | 🟡 Média   | 🟡 Média    | Meio dia      | Crashes no próximo Expo SDK update            |
+| 11  | Extrair `loadDashItems()` do dashboard | Review 5.3    | 🟢 Baixa   | 🟢 Mínima   | 15 min        | Code smell — 3 effects duplicados             |
+| 12  | AsyncStorage → MMKV                    | Grok          | 🟢 Baixa   | 🟢 Baixa    | 4–8h          | Performance de startup                        |
+| 13  | FlashList nas listas longas            | Grok          | 🟢 Baixa   | 🟢 Baixa    | 2–4h por tela | Performance incremental                       |
+| 14  | Consolidar agentes `.ai/`              | Review 5.5    | ✅ Feito   | 🟢 Baixa    | 2026-03-24    | Concluído: 14→7 agentes                       |
+| 15  | Monorepo                               | base3.md P11  | ⏸ Depois   | 🔴 Alta     | Semanas       | Nenhum risco agora                            |
 
 ---
 
@@ -579,15 +608,17 @@ Para cada item foi avaliado:
 
 ### Imediato (esta sessão / hoje)
 
-- [ ] `yarn list firebase` → fixar versão no `package.json` + commit
-- [ ] Mover `dotenv` para `devDependencies` + verificar `app.config.js`
-- [ ] `yarn test:coverage` → verificar cobertura real → ajustar thresholds no `jest.config.js`
-- [ ] Atualizar `mandatory-rules.md` para refletir política de cobertura real
+- [x] `yarn list firebase` → fixar versão no `package.json` + commit ✅ 2026-03-25
+- [x] Mover `dotenv` para `devDependencies` + verificar `app.config.js` ✅ 2026-03-25
+- [x] `yarn test:coverage` → verificar cobertura real → ajustar thresholds no `jest.config.js` ✅ 2026-03-25
+- [x] Atualizar `mandatory-rules.md` para refletir política de cobertura real ✅ 2026-03-25
 
 ### Esta semana
 
-- [ ] `grep -r "EXPO_PUBLIC_" .env*` — mapear o que está exposto no bundle
-- [ ] Decidir proxy: Firebase Functions vs Cloudflare Worker
+- [x] `grep -r "EXPO_PUBLIC_" .env*` — mapeado: `EXPO_PUBLIC_ANTHROPIC_API_KEY` presente no `.env` local ✅ 2026-03-25
+- [x] Decidir proxy: **Firebase Functions** (onCall v2) ✅ 2026-03-25
+- [x] Deploy: `firebase functions:secrets:set ANTHROPIC_API_KEY` + `firebase deploy --only functions` ✅ 2026-03-25
+- [x] `EXPO_PUBLIC_ANTHROPIC_API_KEY` removida do `.env` ✅ 2026-03-25
 - [ ] Extrair `loadDashItems()` no `dashboard.hook.ts` (15 min)
 - [ ] Unificar `buildNotificationHandler` + `buildTopLevelNotificationHandler` numa função parametrizada
 
@@ -610,24 +641,24 @@ Para cada item foi avaliado:
 
 ## 7. Registro de Decisões
 
-| Data       | Item                        | Decisão       | Motivo                                                                 |
-| ---------- | --------------------------- | ------------- | ---------------------------------------------------------------------- |
-| 2026-03-24 | Criação deste documento     | ✅ Criado     | Consolidar melhorias técnicas identificadas por Grok + base3.md        |
-| 2026-03-24 | Atualização com review      | ✅ Atualizado | Integrar todas as sugestões do `react-native-agent-review.md` (6.5/10) |
-| —          | Firebase version lock       | —             | —                                                                      |
-| —          | `dotenv` → devDependencies  | —             | —                                                                      |
-| —          | Alinhar coverage thresholds | —             | —                                                                      |
-| —          | API Key no bundle           | —             | —                                                                      |
-| —          | AIProvider abstraction      | —             | —                                                                      |
-| —          | Validação Zod para IA       | —             | —                                                                      |
-| —          | Extrair navigation.tsx      | —             | —                                                                      |
-| —          | Unificar notif. handlers    | —             | —                                                                      |
-| —          | Network store + netinfo     | —             | —                                                                      |
-| —          | New Arch audit              | —             | —                                                                      |
-| —          | Dashboard loadDashItems()   | —             | —                                                                      |
-| —          | AsyncStorage → MMKV         | —             | —                                                                      |
-| —          | Consolidar agentes .ai/     | —             | —                                                                      |
-| —          | Monorepo                    | ⏸ Adiado      | Sem segundo package concreto ainda                                     |
+| Data       | Item                        | Decisão       | Motivo                                                                                                             |
+| ---------- | --------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 2026-03-24 | Criação deste documento     | ✅ Criado     | Consolidar melhorias técnicas identificadas por Grok + base3.md                                                    |
+| 2026-03-24 | Atualização com review      | ✅ Atualizado | Integrar todas as sugestões do `react-native-agent-review.md` (6.5/10)                                             |
+| 2026-03-25 | Firebase version lock       | ✅ Fixado     | `^12.11.0` (era `latest`, lock confirmou 12.11.0)                                                                  |
+| 2026-03-25 | `dotenv` → devDependencies  | ✅ Movido     | Usado só em `app.config.js` (config-time), não no bundle                                                           |
+| 2026-03-25 | Alinhar coverage thresholds | ✅ Alinhado   | Floor real (stmt 20%, branch 12%, fn 21%, lines 20%); `mandatory-rules.md` atualizado; meta 70% com ratchet        |
+| 2026-03-25 | API Key no bundle           | ✅ Concluído  | `anthropicProxy` deployed (us-central1), key no Secret Manager, `EXPO_PUBLIC_ANTHROPIC_API_KEY` removida do `.env` |
+| —          | AIProvider abstraction      | —             | —                                                                                                                  |
+| —          | Validação Zod para IA       | —             | —                                                                                                                  |
+| —          | Extrair navigation.tsx      | —             | —                                                                                                                  |
+| —          | Unificar notif. handlers    | —             | —                                                                                                                  |
+| —          | Network store + netinfo     | —             | —                                                                                                                  |
+| —          | New Arch audit              | —             | —                                                                                                                  |
+| —          | Dashboard loadDashItems()   | —             | —                                                                                                                  |
+| —          | AsyncStorage → MMKV         | —             | —                                                                                                                  |
+| —          | Consolidar agentes .ai/     | —             | —                                                                                                                  |
+| —          | Monorepo                    | ⏸ Adiado      | Sem segundo package concreto ainda                                                                                 |
 
 ---
 

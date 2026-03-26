@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+TOKENS="$REPO_ROOT/.ai/router/token-usage.csv"
+ORCH="$REPO_ROOT/.ai/router/orchestration.csv"
+PRS="$REPO_ROOT/.ai/router/pr-costs.csv"
+OUT="$REPO_ROOT/docs/analytics.html"
+
+python3 - "$TOKENS" "$ORCH" "$PRS" "$OUT" <<'PYEOF'
+import csv
+import json
+import os
+import sys
+from collections import defaultdict
+from datetime import datetime
+
+tokens_path, orch_path, pr_path, out_path = sys.argv[1:5]
+
+daily_cost = defaultdict(float)
+agent_tokens = defaultdict(int)
+agent_costs = defaultdict(float)
+prs = []
+generated_at = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+def parse_int(value):
+    try:
+        return int(value)
+    except Exception:
+        return 0
+
+def parse_float(value):
+    try:
+        return float(value)
+    except Exception:
+        return 0.0
+
+if os.path.exists(tokens_path):
+    with open(tokens_path, newline="", encoding="utf-8") as fh:
+        reader = csv.DictReader(fh)
+        for row in reader:
+            if (row.get("provider") or "").lower() != "claude":
+                continue
+            date = (row.get("date") or "")[:10]
+            inp = parse_int(row.get("input_tokens"))
+            out = parse_int(row.get("output_tokens"))
+            cache = parse_int(row.get("cache_read"))
+            cost = (inp * 3.0 + out * 15.0 + cache * 0.3) / 1_000_000
+            daily_cost[date] += cost
+
+if os.path.exists(orch_path):
+    with open(orch_path, newline="", encoding="utf-8") as fh:
+        reader = csv.DictReader(fh)
+        for row in reader:
+            agent = row.get("agent_name", "unknown")
+            agent_tokens[agent] += parse_int(row.get("total_tokens"))
+            agent_costs[agent] += parse_float(row.get("cost_usd"))
+
+if os.path.exists(pr_path):
+    with open(pr_path, newline="", encoding="utf-8") as fh:
+        reader = csv.DictReader(fh)
+        for row in reader:
+            prs.append({
+                "id": row.get("pr_id", ""),
+                "title": row.get("pr_title", ""),
+                "status": row.get("status", ""),
+                "cost": parse_float(row.get("cost_usd")),
+                "tokens": parse_int(row.get("total_tokens")),
+            })
+
+payload = json.dumps({
+    "generatedAt": generated_at,
+    "dailyCost": [{"date": key, "cost": round(value, 4)} for key, value in sorted(daily_cost.items())[-14:]],
+    "agentCosts": [{"agent": key, "tokens": agent_tokens[key], "cost": round(agent_costs[key], 4)} for key in sorted(agent_tokens, key=agent_tokens.get, reverse=True)],
+    "prs": prs[:10],
+}, ensure_ascii=False)
+
+html = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FUSE - Analytics Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <style>
+    :root {{ --bg:#fff8ef; --surface:#f4ebda; --panel:#fffdf8; --ink:#1e1731; --muted:#6b5a6c; --border:#38213a; --accent:#c3e3ef; --accent2:#efb366; --radius:16px; }}
+    * {{ box-sizing:border-box; }} body {{ margin:0; font-family:'Fredoka',sans-serif; background:var(--bg); color:var(--ink); }}
+    header {{ padding:24px; border-bottom:1px solid var(--border); background:rgba(255,248,239,.93); position:sticky; top:0; }}
+    nav a {{ margin-right:10px; color:var(--ink); text-decoration:none; border:1px solid var(--border); border-radius:999px; padding:6px 12px; background:#fffaf3; }}
+    main {{ max-width:1120px; margin:0 auto; padding:28px 20px 56px; }}
+    .hero,.panel {{ background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }}
+    .hero {{ margin-bottom:18px; }}
+    .grid {{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }}
+    .kpi,.item {{ background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px; }}
+    .muted {{ color:var(--muted); }} section {{ margin-top:18px; }} table {{ width:100%; border-collapse:collapse; }}
+    th,td {{ text-align:left; padding:10px 8px; border-bottom:1px solid rgba(56,33,58,.18); }} th {{ color:var(--muted); font-size:12px; text-transform:uppercase; }}
+    canvas {{ max-height:320px; }} h1,h2,h3,p {{ margin:0; }} h1 {{ font-size:32px; }} h2 {{ font-size:18px; margin-bottom:12px; }} .badge {{ display:inline-block; margin-bottom:8px; padding:4px 10px; border:1px solid var(--border); border-radius:999px; background:var(--accent2); font-size:12px; font-weight:600; }}
+  </style>
+</head>
+<body>
+  <header>
+    <nav>
+      <a href="./index.html">Home</a>
+      <a href="./demonstration-orchestration.html">Orchestration</a>
+      <a href="./ai-system.html">AI System</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero">
+      <span class="badge">Historical + active system metrics</span>
+      <h1>FUSE Analytics Dashboard</h1>
+      <p class="muted">Token and orchestration data remain historical, but the narrative now reflects the active <code>.claude/</code> Skills-First architecture.</p>
+      <p class="muted">Generated at {generated_at}</p>
+    </section>
+    <section class="grid" id="kpis"></section>
+    <section class="panel">
+      <h2>Claude Cost Trend</h2>
+      <canvas id="costChart"></canvas>
+    </section>
+    <section class="panel">
+      <h2>Agent Cost Distribution</h2>
+      <div class="grid" id="agents"></div>
+    </section>
+    <section class="panel">
+      <h2>Recent PR Cost Records</h2>
+      <table><thead><tr><th>PR</th><th>Status</th><th>Tokens</th><th>Cost</th></tr></thead><tbody id="prs"></tbody></table>
+    </section>
+  </main>
+  <script id="payload" type="application/json">{payload}</script>
+  <script>
+    const data = JSON.parse(document.getElementById('payload').textContent);
+    const totalCost = data.dailyCost.reduce((sum, item) => sum + item.cost, 0);
+    const totalTokens = data.agentCosts.reduce((sum, item) => sum + item.tokens, 0);
+    const kpis = [
+      ['Claude cost (14d)', `$${{totalCost.toFixed(2)}}`],
+      ['Tracked agent tokens', totalTokens.toLocaleString()],
+      ['Agents with cost data', data.agentCosts.length.toString()],
+      ['PR records', data.prs.length.toString()]
+    ];
+    const kpiRoot = document.getElementById('kpis');
+    kpis.forEach(([label, value]) => {{
+      const el = document.createElement('article');
+      el.className = 'kpi';
+      el.innerHTML = `<p class="muted">${{label}}</p><h2>${{value}}</h2>`;
+      kpiRoot.appendChild(el);
+    }});
+    const agentRoot = document.getElementById('agents');
+    data.agentCosts.forEach((item) => {{
+      const el = document.createElement('article');
+      el.className = 'item';
+      el.innerHTML = `<h3>${{item.agent}}</h3><p class="muted">${{item.tokens.toLocaleString()}} tokens</p><p class="muted">$${{item.cost.toFixed(2)}} cost</p>`;
+      agentRoot.appendChild(el);
+    }});
+    const prRoot = document.getElementById('prs');
+    data.prs.forEach((pr) => {{
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>#${{pr.id}} - ${{pr.title}}</td><td>${{pr.status}}</td><td>${{pr.tokens.toLocaleString()}}</td><td>$${{pr.cost.toFixed(2)}}</td>`;
+      prRoot.appendChild(tr);
+    }});
+    new Chart(document.getElementById('costChart'), {{
+      type: 'line',
+      data: {{
+        labels: data.dailyCost.map((item) => item.date),
+        datasets: [{{
+          label: 'Claude cost (USD)',
+          data: data.dailyCost.map((item) => item.cost),
+          borderColor: '#38213a',
+          backgroundColor: '#c3e3ef',
+          tension: 0.25,
+          fill: true
+        }}]
+      }},
+      options: {{ responsive: true, maintainAspectRatio: false }}
+    }});
+  </script>
+</body>
+</html>"""
+
+with open(out_path, "w", encoding="utf-8") as fh:
+    fh.write(html)
+PYEOF

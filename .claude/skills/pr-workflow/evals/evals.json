@@ -1,0 +1,6 @@
+[
+  "Handle a /create-pr command from the current branch.",
+  "Summarize CI failures for an existing PR.",
+  "Prepare a /fix-pr workflow without merging.",
+  "Explain why /merge-pr still requires an explicit gate."
+]

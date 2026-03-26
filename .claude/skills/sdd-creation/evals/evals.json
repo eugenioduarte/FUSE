@@ -1,0 +1,6 @@
+[
+  "Create an SDD for migrating a feature flag system without changing runtime behaviour.",
+  "Refine an existing draft SDD so it includes rollback and acceptance criteria.",
+  "Turn a vague migration idea into a phased implementation plan.",
+  "Review an SDD and identify missing operational sections."
+]

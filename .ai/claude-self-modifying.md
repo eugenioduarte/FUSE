@@ -8,6 +8,7 @@
 > confirmed in previous sessions. **It must be read before any implementation.**
 >
 > Format of each entry:
+>
 > - **Rule** — what to do / not do
 > - **Why** — context or incident that generated the rule
 > - **Applies to** — where this rule has effect
@@ -112,9 +113,34 @@ callback fires, creating a race condition that results in a permanent white scre
 
 ---
 
-## 📝 How to Update This File
+## � Dependencies — Never Use `latest` for Critical Packages
+
+**Rule:** Never set `"firebase"`, `"react"`, `"react-native"`, `"expo"`, or any package with a
+history of breaking changes to `"latest"` in `package.json`. Always pin to an explicit version
+range (e.g. `"^12.11.0"`).
+
+**Why:** `yarn install` on a new machine or CI can silently install a different major version.
+Discovered on 2026-03-25 when Firebase was `"latest"` (resolved 12.11.0) — fixed to `"^12.11.0"`.
+
+**Applies to:** All new dependencies added to `package.json`. When in doubt, use `yarn info <pkg> version`
+to get the latest stable version and pin it explicitly.
+
+---
+
+## 🧠 AI Architecture — `.claude/` Is the Active System
+
+**Rule:** Treat `.claude/CLAUDE.md` and the `.claude/` tree as the active AI system. Use `.ai/` only as archive and migration reference.
+
+**Why:** On 2026-03-25 the repository began the Skills-First migration to an enterprise `.claude/` architecture with path-scoped rules, directory-based skills, lean agents, and generated public documentation.
+
+**Applies to:** AI system maintenance, agent evolution, documentation updates, and future architecture work.
+
+---
+
+## �📝 How to Update This File
 
 Whenever:
+
 - The user corrects something that was done incorrectly
 - A relevant architectural decision is made
 - A recurring error pattern is identified

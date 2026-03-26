@@ -1,3 +1,5 @@
+> **[DEPRECATED — 2026-03-25]** O sistema activo passou para `.claude/CLAUDE.md`. Este ficheiro permanece apenas como referência histórica do modelo `.ai/`.
+>
 > **[PT]** Sistema mestre de orquestração que roteia pedidos para agentes especializados, impõe contratos arquiteturais e gere a criação de novos agentes.
 
 ---

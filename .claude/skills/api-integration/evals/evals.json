@@ -1,0 +1,6 @@
+[
+  "Create a service and query plan for a new endpoint.",
+  "Explain how to prevent DTO leakage into hooks.",
+  "Review an API integration for testability and layer consistency.",
+  "Choose the right place for async orchestration."
+]

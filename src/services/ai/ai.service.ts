@@ -1,5 +1,10 @@
-/* Simple AI service — Anthropic Claude API. In production, prefer a secure server-side proxy. */
+/* AI service — calls the Anthropic Claude API via the anthropicProxy Firebase Function.
+ * The ANTHROPIC_API_KEY lives in Firebase Secret Manager and never touches the client bundle.
+ * Architecture: App → Firebase ID token (onCall) → anthropicProxy → Anthropic API
+ */
 
+import { getCurrentLocale } from '@/locales'
+import { getFirebaseAuth } from '@/services/firebase/auth.service'
 import {
   KNOWLEDGE_SYSTEM,
   knowledgeUserPrompt,
@@ -7,7 +12,8 @@ import {
   SUMMARY_SYSTEM,
   summaryUserPrompt,
 } from '@/services/prompts'
-import { getCurrentLocale } from '@/locales'
+import { getApp } from 'firebase/app'
+import { getFunctions, httpsCallable } from 'firebase/functions'
 
 type AISummary = {
   title: string
@@ -25,12 +31,7 @@ export type AIKnowledgeSummary = AISummary & {
   recommendations?: string[]
 }
 
-const ANTHROPIC_API_KEY = process.env.EXPO_PUBLIC_ANTHROPIC_API_KEY
-const ANTHROPIC_BASE_URL = 'https://api.anthropic.com/v1'
-const ANTHROPIC_VERSION = '2023-06-01'
-const MODEL =
-  process.env.EXPO_PUBLIC_ANTHROPIC_MODEL || 'claude-haiku-4-5'
-const MAX_TOKENS = 4096
+const MODEL = process.env.EXPO_PUBLIC_ANTHROPIC_MODEL || 'claude-haiku-4-5'
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -42,16 +43,22 @@ const MAX_TOKENS = 4096
 export function toJSONSafe(str: string): any {
   if (!str) return null
   // 1. Try direct parse
-  try { return JSON.parse(str) } catch {}
+  try {
+    return JSON.parse(str)
+  } catch {}
   // 2. Strip markdown code block (```json ... ``` or ``` ... ```)
   const codeBlock = /```(?:json)?\s*([\s\S]*?)```/.exec(str)
   if (codeBlock) {
-    try { return JSON.parse(codeBlock[1].trim()) } catch {}
+    try {
+      return JSON.parse(codeBlock[1].trim())
+    } catch {}
   }
   // 3. Extract first { ... } block
   const obj = /\{[\s\S]*\}/.exec(str)
   if (obj) {
-    try { return JSON.parse(obj[0]) } catch {}
+    try {
+      return JSON.parse(obj[0])
+    } catch {}
   }
   return null
 }
@@ -61,9 +68,7 @@ export function toJSONSafe(str: string): any {
  * so they can be sent to the Anthropic API format.
  */
 function splitMessages(messages: { role: string; content: string }[]) {
-  const systemParts = messages
-    .filter((m) => m.role === 'system')
-    .map((m) => m.content)
+  const systemParts = messages.filter((m) => m.role === 'system').map((m) => m.content)
   const chatMessages = messages.filter((m) => m.role !== 'system')
   return {
     system: systemParts.join('\n') || undefined,
@@ -73,62 +78,19 @@ function splitMessages(messages: { role: string; content: string }[]) {
 
 // ── Core request function ─────────────────────────────────────────────────────
 
-async function doRequestWithRetry(
-  body: string,
-): Promise<Response | null> {
-  if (!ANTHROPIC_API_KEY) return null
-  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
-  const maxAttempts = 3
-  let attempt = 0
-  let last: Response | null = null
-
-  while (attempt < maxAttempts) {
-    attempt++
-    try {
-      const controller = new AbortController()
-      const timeoutHandle = setTimeout(() => controller.abort(), 30000)
-      const res = await fetch(`${ANTHROPIC_BASE_URL}/messages`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': ANTHROPIC_API_KEY,
-          'anthropic-version': ANTHROPIC_VERSION,
-        },
-        body,
-        signal: controller.signal,
-      })
-      clearTimeout(timeoutHandle)
-      if (res.ok) return res
-      if (res.status === 429) {
-        const retryAfter = Number(res.headers.get('retry-after') || '0')
-        const backoff = retryAfter > 0 ? retryAfter * 1000 : 500 * attempt
-        await sleep(backoff)
-        last = res
-        continue
-      }
-      if (res.status >= 500 && res.status < 600) {
-        await sleep(400 * attempt)
-        last = res
-        continue
-      }
-      return res
-    } catch {
-      await sleep(300 * attempt)
-    }
-  }
-  return last
-}
-
 /**
  * Shared helper used by all challenge generators.
  * Accepts an OpenAI-style messages array (system + user/assistant) and
- * returns the raw text content from Claude.
+ * returns the raw text content from Claude, via the anthropicProxy Firebase Function.
+ * Throws if the user is not authenticated.
  */
 export async function callAI(
   messages: { role: string; content: string }[],
   temperature = 0.4,
 ): Promise<string> {
-  if (!ANTHROPIC_API_KEY) throw new Error('EXPO_PUBLIC_ANTHROPIC_API_KEY not set')
+  if (!getFirebaseAuth().currentUser) {
+    throw new Error('User not authenticated — sign in to use AI features.')
+  }
   const locale = getCurrentLocale()
   const langNames: Record<string, string> = {
     pt: 'Portuguese',
@@ -142,28 +104,33 @@ export async function callAI(
   }
   const language = langNames[locale] ?? locale
   const { system, messages: chatMessages } = splitMessages(messages)
-  const systemWithLang = [
-    `Always respond in ${language}.`,
-    system,
-  ].filter(Boolean).join('\n')
-  const body = JSON.stringify({
-    model: MODEL,
-    max_tokens: MAX_TOKENS,
-    temperature,
-    ...(systemWithLang ? { system: systemWithLang } : {}),
+  const systemWithLang = [`Always respond in ${language}.`, system].filter(Boolean).join('\n')
+
+  const proxy = httpsCallable<
+    {
+      messages: { role: string; content: string }[]
+      system?: string
+      temperature: number
+      model: string
+    },
+    { text: string }
+  >(getFunctions(getApp()), 'anthropicProxy')
+
+  const result = await proxy({
     messages: chatMessages,
+    system: systemWithLang || undefined,
+    temperature,
+    model: MODEL,
   })
-  const res = await doRequestWithRetry(body)
-  if (!res?.ok) throw new Error(`AI request failed: ${res?.status ?? 'no response'}`)
-  const data = await res.json()
-  return data?.content?.[0]?.text?.trim?.() ?? ''
+
+  return result.data.text
 }
 
 // ── aiService (summary / knowledge / mini-explain / image / tts) ─────────────
 
 export const aiService = {
   async generateSummary(prompt: string): Promise<AISummary> {
-    if (!ANTHROPIC_API_KEY) return mockSummary(prompt)
+    if (!getFirebaseAuth().currentUser) return mockSummary(prompt)
     const text = await callAI(
       [
         { role: 'system', content: SUMMARY_SYSTEM },
@@ -175,7 +142,7 @@ export const aiService = {
   },
 
   async generateKnowledgeSummary(prompt: string): Promise<AIKnowledgeSummary> {
-    if (!ANTHROPIC_API_KEY) return mockKnowledgeSummary(prompt)
+    if (!getFirebaseAuth().currentUser) return mockKnowledgeSummary(prompt)
     const text = await callAI(
       [
         { role: 'system', content: KNOWLEDGE_SYSTEM },
@@ -187,7 +154,7 @@ export const aiService = {
   },
 
   async miniExplain(term: string, context?: string): Promise<string> {
-    if (!ANTHROPIC_API_KEY) return `Brief description (mock) for "${term}".`
+    if (!getFirebaseAuth().currentUser) return `Brief description (mock) for "${term}".`
     try {
       const user =
         `Explain in 1-2 sentences the term: "${term}".` +
@@ -209,10 +176,7 @@ export const aiService = {
     return 'https://picsum.photos/1024/768'
   },
 
-  async ttsToBase64(
-    _text: string,
-    _format: 'mp3' | 'wav' = 'mp3',
-  ): Promise<string | null> {
+  async ttsToBase64(_text: string, _format: 'mp3' | 'wav' = 'mp3'): Promise<string | null> {
     // Anthropic does not have a TTS API
     return null
   },
@@ -228,16 +192,11 @@ function parseSummary(text: string, _fallbackPrompt: string): AISummary {
   return {
     title: String(parsed.title),
     content: String(parsed.content),
-    keywords: Array.isArray(parsed.keywords)
-      ? parsed.keywords.map(String).slice(0, 20)
-      : [],
+    keywords: Array.isArray(parsed.keywords) ? parsed.keywords.map(String).slice(0, 20) : [],
   }
 }
 
-function parseKnowledgeSummary(
-  text: string,
-  _fallbackPrompt: string,
-): AIKnowledgeSummary {
+function parseKnowledgeSummary(text: string, _fallbackPrompt: string): AIKnowledgeSummary {
   const parsed = toJSONSafe(text)
   if (!parsed?.title || !parsed?.content) {
     throw new Error('AI knowledge: unexpected format')
@@ -257,9 +216,7 @@ function parseKnowledgeSummary(
   return {
     title: String(parsed.title),
     content: String(parsed.content),
-    keywords: Array.isArray(parsed.keywords)
-      ? parsed.keywords.map(String).slice(0, 20)
-      : [],
+    keywords: Array.isArray(parsed.keywords) ? parsed.keywords.map(String).slice(0, 20) : [],
     expandableTerms: terms,
     recommendations: recs,
   }

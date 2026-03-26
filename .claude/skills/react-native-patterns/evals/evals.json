@@ -1,0 +1,6 @@
+[
+  "Review a screen for list virtualization issues.",
+  "Assess whether an animation approach is mobile-safe.",
+  "Check a component tree for touch-target and safe-area problems.",
+  "Explain why a ScrollView is risky for a large dataset."
+]
