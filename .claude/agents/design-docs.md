@@ -6,6 +6,8 @@ model: haiku
 memory: project
 skills:
   - business-analysis
+  - figma-context
+  - jira-intake
   - ux-standards
   - translations
   - sdd-creation
