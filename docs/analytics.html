@@ -3,763 +3,101 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FUSE — Analytics Dashboard</title>
+  <title>FUSE - Analytics Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
   <style>
-    :root {
-      --bg:           #FFFAF0;
-      --surface:      #F7F0E0;
-      --surface-alt:  #F7EFDF;
-      --border:       #3A001D;
-      --text:         #06003a;
-      --text-soft:    #5A2E3D;
-      --accent-blue:  #AEE3F3;
-      --accent-green: #BCEBCB;
-      --accent-yellow:#FCCB66;
-      --accent-orange:#FBC19D;
-      --accent-purple:#CFBDDE;
-      --accent-pink:  #F296B8;
-      --radius:       12px;
-      --radius-pill:  999px;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Fredoka', sans-serif; background: var(--bg); color: var(--text); line-height: 1.55; }
-    a { color: var(--text-soft); text-decoration: underline; }
-    a:hover { color: var(--text); }
-
-    header {
-      background: var(--surface); border-bottom: 1px solid var(--border);
-      padding: 14px 32px; display: flex; align-items: center;
-      justify-content: space-between; flex-wrap: wrap; gap: 12px;
-      position: sticky; top: 0; z-index: 10;
-    }
-    .header-title { display: flex; align-items: center; gap: 10px; }
-    .header-logo { width: 32px; height: 32px; border-radius: 8px; object-fit: cover; }
-    .header-title h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: 0.01em; }
-    .header-title .badge {
-      background: var(--accent-purple); color: var(--text);
-      border: 1px solid var(--border); font-size: 0.72rem; padding: 2px 10px;
-      border-radius: var(--radius-pill); font-weight: 600;
-    }
-    nav { display: flex; gap: 10px; flex-wrap: wrap; }
-    nav a {
-      color: var(--text-soft); text-decoration: none; font-size: 0.9rem;
-      font-weight: 500; padding: 4px 14px; border-radius: var(--radius-pill);
-      border: 1px solid var(--border); background: var(--bg); transition: background 0.15s;
-    }
-    nav a:hover { background: var(--accent-yellow); color: var(--text); }
-
-    main { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
-    section { margin-bottom: 60px; }
-    .section-title {
-      font-weight: 600; margin-bottom: 20px; padding-bottom: 8px;
-      border-bottom: 1px solid var(--border); color: var(--text-soft);
-      text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.82rem;
-    }
-
-    /* KPI cards */
-    .kpi-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
-      margin-bottom: 32px;
-    }
-    .kpi-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 18px 20px;
-    }
-    .kpi-label { font-size: 0.72rem; font-weight: 600; color: var(--text-soft);
-      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-    .kpi-value { font-size: 1.8rem; font-weight: 700; color: var(--text); line-height: 1; }
-    .kpi-sub   { font-size: 0.75rem; color: var(--text-soft); margin-top: 4px; }
-    .kpi-good  { border-top: 3px solid var(--accent-green); }
-    .kpi-warn  { border-top: 3px solid var(--accent-yellow); }
-    .kpi-cost  { border-top: 3px solid var(--accent-pink); }
-    .kpi-info  { border-top: 3px solid var(--accent-blue); }
-    .kpi-purple{ border-top: 3px solid var(--accent-purple); }
-
-    /* Charts */
-    .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .chart-full { grid-column: 1 / -1; }
-    .chart-half { grid-column: span 1; }
-    .chart-wrap {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 20px 24px;
-    }
-    .chart-label {
-      font-size: 0.78rem; font-weight: 600; color: var(--text-soft);
-      text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 16px;
-    }
-    .chart-wrap canvas { max-height: 280px; }
-    .empty-state {
-      text-align: center; color: var(--text-soft); padding: 40px 20px;
-      font-size: 0.88rem; line-height: 1.8;
-    }
-    .empty-state code {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 6px; padding: 1px 7px;
-      font-family: 'SFMono-Regular', Consolas, monospace; font-size: 0.8em;
-    }
-
-    footer {
-      text-align: center; padding: 32px 16px;
-      font-size: 0.78rem; color: var(--text-soft);
-      border-top: 1px solid var(--border); margin-top: 40px;
-    }
+    :root { --bg:#fff8ef; --surface:#f4ebda; --panel:#fffdf8; --ink:#1e1731; --muted:#6b5a6c; --border:#38213a; --accent:#c3e3ef; --accent2:#efb366; --radius:16px; }
+    * { box-sizing:border-box; } body { margin:0; font-family:'Fredoka',sans-serif; background:var(--bg); color:var(--ink); }
+    header { padding:24px; border-bottom:1px solid var(--border); background:rgba(255,248,239,.93); position:sticky; top:0; }
+    nav a { margin-right:10px; color:var(--ink); text-decoration:none; border:1px solid var(--border); border-radius:999px; padding:6px 12px; background:#fffaf3; }
+    main { max-width:1120px; margin:0 auto; padding:28px 20px 56px; }
+    .hero,.panel { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:22px; }
+    .hero { margin-bottom:18px; }
+    .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:14px; }
+    .kpi,.item { background:var(--panel); border:1px solid var(--border); border-radius:14px; padding:16px; }
+    .muted { color:var(--muted); } section { margin-top:18px; } table { width:100%; border-collapse:collapse; }
+    th,td { text-align:left; padding:10px 8px; border-bottom:1px solid rgba(56,33,58,.18); } th { color:var(--muted); font-size:12px; text-transform:uppercase; }
+    canvas { max-height:320px; } h1,h2,h3,p { margin:0; } h1 { font-size:32px; } h2 { font-size:18px; margin-bottom:12px; } .badge { display:inline-block; margin-bottom:8px; padding:4px 10px; border:1px solid var(--border); border-radius:999px; background:var(--accent2); font-size:12px; font-weight:600; }
   </style>
 </head>
 <body>
-
-<script id="analytics-data" type="application/json">
-{
-  "generatedAt": "2026-03-24 00:41",
-  "kpis": {
-    "cacheHitRate": 100.0,
-    "cacheSavingsUsd": 1039.1525,
-    "localRate": 11.4,
-    "totalCostUsd": 146.6671,
-    "claudeTokens": 2168501,
-    "ollamaTokens": 278000
-  },
-  "costSeries": [
-    {
-      "date": "2026-03-16",
-      "cost": 0.4167
-    },
-    {
-      "date": "2026-03-17",
-      "cost": 1.1063
-    },
-    {
-      "date": "2026-03-18",
-      "cost": 0.8713
-    },
-    {
-      "date": "2026-03-19",
-      "cost": 1.9613
-    },
-    {
-      "date": "2026-03-20",
-      "cost": 0.958
-    },
-    {
-      "date": "2026-03-21",
-      "cost": 2.6918
-    },
-    {
-      "date": "2026-03-22",
-      "cost": 14.7474
-    },
-    {
-      "date": "2026-03-23",
-      "cost": 123.9142
-    }
-  ],
-  "agentCosts": [
-    {
-      "agent": "unknown",
-      "tokens": 1357869,
-      "cost": 102.1992,
-      "taskType": "other"
-    },
-    {
-      "agent": "logic-engineer",
-      "tokens": 386309,
-      "cost": 0.0,
-      "taskType": "implementation"
-    },
-    {
-      "agent": "code-reviewer",
-      "tokens": 354991,
-      "cost": 15.444,
-      "taskType": "review"
-    },
-    {
-      "agent": "react-native-engineer",
-      "tokens": 279470,
-      "cost": 0.0,
-      "taskType": "implementation"
-    },
-    {
-      "agent": "pr-lifecycle",
-      "tokens": 143714,
-      "cost": 5.5853,
-      "taskType": "pr-lifecycle"
-    },
-    {
-      "agent": "coupling-analyzer",
-      "tokens": 141702,
-      "cost": 5.2713,
-      "taskType": "architecture"
-    },
-    {
-      "agent": "performance-auditor",
-      "tokens": 128515,
-      "cost": 4.2262,
-      "taskType": "architecture"
-    },
-    {
-      "agent": "frontend-architect",
-      "tokens": 125315,
-      "cost": 5.7326,
-      "taskType": "architecture"
-    },
-    {
-      "agent": "sonar-auto-fixer",
-      "tokens": 102560,
-      "cost": 0.0,
-      "taskType": "sonar"
-    },
-    {
-      "agent": "ui-designer",
-      "tokens": 97648,
-      "cost": 3.6355,
-      "taskType": "implementation"
-    },
-    {
-      "agent": "business-analyst",
-      "tokens": 95464,
-      "cost": 3.3744,
-      "taskType": "architecture"
-    },
-    {
-      "agent": "pr-review-fixer",
-      "tokens": 90680,
-      "cost": 0.0,
-      "taskType": "review"
-    },
-    {
-      "agent": "test-writer",
-      "tokens": 77594,
-      "cost": 0.0,
-      "taskType": "tests"
-    },
-    {
-      "agent": "test-write-e2e",
-      "tokens": 64445,
-      "cost": 0.0,
-      "taskType": "tests"
-    },
-    {
-      "agent": "doc-designer",
-      "tokens": 22719,
-      "cost": 0.7678,
-      "taskType": "other"
-    }
-  ],
-  "taskTokens": [
-    {
-      "task": "architecture",
-      "input": 144581,
-      "output": 346415,
-      "cache": 43248515
-    },
-    {
-      "task": "implementation",
-      "input": 443292,
-      "output": 320135,
-      "cache": 8613788
-    },
-    {
-      "task": "review",
-      "input": 168143,
-      "output": 277528,
-      "cache": 38282669
-    },
-    {
-      "task": "tests",
-      "input": 79416,
-      "output": 62623,
-      "cache": 0
-    },
-    {
-      "task": "pr-lifecycle",
-      "input": 38597,
-      "output": 105117,
-      "cache": 12976002
-    },
-    {
-      "task": "sonar",
-      "input": 70408,
-      "output": 32152,
-      "cache": 0
-    },
-    {
-      "task": "other",
-      "input": 63828,
-      "output": 1316760,
-      "cache": 276746981
-    }
-  ],
-  "prCosts": [
-    {
-      "id": 65,
-      "title": "feat: add user authentication flow",
-      "status": "merged",
-      "tokens": 142500,
-      "cost": 1.842,
-      "retries": 0,
-      "errors": [],
-      "mergedAt": "2026-03-16 14:22:00"
-    },
-    {
-      "id": 66,
-      "title": "fix: SecureStore chunking for large payloads",
-      "status": "merged",
-      "tokens": 98200,
-      "cost": 1.214,
-      "retries": 1,
-      "errors": [
-        "TypeScript"
-      ],
-      "mergedAt": "2026-03-17 09:45:00"
-    },
-    {
-      "id": 67,
-      "title": "feat: implement offline sync queue",
-      "status": "merged",
-      "tokens": 185000,
-      "cost": 2.435,
-      "retries": 0,
-      "errors": [],
-      "mergedAt": "2026-03-17 16:30:00"
-    },
-    {
-      "id": 68,
-      "title": "chore: update dependencies and fix lint",
-      "status": "failed",
-      "tokens": 52000,
-      "cost": 0.489,
-      "retries": 3,
-      "errors": [
-        "ESLint",
-        "TypeScript"
-      ],
-      "mergedAt": null
-    },
-    {
-      "id": 69,
-      "title": "feat: add budget category screen",
-      "status": "merged",
-      "tokens": 167000,
-      "cost": 2.19,
-      "retries": 1,
-      "errors": [
-        "ESLint"
-      ],
-      "mergedAt": "2026-03-18 11:20:00"
-    },
-    {
-      "id": 70,
-      "title": "fix: navigation stack memory leak",
-      "status": "merged",
-      "tokens": 88500,
-      "cost": 0.987,
-      "retries": 0,
-      "errors": [],
-      "mergedAt": "2026-03-18 17:55:00"
-    },
-    {
-      "id": 71,
-      "title": "feat: Sonar quality gate improvements",
-      "status": "merged",
-      "tokens": 210000,
-      "cost": 3.012,
-      "retries": 2,
-      "errors": [
-        "Sonar",
-        "Tests"
-      ],
-      "mergedAt": "2026-03-19 10:10:00"
-    },
-    {
-      "id": 72,
-      "title": "refactor: move to repository pattern",
-      "status": "merged",
-      "tokens": 195000,
-      "cost": 2.78,
-      "retries": 0,
-      "errors": [],
-      "mergedAt": "2026-03-20 13:40:00"
-    },
-    {
-      "id": 73,
-      "title": "test: add E2E flows for payment screen",
-      "status": "merged",
-      "tokens": 134000,
-      "cost": 1.566,
-      "retries": 1,
-      "errors": [
-        "Tests"
-      ],
-      "mergedAt": "2026-03-21 09:25:00"
-    },
-    {
-      "id": 74,
-      "title": "feat: analytics dashboard GitHub Pages",
-      "status": "merged",
-      "tokens": 320000,
-      "cost": 4.89,
-      "retries": 0,
-      "errors": [],
-      "mergedAt": "2026-03-22 15:00:00"
-    }
-  ],
-  "errorCosts": [
-    {
-      "type": "Tests",
-      "occurrences": 2,
-      "cost": 3.072
-    },
-    {
-      "type": "ESLint",
-      "occurrences": 2,
-      "cost": 2.4345
-    },
-    {
-      "type": "Sonar",
-      "occurrences": 1,
-      "cost": 1.506
-    },
-    {
-      "type": "TypeScript",
-      "occurrences": 2,
-      "cost": 1.4585
-    }
-  ],
-  "roi": [
-    {
-      "date": "2026-03-16",
-      "costUsd": 0.4167,
-      "savedUsd": 60.0,
-      "netSavingUsd": 59.58
-    },
-    {
-      "date": "2026-03-17",
-      "costUsd": 1.523,
-      "savedUsd": 120.0,
-      "netSavingUsd": 118.48
-    },
-    {
-      "date": "2026-03-18",
-      "costUsd": 2.3943,
-      "savedUsd": 180.0,
-      "netSavingUsd": 177.61
-    },
-    {
-      "date": "2026-03-19",
-      "costUsd": 4.3556,
-      "savedUsd": 240.0,
-      "netSavingUsd": 235.64
-    },
-    {
-      "date": "2026-03-20",
-      "costUsd": 5.3136,
-      "savedUsd": 300.0,
-      "netSavingUsd": 294.69
-    },
-    {
-      "date": "2026-03-21",
-      "costUsd": 8.0054,
-      "savedUsd": 360.0,
-      "netSavingUsd": 351.99
-    },
-    {
-      "date": "2026-03-22",
-      "costUsd": 22.7528,
-      "savedUsd": 420.0,
-      "netSavingUsd": 397.25
-    },
-    {
-      "date": "2026-03-23",
-      "costUsd": 146.667,
-      "savedUsd": 480.0,
-      "netSavingUsd": 333.33
-    }
-  ],
-  "hasOrch": true,
-  "hasPR": true,
-  "hourlyRate": 60.0
-}
-</script>
-
-<header>
-  <div class="header-title">
-    <img src="logo.png" alt="FUSE logo" class="header-logo" />
-    <h1>FUSE — Analytics</h1>
-    <span class="badge">Token Intelligence</span>
-  </div>
-  <nav>
-    <a href="#savings">Token Savings</a>
-    <a href="#usage">Usage by Agent</a>
-    <a href="#agents">Efficiency</a>
-    <a href="#pr">PR Analysis</a>
-    <a href="demonstration-orchestration.html">← Dashboard</a>
-  </nav>
-</header>
-
-<main>
-
-  <!-- ── Token Savings KPIs ───────────────────────────────────────────── -->
-  <section id="savings">
-    <div class="section-title">Token Saving Strategies</div>
-    <div class="kpi-grid" id="kpi-grid"></div>
-  </section>
-
-  <!-- ── Usage by Agent ───────────────────────────────────────────────── -->
-  <section id="usage">
-    <div class="section-title">Usage by Agent</div>
-    <div class="chart-wrap chart-full" id="agent-tokens-wrap">
-      <div class="chart-label">Tokens per Agent</div>
-      <canvas id="chartAgentTokens" style="min-height:320px"></canvas>
-    </div>
-  </section>
-
-  <!-- ── Agents / Task Breakdown ──────────────────────────────────────── -->
-  <section id="agents">
-    <div class="section-title">Efficiency — Tokens per Task Type</div>
-    <div class="charts-grid">
-      <div class="chart-wrap chart-half" id="task-tokens-wrap">
-        <div class="chart-label">Tokens per Task Type</div>
-        <canvas id="chartTaskTokens"></canvas>
-      </div>
-      <div class="chart-wrap chart-half">
-        <div class="chart-label">Remote vs Local Share · Total Tokens</div>
-        <canvas id="chartProviderShare"></canvas>
-      </div>
-    </div>
-  </section>
-
-  <!-- ── PR & Error Analysis ──────────────────────────────────────────── -->
-  <section id="pr">
-    <div class="section-title">PR &amp; Error Analysis</div>
-    <div class="charts-grid">
-      <div class="chart-wrap chart-half" id="pr-retries-wrap">
-        <div class="chart-label">Retries per PR</div>
-        <canvas id="chartPRRetries"></canvas>
-      </div>
-      <div class="chart-wrap chart-half" id="error-freq-wrap">
-        <div class="chart-label">Error Type Frequency</div>
-        <canvas id="chartErrorFreq"></canvas>
-      </div>
-    </div>
-  </section>
-
-</main>
-
-<footer>
-  Generated: 2026-03-24 00:41 · <a href="https://eugenioduarte.github.io/FUSE/" target="_blank">eugenioduarte.github.io/FUSE</a>
-</footer>
-
-<script>
-(function () {
-  const d = JSON.parse(document.getElementById('analytics-data').textContent);
-  const FONT = 'Fredoka';
-  Chart.defaults.font.family = FONT;
-  Chart.defaults.color = '#5A2E3D';
-
-  // ── KPIs ─────────────────────────────────────────────────────────────
-  const kpiDefs = [
-    {
-      label: 'Cache Hit Rate',
-      value: d.kpis.cacheHitRate + '%',
-      sub: 'of Claude input from cache',
-      cls: 'kpi-good',
-      tip: 'Higher = less input cost. Target > 60%.'
-    },
-    // { label: 'Cache Savings', value: '$' + d.kpis.cacheSavingsUsd.toFixed(3), sub: 'USD saved vs full input price', cls: 'kpi-good' },
-    {
-      label: 'Local (Ollama) Share',
-      value: d.kpis.localRate + '%',
-      sub: 'of all tokens — free',
-      cls: 'kpi-purple',
-      tip: 'More local = lower bill. Ollama runs at $0.'
-    },
-    // { label: 'Total Claude Cost', value: '$' + d.kpis.totalCostUsd.toFixed(3), sub: 'USD spent since start', cls: 'kpi-cost' },
-    {
-      label: 'Claude Tokens',
-      value: fmtNum(d.kpis.claudeTokens),
-      sub: 'remote tokens (billable)',
-      cls: 'kpi-warn'
-    },
-    {
-      label: 'Ollama Tokens',
-      value: fmtNum(d.kpis.ollamaTokens),
-      sub: 'local tokens (free)',
-      cls: 'kpi-info'
-    },
-  ];
-  const grid = document.getElementById('kpi-grid');
-  kpiDefs.forEach(k => {
-    grid.innerHTML += `<div class="kpi-card ${k.cls}" title="${k.tip || ''}">
-      <div class="kpi-label">${k.label}</div>
-      <div class="kpi-value">${k.value}</div>
-      <div class="kpi-sub">${k.sub}</div>
-    </div>`;
-  });
-
-  function fmtNum(n) {
-    if (n >= 1_000_000) return (n/1_000_000).toFixed(1)+'M';
-    if (n >= 1_000) return (n/1_000).toFixed(1)+'K';
-    return String(n);
-  }
-
-  // ── Tokens per Agent ──────────────────────────────────────────────────
-  if (d.hasOrch && d.agentCosts.length > 0) {
-    const agentCanvas = document.getElementById('chartAgentTokens');
-    agentCanvas.style.height = Math.max(320, d.agentCosts.length * 36) + 'px';
-    new Chart(agentCanvas, {
-      type: 'bar',
+  <header>
+    <nav>
+      <a href="./index.html">Home</a>
+      <a href="./demonstration-orchestration.html">Orchestration</a>
+      <a href="./ai-system.html">AI System</a>
+    </nav>
+  </header>
+  <main>
+    <section class="hero">
+      <span class="badge">Historical + active system metrics</span>
+      <h1>FUSE Analytics Dashboard</h1>
+      <p class="muted">Token and orchestration data remain historical, but the narrative now reflects the active <code>.claude/</code> Skills-First architecture.</p>
+      <p class="muted">Generated at 2026-03-26 01:05</p>
+    </section>
+    <section class="grid" id="kpis"></section>
+    <section class="panel">
+      <h2>Claude Cost Trend</h2>
+      <canvas id="costChart"></canvas>
+    </section>
+    <section class="panel">
+      <h2>Agent Cost Distribution</h2>
+      <div class="grid" id="agents"></div>
+    </section>
+    <section class="panel">
+      <h2>Recent PR Cost Records</h2>
+      <table><thead><tr><th>PR</th><th>Status</th><th>Tokens</th><th>Cost</th></tr></thead><tbody id="prs"></tbody></table>
+    </section>
+  </main>
+  <script id="payload" type="application/json">{"generatedAt": "2026-03-26 01:05", "dailyCost": [{"date": "2026-03-16", "cost": 0.4167}, {"date": "2026-03-17", "cost": 1.1063}, {"date": "2026-03-18", "cost": 0.8713}, {"date": "2026-03-19", "cost": 1.9613}, {"date": "2026-03-20", "cost": 0.958}, {"date": "2026-03-21", "cost": 2.6918}, {"date": "2026-03-22", "cost": 14.7474}, {"date": "2026-03-23", "cost": 123.9142}], "agentCosts": [{"agent": "unknown", "tokens": 1357869, "cost": 102.1992}, {"agent": "logic-engineer", "tokens": 386309, "cost": 0.0}, {"agent": "code-reviewer", "tokens": 354991, "cost": 15.444}, {"agent": "react-native-engineer", "tokens": 279470, "cost": 0.0}, {"agent": "pr-lifecycle", "tokens": 143714, "cost": 5.5853}, {"agent": "coupling-analyzer", "tokens": 141702, "cost": 5.2713}, {"agent": "performance-auditor", "tokens": 128515, "cost": 4.2262}, {"agent": "frontend-architect", "tokens": 125315, "cost": 5.7326}, {"agent": "sonar-auto-fixer", "tokens": 102560, "cost": 0.0}, {"agent": "ui-designer", "tokens": 97648, "cost": 3.6355}, {"agent": "business-analyst", "tokens": 95464, "cost": 3.3744}, {"agent": "pr-review-fixer", "tokens": 90680, "cost": 0.0}, {"agent": "test-writer", "tokens": 77594, "cost": 0.0}, {"agent": "test-write-e2e", "tokens": 64445, "cost": 0.0}, {"agent": "doc-designer", "tokens": 22719, "cost": 0.7678}], "prs": [{"id": "65", "title": "feat: add user authentication flow", "status": "merged", "cost": 1.842, "tokens": 142500}, {"id": "66", "title": "fix: SecureStore chunking for large payloads", "status": "merged", "cost": 1.214, "tokens": 98200}, {"id": "67", "title": "feat: implement offline sync queue", "status": "merged", "cost": 2.435, "tokens": 185000}, {"id": "68", "title": "chore: update dependencies and fix lint", "status": "failed", "cost": 0.489, "tokens": 52000}, {"id": "69", "title": "feat: add budget category screen", "status": "merged", "cost": 2.19, "tokens": 167000}, {"id": "70", "title": "fix: navigation stack memory leak", "status": "merged", "cost": 0.987, "tokens": 88500}, {"id": "71", "title": "feat: Sonar quality gate improvements", "status": "merged", "cost": 3.012, "tokens": 210000}, {"id": "72", "title": "refactor: move to repository pattern", "status": "merged", "cost": 2.78, "tokens": 195000}, {"id": "73", "title": "test: add E2E flows for payment screen", "status": "merged", "cost": 1.566, "tokens": 134000}, {"id": "74", "title": "feat: analytics dashboard GitHub Pages", "status": "merged", "cost": 4.89, "tokens": 320000}]}</script>
+  <script>
+    const data = JSON.parse(document.getElementById('payload').textContent);
+    const totalCost = data.dailyCost.reduce((sum, item) => sum + item.cost, 0);
+    const totalTokens = data.agentCosts.reduce((sum, item) => sum + item.tokens, 0);
+    const kpis = [
+      ['Claude cost (14d)', `$${totalCost.toFixed(2)}`],
+      ['Tracked agent tokens', totalTokens.toLocaleString()],
+      ['Agents with cost data', data.agentCosts.length.toString()],
+      ['PR records', data.prs.length.toString()]
+    ];
+    const kpiRoot = document.getElementById('kpis');
+    kpis.forEach(([label, value]) => {
+      const el = document.createElement('article');
+      el.className = 'kpi';
+      el.innerHTML = `<p class="muted">${label}</p><h2>${value}</h2>`;
+      kpiRoot.appendChild(el);
+    });
+    const agentRoot = document.getElementById('agents');
+    data.agentCosts.forEach((item) => {
+      const el = document.createElement('article');
+      el.className = 'item';
+      el.innerHTML = `<h3>${item.agent}</h3><p class="muted">${item.tokens.toLocaleString()} tokens</p><p class="muted">$${item.cost.toFixed(2)} cost</p>`;
+      agentRoot.appendChild(el);
+    });
+    const prRoot = document.getElementById('prs');
+    data.prs.forEach((pr) => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>#${pr.id} - ${pr.title}</td><td>${pr.status}</td><td>${pr.tokens.toLocaleString()}</td><td>$${pr.cost.toFixed(2)}</td>`;
+      prRoot.appendChild(tr);
+    });
+    new Chart(document.getElementById('costChart'), {
+      type: 'line',
       data: {
-        labels: d.agentCosts.map(x => x.agent),
+        labels: data.dailyCost.map((item) => item.date),
         datasets: [{
-          label: 'Tokens',
-          data: d.agentCosts.map(x => x.tokens),
-          backgroundColor: 'rgba(207,189,222,0.85)',
-          borderColor: '#3A001D', borderWidth: 1, borderRadius: 4,
+          label: 'Claude cost (USD)',
+          data: data.dailyCost.map((item) => item.cost),
+          borderColor: '#38213a',
+          backgroundColor: '#c3e3ef',
+          tension: 0.25,
+          fill: true
         }]
       },
-      options: {
-        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false },
-          tooltip: { callbacks: { label: ctx => fmtNum(ctx.parsed.x) + ' tokens' } }
-        },
-        scales: {
-          x: { ticks: { callback: fmtNum }, grid: { color: 'rgba(58,0,29,0.08)' } },
-          y: { ticks: { autoSkip: false }, grid: { display: false } }
-        }
-      }
+      options: { responsive: true, maintainAspectRatio: false }
     });
-  } else {
-    document.getElementById('agent-tokens-wrap').innerHTML =
-      '<div class="chart-label">Tokens per Agent</div>' +
-      '<div class="empty-state">Waiting for agent data.<br>Set <code>CLAUDE_AGENT_NAME</code> in your hook to start tracking.</div>';
-  }
-
-  // ── Provider Share ────────────────────────────────────────────────────
-  {
-    const cTok = d.kpis.claudeTokens;
-    const oTok = d.kpis.ollamaTokens;
-    if (cTok + oTok > 0) {
-      new Chart(document.getElementById('chartProviderShare'), {
-        type: 'doughnut',
-        data: {
-          labels: ['Remote (Claude)', 'Local (Ollama)'],
-          datasets: [{
-            data: [cTok, oTok],
-            backgroundColor: ['#AEE3F3','#BCEBCB'],
-            borderColor: '#3A001D', borderWidth: 1,
-          }]
-        },
-        options: {
-          responsive: true, maintainAspectRatio: true,
-          plugins: {
-            legend: { position: 'bottom', labels: { font: { family: FONT }, padding: 12 } },
-            tooltip: { callbacks: { label: ctx => ctx.label + ': ' + fmtNum(ctx.parsed) + ' tokens' } }
-          }
-        }
-      });
-    } else {
-      document.getElementById('chartProviderShare').closest('.chart-wrap').innerHTML =
-        '<div class="chart-label">Remote vs Local Share</div><div class="empty-state">No data yet.</div>';
-    }
-  }
-
-  // ── Task Tokens (orchestration.csv) ───────────────────────────────────
-  if (d.hasOrch && d.taskTokens.length > 0) {
-    new Chart(document.getElementById('chartTaskTokens'), {
-      type: 'bar',
-      data: {
-        labels: d.taskTokens.map(x => x.task),
-        datasets: [
-          { label: 'Input',  data: d.taskTokens.map(x => x.input),  backgroundColor: 'rgba(174,227,243,0.8)', borderRadius: 4 },
-          { label: 'Output', data: d.taskTokens.map(x => x.output), backgroundColor: 'rgba(188,235,203,0.8)', borderRadius: 4 },
-          { label: 'Cache',  data: d.taskTokens.map(x => x.cache),  backgroundColor: 'rgba(252,203,102,0.8)', borderRadius: 4 },
-        ]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true,
-        plugins: { legend: { position: 'bottom', labels: { font: { family: FONT }, padding: 10 } } },
-        scales: {
-          x: { stacked: true, grid: { display: false } },
-          y: { stacked: true, ticks: { callback: fmtNum }, grid: { color: 'rgba(58,0,29,0.08)' } }
-        }
-      }
-    });
-  } else {
-    document.getElementById('chartTaskTokens').closest('.chart-wrap').innerHTML =
-      '<div class="chart-label">Tokens per Task Type</div>' +
-      '<div class="empty-state">Waiting for orchestration data.<br><code>.ai/router/orchestration.csv</code> is populated by the stop hook.</div>';
-  }
-
-  // ── Retries per PR ────────────────────────────────────────────────────
-  if (d.hasPR && d.prCosts.length > 0) {
-    const top = d.prCosts.slice(0, 15);
-    new Chart(document.getElementById('chartPRRetries'), {
-      type: 'bar',
-      data: {
-        labels: top.map(x => '#' + x.id),
-        datasets: [{
-          label: 'Retries',
-          data: top.map(x => x.retries),
-          backgroundColor: top.map(x => x.status === 'failed' ? 'rgba(242,150,184,0.8)' : 'rgba(188,235,203,0.8)'),
-          borderColor: '#3A001D', borderWidth: 1, borderRadius: 4,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true,
-        plugins: { legend: { display: false },
-          tooltip: { callbacks: {
-            title: ctx => '#'+top[ctx[0].dataIndex].id+' '+top[ctx[0].dataIndex].title.substring(0,40),
-            label: ctx => ctx.parsed.y + ' retries · ' + top[ctx[0].dataIndex].status
-          }}
-        },
-        scales: {
-          y: { ticks: { stepSize: 1 }, grid: { color: 'rgba(58,0,29,0.08)' } },
-          x: { grid: { display: false } }
-        }
-      }
-    });
-  } else {
-    document.getElementById('pr-retries-wrap').innerHTML =
-      '<div class="chart-label">Retries per PR</div>' +
-      '<div class="empty-state">No PR data yet.</div>';
-  }
-
-  // ── Error Type Frequency ──────────────────────────────────────────────
-  if (d.hasPR && d.errorCosts.length > 0) {
-    new Chart(document.getElementById('chartErrorFreq'), {
-      type: 'bar',
-      data: {
-        labels: d.errorCosts.map(x => x.type),
-        datasets: [{
-          label: 'Occurrences',
-          data: d.errorCosts.map(x => x.occurrences),
-          backgroundColor: 'rgba(242,150,184,0.8)',
-          borderColor: '#3A001D', borderWidth: 1, borderRadius: 4,
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: true,
-        plugins: { legend: { display: false },
-          tooltip: { callbacks: { label: ctx => ctx.parsed.y + ' occurrences' } }
-        },
-        scales: {
-          y: { ticks: { stepSize: 1 }, grid: { color: 'rgba(58,0,29,0.08)' } },
-          x: { grid: { display: false } }
-        }
-      }
-    });
-  } else {
-    document.getElementById('error-freq-wrap').innerHTML =
-      '<div class="chart-label">Error Type Frequency</div>' +
-      '<div class="empty-state">No error data yet.</div>';
-  }
-
-})();
-</script>
+  </script>
 </body>
 </html>

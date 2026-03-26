@@ -1,0 +1,1 @@
+{"version":1,"cases":[{"name":"webview_boundary","input":"Review WebView with injectedJavaScript and untrusted URL.","expect":["Flags WebView trust-boundary issue","Flags injection risk","Suggests RN-specific mitigations"]}]}

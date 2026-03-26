@@ -1,0 +1,6 @@
+[
+  "Review a proposed folder structure for architectural drift.",
+  "Explain where business logic should live for a new screen.",
+  "Assess whether a DTO is leaking into UI code.",
+  "Recommend a boundary for a cross-cutting refactor."
+]

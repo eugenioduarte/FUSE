@@ -34,10 +34,13 @@ module.exports = {
   collectCoverageFrom: ['src/**/*.{js,jsx,ts,tsx}'],
   coverageThreshold: {
     global: {
-      branches: 1.5,
-      functions: 4.5,
-      lines: 5,
-      statements: 5,
+      // Thresholds aligned to real coverage baseline (2026-03-25: ~20%).
+      // Ratchet up by ~5% per sprint toward the 70% goal.
+      // Real values at last measurement: statements 20.41%, branches 12.82%, functions 21.92%, lines 20.65%
+      branches: 12,
+      functions: 21,
+      lines: 20,
+      statements: 20,
     },
   },
 }

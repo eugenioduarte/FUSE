@@ -1,0 +1,6 @@
+[
+  "Review a feature for hardcoded user-facing strings.",
+  "Convert UI copy into translation-ready keys.",
+  "Check a new message for locale-sensitive wording.",
+  "Assess whether placeholders are safe for translation."
+]

@@ -1,0 +1,1 @@
+{"version":1,"cases":[{"name":"risk_based_resilience","input":"Review critical app with no root detection or attestation.","expect":["Flags resilience gaps","Adjusts severity by app sensitivity","Suggests native or server-backed mitigations"]}]}
