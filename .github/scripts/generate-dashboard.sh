@@ -172,6 +172,7 @@ html = f"""<!DOCTYPE html>
     <nav>
       <a href="./index.html">Home</a>
       <a href="./ai-system.html">AI System</a>
+      <a href="./sdd-system.html">SDD System</a>
       <a href="./analytics.html">Analytics</a>
     </nav>
   </header>
