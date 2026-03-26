@@ -47,6 +47,7 @@ yarn\ 2.lock
 .env
 .env*.local
 .env.backup
+.claude/settings.local.json
 # typescript
 *.tsbuildinfo
 
@@ -58,4 +59,3 @@ todo.ts
 
 # AI system — private investigation docs
 .ai/_sdd/
-

@@ -27,4 +27,13 @@ module.exports = defineConfig([
       '@typescript-eslint/no-unused-vars': 'off',
     },
   },
+  {
+    files: ['functions/**/*.{ts,tsx}'],
+    rules: {
+      // Firebase functions live in a separate package with its own dependencies.
+      // The root lint job does not install that subpackage's node_modules, so
+      // import/no-unresolved becomes a false positive in CI.
+      'import/no-unresolved': 'off',
+    },
+  },
 ])

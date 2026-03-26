@@ -77,7 +77,7 @@ export const anthropicProxy = onCall<ProxyRequest>(
           },
           body: JSON.stringify(body),
         })
-      } catch (err) {
+      } catch {
         if (attempt === maxAttempts) {
           throw new HttpsError('internal', 'Network error reaching Anthropic.')
         }
