@@ -1,11 +1,11 @@
 # Business Analyst — Summary to SDD
 
-You are the **Design & Docs agent** for the FUSE project. Read `.ai/agents/design-docs.md` before proceeding — it defines your full behavior contract.
+You are the **Design & Docs agent** for the FUSE project. Read `.claude/agents/design-docs.md` and `.claude/skills/business-analysis/SKILL.md` before proceeding.
 
 **Invocation:** `/business-to-sdd [feature-name]`
 
-- If `feature-name` is provided: process only `.ai/business/inbox/$ARGUMENTS.summary.md`
-- If no argument: process **all** `*.summary.md` files found in `.ai/business/inbox/`
+- If `feature-name` is provided: process only `.claude/inbox/$ARGUMENTS.summary.md`
+- If no argument: process all `*.summary.md` files found in `.claude/inbox/`
 
 ---
 
@@ -14,73 +14,63 @@ You are the **Design & Docs agent** for the FUSE project. Read `.ai/agents/desig
 ### Step 1 — Discover summaries
 
 ```bash
-ls .ai/business/inbox/*.summary.md 2>/dev/null
+ls .claude/inbox/*.summary.md 2>/dev/null
 ```
 
-If no files found → report "No summaries in inbox." and stop.
+If no files are found, report `No summaries in inbox.` and stop.
 
-If `$ARGUMENTS` is provided, check that the specific file exists:
-```bash
-ls .ai/business/inbox/$ARGUMENTS.summary.md
-```
-
-### Step 2 — Read agent contract
-
-Read `.ai/agents/design-docs.md` fully before processing any summary.
-
-### Step 3 — For each summary file
-
-1. Read the summary file completely
-2. Read the existing SDDs in `.ai/_sdd/` to understand naming and style conventions
-3. Read `.ai/agents/architect.md` to understand architectural constraints that must be reflected in the SDD
-4. Read `src/models/` to understand existing domain models (avoid duplicating entities)
-5. Read `src/lib/db/migrations.ts` to understand the current SQLite schema
-
-### Step 4 — Generate the SDD
-
-Follow the SDD structure defined in `.ai/agents/design-docs.md` exactly.
-
-Name the output file:
-- Feature name from `$ARGUMENTS` if provided
-- Otherwise, derive from the summary filename: `inbox/user-profile.summary.md` → `.ai/_sdd/user-profile.sdd.md`
-
-Write the SDD to `.ai/_sdd/[feature-name].sdd.md`.
-
-### Step 5 — Delete the summary
-
-After writing the SDD successfully:
+If `$ARGUMENTS` is provided, verify the specific file exists:
 
 ```bash
-rm .ai/business/inbox/[feature-name].summary.md
+ls .claude/inbox/$ARGUMENTS.summary.md
 ```
 
-Confirm deletion with: `✅ Summary deleted: .ai/business/inbox/[feature-name].summary.md`
+### Step 2 — Read required context
 
-### Step 6 — Report
+Read in this order:
 
-For each processed summary, output:
+1. `.claude/agents/design-docs.md`
+2. `.claude/skills/business-analysis/SKILL.md`
+3. Existing SDDs in `.claude/sdd/`
+4. `.claude/agents/architect.md`
+5. Existing domain models and migrations relevant to the feature
 
+### Step 3 — Generate the SDD
+
+Rules:
+
+- preserve the business intent without inventing requirements
+- align the design with the active `.claude` architecture
+- mark unknowns as `TBD`
+- if the feature name has no sequence yet, use the next available `NN-` prefix in `.claude/sdd/`
+
+Write the result to:
+
+```text
+.claude/sdd/[sequence]-[feature-name].sdd.md
 ```
-✅ SDD created: .ai/_sdd/[feature-name].sdd.md
-✅ Summary deleted: .ai/business/inbox/[feature-name].summary.md
+
+### Step 4 — Delete the summary
+
+After the SDD is written successfully:
+
+```bash
+rm .claude/inbox/[feature-name].summary.md
+```
+
+### Step 5 — Report
+
+Output:
+
+```text
+✅ SDD created: .claude/sdd/[sequence]-[feature-name].sdd.md
+✅ Summary deleted: .claude/inbox/[feature-name].summary.md
 
 Next step: /implement-logic [feature-name]
 ```
 
----
-
-## Rules
-
-- Do NOT write any code — SDD documents only
-- Do NOT invent API endpoints — use what is in the summary or mark as `TBD`
-- Every SDD section must be present (see agent contract for mandatory sections)
-- If the summary is too vague to produce a valid SDD, output specific questions instead of guessing:
-  ```
-  ⚠️ Summary insufficient for SDD. Missing information:
-  - [ ] No API endpoint specified — is this local-only?
-  - [ ] User story unclear — what triggers this screen?
-  ```
+If the summary is too vague, stop and report explicit missing information instead of guessing.
 
 ## Arguments
 
-`$ARGUMENTS` — optional feature name. If empty, processes all summaries in inbox.
+`$ARGUMENTS` — optional feature name. If empty, processes all summaries in the inbox.

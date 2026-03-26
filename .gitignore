@@ -46,7 +46,7 @@ yarn\ 2.lock
 # local env files
 .env
 .env*.local
-
+.env.backup
 # typescript
 *.tsbuildinfo
 

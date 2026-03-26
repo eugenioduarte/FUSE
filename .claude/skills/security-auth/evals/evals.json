@@ -1,0 +1,1 @@
+{"version":1,"cases":[{"name":"flags_client_side_auth","input":"Review auth flow with client_secret in mobile app and no PKCE.","expect":["Flags mobile secret exposure","Flags missing PKCE","Notes backend validation gaps"]}]}

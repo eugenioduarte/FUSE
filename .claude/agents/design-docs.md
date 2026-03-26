@@ -5,6 +5,7 @@ tools: Read, Write, Edit
 model: haiku
 memory: project
 skills:
+  - business-analysis
   - ux-standards
   - translations
   - sdd-creation

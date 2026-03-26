@@ -1,0 +1,1 @@
+{"version":1,"cases":[{"name":"flags_plaintext_storage","input":"Audit token persistence.","expect":["Identifies plaintext storage risks","Notes secure alternatives","Maps to storage/privacy controls"]}]}

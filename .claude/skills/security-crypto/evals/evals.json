@@ -1,0 +1,1 @@
+{"version":1,"cases":[{"name":"catches_weak_crypto","input":"Review code using SHA-1 and Math.random for OTP.","expect":["Flags weak crypto","Flags insecure randomness","Suggests secure RN-compatible alternatives"]}]}
