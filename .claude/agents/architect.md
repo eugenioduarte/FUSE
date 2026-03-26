@@ -5,6 +5,7 @@ tools: Read, Grep, Glob
 model: sonnet
 memory: project
 skills:
+  - engineering-principles
   - sdd-creation
   - coupling-analysis
   - project-architecture

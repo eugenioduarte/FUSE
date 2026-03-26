@@ -2,6 +2,14 @@
 
 ---
 
+## Model Strategy — Current State (2026-03-25)
+
+**Decision:** Claude-only. Ollama dual-model routing is preserved as reference in this document but is not active.
+
+**Rationale:** The complexity of maintaining two model backends (Claude remote + Ollama local qwen2.5-coder:14b) exceeded the cost savings for the current project scale. All agents now declare `model: sonnet` or `model: haiku` in their frontmatter. The routing table below reflects the original dual-model design for future reference only.
+
+---
+
 # LLM Router
 
 > In a development flow, the LLM router decides whether to send a task to a local model (Ollama qwen2.5-coder:14b) or a remote model (Claude Sonnet). Simple tasks are directed to the local model for speed and efficiency, while complex tasks are sent to the remote model which has more processing power and advanced capabilities. This system helps optimize the workflow, balancing speed and available resources.

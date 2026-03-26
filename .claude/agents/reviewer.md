@@ -5,6 +5,7 @@ tools: Read, Grep, Glob, Bash
 model: sonnet
 memory: project
 skills:
+  - coding-conventions
   - typescript-strict
   - react-native-patterns
   - clean-code
