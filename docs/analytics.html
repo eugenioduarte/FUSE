@@ -36,7 +36,7 @@
       <span class="badge">Historical + active system metrics</span>
       <h1>FUSE Analytics Dashboard</h1>
       <p class="muted">Token and orchestration data remain historical, but the narrative now reflects the active <code>.claude/</code> Skills-First architecture.</p>
-      <p class="muted">Generated at 2026-03-26 12:47</p>
+      <p class="muted">Generated at 2026-03-26 12:49</p>
     </section>
     <section class="grid" id="kpis"></section>
     <section class="panel">
@@ -52,7 +52,7 @@
       <table><thead><tr><th>PR</th><th>Status</th><th>Tokens</th><th>Cost</th></tr></thead><tbody id="prs"></tbody></table>
     </section>
   </main>
-  <script id="payload" type="application/json">{"generatedAt": "2026-03-26 12:47", "dailyCost": [{"date": "2026-03-22", "cost": 14.7474}, {"date": "2026-03-23", "cost": 123.9142}, {"date": "2026-03-26", "cost": 2.5402}], "agentCosts": [{"agent": "unknown", "tokens": 1421027, "cost": 104.7393}], "prs": []}</script>
+  <script id="payload" type="application/json">{"generatedAt": "2026-03-26 12:49", "dailyCost": [{"date": "2026-03-22", "cost": 14.7474}, {"date": "2026-03-23", "cost": 123.9142}, {"date": "2026-03-26", "cost": 2.5402}], "agentCosts": [{"agent": "unknown", "tokens": 1421027, "cost": 104.7393}], "prs": []}</script>
   <script>
     const data = JSON.parse(document.getElementById('payload').textContent);
     const totalCost = data.dailyCost.reduce((sum, item) => sum + item.cost, 0);
