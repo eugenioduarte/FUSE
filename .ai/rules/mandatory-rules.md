@@ -144,12 +144,12 @@ Priority order for tests:
 
 # 7️⃣ State Management Discipline
 
-| State type       | Solution                     |
-| ---------------- | -----------------------------|
-| Local UI state   | `useState`                   |
-| Screen state     | Screen hook                  |
-| Cross-feature    | Zustand store (slice/domain) |
-| Server state     | TanStack Query               |
+| State type     | Solution                     |
+| -------------- | ---------------------------- |
+| Local UI state | `useState`                   |
+| Screen state   | Screen hook                  |
+| Cross-feature  | Zustand store (slice/domain) |
+| Server state   | TanStack Query               |
 
 - No global context for frequently changing state
 - Subscribe using selectors only

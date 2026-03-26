@@ -55,3 +55,7 @@ app-example
 coverage/
 
 todo.ts
+
+# AI system — private investigation docs
+.ai/_sdd/
+

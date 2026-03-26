@@ -1,5 +1,5 @@
-import useChallengeAdd from '../challenge-add.hook'
 import { renderHook } from '@testing-library/react-native'
+import useChallengeAdd from '../challenge-add.hook'
 
 // ai.service.ts now imports firebase/functions + auth.service; mock those to avoid
 // transitive ESM issues (expo-constants) in the Jest environment.

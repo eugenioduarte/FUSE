@@ -16,11 +16,17 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Generate dashboard
-        run: bash .ai/scripts/generate-dashboard.sh
+        run: bash .github/scripts/generate-dashboard.sh
+
+      - name: Generate analytics
+        run: bash .github/scripts/generate-analytics.sh
+
+      - name: Generate AI system page
+        run: bash .github/scripts/generate-ai-system.sh
 
       - name: Upload dashboard artifact
         uses: actions/upload-artifact@v4
         with:
           name: dashboard-preview
-          path: docs/demonstration-orchestration.html
+          path: docs/
           retention-days: 7

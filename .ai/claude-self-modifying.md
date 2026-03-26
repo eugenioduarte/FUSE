@@ -127,6 +127,16 @@ to get the latest stable version and pin it explicitly.
 
 ---
 
+## 🧠 AI Architecture — `.claude/` Is the Active System
+
+**Rule:** Treat `.claude/CLAUDE.md` and the `.claude/` tree as the active AI system. Use `.ai/` only as archive and migration reference.
+
+**Why:** On 2026-03-25 the repository began the Skills-First migration to an enterprise `.claude/` architecture with path-scoped rules, directory-based skills, lean agents, and generated public documentation.
+
+**Applies to:** AI system maintenance, agent evolution, documentation updates, and future architecture work.
+
+---
+
 ## �📝 How to Update This File
 
 Whenever:

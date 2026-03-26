@@ -1,0 +1,6 @@
+[
+  "Review a hook for unnecessary nesting and mixed responsibilities.",
+  "Find duplication across two related components.",
+  "Assess whether a function name reflects its true intent.",
+  "Recommend a cleanup plan for a mechanically correct but hard-to-read file."
+]

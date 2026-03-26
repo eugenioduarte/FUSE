@@ -1,0 +1,6 @@
+[
+  "Review a storage implementation for local secret exposure.",
+  "Assess an auth flow for session handling weaknesses.",
+  "Check network code for transport and pinning issues.",
+  "Summarize resilience gaps after repeated API failures."
+]

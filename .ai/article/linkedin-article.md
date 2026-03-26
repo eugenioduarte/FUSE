@@ -1,132 +1,238 @@
-# Construindo um Sistema Multi-Agente com IA para Desenvolvimento React Native
+Building a Multi-Agent AI System for React Native Development
 
-<img src="./images/hive.png" alt="O System Orchestrator – Guardião das Regras Antigas" width="100%" height="200" style="object-fit: cover;" />
+A few months ago, during a dinner with friends, I said something I was completely convinced about:
 
-Há alguns meses decidi parar de usar o Claude apenas como assistente genérico e transformá-lo em parte de um **sistema de engenharia estruturado**.
+“AI will never dominate mobile development — especially React Native.”
 
-Criei uma pasta `.ai/` que hoje contém cerca de 80 arquivos: um orquestrador central (`system.md`), agentes especializados, regras obrigatórias, skills reutilizáveis, templates, scripts e um arquivo de aprendizado contínuo (`claude-self-modifying.md`).
+I wasn’t just skeptical. I had already decided this would fail.
 
-Não é um framework revolucionário.  
-É simplesmente o que funcionou para mim para reduzir tarefas repetitivas e manter consistência arquitetural sem perder qualidade.
+I was wrong.
 
-<img src="./images/mox.png" alt="Frontend Architect – Definindo a estrutura antes do código" width="100%" height="200" style="object-fit: cover;" />
+Instead of debating, I tested it
+Rather than arguing about it, I decided to validate it under real constraints.
 
-### O Coração do Sistema: System Orchestrator
+I took a real portfolio project — an app I genuinely cared about — and set a simple rule:
 
-O arquivo `system.md` é lido primeiro pelo LLM. Ele define:
+Write as little code as possible.
 
-- “Você não é um assistente genérico. Você é o **System Orchestrator**.”
-- Contexto completo do projeto (React Native + Expo)
-- Arquitetura obrigatória: **Model → Service → Query → Hook → Screen**
-- Todas as regras não negociáveis
-- Matriz de roteamento (tipo de pedido → agente responsável)
+But with clear boundaries:
 
-A partir daí, cada solicitação é analisada e delegada.
+No “vibe coding”
 
-### Agentes Especializados
+No blind trust in AI
 
-- **architect**: Cria SDDs, decisões arquiteturais e análise de acoplamento
-- **engineer**: Implementa código — screens, hooks, lógica de negócio
-- **test-writer**: Gera testes unitários e flows Maestro E2E
-- **reviewer**: Executa quality gate e resolve review comments
-- **quality**: Analisa performance, FPS, JS thread e corrige issues Sonar
-- **design-docs**: UI polish, README auto-update, business → SDD
-- **pr-lifecycle**: Gerencia o ciclo completo de Pull Request
+No jumping in to fix things manually
 
-### Router Inteligente (Local vs Remote)
+Every time something broke, I didn’t fix the code.
 
-Para controlar custos, implementei um router simples:
+I stepped back. Adjusted the system. Refined the instructions. And tried again.
 
-- **70% das tarefas** → Ollama (qwen2.5-coder:14b) – boilerplate, testes, templates, E2E
-- Tarefas complexas (arquitetura, revisão, performance, refatorações profundas) → Claude Sonnet
+The moment everything changed
+At some point, my role quietly shifted.
 
-Resultado real (março 2026): redução de aproximadamente **65-70%** no custo de tokens.
+I stopped being:
 
-### Regras Obrigatórias (Mandatory Rules)
+the developer fixing AI outputs
 
-O que mais impactou não foram os agentes em si, mas as regras que ninguém pode violar:
+And became:
 
-- TypeScript estrito (zero `any` implícito)
-- `useState` sempre tipado explicitamente
-- Nunca colocar lógica de negócio em `.screen.tsx`
-- Listas dinâmicas sempre com `FlatList` ou `FlashList`
-- Estilos apenas via tokens do theme + `StyleSheet.create`
-- Coverage mínimo de 80% global / 90% em hooks
-- Conventional Commits obrigatório
-- Nunca auto-commit ou auto-push
+the person designing the system that generates them
 
-O `reviewer` rejeita automaticamente qualquer violação.
+Instead of reacting to problems, I started improving the system behind them.
 
-<img src="./images/wall.png" alt="Code Reviewer – O guardião que não aceita violações" width="100%" height="200" style="object-fit: cover;" />
+That shift changed everything.
 
-### Memória Permanente: claude-self-modifying.md
+What I actually built
+I ended up creating a .ai/ folder with around 30 files:
 
-Criei um arquivo vivo de aprendizado. Toda decisão importante ou anti-pattern descoberto vira uma regra permanente.
+A central orchestrator (system.md)
 
-Exemplo real:
+Specialized agents with clear responsibilities
 
-```markdown
-## Loading Global – Nunca mais manual
+Mandatory rules to enforce consistency
 
-**Regra:** Proibido chamar overlayActions.open('loading') diretamente.  
-**Motivo:** Criamos GlobalLoadingObserver baseado em useIsFetching + useIsMutating.  
-**Aplica-se a:** Todos os hooks de query.
-```
+Reusable skills and templates
 
-```
+A self-evolving memory file: claude-self-modifying.md
 
-Isso eliminou grande parte das regressões do mesmo tipo.
+This wasn’t about building a framework.
 
-<img src="./images/self-modifying.jpg" alt="Self-Modifying – O grimório que aprende com cada erro" width="100%" height="200" style="object-fit: cover;" />
+It was about building a system that could:
 
-### Fluxo Real de uma Feature
+learn from mistakes
 
-1. Solicito a feature
-2. System roteia para o architect (se necessário)
-3. Architect gera SDD
-4. Engineer implementa (maioria local)
-5. Test-writer gera testes
-6. Code-reviewer valida tudo
-7. Eu faço revisão rápida do diff e confirmo commit
-8. (Opcional) Aciono pr-lifecycle
+preserve context
 
-O tempo médio por feature diminuiu significativamente e, o mais importante, o código ficou muito mais consistente.
+improve incrementally over time
 
-### O Que Melhorou
+Important clarification
+This is not:
 
-- Consistência arquitetural próxima de 100%
-- Cobertura de testes subiu de ~60% para 92–95%
-- Redução drástica de bugs por quebra de contrato
-- Menos tempo gasto em correções repetitivas
-- Decisões arquiteturais documentadas e versionadas
+a production-ready architecture
 
-### O Que Ainda Limita
+an enterprise setup
 
-- Ainda reviso diffs manualmente (principalmente decisões de UX e trade-offs de produto)
-- Contexto muito grande pode fazer o modelo “esquecer” regras antigas
-- Criação e manutenção de novos agentes ainda é manual
-- Análise de performance real em device físico continua exigindo trabalho manual
+a polished framework
 
-<img src="./images/scroll.png" alt="Frontend Architect – Definindo a estrutura antes do código" width="100%" height="200" style="object-fit: cover;" />
+This is:
 
-### Lições Aprendidas
+an experiment to make AI reliable inside a real project
 
-1. Especialização vence generalização
-2. Regras obrigatórias geram mais liberdade que bons prompts
-3. Modelos locais resolvem a maior parte do volume quando separamos o mecânico
-4. Memória persistente é mais valiosa que prompt engineering
-5. Automação não substitui julgamento humano — ela apenas o amplifica
+That distinction matters.
 
-Se você também está experimentando setups agentic em React Native + Expo + Claude Code (ou Ollama), me conta:
+The architecture (simplified)
 
-- Como você organiza a sua pasta `.ai/`?
-- Qual tem sido o maior gargalo até agora?
-- Quantos agentes você considera gerenciável antes de virar bagunça?
+1. Orchestrator (system.md)
+   Defines:
 
-Abraço e boa construção.
+project context (React Native + Expo)
 
-<img src="./images/lotus.png" alt="Frontend Architect – Definindo a estrutura antes do código" width="100%" height="200" style="object-fit: cover;" />
+mandatory architecture: Model → Service → Query → Hook → Screen
+
+non-negotiable rules
+
+routing logic
+
+2. Specialized agents
+   Each agent has a clear responsibility:
+
+frontend-architect → designs before coding
+
+react-native-engineer → implements features
+
+code-reviewer → enforces rules
+
+test-writer → ensures coverage
+
+performance-auditor → analyzes runtime
+
+coupling-analyzer → detects architectural issues
+
+3. Smart routing (cost optimization)
+   Mechanical tasks → local model (Ollama)
+
+Complex reasoning → Claude Sonnet
+
+4. Mandatory rules (the backbone)
+   Rules enforce:
+
+strict TypeScript
+
+proper layer separation
+
+design system consistency
+
+minimum test coverage
+
+safe Git workflow
+
+If something violates the rules → it gets rejected.
+
+No exceptions.
+
+5. Persistent learning
+   The file claude-self-modifying.md acts as memory.
+
+It records:
+
+mistakes
+
+patterns
+
+corrections
+
+Over time, the system improves without rewriting everything from scratch.
+
+What actually improved
+Feature development became more predictable
+
+Architectural consistency increased
+
+Test coverage improved
+
+Repetitive fixes dropped significantly
+
+But the biggest change was this:
+
+I stopped reacting to AI and started shaping it
+
+Limitations (being honest)
+This approach is not perfect:
+
+Manual diff review is still necessary (especially UI/UX)
+
+Large contexts can make models forget rules
+
+Local models slow down on complex tasks
+
+UI/UX is still the weakest area
+
+The system requires discipline to maintain
+
+Lessons learned
+Specialization beats generalization
+
+Rigid rules > clever prompts
+
+Persistent memory > prompt engineering
+
+Local models handle most of the workload
+
+Automation amplifies judgment — it doesn’t replace it
+
+The real shift
+We might be thinking about this the wrong way.
+
+This isn’t about:
+
+“AI replacing developers”
+
+It’s about:
+
+developers who know how to design systems around AI
+
+The skill is changing:
+
+From:
+
+writing code
+
+To:
+
+structuring knowledge
+
+defining constraints
+
+designing feedback loops
+
+Where this is going
+Next steps:
+
+JIRA integration → auto-generate SDDs
+
+E2E tests based on real flows
+
+Figma integration → generate screens and navigation
+
+The goal is simple:
+
+automate what can be automated keep humans focused on what still matters (UX, judgment)
+
+Final thought
+This was the first time AI stopped feeling like a gimmick.
+
+And started feeling like something I can reason about.
+
+Like turning on a flashlight in a dark room.
+
+Not everything is clear yet.
+
+But the path is finally visible.
+
+Curious to hear how others are approaching this:
+
+Are you still coding with AI or starting to design systems around it?
+
+🔗 Repository: https://github.com/eugenioduarte/FUSE 🔗 Demo: https://eugenioduarte.github.io/FUSE/demonstration-orchestration.html
 
 #ReactNative #Expo #TypeScript #AI #SoftwareEngineering
-
-```

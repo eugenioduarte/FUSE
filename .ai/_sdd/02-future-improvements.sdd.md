@@ -572,23 +572,23 @@ useFocusEffect(
 
 ## 4. Matriz de Priorização
 
-| #   | Item                                   | Fonte         | Prioridade | Dificuldade | Esforço       | Risco de Não Fazer                          |
-| --- | -------------------------------------- | ------------- | ---------- | ----------- | ------------- | ------------------------------------------- |
-| 1   | Firebase version lock                  | Grok + Review | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: pinado ^12.11.0                  |
-| 2   | `dotenv` → devDependencies             | Review 5.1    | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: movido para devDeps              |
-| 3   | Alinhar coverage thresholds            | Review PC-2   | ✅ Feito   | 🟢 Baixa    | 2026-03-25    | Floor real: 20%/12%/21%/20% — meta 70%      |
+| #   | Item                                   | Fonte         | Prioridade | Dificuldade | Esforço       | Risco de Não Fazer                            |
+| --- | -------------------------------------- | ------------- | ---------- | ----------- | ------------- | --------------------------------------------- |
+| 1   | Firebase version lock                  | Grok + Review | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: pinado ^12.11.0                    |
+| 2   | `dotenv` → devDependencies             | Review 5.1    | ✅ Feito   | 🟢 Mínima   | 2026-03-25    | Concluído: movido para devDeps                |
+| 3   | Alinhar coverage thresholds            | Review PC-2   | ✅ Feito   | 🟢 Baixa    | 2026-03-25    | Floor real: 20%/12%/21%/20% — meta 70%        |
 | 4   | API Key no bundle (proxy)              | Grok + Review | ✅ Feito   | 🟡 Média    | 2026-03-25    | Concluído: proxy deployed, key fora do bundle |
-| 5   | AIProvider abstraction                 | base3.md C-2  | 🟡 Média   | 🟢 Baixa    | 2–4h          | Reescrita total para trocar provider        |
-| 6   | Validação Zod para respostas de IA     | Review 4.5    | 🟡 Média   | 🟢 Baixa    | 2–3h          | Crashes silenciosos de parsing              |
-| 7   | Extrair `navigation.tsx`               | Review PC-3   | 🟡 Média   | 🟡 Média    | 4–6h          | Bottleneck de manutenibilidade #1           |
-| 8   | Unificar notification handlers         | Review 5.2    | 🟡 Média   | 🟢 Mínima   | 1h            | Copy-paste que diverge com o tempo          |
-| 9   | Integrar `useNetworkStore` com netinfo | Review 4.6    | 🟡 Média   | 🟢 Baixa    | 2h            | Flush offline sem rede = CPU/bateria        |
-| 10  | New Arch compatibility audit           | Grok          | 🟡 Média   | 🟡 Média    | Meio dia      | Crashes no próximo Expo SDK update          |
-| 11  | Extrair `loadDashItems()` do dashboard | Review 5.3    | 🟢 Baixa   | 🟢 Mínima   | 15 min        | Code smell — 3 effects duplicados           |
-| 12  | AsyncStorage → MMKV                    | Grok          | 🟢 Baixa   | 🟢 Baixa    | 4–8h          | Performance de startup                      |
-| 13  | FlashList nas listas longas            | Grok          | 🟢 Baixa   | 🟢 Baixa    | 2–4h por tela | Performance incremental                     |
-| 14  | Consolidar agentes `.ai/`              | Review 5.5    | ✅ Feito   | 🟢 Baixa    | 2026-03-24    | Concluído: 14→7 agentes                     |
-| 15  | Monorepo                               | base3.md P11  | ⏸ Depois   | 🔴 Alta     | Semanas       | Nenhum risco agora                          |
+| 5   | AIProvider abstraction                 | base3.md C-2  | 🟡 Média   | 🟢 Baixa    | 2–4h          | Reescrita total para trocar provider          |
+| 6   | Validação Zod para respostas de IA     | Review 4.5    | 🟡 Média   | 🟢 Baixa    | 2–3h          | Crashes silenciosos de parsing                |
+| 7   | Extrair `navigation.tsx`               | Review PC-3   | 🟡 Média   | 🟡 Média    | 4–6h          | Bottleneck de manutenibilidade #1             |
+| 8   | Unificar notification handlers         | Review 5.2    | 🟡 Média   | 🟢 Mínima   | 1h            | Copy-paste que diverge com o tempo            |
+| 9   | Integrar `useNetworkStore` com netinfo | Review 4.6    | 🟡 Média   | 🟢 Baixa    | 2h            | Flush offline sem rede = CPU/bateria          |
+| 10  | New Arch compatibility audit           | Grok          | 🟡 Média   | 🟡 Média    | Meio dia      | Crashes no próximo Expo SDK update            |
+| 11  | Extrair `loadDashItems()` do dashboard | Review 5.3    | 🟢 Baixa   | 🟢 Mínima   | 15 min        | Code smell — 3 effects duplicados             |
+| 12  | AsyncStorage → MMKV                    | Grok          | 🟢 Baixa   | 🟢 Baixa    | 4–8h          | Performance de startup                        |
+| 13  | FlashList nas listas longas            | Grok          | 🟢 Baixa   | 🟢 Baixa    | 2–4h por tela | Performance incremental                       |
+| 14  | Consolidar agentes `.ai/`              | Review 5.5    | ✅ Feito   | 🟢 Baixa    | 2026-03-24    | Concluído: 14→7 agentes                       |
+| 15  | Monorepo                               | base3.md P11  | ⏸ Depois   | 🔴 Alta     | Semanas       | Nenhum risco agora                            |
 
 ---
 
@@ -641,24 +641,24 @@ Para cada item foi avaliado:
 
 ## 7. Registro de Decisões
 
-| Data       | Item                        | Decisão       | Motivo                                                                                                            |
-| ---------- | --------------------------- | ------------- | ----------------------------------------------------------------------------------------------------------------- |
-| 2026-03-24 | Criação deste documento     | ✅ Criado     | Consolidar melhorias técnicas identificadas por Grok + base3.md                                                   |
-| 2026-03-24 | Atualização com review      | ✅ Atualizado | Integrar todas as sugestões do `react-native-agent-review.md` (6.5/10)                                            |
-| 2026-03-25 | Firebase version lock       | ✅ Fixado     | `^12.11.0` (era `latest`, lock confirmou 12.11.0)                                                                 |
-| 2026-03-25 | `dotenv` → devDependencies  | ✅ Movido     | Usado só em `app.config.js` (config-time), não no bundle                                                          |
-| 2026-03-25 | Alinhar coverage thresholds | ✅ Alinhado   | Floor real (stmt 20%, branch 12%, fn 21%, lines 20%); `mandatory-rules.md` atualizado; meta 70% com ratchet       |
+| Data       | Item                        | Decisão       | Motivo                                                                                                             |
+| ---------- | --------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------ |
+| 2026-03-24 | Criação deste documento     | ✅ Criado     | Consolidar melhorias técnicas identificadas por Grok + base3.md                                                    |
+| 2026-03-24 | Atualização com review      | ✅ Atualizado | Integrar todas as sugestões do `react-native-agent-review.md` (6.5/10)                                             |
+| 2026-03-25 | Firebase version lock       | ✅ Fixado     | `^12.11.0` (era `latest`, lock confirmou 12.11.0)                                                                  |
+| 2026-03-25 | `dotenv` → devDependencies  | ✅ Movido     | Usado só em `app.config.js` (config-time), não no bundle                                                           |
+| 2026-03-25 | Alinhar coverage thresholds | ✅ Alinhado   | Floor real (stmt 20%, branch 12%, fn 21%, lines 20%); `mandatory-rules.md` atualizado; meta 70% com ratchet        |
 | 2026-03-25 | API Key no bundle           | ✅ Concluído  | `anthropicProxy` deployed (us-central1), key no Secret Manager, `EXPO_PUBLIC_ANTHROPIC_API_KEY` removida do `.env` |
-| —          | AIProvider abstraction      | —             | —                                                                                                                 |
-| —          | Validação Zod para IA       | —             | —                                                                                                                 |
-| —          | Extrair navigation.tsx      | —             | —                                                                                                                 |
-| —          | Unificar notif. handlers    | —             | —                                                                                                                 |
-| —          | Network store + netinfo     | —             | —                                                                                                                 |
-| —          | New Arch audit              | —             | —                                                                                                                 |
-| —          | Dashboard loadDashItems()   | —             | —                                                                                                                 |
-| —          | AsyncStorage → MMKV         | —             | —                                                                                                                 |
-| —          | Consolidar agentes .ai/     | —             | —                                                                                                                 |
-| —          | Monorepo                    | ⏸ Adiado      | Sem segundo package concreto ainda                                                                                |
+| —          | AIProvider abstraction      | —             | —                                                                                                                  |
+| —          | Validação Zod para IA       | —             | —                                                                                                                  |
+| —          | Extrair navigation.tsx      | —             | —                                                                                                                  |
+| —          | Unificar notif. handlers    | —             | —                                                                                                                  |
+| —          | Network store + netinfo     | —             | —                                                                                                                  |
+| —          | New Arch audit              | —             | —                                                                                                                  |
+| —          | Dashboard loadDashItems()   | —             | —                                                                                                                  |
+| —          | AsyncStorage → MMKV         | —             | —                                                                                                                  |
+| —          | Consolidar agentes .ai/     | —             | —                                                                                                                  |
+| —          | Monorepo                    | ⏸ Adiado      | Sem segundo package concreto ainda                                                                                 |
 
 ---
 

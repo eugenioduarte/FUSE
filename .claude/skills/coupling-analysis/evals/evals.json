@@ -1,0 +1,6 @@
+[
+  "Find high fan-out files in a feature before a refactor.",
+  "Detect a screen importing a service directly and explain the violation.",
+  "Assess whether a shared module became a God object.",
+  "Summarize coupling risks after moving logic across layers."
+]

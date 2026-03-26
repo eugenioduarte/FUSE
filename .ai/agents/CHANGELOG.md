@@ -41,6 +41,14 @@ Increment when making **backwards-compatible bug fixes**: fixing typos, correcti
 
 ## 🔄 Version History
 
+### 2026-03-25 — Skills-First Migration v3.0.0
+
+- Promoted `.claude/` as the active AI system structure
+- Preserved `.ai/` as archive-only reference
+- Introduced `.claude/CLAUDE.md`, path-scoped rules, directory-based skills, lean agents, and agent memory structure
+- Moved active dashboard generation scripts to `.github/scripts/`
+- Updated GitHub Pages to document the live `.claude/` architecture
+
 ### 2026-03-24 — Consolidation v2.0.0
 
 - **System restructure:** 14 agents consolidated into 7 to reduce cognitive overhead for solo/small team
@@ -81,4 +89,4 @@ When updating an agent:
 
 ---
 
-**Last Updated:** 2026-03-24 by Eugénio Silva
+**Last Updated:** 2026-03-25 by Eugénio Silva

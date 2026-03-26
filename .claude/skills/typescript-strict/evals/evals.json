@@ -1,0 +1,6 @@
+[
+  "Identify unsafe typing in a hook return shape.",
+  "Explain whether a runtime validator is needed at an API boundary.",
+  "Review a reducer for exhaustive handling.",
+  "Detect DTO leakage into presentation code."
+]
